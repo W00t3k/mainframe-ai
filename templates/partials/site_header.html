@@ -1,0 +1,11 @@
+<header class="app-header">
+    <a href="/" class="brand">
+        <img src="/static/logo.svg" alt="z/OS">
+        <span>IBM</span> {{ brand_title }}
+    </a>
+    <nav class="nav-links">
+        {% for item in nav_items %}
+            <a href="{{ item.href }}" class="{% if item.active %}active{% endif %}">{{ item.label }}</a>
+        {% endfor %}
+    </nav>
+</header>

@@ -1,0 +1,31 @@
+#**********************************************************************
+#***                                                                ***
+#*** File:    tcpnje                                                ***
+#***                                                                ***
+#*** Purpose: Define TCPNJE lines                                   ***
+#***                                                                ***
+#***          For each NJE node connected directly to this node     ***
+#***          (aka NJE link) one line must be defined, using device ***
+#***          addresses in the range from 090 to 097. Uncomment     ***
+#***          and modify the template lines below to match your     ***
+#***          NJE network configuration.                            ***
+#***                                                                ***
+#*** Updated: 2020/05/15                                            ***
+#***                                                                ***
+#**********************************************************************
+#  +------------------------------------------------------------------------------- MVS device address (cuu) for this TCPNJE link
+#  |                        +------------------------------------------------------ NJE nodename of local system
+#  |                        |              +--------------------------------------- NJE nodename of remote system
+#  |                        |              |           +--------------------------- port to listen at for incoming connections
+#  |                        |              |           |        +------------------ port to connect to at remote host
+#  |                        |              |           |        |               +-- IP address of remote host
+#  |                        |              |           |        |               |
+#  v                        v              v           v        v               v
+# 0090 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0091 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0092 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0093 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0094 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0095 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0096 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III
+# 0097 tcpnje 2703 lnode=LLLLLLLL rnode=RRRRRRRR lport=LP rport=RP rhost=III.III.III.III

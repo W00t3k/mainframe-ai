@@ -1,0 +1,46 @@
+Host: localhost:3270
+Time: 2026-01-25 22:55:58
+================================================================================
+ IKJ56710I INVALID USERID, ddffddff                                             
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+                                                                                
+ IKJ56703A REENTER -                                                            
+aaddff                                                                          
+ IKJ56420I USERID AADDFF NOT AUTHORIZED TO USE TSO                              
+ IKJ56429A REENTER -                                                            
+                                                                                
+ IKJ56700A ENTER USERID -                                                       
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                
+                                                                                

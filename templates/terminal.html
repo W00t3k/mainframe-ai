@@ -1,0 +1,316 @@
+{% extends "base.html" %}
+
+{% block title %}Terminal - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/terminal.css">
+{% endblock %}
+
+{% block body %}
+<div class="toolbar">
+        <a href="/" class="brand">
+            <img src="/static/logo.svg" alt="z/OS">
+            <span>z/OS Terminal</span>
+        </a>
+        <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port">
+        <button id="connectBtn" onclick="connect()">Connect</button>
+        <button class="danger" id="disconnectBtn" onclick="disconnect()" style="display:none;">Disconnect</button>
+        <button onclick="capture()">Capture</button>
+        <button class="secondary" onclick="toggleChatPanel()">Chat Panel</button>
+        <span style="flex:1;"></span>
+        <div class="status">
+            <span class="dot" id="statusDot"></span>
+            <span id="statusText">Disconnected</span>
+        </div>
+        <a href="/">Home</a>
+        <a href="/chat">AI Chat</a>
+    </div>
+
+    <div class="terminal-container">
+        <div class="terminal disconnected" id="terminal" tabindex="0">
+            <h2>TN3270 Terminal</h2>
+            <p>Enter host:port above and click Connect</p>
+            <p style="margin-top: 1rem; font-size: 0.85rem;">
+                Keyboard: Click to focus, then type. Enter, Tab, PF1-F12, Esc=Clear
+            </p>
+        </div>
+    </div>
+
+    <div class="pf-bar">
+        <button class="pf-key special" onclick="sendKey('enter')">Enter</button>
+        <button class="pf-key special" onclick="sendKey('clear')">Clear</button>
+        <button class="pf-key special" onclick="sendKey('tab')">Tab</button>
+        <button class="pf-key special" onclick="sendKey('reset')">Reset</button>
+        <span style="width:1rem;"></span>
+        <button class="pf-key" onclick="sendKey('pf', 1)">PF1</button>
+        <button class="pf-key" onclick="sendKey('pf', 2)">PF2</button>
+        <button class="pf-key" onclick="sendKey('pf', 3)">PF3</button>
+        <button class="pf-key" onclick="sendKey('pf', 4)">PF4</button>
+        <button class="pf-key" onclick="sendKey('pf', 5)">PF5</button>
+        <button class="pf-key" onclick="sendKey('pf', 6)">PF6</button>
+        <button class="pf-key" onclick="sendKey('pf', 7)">PF7</button>
+        <button class="pf-key" onclick="sendKey('pf', 8)">PF8</button>
+        <button class="pf-key" onclick="sendKey('pf', 9)">PF9</button>
+        <button class="pf-key" onclick="sendKey('pf', 10)">PF10</button>
+        <button class="pf-key" onclick="sendKey('pf', 11)">PF11</button>
+        <button class="pf-key" onclick="sendKey('pf', 12)">PF12</button>
+    </div>
+
+    <div class="chat-float hidden" id="chatFloat">
+        <div class="chat-float-header" id="chatFloatHeader">
+            <span>AI Chat</span>
+            <div class="chat-float-actions">
+                <button class="chat-float-btn" onclick="toggleChatMinimize()" title="Minimize">_</button>
+                <button class="chat-float-btn" onclick="toggleChatPanel(false)" title="Close">×</button>
+            </div>
+        </div>
+        <div class="chat-float-body">
+            <iframe src="/chat?embed=1" title="AI Chat"></iframe>
+        </div>
+        <div class="chat-float-resizer" id="chatFloatResizer" aria-hidden="true"></div>
+    </div>
+{% endblock %}
+
+{% block page_scripts %}
+    <script>
+        let connected = false;
+        const terminal = document.getElementById('terminal');
+        const chatFloat = document.getElementById('chatFloat');
+        const chatFloatHeader = document.getElementById('chatFloatHeader');
+        const chatFloatResizer = document.getElementById('chatFloatResizer');
+        let chatMinimized = false;
+        terminal.addEventListener('click', () => terminal.focus());
+        const hostParam = new URLSearchParams(window.location.search).get('host');
+        if (hostParam) {
+            document.getElementById('hostInput').value = hostParam;
+        }
+
+        async function connect() {
+            const target = document.getElementById('hostInput').value.trim();
+            if (!target) return;
+
+            try {
+                const response = await fetch('/api/terminal/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    connected = true;
+                    updateScreen(data.screen_data);
+                    updateStatus(true, target);
+                    terminal.focus();
+                } else {
+                    showToast('Connection failed: ' + data.message, { type: 'error', title: 'Terminal' });
+                }
+            } catch (e) {
+                showToast('Error: ' + e.message, { type: 'error', title: 'Terminal' });
+            }
+        }
+
+        async function disconnect() {
+            await fetch('/api/terminal/disconnect', { method: 'POST' });
+            connected = false;
+            updateStatus(false);
+            terminal.classList.add('disconnected');
+            terminal.innerHTML = '<h2>Disconnected</h2><p>Enter host:port and click Connect</p>';
+        }
+
+        function updateStatus(isConnected, host = '') {
+            document.getElementById('statusDot').className = 'dot ' + (isConnected ? 'connected' : '');
+            document.getElementById('statusText').textContent = isConnected ? 'Connected: ' + host : 'Disconnected';
+            document.getElementById('connectBtn').style.display = isConnected ? 'none' : '';
+            document.getElementById('disconnectBtn').style.display = isConnected ? '' : 'none';
+        }
+
+        function updateScreen(data) {
+            if (data && data.connected && data.screen) {
+                terminal.classList.remove('disconnected');
+                terminal.textContent = data.screen;
+            }
+        }
+
+        async function sendKey(keyType, value = '') {
+            if (!connected) return;
+
+            const response = await fetch('/api/terminal/key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key_type: keyType, value: String(value) })
+            });
+            const data = await response.json();
+            if (data.success && data.screen_data) {
+                updateScreen(data.screen_data);
+            } else if (data.success) {
+                pollScreen();
+            }
+        }
+
+        async function capture() {
+            if (!connected) {
+                showToast('Connect first', { type: 'warning', title: 'Terminal' });
+                return;
+            }
+            const response = await fetch('/api/screencap', { method: 'POST' });
+            const data = await response.json();
+            if (data.success) {
+                showToast('Screen captured: ' + data.file, { type: 'success', title: 'Capture' });
+            }
+        }
+
+        function handleTerminalKey(e) {
+            if (!connected) return;
+            e.preventDefault();
+
+            if (e.key === 'Enter') sendKey('enter');
+            else if (e.key === 'Escape') sendKey('clear');
+            else if (e.key === 'Tab') sendKey(e.shiftKey ? 'backtab' : 'tab');
+            else if (e.key === 'Backspace') sendKey('backspace');
+            else if (e.key === 'Delete') sendKey('delete');
+            else if (e.key.startsWith('F') && e.key.length <= 3) {
+                const num = parseInt(e.key.substring(1));
+                if (num >= 1 && num <= 12) sendKey('pf', e.shiftKey ? num + 12 : num);
+            }
+            else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                sendKey('string', e.key);
+            }
+        }
+
+        terminal.addEventListener('keydown', handleTerminalKey);
+
+        document.addEventListener('keydown', function(e) {
+            if (!connected) return;
+            const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
+            if (tag === 'input' || tag === 'textarea') return;
+            terminal.focus();
+            handleTerminalKey(e);
+        });
+
+        // Check initial status
+        fetch('/api/status').then(r => r.json()).then(data => {
+            if (data.connected) {
+                connected = true;
+                updateStatus(true, data.host);
+                fetch('/api/screen').then(r => r.json()).then(s => updateScreen(s));
+            }
+        });
+
+        async function pollScreen() {
+            if (!connected) return;
+            try {
+                const response = await fetch('/api/screen');
+                const data = await response.json();
+                updateScreen(data);
+            } catch (e) {
+                // Ignore polling errors.
+            }
+        }
+
+        setInterval(pollScreen, 2000);
+
+        function toggleChatPanel(forceOpen = true) {
+            if (!chatFloat) return;
+            if (forceOpen === false) {
+                chatFloat.classList.add('hidden');
+                return;
+            }
+            chatFloat.classList.toggle('hidden');
+            if (chatFloat.classList.contains('hidden')) {
+                chatMinimized = false;
+                chatFloat.classList.remove('minimized');
+            }
+        }
+
+        function toggleChatMinimize() {
+            if (!chatFloat) return;
+            chatMinimized = !chatMinimized;
+            chatFloat.classList.toggle('minimized', chatMinimized);
+        }
+
+        function makeChatDraggable() {
+            if (!chatFloat || !chatFloatHeader) return;
+            let dragging = false;
+            let startX = 0;
+            let startY = 0;
+            let startLeft = 0;
+            let startTop = 0;
+
+            const onMove = (e) => {
+                if (!dragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                chatFloat.style.left = `${startLeft + dx}px`;
+                chatFloat.style.top = `${startTop + dy}px`;
+                chatFloat.style.right = 'auto';
+                chatFloat.style.bottom = 'auto';
+            };
+
+            const onUp = () => {
+                dragging = false;
+                document.body.style.userSelect = '';
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+            };
+
+            chatFloatHeader.addEventListener('mousedown', (e) => {
+                if (e.target && e.target.closest('.chat-float-actions')) return;
+                dragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = chatFloat.getBoundingClientRect();
+                startLeft = rect.left;
+                startTop = rect.top;
+                document.body.style.userSelect = 'none';
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+            });
+        }
+
+        function makeChatResizable() {
+            if (!chatFloat || !chatFloatResizer) return;
+            let resizing = false;
+            let startX = 0;
+            let startY = 0;
+            let startW = 0;
+            let startH = 0;
+
+            const onMove = (e) => {
+                if (!resizing) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                const minW = 360;
+                const minH = 280;
+                const maxW = window.innerWidth - 24;
+                const maxH = window.innerHeight - 80;
+                const nextW = Math.min(Math.max(startW + dx, minW), maxW);
+                const nextH = Math.min(Math.max(startH + dy, minH), maxH);
+                chatFloat.style.width = `${nextW}px`;
+                chatFloat.style.height = `${nextH}px`;
+            };
+
+            const onUp = () => {
+                resizing = false;
+                document.body.style.userSelect = '';
+                window.removeEventListener('mousemove', onMove);
+                window.removeEventListener('mouseup', onUp);
+            };
+
+            chatFloatResizer.addEventListener('mousedown', (e) => {
+                resizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = chatFloat.getBoundingClientRect();
+                startW = rect.width;
+                startH = rect.height;
+                document.body.style.userSelect = 'none';
+                window.addEventListener('mousemove', onMove);
+                window.addEventListener('mouseup', onUp);
+            });
+        }
+
+        makeChatDraggable();
+        makeChatResizable();
+    </script>
+{% endblock %}

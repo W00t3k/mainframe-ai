@@ -1,0 +1,241 @@
+{% extends "base.html" %}
+
+{% block title %}Screen Captures - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/screencaps.css">
+{% endblock %}
+
+{% block body %}
+{% set brand_title = "z/OS Captures" %}
+{% set nav_items = [
+    {'href': '/', 'label': 'Home'},
+    {'href': '/terminal', 'label': 'Terminal'},
+    {'href': '/chat', 'label': 'AI Chat'},
+    {'href': '/scanner', 'label': 'Scanner'},
+    {'href': '/architecture', 'label': 'Architecture'}
+] %}
+{% include "partials/site_header.html" %}
+
+<main class="page">
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Screen Captures</h1>
+            <p class="page-subtitle">Saved terminal screens for documentation and analysis</p>
+        </div>
+        <a href="/terminal" class="btn">Open Terminal</a>
+    </div>
+
+    <div class="stats" id="stats">
+        <div class="stat">
+            <div class="value" id="totalCaptures">0</div>
+            <div class="label">Total Captures</div>
+        </div>
+        <div class="stat">
+            <div class="value" id="todayCaptures">0</div>
+            <div class="label">Today</div>
+        </div>
+        <div class="stat">
+            <div class="value" id="storageUsed">0 KB</div>
+            <div class="label">Storage Used</div>
+        </div>
+    </div>
+
+    <div class="captures-grid" id="capturesGrid">
+        <div class="loading">
+            <div class="spinner"></div>
+            Loading captures...
+        </div>
+    </div>
+</main>
+
+<!-- View Modal -->
+<div class="modal" id="viewModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="modalTitle">Screen Capture</h2>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="modal-screen" id="modalScreen"></div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="downloadCapture()">Download</button>
+            <button class="btn danger" onclick="deleteCapture()">Delete</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    let captures = [];
+    let selectedCapture = null;
+
+    async function loadCaptures() {
+        const grid = document.getElementById('capturesGrid');
+
+        try {
+            const response = await fetch('/api/screencaps');
+            const data = await response.json();
+            captures = data.captures || [];
+
+            updateStats();
+            renderCaptures();
+        } catch (e) {
+            grid.innerHTML = `
+                <div class="empty-state">
+                    <div class="icon">⚠️</div>
+                    <h3>Error Loading Captures</h3>
+                    <p>${e.message}</p>
+                </div>
+            `;
+            showToast('Error loading captures: ' + e.message, { type: 'error', title: 'Captures' });
+        }
+    }
+
+    function updateStats() {
+        document.getElementById('totalCaptures').textContent = captures.length;
+
+        const today = new Date().toDateString();
+        const todayCount = captures.filter(c =>
+            new Date(c.timestamp * 1000).toDateString() === today
+        ).length;
+        document.getElementById('todayCaptures').textContent = todayCount;
+
+        // Estimate storage (rough calculation)
+        const totalChars = captures.reduce((sum, c) => sum + (c.screen?.length || 0), 0);
+        const kb = Math.round(totalChars / 1024);
+        document.getElementById('storageUsed').textContent = kb + ' KB';
+    }
+
+    function renderCaptures() {
+        const grid = document.getElementById('capturesGrid');
+
+        if (captures.length === 0) {
+            grid.innerHTML = `
+                <div class="empty-state" style="grid-column: 1 / -1;">
+                    <div class="icon">📷</div>
+                    <h3>No Screen Captures Yet</h3>
+                    <p>Connect to a terminal and capture screens to save them here.</p>
+                    <a href="/terminal" class="btn">Open Terminal</a>
+                </div>
+            `;
+            return;
+        }
+
+        grid.innerHTML = captures.map(cap => {
+            const date = new Date(cap.timestamp * 1000);
+            const preview = cap.screen ? cap.screen.substring(0, 800) : 'No screen data';
+
+            return `
+                <div class="capture-card">
+                    <div class="capture-preview" onclick="viewCapture('${cap.id}')">${escapeHtml(preview)}</div>
+                    <div class="capture-info">
+                        <div class="capture-meta">
+                            <h3>${cap.host || 'Unknown Host'}</h3>
+                            <div class="details">${formatDate(date)} - ${cap.id}</div>
+                        </div>
+                        <div class="capture-actions">
+                            <button onclick="viewCapture('${cap.id}')">View</button>
+                            <button onclick="downloadCaptureById('${cap.id}')">Save</button>
+                            <button class="delete" onclick="deleteCaptureById('${cap.id}')">Delete</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function formatDate(date) {
+        return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    }
+
+    async function viewCapture(id) {
+        try {
+            const response = await fetch(`/api/screencap/${id}`);
+            const data = await response.json();
+
+            if (data.error) {
+                showToast('Capture not found', { type: 'error', title: 'Captures' });
+                return;
+            }
+
+            selectedCapture = data;
+            document.getElementById('modalTitle').textContent = `${data.host || 'Capture'} - ${data.id}`;
+            document.getElementById('modalScreen').textContent = data.screen || 'No screen data';
+            document.getElementById('viewModal').classList.add('active');
+        } catch (e) {
+            showToast('Error loading capture: ' + e.message, { type: 'error', title: 'Captures' });
+        }
+    }
+
+    function closeModal() {
+        document.getElementById('viewModal').classList.remove('active');
+        selectedCapture = null;
+    }
+
+    function downloadCapture() {
+        if (!selectedCapture) return;
+
+        const blob = new Blob([selectedCapture.screen || ''], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `screencap_${selectedCapture.id}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    function downloadCaptureById(id) {
+        const cap = captures.find(c => c.id === id);
+        if (!cap) return;
+
+        const blob = new Blob([cap.screen || ''], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `screencap_${id}.txt`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    async function deleteCapture() {
+        if (!selectedCapture) return;
+        await deleteCaptureById(selectedCapture.id);
+        closeModal();
+    }
+
+    async function deleteCaptureById(id) {
+        if (!confirm('Delete this capture?')) return;
+
+        try {
+            await fetch(`/api/screencap/${id}`, { method: 'DELETE' });
+            captures = captures.filter(c => c.id !== id);
+            updateStats();
+            renderCaptures();
+            showToast('Capture deleted', { type: 'success', title: 'Captures' });
+        } catch (e) {
+            showToast('Error deleting: ' + e.message, { type: 'error', title: 'Captures' });
+        }
+    }
+
+    // Close modal on escape or background click
+    document.addEventListener('keydown', e => {
+        if (e.key === 'Escape') closeModal();
+    });
+
+    document.getElementById('viewModal').addEventListener('click', e => {
+        if (e.target.classList.contains('modal')) closeModal();
+    });
+
+    // Load captures on page load
+    loadCaptures();
+</script>
+{% endblock %}

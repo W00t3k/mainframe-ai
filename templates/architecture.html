@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block title %}Architecture - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/architecture.css">
+{% endblock %}
+
+{% block body %}
+{% set brand_title = "z/OS Architecture" %}
+{% set nav_items = [
+    {'href': '/', 'label': 'Home'},
+    {'href': '/terminal', 'label': 'Terminal'},
+    {'href': '/chat', 'label': 'AI Chat'},
+    {'href': '/rag', 'label': 'RAG'},
+    {'href': '/scanner', 'label': 'Scanner'}
+] %}
+{% include "partials/site_header.html" %}
+
+<main class="page">
+    <section class="arch-hero">
+        <h1>System Architecture</h1>
+        <p>
+            A local-first mainframe operations assistant with FastAPI at the center, Ollama for LLM + embeddings,
+            a file-backed RAG store, and a TN3270 pipeline for live terminal control.
+        </p>
+        <div class="arch-pill-row">
+            <div class="arch-pill">FastAPI</div>
+            <div class="arch-pill">Ollama Local LLM</div>
+            <div class="arch-pill">RAG File Store</div>
+            <div class="arch-pill">BIRP v2 Emulator</div>
+            <div class="arch-pill">TN3270</div>
+        </div>
+    </section>
+
+    <section class="arch-grid">
+        <div class="arch-card">
+            <h3>Web UI</h3>
+            <p>Jinja templates with shared CSS, toast notifications, and a consistent IBM-style layout.</p>
+        </div>
+        <div class="arch-card">
+            <h3>API Layer</h3>
+            <p>FastAPI endpoints for chat, terminal I/O, RAG ingestion, scanner operations, and screencaps.</p>
+        </div>
+        <div class="arch-card">
+            <h3>LLM + RAG</h3>
+            <p>Ollama handles generation and embeddings; the RAG engine stores chunks and metadata locally.</p>
+        </div>
+        <div class="arch-card">
+            <h3>TN3270 Stack</h3>
+            <p>BIRP v2 wraps a TN3270 emulator for screen capture, key events, and session state.</p>
+        </div>
+    </section>
+
+    <section class="arch-diagram">
+        <h2>Request Flow</h2>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="label">01 UI</div>
+                <div class="title">User Prompt</div>
+                <div class="detail">Chat or terminal action triggers API call.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">02 API</div>
+                <div class="title">FastAPI Router</div>
+                <div class="detail">Routes to chat, RAG, or terminal handlers.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">03 RAG</div>
+                <div class="title">Knowledge Retrieval</div>
+                <div class="detail">Vector search enriches prompt context.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">04 LLM</div>
+                <div class="title">Ollama Generation</div>
+                <div class="detail">Response composed with system + RAG context.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">05 TN3270</div>
+                <div class="title">Screen + Keys</div>
+                <div class="detail">Optional terminal updates and screen refresh.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="section-header">
+            <h2>Core Services</h2>
+        </div>
+        <div class="section-body">
+            <table class="arch-table">
+                <thead>
+                    <tr>
+                        <th>Service</th>
+                        <th>Purpose</th>
+                        <th>Primary Endpoints</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Chat</td>
+                        <td>Natural language interface to z/OS expertise.</td>
+                        <td><code>/api/chat</code></td>
+                    </tr>
+                    <tr>
+                        <td>RAG Engine</td>
+                        <td>Chunked document storage + retrieval.</td>
+                        <td><code>/api/rag/*</code></td>
+                    </tr>
+                    <tr>
+                        <td>TN3270</td>
+                        <td>Live mainframe terminal control.</td>
+                        <td><code>/api/terminal/*</code>, <code>/ws/terminal</code></td>
+                    </tr>
+                    <tr>
+                        <td>Scanner</td>
+                        <td>Discovery of TN3270 services on the network.</td>
+                        <td><code>/api/scanner/scan</code></td>
+                    </tr>
+                    <tr>
+                        <td>Screencaps</td>
+                        <td>Capture and manage session snapshots.</td>
+                        <td><code>/api/screencap*</code></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+</main>
+{% endblock %}

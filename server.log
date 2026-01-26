@@ -1,0 +1,821 @@
+INFO:     Started server process [35508]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8080 (Press CTRL+C to quit)
+
+╔══════════════════════════════════════════════════════════╗
+║       Mainframe AI Assistant - LOCAL LLM Edition         ║
+╠══════════════════════════════════════════════════════════╣
+║  Landing Page:  http://127.0.0.1:8080/                    ║
+║  Chat:          http://127.0.0.1:8080/chat                ║
+╠══════════════════════════════════════════════════════════╣
+║  LLM Backend:   Ollama (llama3.1:8b)             ║
+║  BIRP Available: True                                    ║
+╠══════════════════════════════════════════════════════════╣
+║  No API key required! Runs 100% locally.                 ║
+║  Web Terminal: Type in browser, no shell needed!         ║
+╚══════════════════════════════════════════════════════════╝
+    
+INFO:     127.0.0.1:59795 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "GET /static/css/pages/terminal.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+Connecting to localhost:3270...
+Connected to localhost:3270
+INFO:     127.0.0.1:59802 - "POST /api/terminal/connect HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59799 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59810 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59813 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59817 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59820 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59836 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59839 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59843 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59846 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59802 - "GET /static/css/pages/terminal.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59802 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59852 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59856 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59859 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59863 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59879 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59884 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59847 - "GET /static/css/base.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59886 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59887 - "GET /static/logo.svg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /static/css/pages/terminal.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59888 - "GET /static/js/toast.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59887 - "GET /static/css/pages/chat.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59888 - "GET /static/css/base.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /static/js/toast.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /static/logo.svg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59847 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59893 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59906 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59909 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59910 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59913 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59914 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59917 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59922 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59925 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59965 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59968 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59885 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59971 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59973 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59976 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59977 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59980 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59994 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59997 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:59994 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /static/css/base.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59999 - "GET /static/logo.svg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59998 - "GET /static/css/pages/terminal.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /static/js/toast.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59998 - "GET /static/css/base.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59999 - "GET /static/logo.svg HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /static/css/pages/chat.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /static/js/toast.js HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60000 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60005 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /favicon.ico HTTP/1.1" 404 Not Found
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60008 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60012 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60016 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60031 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60036 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60046 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60062 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:60043 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60065 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60043 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60069 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60082 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60085 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     connection closed
+INFO:     127.0.0.1:60082 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60082 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60082 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /static/css/pages/terminal.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:59918 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:59918 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60088 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60082 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60082 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60082 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60082 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60082 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60107 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60110 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60111 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60114 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60115 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60118 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60119 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60122 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60132 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60138 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60141 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60144 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60147 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60148 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60129 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60151 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60129 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60153 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60156 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60158 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60161 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60106 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60158 - "GET /static/css/pages/terminal.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60158 - "GET /static/css/pages/chat.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60158 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60158 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60178 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60106 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60179 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60182 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60179 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60179 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60179 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60179 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60179 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60183 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60186 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60183 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60183 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60183 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60183 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60183 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60189 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60192 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60189 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60189 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60189 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60189 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60189 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60195 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60198 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60195 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60195 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60195 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60195 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60195 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60203 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60200 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60200 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60208 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60205 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60221 - "GET /static/css/pages/terminal.css HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60221 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60221 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60221 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60226 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60205 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60230 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60245 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60248 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60245 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60227 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60256 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60259 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60256 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60256 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60256 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60256 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60256 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60270 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60273 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60270 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60270 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60270 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60270 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60270 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60276 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60279 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60276 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60276 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60245 - "POST /api/chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60245 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60245 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60245 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60280 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60283 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60280 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60280 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60280 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60280 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60280 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60284 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60287 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60284 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60284 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60284 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60284 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60284 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60290 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60293 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60290 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60290 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60290 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60290 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60290 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60295 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60298 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60295 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60295 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60295 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60295 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60295 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60305 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60302 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60310 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60307 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /terminal HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60307 - "GET /chat?embed=1 HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /static/css/pages/terminal.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60302 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60302 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60302 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60315 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60307 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "POST /api/terminal/key HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60307 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60320 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60317 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60317 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60337 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60343 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60334 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60340 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60351 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60340 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60340 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60340 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60340 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60340 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60352 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60355 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60352 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60352 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60352 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60352 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60352 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60356 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60359 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60356 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60356 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60356 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60356 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60356 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60361 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60364 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60361 - "POST /api/screencap HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60361 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60361 - "GET /api/screen HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60361 - "GET / HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60361 - "GET /static/css/pages/index.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60361 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60380 - "GET /architecture HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60380 - "GET /static/css/pages/architecture.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60381 - "GET / HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60381 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60384 - "GET /chat HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60384 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60384 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60387 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60389 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60392 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60416 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60419 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60440 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60443 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60460 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60463 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60467 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60470 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60483 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60486 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60494 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60497 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60512 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60515 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60512 - "GET /chat HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60512 - "GET /static/css/pages/chat.css HTTP/1.1" 304 Not Modified
+INFO:     127.0.0.1:60512 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     127.0.0.1:60519 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60520 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60523 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60525 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60528 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60530 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60533 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60535 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60538 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60554 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60557 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60559 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60562 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60564 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60567 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60577 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60580 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60583 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60586 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60587 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60590 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60604 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60607 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60609 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60612 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60613 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60616 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60626 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60629 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open
+INFO:     127.0.0.1:60639 - "GET /api/status HTTP/1.1" 200 OK
+INFO:     connection closed
+INFO:     127.0.0.1:60642 - "WebSocket /ws/terminal" [accepted]
+INFO:     connection open

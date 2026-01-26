@@ -1,0 +1,95 @@
+HHC01413I Hercules version 4.3.9999.10140-SDL-g8d6065f3-modified (4.3.9999.10140)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 24 2020 at 08:19:37
+HHC01417I Built with: Microsoft Visual C (MSVC 191627026 1)
+HHC01417I Build type: Windows MSVC i386 host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 fetch_dw store_dw hatomics=msvcIntrinsics
+HHC01417I Built with crypto external package version 1.0.0.27-ga3e07b5
+HHC01417I Built with decNumber external package version 3.68.0.80-gdb5c456
+HHC01417I Built with SoftFloat external package version 3.5.0.83-g3da230f
+HHC01417I Built with telnet external package version 1.0.0.45-g2d9f219-modified
+
+HHC01413I Hercules version 4.3.9999.9976-SDL-gcb243985-modified (4.3.9999.9976)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 13 2020 at 14:52:03
+HHC01417I Built with: Microsoft Visual C (MSVC 191627026 1)
+HHC01417I Build type: Windows MSVC AMD64 host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 cmpxchg16 hatomics=msvcIntrinsics
+HHC01417I Built with crypto external package version 1.0.0.27-ga3e07b5
+HHC01417I Built with decNumber external package version 3.68.0.80-gdb5c456
+HHC01417I Built with SoftFloat external package version 3.5.0.83-g3da230f
+HHC01417I Built with telnet external package version 1.0.0.45-g2d9f219-modified
+
+HHC01413I Hercules version 4.3.9999.10140-SDL-g8d6065f-modified (4.3.9999.10140)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 24 2020 at 08:02:53
+HHC01417I Built with: GCC 4.8.4
+HHC01417I Build type: GNU/Linux i386 host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 fetch_dw store_dw hatomics=atomicIntrinsics
+HHC01417I Built with crypto external package version 1.0.0.27-ga3e07b5
+HHC01417I Built with decNumber external package version 3.68.0.80-gdb5c456
+HHC01417I Built with SoftFloat external package version 3.5.0.83-g3da230f
+HHC01417I Built with telnet external package version 1.0.0.45-g2d9f219-modified
+
+HHC01413I Hercules version 4.3.9999.9976-SDL-gcb24398-modified (4.3.9999.9976)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 13 2020 at 14:51:49
+HHC01417I Built with: GCC 4.8.4
+HHC01417I Build type: GNU/Linux x86_64 host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 cmpxchg16 hatomics=atomicIntrinsics
+HHC01417I Built with crypto external package version 1.0.0.27-ga3e07b5
+HHC01417I Built with decNumber external package version 3.68.0.80-gdb5c456
+HHC01417I Built with SoftFloat external package version 3.5.0.83-g3da230f
+HHC01417I Built with telnet external package version 1.0.0.45-g2d9f219-modified
+
+HHC01413I Hercules version 4.3.9999.0-SDL-gcb24398-modified (4.3.9999.0)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 14 2020 at 12:01:45
+HHC01417I Built with: GCC 5.4.0 20160609
+HHC01417I Build type: GNU/Linux aarch64 host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 cmpxchg16 hatomics=C11
+HHC01417I Built with crypto external package version 1.0.0.33-g02174c9
+HHC01417I Built with decNumber external package version 3.68.0.86-g963bd1f
+HHC01417I Built with SoftFloat external package version 3.5.0.89-g4bd642a
+HHC01417I Built with telnet external package version 1.0.0.50-g650fad2
+
+HHC01413I Hercules version 4.3.9999.10139-SDL-g3df3b2f-modified(?) (4.3.9999.10139)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 23 2020 at 15:11:12
+HHC01417I Built with: GCC 4.8.2
+HHC01417I Build type: GNU/Linux arm host architecture build
+HHC01417I Machine dependent assists: hatomics=atomicIntrinsics
+HHC01417I Built with crypto external package version 1.0.0.33-g02174c9
+HHC01417I Built with decNumber external package version 3.68.0.86-g963bd1f
+HHC01417I Built with SoftFloat external package version 3.5.0.89-g4bd642a
+HHC01417I Built with telnet external package version 1.0.0.50-g650fad2
+
+HHC01413I Hercules version 4.3.9999.0-SDL-g3df3b2f-modified (4.3.9999.0)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 23 2020 at 13:07:33
+HHC01417I Built with: GCC 4.9.2
+HHC01417I Build type: GNU/Linux arm host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 hatomics=C11
+HHC01417I Built with crypto external package version 1.0.0.33-g02174c9
+HHC01417I Built with decNumber external package version 3.68.0.86-g963bd1f
+HHC01417I Built with SoftFloat external package version 3.5.0.89-g4bd642a
+HHC01417I Built with telnet external package version 1.0.0.50-g650fad2
+
+HHC01413I Hercules version 4.3.9999.9976-SDL-gcb24398-modified (4.3.9999.9976)
+HHC01414I (C) Copyright 1999-2020 by Roger Bowler, Jan Jaeger, and others
+HHC01417I ** The SoftDevLabs version of Hercules **
+HHC01415I Build date: May 13 2020 at 14:52:11
+HHC01417I Built with: Apple Clang 5.1 (clang-503.0.40)
+HHC01417I Build type: Mac OS X x86_64 host architecture build
+HHC01417I Machine dependent assists: cmpxchg1 cmpxchg4 cmpxchg8 cmpxchg16 hatomics=atomicIntrinsics
+HHC01417I Built with crypto external package version 1.0.0.33-g02174c9
+HHC01417I Built with decNumber external package version 3.68.0.86-g963bd1f
+HHC01417I Built with SoftFloat external package version 3.5.0.89-g4bd642a
+HHC01417I Built with telnet external package version 1.0.0.50-g650fad2

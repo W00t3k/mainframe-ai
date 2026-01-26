@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IBM z/OS AI Assistant - Mainframe Console</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --ibm-blue: #0f62fe;
+            --ibm-blue-dark: #0043ce;
+            --ibm-blue-light: #4589ff;
+            --ibm-cyan: #08bdba;
+            --ibm-green: #42be65;
+            --ibm-red: #da1e28;
+            --ibm-yellow: #f1c21b;
+            --ibm-purple: #8a3ffc;
+            --ibm-gray-100: #161616;
+            --ibm-gray-90: #262626;
+            --ibm-gray-80: #393939;
+            --ibm-gray-70: #525252;
+            --ibm-gray-50: #8d8d8d;
+            --ibm-gray-30: #c6c6c6;
+            --ibm-gray-10: #f4f4f4;
+            --ibm-white: #ffffff;
+            --terminal-green: #33ff33;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+            background: var(--ibm-gray-100);
+            color: var(--ibm-gray-10);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: var(--ibm-gray-90);
+            border-bottom: 1px solid var(--ibm-gray-80);
+            padding: 0 2rem;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .header .brand {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .header .logo { width: 32px; height: 32px; }
+
+        .header h1 {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .header h1 span { color: var(--ibm-blue-light); }
+
+        .header-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .header-nav a {
+            color: var(--ibm-gray-30);
+            text-decoration: none;
+            font-size: 0.875rem;
+            padding: 0.5rem 1rem;
+            transition: color 0.15s;
+        }
+
+        .header-nav a:hover { color: var(--ibm-white); }
+
+        /* Main Content */
+        .main {
+            display: flex;
+            min-height: calc(100vh - 48px);
+        }
+
+        /* Sidebar - Connection Panel */
+        .sidebar {
+            width: 360px;
+            background: var(--ibm-gray-90);
+            border-right: 1px solid var(--ibm-gray-80);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-section {
+            border-bottom: 1px solid var(--ibm-gray-80);
+        }
+
+        .sidebar-header {
+            background: var(--ibm-gray-80);
+            padding: 1rem;
+            font-weight: 600;
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .sidebar-body { padding: 1rem; }
+
+        /* Connect Form */
+        .connect-form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 0.75rem;
+            color: var(--ibm-gray-50);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+
+        .form-group input {
+            width: 100%;
+            background: var(--ibm-gray-100);
+            border: 1px solid var(--ibm-gray-70);
+            color: var(--ibm-gray-10);
+            padding: 0.75rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.875rem;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: var(--ibm-blue);
+        }
+
+        .btn {
+            padding: 0.875rem 1.5rem;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--ibm-blue);
+            color: white;
+        }
+
+        .btn-primary:hover { background: var(--ibm-blue-dark); }
+
+        .btn-secondary {
+            background: var(--ibm-gray-80);
+            color: var(--ibm-gray-10);
+            border: 1px solid var(--ibm-gray-70);
+        }
+
+        .btn-secondary:hover { background: var(--ibm-gray-70); }
+
+        .btn-danger {
+            background: var(--ibm-red);
+            color: white;
+        }
+
+        /* Quick Connect Buttons */
+        .quick-connects {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .quick-connect-btn {
+            background: var(--ibm-gray-100);
+            border: 1px solid var(--ibm-gray-70);
+            color: var(--ibm-gray-10);
+            padding: 0.75rem 1rem;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            transition: all 0.15s;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+        }
+
+        .quick-connect-btn:hover {
+            border-color: var(--ibm-blue);
+            background: var(--ibm-gray-90);
+        }
+
+        .quick-connect-btn .status {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--ibm-gray-50);
+        }
+
+        .quick-connect-btn .status.online {
+            background: var(--ibm-green);
+            box-shadow: 0 0 8px var(--ibm-green);
+        }
+
+        .quick-connect-btn .host { flex: 1; }
+
+        .quick-connect-btn .port {
+            color: var(--ibm-gray-50);
+        }
+
+        /* Saved Sessions */
+        .session-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .session-item {
+            background: var(--ibm-gray-100);
+            border: 1px solid var(--ibm-gray-80);
+            padding: 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .session-item:hover { border-color: var(--ibm-blue); }
+
+        .session-item .thumbnail {
+            width: 80px;
+            height: 48px;
+            background: #000;
+            border: 1px solid var(--ibm-gray-70);
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.4rem;
+            color: var(--terminal-green);
+            overflow: hidden;
+            padding: 2px;
+            white-space: pre;
+            line-height: 1;
+        }
+
+        .session-item .info { flex: 1; }
+        .session-item .name { font-size: 0.85rem; margin-bottom: 0.25rem; }
+        .session-item .host {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--ibm-gray-50);
+        }
+
+        /* Main Display Area */
+        .display-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            background: var(--ibm-gray-100);
+        }
+
+        .display-toolbar {
+            background: var(--ibm-gray-90);
+            border-bottom: 1px solid var(--ibm-gray-80);
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .display-toolbar .status-badge {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+        }
+
+        .display-toolbar .status-badge .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+        }
+
+        .display-toolbar .status-badge .dot.connected { background: var(--ibm-green); }
+        .display-toolbar .status-badge .dot.disconnected { background: var(--ibm-red); }
+
+        /* Terminal Display */
+        .terminal-display {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 2rem;
+            background: radial-gradient(ellipse at center, var(--ibm-gray-90) 0%, var(--ibm-gray-100) 100%);
+        }
+
+        .terminal-frame {
+            background: #0a0a0a;
+            border: 3px solid var(--ibm-gray-70);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: 0 0 60px rgba(51, 255, 51, 0.1), inset 0 0 100px rgba(0,0,0,0.5);
+            position: relative;
+            min-width: 800px;
+            min-height: 500px;
+        }
+
+        .terminal-frame::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(transparent 50%, rgba(0,0,0,0.1) 50%);
+            background-size: 100% 4px;
+            pointer-events: none;
+            opacity: 0.3;
+        }
+
+        .terminal-screen {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 14px;
+            line-height: 1.3;
+            color: var(--terminal-green);
+            white-space: pre;
+            min-height: 400px;
+        }
+
+        .terminal-screen.disconnected {
+            color: var(--ibm-gray-50);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+        }
+
+        .terminal-screen.disconnected .big-logo {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .terminal-screen.disconnected h2 {
+            font-size: 1.5rem;
+            color: var(--ibm-blue-light);
+            margin-bottom: 1rem;
+        }
+
+        .terminal-screen.disconnected p {
+            color: var(--ibm-gray-50);
+            max-width: 400px;
+            line-height: 1.6;
+        }
+
+        /* PF Key Bar */
+        .pf-bar {
+            background: var(--ibm-gray-90);
+            border-top: 1px solid var(--ibm-gray-80);
+            padding: 0.75rem 1rem;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .pf-key {
+            background: var(--ibm-gray-80);
+            border: 1px solid var(--ibm-gray-70);
+            color: var(--ibm-gray-30);
+            padding: 0.5rem 0.75rem;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .pf-key:hover {
+            background: var(--ibm-gray-70);
+            border-color: var(--ibm-blue);
+        }
+
+        .pf-key.special {
+            background: var(--ibm-blue);
+            border-color: var(--ibm-blue);
+            color: white;
+        }
+
+        /* Scanner Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active { display: flex; }
+
+        .modal-content {
+            background: var(--ibm-gray-90);
+            border: 1px solid var(--ibm-gray-80);
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow: auto;
+        }
+
+        .modal-header {
+            background: var(--ibm-gray-80);
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h3 { font-size: 1rem; }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--ibm-gray-30);
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .modal-body { padding: 1.5rem; }
+
+        /* Scanner Results */
+        .scan-results {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .scan-result {
+            background: var(--ibm-gray-100);
+            border: 1px solid var(--ibm-gray-80);
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .scan-result:hover { border-color: var(--ibm-green); }
+
+        .scan-result .status-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--ibm-gray-80);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.25rem;
+        }
+
+        .scan-result.tn3270 .status-icon { background: rgba(66, 190, 101, 0.2); }
+
+        .scan-result .info { flex: 1; }
+        .scan-result .host { font-weight: 500; }
+        .scan-result .details {
+            font-size: 0.8rem;
+            color: var(--ibm-gray-50);
+            margin-top: 0.25rem;
+        }
+
+        .scan-result .connect-btn {
+            background: var(--ibm-blue);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        /* Screencap Gallery */
+        .screencap-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .screencap-item {
+            background: #000;
+            border: 1px solid var(--ibm-gray-80);
+            cursor: pointer;
+            transition: all 0.15s;
+            position: relative;
+        }
+
+        .screencap-item:hover {
+            border-color: var(--ibm-blue);
+            transform: scale(1.02);
+        }
+
+        .screencap-item .preview {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.35rem;
+            color: var(--terminal-green);
+            padding: 0.5rem;
+            white-space: pre;
+            line-height: 1;
+            height: 100px;
+            overflow: hidden;
+        }
+
+        .screencap-item .meta {
+            background: var(--ibm-gray-90);
+            padding: 0.5rem;
+            font-size: 0.7rem;
+        }
+
+        .screencap-item .meta .host { color: var(--ibm-gray-10); }
+        .screencap-item .meta .time { color: var(--ibm-gray-50); }
+
+        /* Footer */
+        footer {
+            background: var(--ibm-gray-90);
+            border-top: 1px solid var(--ibm-gray-80);
+            padding: 1rem 2rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--ibm-gray-50);
+        }
+
+        footer a { color: var(--ibm-blue-light); text-decoration: none; }
+
+        /* Loading */
+        .loading {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--ibm-gray-50);
+        }
+
+        .loading .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid var(--ibm-gray-70);
+            border-top-color: var(--ibm-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        @media (max-width: 1000px) {
+            .main { flex-direction: column; }
+            .sidebar { width: 100%; max-height: 300px; overflow-y: auto; }
+            .terminal-frame { min-width: auto; width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="brand">
+            <img src="/static/logo.svg" alt="IBM z/OS" class="logo">
+            <h1><span>IBM</span> z/OS AI Assistant</h1>
+        </div>
+        <nav class="header-nav">
+            <a href="/chat">AI Chat</a>
+            <a href="#" onclick="openScanner()">Scan Network</a>
+            <a href="#" onclick="openScreencaps()">Screencaps</a>
+        </nav>
+    </header>
+
+    <div class="main">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <!-- Connect Section -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>🔌</span> Connect to Mainframe
+                </div>
+                <div class="sidebar-body">
+                    <div class="connect-form">
+                        <div class="form-group">
+                            <label>Host</label>
+                            <input type="text" id="hostInput" value="localhost" placeholder="hostname or IP">
+                        </div>
+                        <div class="form-group">
+                            <label>Port</label>
+                            <input type="text" id="portInput" value="3270" placeholder="3270">
+                        </div>
+                        <button class="btn btn-primary" onclick="connect()">
+                            <span>⚡</span> Connect
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Connect -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>⚡</span> Quick Connect
+                </div>
+                <div class="sidebar-body">
+                    <div class="quick-connects">
+                        <button class="quick-connect-btn" onclick="quickConnect('localhost', 3270)">
+                            <span class="status" id="localStatus"></span>
+                            <span class="host">MVS TK5 (Local)</span>
+                            <span class="port">:3270</span>
+                        </button>
+                        <button class="quick-connect-btn" onclick="quickConnect('localhost', 3270)">
+                            <span class="status"></span>
+                            <span class="host">Add New Host...</span>
+                            <span class="port">+</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Sessions -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>📷</span> Recent Screencaps
+                </div>
+                <div class="sidebar-body">
+                    <div class="session-list" id="sessionList">
+                        <div class="session-item" onclick="loadSession(0)">
+                            <div class="thumbnail" id="thumb0">No screencaps yet</div>
+                            <div class="info">
+                                <div class="name">Connect to capture</div>
+                                <div class="host">screens...</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="sidebar-section">
+                <div class="sidebar-header">
+                    <span>🛠️</span> Actions
+                </div>
+                <div class="sidebar-body" style="display: flex; flex-direction: column; gap: 0.5rem;">
+                    <button class="btn btn-secondary" onclick="captureScreen()">
+                        <span>📸</span> Capture Screen
+                    </button>
+                    <button class="btn btn-secondary" onclick="openScanner()">
+                        <span>🔍</span> Scan for Mainframes
+                    </button>
+                    <a href="/chat" class="btn btn-secondary" style="text-decoration: none;">
+                        <span>🤖</span> Open AI Chat
+                    </a>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Display -->
+        <div class="display-area">
+            <div class="display-toolbar">
+                <div class="status-badge">
+                    <span class="dot disconnected" id="connectionDot"></span>
+                    <span id="connectionStatus">Disconnected</span>
+                </div>
+                <span style="flex:1;"></span>
+                <span style="font-size: 0.75rem; color: var(--ibm-gray-50);">
+                    BIRP v2 | TN3270 | <span id="screenSize">24x80</span>
+                </span>
+            </div>
+
+            <div class="terminal-display">
+                <div class="terminal-frame">
+                    <div class="terminal-screen disconnected" id="terminalScreen" tabindex="0">
+                        <div class="big-logo">🖥️</div>
+                        <h2>IBM z/OS Terminal</h2>
+                        <p>
+                            Enter a host address in the sidebar and click Connect,
+                            or use Quick Connect to access your local MVS TK5 system.
+                        </p>
+                        <p style="margin-top: 1rem; font-size: 0.85rem;">
+                            <a href="/chat" style="color: var(--ibm-blue-light);">Open AI Chat →</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pf-bar">
+                <button class="pf-key special" onclick="sendKey('enter')">Enter</button>
+                <button class="pf-key special" onclick="sendKey('clear')">Clear</button>
+                <button class="pf-key special" onclick="sendKey('tab')">Tab</button>
+                <button class="pf-key" onclick="sendKey('pf', 1)">PF1</button>
+                <button class="pf-key" onclick="sendKey('pf', 2)">PF2</button>
+                <button class="pf-key" onclick="sendKey('pf', 3)">PF3</button>
+                <button class="pf-key" onclick="sendKey('pf', 4)">PF4</button>
+                <button class="pf-key" onclick="sendKey('pf', 5)">PF5</button>
+                <button class="pf-key" onclick="sendKey('pf', 6)">PF6</button>
+                <button class="pf-key" onclick="sendKey('pf', 7)">PF7</button>
+                <button class="pf-key" onclick="sendKey('pf', 8)">PF8</button>
+                <button class="pf-key" onclick="sendKey('pf', 9)">PF9</button>
+                <button class="pf-key" onclick="sendKey('pf', 10)">PF10</button>
+                <button class="pf-key" onclick="sendKey('pf', 11)">PF11</button>
+                <button class="pf-key" onclick="sendKey('pf', 12)">PF12</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scanner Modal -->
+    <div class="modal" id="scannerModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>🔍 Scan for Mainframes</h3>
+                <button class="modal-close" onclick="closeModal('scannerModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="connect-form">
+                    <div class="form-group">
+                        <label>Network Range / Host</label>
+                        <input type="text" id="scanTarget" value="192.168.1.0/24" placeholder="IP, hostname, or CIDR range">
+                    </div>
+                    <div class="form-group">
+                        <label>Ports to Scan</label>
+                        <input type="text" id="scanPorts" value="23,3270,2323" placeholder="23,3270,2323">
+                    </div>
+                    <button class="btn btn-primary" onclick="startScan()">
+                        <span>🔍</span> Start Scan
+                    </button>
+                </div>
+
+                <div class="scan-results" id="scanResults">
+                    <!-- Results will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Screencaps Modal -->
+    <div class="modal" id="screencapsModal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3>📷 Captured Screens</h3>
+                <button class="modal-close" onclick="closeModal('screencapsModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="color: var(--ibm-gray-50); margin-bottom: 1rem;">
+                    Screen captures from connected mainframes. Click to view full screen.
+                </p>
+                <div class="screencap-gallery" id="screencapGallery">
+                    <!-- Screencaps will appear here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        Built with BIRP v2 + Ollama | <a href="/chat">AI Chat</a> | Local LLM - No API Key Required
+    </footer>
+
+    <script>
+        let connected = false;
+        let screencaps = [];
+
+        // Connect to mainframe
+        async function connect() {
+            const host = document.getElementById('hostInput').value.trim();
+            const port = document.getElementById('portInput').value.trim();
+
+            if (!host) {
+                alert('Please enter a host');
+                return;
+            }
+
+            const target = port ? `${host}:${port}` : host;
+
+            try {
+                const response = await fetch('/api/terminal/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    connected = true;
+                    updateScreen(data.screen_data);
+                    updateConnectionStatus(true, target);
+                } else {
+                    alert('Connection failed: ' + data.message);
+                }
+            } catch (error) {
+                alert('Error: ' + error.message);
+            }
+        }
+
+        function quickConnect(host, port) {
+            document.getElementById('hostInput').value = host;
+            document.getElementById('portInput').value = port;
+            connect();
+        }
+
+        function updateConnectionStatus(isConnected, host = '') {
+            const dot = document.getElementById('connectionDot');
+            const status = document.getElementById('connectionStatus');
+
+            if (isConnected) {
+                dot.className = 'dot connected';
+                status.textContent = 'Connected: ' + host;
+                status.style.color = 'var(--ibm-green)';
+            } else {
+                dot.className = 'dot disconnected';
+                status.textContent = 'Disconnected';
+                status.style.color = 'var(--ibm-gray-50)';
+            }
+        }
+
+        function updateScreen(screenData) {
+            const screen = document.getElementById('terminalScreen');
+
+            if (screenData && screenData.connected && screenData.screen) {
+                screen.classList.remove('disconnected');
+                screen.textContent = screenData.screen;
+                connected = true;
+            } else {
+                screen.classList.add('disconnected');
+                screen.innerHTML = `
+                    <div class="big-logo">🖥️</div>
+                    <h2>IBM z/OS Terminal</h2>
+                    <p>Enter a host address and click Connect.</p>
+                `;
+                connected = false;
+            }
+        }
+
+        // Send key to terminal
+        async function sendKey(keyType, value = '') {
+            if (!connected) return;
+
+            try {
+                const response = await fetch('/api/terminal/key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key_type: keyType, value: String(value) })
+                });
+
+                const data = await response.json();
+                if (data.success && data.screen_data) {
+                    updateScreen(data.screen_data);
+                }
+            } catch (error) {
+                console.error('Key error:', error);
+            }
+        }
+
+        // Keyboard handling
+        document.getElementById('terminalScreen').addEventListener('keydown', function(e) {
+            if (!connected) return;
+            e.preventDefault();
+
+            if (e.key === 'Enter') sendKey('enter');
+            else if (e.key === 'Escape') sendKey('clear');
+            else if (e.key === 'Tab') sendKey(e.shiftKey ? 'backtab' : 'tab');
+            else if (e.key === 'Backspace') sendKey('backspace');
+            else if (e.key === 'Delete') sendKey('delete');
+            else if (e.key.startsWith('F') && e.key.length <= 3) {
+                const num = parseInt(e.key.substring(1));
+                if (num >= 1 && num <= 12) sendKey('pf', e.shiftKey ? num + 12 : num);
+            }
+            else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                sendKey('string', e.key);
+            }
+        });
+
+        // Capture screen
+        function captureScreen() {
+            if (!connected) {
+                alert('Connect to a mainframe first');
+                return;
+            }
+
+            const screen = document.getElementById('terminalScreen').textContent;
+            const host = document.getElementById('connectionStatus').textContent.replace('Connected: ', '');
+
+            screencaps.push({
+                screen: screen,
+                host: host,
+                time: new Date().toLocaleString()
+            });
+
+            updateThumbnails();
+            alert('Screen captured!');
+        }
+
+        function updateThumbnails() {
+            const list = document.getElementById('sessionList');
+            list.innerHTML = '';
+
+            screencaps.slice(-5).reverse().forEach((cap, i) => {
+                const item = document.createElement('div');
+                item.className = 'session-item';
+                item.onclick = () => viewScreencap(screencaps.length - 1 - i);
+                item.innerHTML = `
+                    <div class="thumbnail">${cap.screen.substring(0, 200)}</div>
+                    <div class="info">
+                        <div class="name">${cap.host}</div>
+                        <div class="host">${cap.time}</div>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+        }
+
+        function viewScreencap(index) {
+            const cap = screencaps[index];
+            if (cap) {
+                document.getElementById('terminalScreen').textContent = cap.screen;
+                document.getElementById('terminalScreen').classList.remove('disconnected');
+            }
+        }
+
+        // Scanner
+        function openScanner() {
+            document.getElementById('scannerModal').classList.add('active');
+        }
+
+        function openScreencaps() {
+            const gallery = document.getElementById('screencapGallery');
+            gallery.innerHTML = '';
+
+            if (screencaps.length === 0) {
+                gallery.innerHTML = '<p style="color: var(--ibm-gray-50);">No screencaps yet. Connect to a mainframe and click Capture Screen.</p>';
+            } else {
+                screencaps.forEach((cap, i) => {
+                    const item = document.createElement('div');
+                    item.className = 'screencap-item';
+                    item.onclick = () => { closeModal('screencapsModal'); viewScreencap(i); };
+                    item.innerHTML = `
+                        <div class="preview">${cap.screen.substring(0, 500)}</div>
+                        <div class="meta">
+                            <div class="host">${cap.host}</div>
+                            <div class="time">${cap.time}</div>
+                        </div>
+                    `;
+                    gallery.appendChild(item);
+                });
+            }
+
+            document.getElementById('screencapsModal').classList.add('active');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.remove('active');
+        }
+
+        async function startScan() {
+            const target = document.getElementById('scanTarget').value.trim();
+            const ports = document.getElementById('scanPorts').value.trim();
+            const results = document.getElementById('scanResults');
+
+            results.innerHTML = '<div class="loading"><div class="spinner"></div> Scanning...</div>';
+
+            // Simulated scan results for demo
+            setTimeout(() => {
+                results.innerHTML = `
+                    <div class="scan-result tn3270" onclick="quickConnect('localhost', 3270)">
+                        <div class="status-icon">🖥️</div>
+                        <div class="info">
+                            <div class="host">localhost:3270</div>
+                            <div class="details">TN3270 - MVS/TSO detected</div>
+                        </div>
+                        <button class="connect-btn">Connect</button>
+                    </div>
+                    <p style="margin-top: 1rem; color: var(--ibm-gray-50); font-size: 0.85rem;">
+                        Note: Full network scanning requires the scanner backend. This demo shows local MVS TK5.
+                    </p>
+                `;
+            }, 1500);
+        }
+
+        // Check local MVS status
+        async function checkLocalMVS() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+
+                if (data.birp_available) {
+                    document.getElementById('localStatus').classList.add('online');
+                }
+            } catch (e) {
+                console.log('Status check failed');
+            }
+        }
+
+        // Initialize
+        checkLocalMVS();
+
+        // Click outside modal to close
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) closeModal(this.id);
+            });
+        });
+    </script>
+</body>
+</html>

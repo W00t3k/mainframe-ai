@@ -1,0 +1,35 @@
+#!/bin/bash
+#**********************************************************************
+#***                                                                ***
+#*** Script:  mvs_osx                                               ***
+#***                                                                ***
+#*** Purpose: Wrapper for the original TK5  mvs script (now named   ***
+#***          mvs_ipl) to work around the missing coproc capability ***
+#***          of bash v3.x as distributed with OS X. This script    ***
+#***          executes a bash v4 shell which in turn runs the       ***
+#***          original mvs_ipl script.                              ***
+#***                                                                ***
+#*** Updated: 2019/03/28                                            ***
+#***                                                                ***
+#**********************************************************************
+#
+# set environment
+#
+a=`uname -m`
+if [[ $a == 'x86_64' || $a == 'arm64' ]];then arch=64;else arch=32;fi
+system=`uname -s | awk '{print tolower($0)}'`
+case $system in
+darwin)
+   PATH=hercules/$system/utils:$PATH
+   export DYLD_LIBRARY_PATH=hercules/$system/utils/lib:$DYLD_LIBRARY_PATH
+   if [[ $arch == '32' ]];then force_arch="arch -arch i386";else force_arch=;fi
+   ;;
+*)
+   echo "System $system not supported."
+   exit
+   ;;
+esac
+#
+# replace ourselves with a bash v4 shell and execute mvs_ipl
+#
+exec $force_arch bash -c "source mvs_ipl"

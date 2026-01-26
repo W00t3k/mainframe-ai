@@ -1,0 +1,207 @@
+body {
+    background: var(--ibm-gray-100);
+    color: var(--ibm-gray-10);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+header {
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    padding: 0 2rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+}
+
+.brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.brand img {
+    width: 32px;
+    height: 32px;
+}
+
+.brand h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.brand h1 span {
+    color: var(--ibm-blue-light);
+}
+
+main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 3rem 2rem;
+    background:
+        radial-gradient(ellipse at top, rgba(15, 98, 254, 0.1) 0%, transparent 50%),
+        linear-gradient(180deg, var(--ibm-gray-100) 0%, var(--ibm-gray-90) 100%);
+}
+
+.hero {
+    text-align: center;
+    max-width: 700px;
+    margin-bottom: 4rem;
+}
+
+.hero-logo {
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 2rem;
+    filter: drop-shadow(0 0 40px rgba(69, 137, 255, 0.4));
+}
+
+.hero h2 {
+    font-size: 3rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin-bottom: 1.5rem;
+}
+
+.hero h2 strong {
+    font-weight: 600;
+    color: var(--ibm-blue-light);
+}
+
+.hero p {
+    font-size: 1.125rem;
+    color: var(--ibm-gray-30);
+    line-height: 1.6;
+    margin-bottom: 2rem;
+}
+
+.hero-badges {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.badge {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--ibm-gray-90);
+    border: 1px solid var(--ibm-gray-80);
+    padding: 0.5rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ibm-gray-30);
+}
+
+.badge .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ibm-green);
+}
+
+.options {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+.option-card {
+    background: var(--ibm-gray-90);
+    border: 1px solid var(--ibm-gray-80);
+    padding: 2rem;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+}
+
+.option-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: var(--ibm-blue);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+}
+
+.option-card:hover {
+    border-color: var(--ibm-blue);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.option-card:hover::before {
+    transform: scaleY(1);
+}
+
+.option-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.option-card h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+    color: var(--ibm-white);
+}
+
+.option-card p {
+    font-size: 0.9rem;
+    color: var(--ibm-gray-50);
+    line-height: 1.5;
+    flex: 1;
+}
+
+.option-card .arrow {
+    margin-top: 1.5rem;
+    color: var(--ibm-blue-light);
+    font-size: 0.875rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.option-card.terminal .option-icon { color: #33ff33; }
+.option-card.chat .option-icon { color: var(--ibm-blue-light); }
+.option-card.scan .option-icon { color: var(--ibm-purple); }
+.option-card.screens .option-icon { color: var(--ibm-cyan); }
+.option-card.rag .option-icon { color: var(--ibm-green); }
+.option-card.arch .option-icon { color: var(--ibm-teal); }
+
+footer {
+    background: var(--ibm-gray-90);
+    border-top: 1px solid var(--ibm-gray-80);
+    padding: 1.5rem 2rem;
+    text-align: center;
+}
+
+footer p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ibm-gray-50);
+}
+
+footer a {
+    color: var(--ibm-blue-light);
+}
+
+@media (max-width: 768px) {
+    .hero h2 { font-size: 2rem; }
+    .options { grid-template-columns: 1fr; }
+}

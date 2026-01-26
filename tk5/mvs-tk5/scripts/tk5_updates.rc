@@ -1,0 +1,19 @@
+#**********************************************************************
+#***                                                                ***
+#*** Script:  tk5_updates.rc                                        ***
+#***                                                                ***
+#*** Purpose: Run tk5 update scripts                                ***
+#***                                                                ***
+#*** Updated: 2023/05/30                                            ***
+#***                                                                ***
+#**********************************************************************
+script scripts/tk5_updates/01
+script scripts/tk5_updates/02
+script scripts/tk5_updates/03
+script scripts/tk5_updates/04
+script scripts/tk5_updates/05
+script scripts/tk5_updates/06
+script scripts/tk5_updates/07
+script scripts/tk5_updates/08
+script scripts/tk5_updates/09
+script scripts/tk5_updates/10

@@ -1,0 +1,32 @@
+#**********************************************************************
+#***                                                                ***
+#*** Script:  tk4-.rc                                               ***
+#***                                                                ***
+#*** Purpose: complete TK4- initialization and display logo         ***
+#***                                                                ***
+#*** Updated: 2023/05/16                                            ***
+#***                                                                ***
+#**********************************************************************
+pause 1
+script scripts/tk5_updates.rc
+${LOCALRC:=script scripts/local.rc}
+pause 1
+*
+*                           TTTTTTTTTTTT   KKKK  KKKKK     555555555555
+*                           TT   TT   TT    KK    KK       55
+*                           TT   TT   TT    KK   KK        55      Update 4
+*                                TT         KK  KK         55
+*        4l      _,,,---,,_      TT         KK KK          55     
+* ZZZzz /,'.-'`'    -.  ;-;;,    TT         KKKK           55555555555    
+*      4,4-  ) )-,_. ,( (  ''-'  TT         KKKKK                    55      
+*     '---''(_/--'  `-')_)       TT         KK  KK                   55
+*                                TT         KK   KK                  55
+*       The MVS 3.8j             TT         KK    KK                 55
+*     Tur(n)key System           TT         KK     KK                55
+*                              TTTTTT      KKKK     KKK    55555555555
+*
+*     TK3 created by Volker Bandke       volker@bandke.org
+*     TK4- update by Juergen Winkelmann  juergen.winkelmann@pebble-beach.ch
+*     TK5  update by Rob Prins           prin0096@gmail.com
+*          see SYS2.JCLLIB(CREDITS) for complete credits
+*

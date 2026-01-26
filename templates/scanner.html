@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Scanner - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/scanner.css">
+{% endblock %}
+
+{% block body %}
+{% set brand_title = "z/OS Scanner" %}
+{% set nav_items = [
+    {'href': '/', 'label': 'Home'},
+    {'href': '/terminal', 'label': 'Terminal'},
+    {'href': '/chat', 'label': 'AI Chat'},
+    {'href': '/architecture', 'label': 'Architecture'}
+] %}
+{% include "partials/site_header.html" %}
+
+<main class="page">
+    <h1 class="page-title">Mainframe Scanner</h1>
+    <p class="page-subtitle">Scan networks for TN3270 services and IBM mainframes</p>
+
+    <div class="scan-form">
+        <div class="form-row">
+            <div class="form-group">
+                <label>Target (IP, hostname, or CIDR)</label>
+                <input type="text" id="target" value="localhost" placeholder="192.168.1.0/24">
+            </div>
+            <div class="form-group">
+                <label>Ports</label>
+                <input type="text" id="ports" value="23,3270,2323" placeholder="23,3270,2323">
+            </div>
+        </div>
+        <button class="btn" id="scanBtn" onclick="startScan()">Start Scan</button>
+    </div>
+
+    <div class="results" id="results">
+        <div class="empty">Enter a target and click Start Scan</div>
+    </div>
+</main>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    async function startScan() {
+        const target = document.getElementById('target').value.trim();
+        const ports = document.getElementById('ports').value.trim();
+        const results = document.getElementById('results');
+        const btn = document.getElementById('scanBtn');
+
+        if (!target) {
+            showToast('Enter a target to scan.', { type: 'warning', title: 'Scanner' });
+            return;
+        }
+
+        btn.disabled = true;
+        btn.textContent = 'Scanning...';
+        results.innerHTML = '<div class="loading"><div class="spinner"></div>Scanning ' + target + '...</div>';
+
+        try {
+            const response = await fetch('/api/scanner/scan', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ target, ports })
+            });
+            const data = await response.json();
+
+            if (!response.ok || data.error) {
+                const message = data.error || 'Scan failed';
+                results.innerHTML = '<div class="empty">' + message + '</div>';
+                showToast(message, { type: 'error', title: 'Scanner' });
+                return;
+            }
+
+            const hosts = data.results || [];
+
+            if (hosts.length === 0) {
+                results.innerHTML = '<div class="empty">No TN3270 services found on ' + target + '</div>';
+                return;
+            }
+
+            results.innerHTML = hosts.map(h => `
+                <div class="result-card">
+                    <div class="icon">🖥️</div>
+                    <div class="info">
+                        <div class="host">${h.host}:${h.port}</div>
+                        <div class="details">${h.type} - ${h.details}</div>
+                    </div>
+                    <a href="/terminal?host=${h.host}:${h.port}" class="connect-btn">Connect</a>
+                </div>
+            `).join('');
+        } catch (e) {
+            const message = 'Scan error: ' + e.message;
+            results.innerHTML = '<div class="empty">' + message + '</div>';
+            showToast(message, { type: 'error', title: 'Scanner' });
+        } finally {
+            btn.disabled = false;
+            btn.textContent = 'Start Scan';
+        }
+    }
+</script>
+{% endblock %}

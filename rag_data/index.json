@@ -1,0 +1,20 @@
+{
+  "documents": [
+    {
+      "id": "3fad8a90ff0b",
+      "name": "Mainframe Quick Reference",
+      "source": "builtin",
+      "doc_type": "builtin",
+      "chunks": 1,
+      "added": "2026-01-25 08:11"
+    },
+    {
+      "id": "a46d71e018dd",
+      "name": "sg248410.pdf",
+      "source": "/Users/w00tock/Desktop/mainframe_ai_assistant/rag_data/documents/sg248410.pdf",
+      "doc_type": "pdf",
+      "chunks": 38,
+      "added": "2026-01-25 08:13"
+    }
+  ]
+}

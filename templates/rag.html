@@ -1,0 +1,332 @@
+{% extends "base.html" %}
+
+{% block title %}RAG Manager - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/rag.css">
+{% endblock %}
+
+{% block body %}
+{% set brand_title = "z/OS RAG Manager" %}
+{% set nav_items = [
+    {'href': '/', 'label': 'Home'},
+    {'href': '/terminal', 'label': 'Terminal'},
+    {'href': '/chat', 'label': 'AI Chat'},
+    {'href': '/architecture', 'label': 'Architecture'}
+] %}
+{% include "partials/site_header.html" %}
+
+<main class="page">
+    <h1 class="page-title">Knowledge Base Manager</h1>
+    <p class="page-subtitle">Add documents to enhance AI responses with mainframe-specific knowledge</p>
+
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="value" id="docCount">0</div>
+            <div class="label">Documents</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="chunkCount">0</div>
+            <div class="label">Text Chunks</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="embeddingModel">-</div>
+            <div class="label">Embedding Model</div>
+        </div>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Quick Start</h2>
+            <button class="btn success" onclick="initBuiltin()">Load Built-in Knowledge</button>
+        </div>
+        <div class="section-body">
+            <p style="color: var(--ibm-gray-50); margin-bottom: 1rem;">
+                Click "Load Built-in Knowledge" to add ABEND codes, JCL reference, and COBOL basics.
+                Then add your own PDFs below for more comprehensive coverage.
+            </p>
+            <div class="redbook-links">
+                <a href="https://www.redbooks.ibm.com/abstracts/sg247798.html" target="_blank" class="redbook-link">
+                    <span class="icon">📘</span>
+                    <div class="info">
+                        <h4>z/OS Basics</h4>
+                        <p>Introduction to z/OS concepts</p>
+                    </div>
+                </a>
+                <a href="https://www.redbooks.ibm.com/abstracts/sg246667.html" target="_blank" class="redbook-link">
+                    <span class="icon">📗</span>
+                    <div class="info">
+                        <h4>ABCs of z/OS System Programming</h4>
+                        <p>System programming fundamentals</p>
+                    </div>
+                </a>
+                <a href="https://www.redbooks.ibm.com/abstracts/sg247858.html" target="_blank" class="redbook-link">
+                    <span class="icon">📙</span>
+                    <div class="info">
+                        <h4>JCL User's Guide</h4>
+                        <p>Comprehensive JCL reference</p>
+                    </div>
+                </a>
+                <a href="https://www.redbooks.ibm.com/abstracts/tips0869.html" target="_blank" class="redbook-link">
+                    <span class="icon">📕</span>
+                    <div class="info">
+                        <h4>COBOL Programming</h4>
+                        <p>Enterprise COBOL development</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload Documents -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Add Documents</h2>
+        </div>
+        <div class="section-body">
+            <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+                <div class="icon">📄</div>
+                <p>Drop PDF or TXT files here, or click to browse</p>
+                <button class="btn secondary">Select Files</button>
+                <input type="file" id="fileInput" accept=".pdf,.txt,.md" multiple onchange="handleFiles(this.files)">
+            </div>
+        </div>
+    </div>
+
+    <!-- Document List -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Indexed Documents</h2>
+            <button class="btn secondary" onclick="loadDocuments()">Refresh</button>
+        </div>
+        <div class="section-body">
+            <div class="doc-list" id="docList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading documents...
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Test RAG -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Test Retrieval</h2>
+            <div class="query-meta" id="queryMeta" style="display: none;">
+                <span class="meta-item" id="queryTime"></span>
+                <span class="meta-item" id="cacheStatus"></span>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="test-section">
+                <input type="text" id="testQuery" placeholder="Ask a question to test retrieval..." onkeypress="if(event.key==='Enter')testQuery()">
+                <button class="btn" onclick="testQuery()">Search</button>
+            </div>
+            <div class="results" id="testResults"></div>
+        </div>
+    </div>
+</main>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    // Load stats and documents on page load
+    loadStats();
+    loadDocuments();
+
+    // Drag and drop handling
+    const uploadZone = document.getElementById('uploadZone');
+
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+        });
+    });
+
+    ['dragenter', 'dragover'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, () => uploadZone.classList.add('dragover'));
+    });
+
+    ['dragleave', 'drop'].forEach(eventName => {
+        uploadZone.addEventListener(eventName, () => uploadZone.classList.remove('dragover'));
+    });
+
+    uploadZone.addEventListener('drop', e => {
+        handleFiles(e.dataTransfer.files);
+    });
+
+    async function loadStats() {
+        try {
+            const response = await fetch('/api/rag/stats');
+            const data = await response.json();
+            document.getElementById('docCount').textContent = data.documents || 0;
+            document.getElementById('chunkCount').textContent = data.chunks || 0;
+            document.getElementById('embeddingModel').textContent = data.embedding_model || '-';
+        } catch (e) {
+            console.error('Failed to load stats:', e);
+        }
+    }
+
+    async function loadDocuments() {
+        const docList = document.getElementById('docList');
+        docList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+        try {
+            const response = await fetch('/api/rag/documents');
+            const data = await response.json();
+
+            if (!data.documents || data.documents.length === 0) {
+                docList.innerHTML = '<div class="empty-state">No documents indexed yet. Upload files or load built-in knowledge.</div>';
+                return;
+            }
+
+            docList.innerHTML = data.documents.map(doc => `
+                <div class="doc-item">
+                    <span class="icon">${getDocIcon(doc.type)}</span>
+                    <div class="info">
+                        <div class="name">${doc.name}</div>
+                        <div class="meta">${doc.chunks} chunks | Added: ${doc.added || 'Unknown'}</div>
+                    </div>
+                    <div class="actions">
+                        <button class="delete" onclick="deleteDoc('${doc.id}')">Delete</button>
+                    </div>
+                </div>
+            `).join('');
+        } catch (e) {
+            docList.innerHTML = '<div class="empty-state">Error loading documents</div>';
+        }
+    }
+
+    function getDocIcon(type) {
+        const icons = {
+            'pdf': '📕',
+            'txt': '📄',
+            'md': '📝',
+            'builtin': '📚'
+        };
+        return icons[type] || '📄';
+    }
+
+    async function handleFiles(files) {
+        for (const file of files) {
+            await uploadFile(file);
+        }
+        loadStats();
+        loadDocuments();
+    }
+
+    async function uploadFile(file) {
+        showToast('Uploading ' + file.name + '...', { type: 'info', title: 'RAG' });
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        try {
+            const response = await fetch('/api/rag/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Added ' + file.name + ' (' + data.chunks + ' chunks)', { type: 'success', title: 'RAG' });
+            } else {
+                showToast('Error: ' + data.error, { type: 'error', title: 'RAG' });
+            }
+        } catch (e) {
+            showToast('Upload failed: ' + e.message, { type: 'error', title: 'RAG' });
+        }
+    }
+
+    async function initBuiltin() {
+        showToast('Loading built-in knowledge...', { type: 'info', title: 'RAG' });
+
+        try {
+            const response = await fetch('/api/rag/init', { method: 'POST' });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Built-in knowledge loaded!', { type: 'success', title: 'RAG' });
+                loadStats();
+                loadDocuments();
+            } else {
+                showToast(data.message || data.error || 'Already loaded', { type: 'success', title: 'RAG' });
+            }
+        } catch (e) {
+            showToast('Error: ' + e.message, { type: 'error', title: 'RAG' });
+        }
+    }
+
+    async function deleteDoc(docId) {
+        if (!confirm('Delete this document?')) return;
+
+        try {
+            const response = await fetch(`/api/rag/document/${docId}`, { method: 'DELETE' });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast('Document deleted', { type: 'success', title: 'RAG' });
+                loadStats();
+                loadDocuments();
+            } else {
+                showToast('Error: ' + data.error, { type: 'error', title: 'RAG' });
+            }
+        } catch (e) {
+            showToast('Delete failed: ' + e.message, { type: 'error', title: 'RAG' });
+        }
+    }
+
+    async function testQuery() {
+        const query = document.getElementById('testQuery').value.trim();
+        if (!query) return;
+
+        const results = document.getElementById('testResults');
+        const queryMeta = document.getElementById('queryMeta');
+        results.innerHTML = '<div class="loading"><div class="spinner"></div>Searching...</div>';
+        queryMeta.style.display = 'none';
+
+        try {
+            const response = await fetch('/api/rag/query', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ query, n_results: 3, include_highlights: true })
+            });
+            const data = await response.json();
+
+            // Display query metadata
+            queryMeta.style.display = 'flex';
+            document.getElementById('queryTime').textContent = `${data.query_time_ms}ms`;
+            document.getElementById('cacheStatus').textContent = data.cache_hit ? '(cached)' : `(${data.total_chunks} chunks searched)`;
+
+            if (!data.results || data.results.length === 0) {
+                results.innerHTML = '<div class="empty-state">No results found</div>';
+                return;
+            }
+
+            results.innerHTML = data.results.map(r => {
+                // Use highlighted content if available, otherwise plain content
+                const displayContent = r.highlighted_content || r.content;
+                const truncated = displayContent.length > 500 ? displayContent.substring(0, 500) + '...' : displayContent;
+                const docType = r.doc_type || 'unknown';
+                const docIcon = getDocIcon(docType);
+
+                return `
+                    <div class="result-item">
+                        <div class="result-header">
+                            <span class="source">${docIcon} ${r.doc_name || 'Unknown'}</span>
+                            <span class="score-badge">${(r.score * 100).toFixed(1)}%</span>
+                        </div>
+                        <div class="content">${truncated}</div>
+                    </div>
+                `;
+            }).join('');
+        } catch (e) {
+            results.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+            queryMeta.style.display = 'none';
+        }
+    }
+</script>
+{% endblock %}

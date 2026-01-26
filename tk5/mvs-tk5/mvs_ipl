@@ -1,0 +1,57 @@
+#!/bin/bash
+#**********************************************************************
+#***                                                                ***
+#*** Script:  mvs_ipl                                               ***
+#***                                                                ***
+#*** Purpose: IPL OS/VS2-MVS 3.8j (tk5 unattended operations)       ***
+#***                                                                ***
+#*** Updated: 2023/05/30                                            ***
+#***                                                                ***
+#**********************************************************************
+#
+# set environment
+#
+a=`uname -m`
+if [[ ${a:0:3} == 'arm' ]];then
+   hf=`readelf -A /proc/self/exe | grep Tag_ABI_VFP_args`
+   if [[ ${hf:2:3} == 'Tag' ]];then arch='arm';else arch='arm_softfloat';fi;fi
+if [[ $a == 'aarch64' ]];then arch='aarch64';fi
+if [[ $a == 'x86_64' ]];then arch=64;fi
+if [[ ${a:2:2} == '86' ]];then arch=32;fi
+system=`uname -s | awk '{print tolower($0)}'`
+case $system in
+linux)
+   force_arch=
+   export PATH=hercules/$system/$arch/bin:$PATH
+   export LD_LIBRARY_PATH=hercules/$system/$arch/lib:hercules/$system/$arch/lib/hercules:$LD_LIBRARY_PATH
+   ;;
+darwin)
+   export PATH=hercules/$system/bin:$PATH
+   export DYLD_LIBRARY_PATH=hercules/$system/lib:hercules/$system/lib/hercules:$DYLD_LIBRARY_PATH
+   if [[ $arch == '32' ]];then force_arch="arch -arch i386";else force_arch=;fi
+   ;;
+*)
+   echo "System $system not supported."
+   exit
+   ;;
+esac
+MODE=`head -1 unattended/mode 2>/dev/null`
+DAEMON="-d"
+if [[ $MODE == 'CONSOLE' ]]; then unset DAEMON; fi
+#
+# source configuration variables
+#
+if [ -f local_conf/tk5.parm ]; then . local_conf/tk5.parm; fi
+if [[ ${arch:0:3} == 'arm'   && $REP101A == '' ]];then export REP101A=specific;fi
+if [[ $REP101A == 'specific' && $CMD101A == '' ]];then export CMD101A=02;fi
+#
+# IPL OS/VS2-MVS 3.8j
+#
+export HERCULES_RC=scripts/ipl.rc
+if [[ $MODE == 'CONSOLE' ]];
+   then $force_arch hercules $DAEMON -f conf/tk5.cnf >log/3033.log;
+   else
+      coproc MVS ($force_arch hercules $DAEMON -f conf/tk5.cnf 2>&1 | tee log/3033.log)
+      cat <&${MVS[0]}
+      wait $MVS_PID;
+fi

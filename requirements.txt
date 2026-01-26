@@ -1,0 +1,24 @@
+# AI/LLM
+anthropic>=0.40.0
+openai>=1.0.0  # Optional: for GPT fallback
+
+# Mainframe connectivity (uses BIRP)
+py3270>=0.3.5
+
+# CLI interface
+rich>=13.0.0
+prompt_toolkit>=3.0.0
+
+# Async support
+asyncio-atexit>=1.0.0
+
+# RAG/Knowledge base (file-based, no vector DB needed)
+numpy>=1.24.0
+PyPDF2>=3.0.0  # Optional: for PDF support
+httpx>=0.24.0  # HTTP client for Ollama API
+
+# Web interface
+fastapi>=0.100.0
+uvicorn>=0.20.0
+python-multipart>=0.0.6  # For file uploads
+jinja2>=3.0.0  # Templates

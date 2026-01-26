@@ -1,0 +1,19 @@
+#**********************************************************************
+#***                                                                ***
+#*** File:    tk5_updates.cnf                                       ***
+#***                                                                ***
+#*** Purpose: Include TK5 configuration updates                     ***
+#***                                                                ***
+#*** Updated: 2023/05/30                                            ***
+#***                                                                ***
+#**********************************************************************
+INCLUDE conf/tk5_updates/01
+INCLUDE conf/tk5_updates/02
+INCLUDE conf/tk5_updates/03
+INCLUDE conf/tk5_updates/04
+INCLUDE conf/tk5_updates/05
+INCLUDE conf/tk5_updates/06
+INCLUDE conf/tk5_updates/07
+INCLUDE conf/tk5_updates/08
+INCLUDE conf/tk5_updates/09
+INCLUDE conf/tk5_updates/10

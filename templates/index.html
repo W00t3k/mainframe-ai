@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/index.css">
+{% endblock %}
+
+{% block body %}
+    <header>
+        <div class="brand">
+            <img src="/static/logo.svg" alt="IBM z/OS">
+            <h1><span>IBM</span> z/OS AI Assistant</h1>
+        </div>
+    </header>
+
+    <div class="status-bar">
+        <div class="status-item">
+            <span class="label">LLM:</span>
+            <span class="value" id="llmStatus">Checking...</span>
+        </div>
+        <div class="status-item">
+            <span class="label">BIRP:</span>
+            <span class="value" id="birpStatus">Checking...</span>
+        </div>
+        <div class="status-item">
+            <span class="label">Model:</span>
+            <span class="value" id="modelName">-</span>
+        </div>
+    </div>
+
+    <main>
+        <div class="hero">
+            <img src="/static/logo.svg" alt="IBM z/OS AI" class="hero-logo">
+            <h2>AI-Powered <strong>z/OS</strong> Operations</h2>
+            <p>
+                Natural language interface for mainframe operations. Connect to TN3270 terminals,
+                ask questions about JCL and ABEND codes, and get AI-powered assistance -
+                all running locally with no API keys required.
+            </p>
+            <div class="hero-badges">
+                <div class="badge"><span class="dot"></span> 100% Local LLM</div>
+                <div class="badge"><span class="dot"></span> TN3270 Terminal</div>
+                <div class="badge"><span class="dot"></span> BIRP v2 Integration</div>
+            </div>
+        </div>
+
+        <div class="options">
+            <a href="/terminal" class="option-card terminal">
+                <div class="option-icon">🖥️</div>
+                <h3>Terminal Console</h3>
+                <p>Connect to IBM mainframes via TN3270. Full keyboard support, PF keys, and screen capture capabilities.</p>
+                <div class="arrow">Open Terminal →</div>
+            </a>
+
+            <a href="/chat" class="option-card chat">
+                <div class="option-icon">🤖</div>
+                <h3>AI Chat Assistant</h3>
+                <p>Ask questions about z/OS, JCL, COBOL, ABEND codes. Get AI-powered help with terminal navigation and debugging.</p>
+                <div class="arrow">Start Chat →</div>
+            </a>
+
+            <a href="/scanner" class="option-card scan">
+                <div class="option-icon">🔍</div>
+                <h3>Mainframe Scanner</h3>
+                <p>Scan networks for TN3270 services. Discover mainframes and identify system types automatically.</p>
+                <div class="arrow">Scan Network →</div>
+            </a>
+
+            <a href="/screencaps" class="option-card screens">
+                <div class="option-icon">📷</div>
+                <h3>Screen Captures</h3>
+                <p>View and manage captured terminal screens. Save sessions for documentation or later analysis.</p>
+                <div class="arrow">View Captures →</div>
+            </a>
+
+            <a href="/rag" class="option-card rag">
+                <div class="option-icon">📚</div>
+                <h3>Knowledge Base</h3>
+                <p>Manage RAG documents - add IBM Redbooks, JCL guides, ABEND references to enhance AI responses.</p>
+                <div class="arrow">Manage Knowledge →</div>
+            </a>
+
+            <a href="/architecture" class="option-card arch">
+                <div class="option-icon">🧭</div>
+                <h3>Architecture</h3>
+                <p>See how the UI, RAG engine, scanner, and TN3270 pipeline fit together for local mainframe ops.</p>
+                <div class="arrow">View Architecture →</div>
+            </a>
+        </div>
+    </main>
+
+    <footer>
+        <p>Built with BIRP v2 + Ollama | <a href="https://github.com">Documentation</a> | Local LLM - No API Key Required</p>
+    </footer>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+    async function checkStatus() {
+        try {
+            const response = await fetch('/api/status');
+            const data = await response.json();
+
+            document.getElementById('llmStatus').textContent = data.ollama_running ? 'Connected' : 'Offline';
+            document.getElementById('llmStatus').className = 'value ' + (data.ollama_running ? 'ok' : 'err');
+
+            document.getElementById('birpStatus').textContent = data.birp_available ? 'Available' : 'Not Found';
+            document.getElementById('birpStatus').className = 'value ' + (data.birp_available ? 'ok' : 'err');
+
+            if (data.model) {
+                document.getElementById('modelName').textContent = data.model;
+            }
+        } catch (e) {
+            document.getElementById('llmStatus').textContent = 'Error';
+            document.getElementById('llmStatus').className = 'value err';
+        }
+    }
+
+    checkStatus();
+</script>
+{% endblock %}

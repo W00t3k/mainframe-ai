@@ -1,0 +1,60 @@
+@ALIGN NONE
+@SBA 0,0
+@SF P
+Hercules Version  :
+@SF HP
+$(VERSION)
+@NL
+@SF P
+Host name         :
+@SF HP
+$(HOSTNAME)
+@NL
+@SF P
+Host OS           :
+@SF HP
+$(HOSTOS)-$(HOSTOSREL) $(HOSTOSVER)
+@NL
+@SF P
+Host Architecture :
+@SF HP
+$(HOSTARCH)
+@NL
+@SF P
+Processors        :
+@SF HP
+$(HOSTNUMCPUS)
+@NL
+@SF P
+LPAR Name         :
+@SF HP
+$(LPARNAME)
+@NL
+@SF P
+Device number     :
+@SF HP
+$(CSS):$(CCUU)
+@NL
+@SF P
+Subchannel        :
+@SF HP
+$(SUBCHAN)
+@SF P
+@ALIGN LEFT
+                           TTTTTTTTTTTT   KKKK  KKKKK     555555555555
+                           TT   TT   TT    KK    KK       55
+                           TT   TT   TT    KK   KK        55       Update 4
+                                TT         KK  KK         55
+        4l      _,,,---,,_      TT         KK KK          55     
+ ZZZzz /,'.-'`'    -.  ;-;;,    TT         KKKK           55555555555    
+      4,4-  ) )-,_. ,( (  ''-'  TT         KKKKK                    55      
+     '---''(_/--'  `-')_)       TT         KK  KK                   55
+                                TT         KK   KK                  55
+       The MVS 3.8j             TT         KK    KK                 55
+     Tur(n)key System           TT         KK     KK                55
+                              TTTTTT      KKKK     KKK    55555555555
+
+    TK3 created by   Volker Bandke       volker@bandke.org
+    TK4- update by   Juergen Winkelmann  juergen.winkelmann@pebble-beach.ch
+    TK5  update by   Rob Prins           prin0096@gmail.com
+         see SYS2.JCLLIB(CREDITS) for complete credits

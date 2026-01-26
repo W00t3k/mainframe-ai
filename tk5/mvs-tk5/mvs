@@ -1,0 +1,31 @@
+#!/bin/bash
+#**********************************************************************
+#***                                                                ***
+#*** Script:  mvs                                                   ***
+#***                                                                ***
+#*** Purpose: Wrapper for the original TK5 mvs script (now named    ***
+#***          mvs_ipl) to work around the missing coproc capability ***
+#***          of bash v3.x as distributed with OS X. If running on  ***
+#***          OS X this script executes mvs_osx for special OS X    ***
+#***          processing. In all other cases it executes the        ***
+#***          original mvs_ipl script.                              ***
+#***                                                                ***
+#*** Updated: 2023/05/30                                            ***
+#***                                                                ***
+#**********************************************************************
+#
+# set environment
+#
+system=`uname -s | awk '{print tolower($0)}'`
+case $system in
+darwin)
+   mvs=mvs_osx
+   ;;
+*)
+   mvs=mvs_ipl
+   ;;
+esac
+#
+# execute the target script
+#
+exec bash -c "source $mvs"

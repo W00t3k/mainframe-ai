@@ -1,0 +1,601 @@
+﻿  makefile.bat begun on 24.05.2020 at 08:19:28.69
+  cmdline: makefile.bat RETAIL makefile.msvc 32 -a -title "** The SoftDevLabs version of Hercules **"
+  Visual Studio vs2017 detected
+  
+  **********************************************************************
+  ** Visual Studio 2017 Developer Command Prompt v15.9.6
+  ** Copyright (c) 2017 Microsoft Corporation
+  **********************************************************************
+  [vcvarsall.bat] Environment initialized for: 'x86'
+  
+  VERSION = "4.3.9999.10140-SDL-g8d6065f3-modified"  (4.3.9999.10140)
+  CUSTOM_BUILD_STRING = "** The SoftDevLabs version of Hercules **"
+  
+  --------------------------- ENVIRONMENT POOL ---------------------------
+  
+  #=1
+  2shifts=yes
+  @=32
+  ALLUSERSPROFILE=C:\ProgramData
+  APPDATA=C:\Users\juergen\AppData\Roaming
+  asl.log=Destination=file
+  break=goto :break
+  build_type=RETAIL
+  CAExcludePath=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;;
+  CFG=RETAIL
+  CommandPromptType=Native
+  CommonProgramFiles=C:\Program Files (x86)\Common Files
+  CommonProgramFiles(x86)=C:\Program Files (x86)\Common Files
+  CommonProgramW6432=C:\Program Files\Common Files
+  COMPUTERNAME=WOTHO3
+  ComSpec=C:\WINDOWS\system32\cmd.exe
+  CPU=i386
+  CUSTOM_BUILD_STRING="** The SoftDevLabs version of Hercules **"
+  DevEnvDir=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\
+  DISPLAY=:0.0
+  DriverData=C:\Windows\System32\Drivers\DriverData
+  exit=goto :exit
+  ExtensionSdkDir=C:\Program Files (x86)\Microsoft SDKs\Windows Kits\10\ExtensionSDKs
+  extra_nmake_args= -a
+  FPS_BROWSER_APP_PROFILE_STRING=Internet Explorer
+  FPS_BROWSER_USER_PROFILE_STRING=Default
+  Framework40Version=v4.0
+  FrameworkDir=C:\Windows\Microsoft.NET\Framework\
+  FrameworkDIR32=C:\Windows\Microsoft.NET\Framework\
+  FrameworkVersion=v4.0.30319
+  FrameworkVersion32=v4.0.30319
+  fullpath=C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include\Win32.Mak
+  HOME=C:\Users\juergen
+  HOMEDRIVE=C:
+  HOMEPATH=\Users\juergen
+  HTMLHelpDir=C:\Program Files (x86)\HTML Help Workshop
+  INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\include;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\ucrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\shared;C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\um;C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\winrt;C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\cppwinrt;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include;;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include;;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;
+  LIB=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\lib\x86;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.16299.0\ucrt\x86;C:\Program Files (x86)\Windows Kits\10\lib\10.0.16299.0\um\x86;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\lib\x86;;C:\Program Files (x86)\Windows Kits\10\lib\10.0.10240.0\ucrt\x86;;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\lib;;Lib\um\x86
+  LIBPATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\lib\x86;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86\store\references;C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.16299.0;C:\Program Files (x86)\Windows Kits\10\References\10.0.16299.0;C:\Windows\Microsoft.NET\Framework\v4.0.30319;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;
+  LOCALAPPDATA=C:\Users\juergen\AppData\Local
+  LOGONSERVER=\\WOTHO3
+  makefile_name=makefile.msvc
+  MAN_CHM_INDEX=C:/PROGRA~2/MKSTOO~1/etc/chm/tkutil.idx;C:/PROGRA~2/MKSTOO~1/etc/chm/tkapi.idx;C:/PROGRA~2/MKSTOO~1/etc/chm/tcltk.idx;C:/PROGRA~2/MKSTOO~1/etc/chm/tkcurses.idx
+  MAN_HTM_PATHS=C:/PROGRA~2/MKSTOO~1/etc/htm/perl;C:/PROGRA~2/MKSTOO~1/etc/htm/perl/pod;C:/PROGRA~2/MKSTOO~1/etc/htm/perl/ext;C:/PROGRA~2/MKSTOO~1/etc/htm/perl/lib
+  MAN_TXT_INDEX=C:/PROGRA~2/MKSTOO~1/etc/tkutil.idx;C:/PROGRA~2/MKSTOO~1/etc/tkapi.idx;C:/PROGRA~2/MKSTOO~1/etc/tcltk.idx;C:/PROGRA~2/MKSTOO~1/etc/tkcurses.idx
+  MAX_CPU_ENGINES=32
+  MSBuildLoadMicrosoftTargetsReadOnly=true
+  NUMBER_OF_PROCESSORS=4
+  num_cpus=32
+  NUTCROOT=C:\PROGRA~2\MKSTOO~1
+  NVIDIAWHITELISTED=0x01
+  nx0=makefile.bat
+  nx0_cmdline=makefile.bat RETAIL makefile.msvc 32 -a -title "** The SoftDevLabs version of Hercules **"
+  OneDrive=C:\Users\juergen\OneDrive
+  opt=-title
+  optval=** The SoftDevLabs version of Hercules **
+  original_include=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include;;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;
+  OS=Windows_NT
+  Path=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCPackages;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin\Roslyn;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Performance Tools;C:\Program Files (x86)\Microsoft Visual Studio\Shared\Common\VSPerfCollectionTools\;C:\Program Files (x86)\HTML Help Workshop;C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x86;C:\Program Files (x86)\Windows Kits\10\bin\x86;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\\MSBuild\15.0\bin;C:\Windows\Microsoft.NET\Framework\v4.0.30319;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\ide;C:\Program Files (x86)\HTML Help Workshop;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\;C:\WINDOWS\SysWow64;;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\PROGRA~2\MKSTOO~1\bin;C:\PROGRA~2\MKSTOO~1\bin\X11;C:\PROGRA~2\MKSTOO~1\mksnt;C:\Program Files\Intel\iCLS Client\;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\SoftDevLabs\HercPrt;C:\Program Files (x86)\SoftDevLabs\FishLib;C:\Program Files\Git\cmd;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\IBM\Trace Facility;C:\Program Files (x86)\IBM\Personal Communications\;C:\Users\juergen\AppData\Local\Microsoft\WindowsApps;C:\Program Files\CMake\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;
+  PATHEXT=.COM;.EXE;.BAT;.CMD;.VBS;.VBE;.JS;.JSE;.WSF;.WSH;.MSC;.sh;.ksh;.csh;.sed;.awk;.pl
+  PCOMM_Root=C:\Program Files (x86)\IBM\Personal Communications\
+  PkgDefApplicationConfigFile=C:\Users\juergen\AppData\Local\Microsoft\VisualStudio\15.0_41886e95\devenv.exe.config
+  Platform=x86
+  PROCESSOR_ARCHITECTURE=x86
+  PROCESSOR_ARCHITEW6432=AMD64
+  PROCESSOR_IDENTIFIER=Intel64 Family 6 Model 61 Stepping 4, GenuineIntel
+  PROCESSOR_LEVEL=6
+  PROCESSOR_REVISION=3d04
+  ProgramData=C:\ProgramData
+  ProgramFiles=C:\Program Files (x86)
+  ProgramFiles(x86)=C:\Program Files (x86)
+  ProgramW6432=C:\Program Files
+  PROMPT=$P$G
+  PSModulePath=C:\Program Files\WindowsPowerShell\Modules;C:\WINDOWS\system32\WindowsPowerShell\v1.0\Modules
+  PUBLIC=C:\Users\Public
+  rc=0
+  return=goto :EOF
+  ROOTDIR=C:/PROGRA~2/MKSTOO~1
+  save_path=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\ide;C:\Program Files (x86)\HTML Help Workshop;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\;C:\WINDOWS\SysWow64;;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\PROGRA~2\MKSTOO~1\bin;C:\PROGRA~2\MKSTOO~1\bin\X11;C:\PROGRA~2\MKSTOO~1\mksnt;C:\Program Files\Intel\iCLS Client\;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\SoftDevLabs\HercPrt;C:\Program Files (x86)\SoftDevLabs\FishLib;C:\Program Files\Git\cmd;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\IBM\Trace Facility;C:\Program Files (x86)\IBM\Personal Communications\;C:\Users\juergen\AppData\Local\Microsoft\WindowsApps;C:\Program Files\CMake\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include;;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;
+  SESSIONNAME=Console
+  SHIM_MCCOMPAT=0x810000001
+  SystemDrive=C:
+  SystemRoot=C:\WINDOWS
+  targ_arch=x86
+  TEMP=C:\Users\juergen\AppData\Local\Temp
+  TERM=nutc
+  TERMCAP=C:\PROGRA~2\MKSTOO~1\etc\termcap
+  TERMINFO=C:\PROGRA~2\MKSTOO~1\usr\lib\terminfo
+  TMP=C:\Users\juergen\AppData\Local\Temp
+  TMPDIR=C:/Users/juergen/AppData/Local/Temp
+  TRACE=if defined DEBUG echo
+  TVT=C:\Program Files (x86)\Lenovo
+  UCRTVersion=10.0.16299.0
+  UniversalCRTSdkDir=C:\Program Files (x86)\Windows Kits\10\
+  USERDOMAIN=WOTHO3
+  USERDOMAIN_ROAMINGPROFILE=WOTHO3
+  USERNAME=juergen
+  USERPROFILE=C:\Users\juergen
+  VCIDEInstallDir=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\
+  VCINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\
+  VCToolsInstallDir=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\
+  VCToolsRedistDir=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Redist\MSVC\14.16.27012\
+  VCToolsVersion=14.16.27023
+  VCVARSDIR=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\..\..\VC\Auxiliary\Build
+  VERSION="4.3.9999.10140-SDL-g8d6065f3-modified"
+  VERS_BLD=10140
+  VERS_INT=3
+  VERS_MAJ=4
+  VERS_MIN=9999
+  VisualStudioDir=C:\Users\juergen\Documents\Visual Studio 2017
+  VisualStudioEdition=Microsoft Visual Studio Community 2017
+  VisualStudioVersion=15.0
+  VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\
+  vs2005=80
+  vs2008=90
+  vs2010=100
+  vs2012=110
+  vs2013=120
+  vs2015=140
+  vs2017=150
+  vs2019=160
+  VSAPPIDDIR=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\
+  VSAPPIDNAME=devenv.exe
+  VSCMD_ARG_app_plat=Desktop
+  VSCMD_ARG_HOST_ARCH=x86
+  VSCMD_ARG_TGT_ARCH=x86
+  VSCMD_VER=15.9.6
+  vshost=amd64
+  VSINSTALLDIR=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\
+  VSLANG=1031
+  vsname=vs2017
+  VSNAMES=vs2019 vs2017 vs2015 vs2013 vs2012 vs2010 vs2008 vs2005
+  VSSKUEDITION=Community
+  vstarget=x86
+  vstools_arch=32
+  vsver=150
+  win32_mak_dir=C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include\
+  win32_mak_path=C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include\Win32.Mak
+  windir=C:\WINDOWS
+  WindowsLibPath=C:\Program Files (x86)\Windows Kits\10\UnionMetadata\10.0.16299.0;C:\Program Files (x86)\Windows Kits\10\References\10.0.16299.0
+  WindowsSdkBinPath=C:\Program Files (x86)\Windows Kits\10\bin\
+  WindowsSdkDir=C:\Program Files (x86)\Windows Kits\10\
+  WindowsSDKLibVersion=10.0.16299.0\
+  WindowsSdkVerBinPath=C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\
+  WindowsSDKVersion=10.0.16299.0\
+  _SDL_FLIB_DIR=C:\Program Files (x86)\SoftDevLabs\FishLib
+  _SDL_HERCPRT_DIR=C:\Program Files (x86)\SoftDevLabs\HercPrt
+  __DOTNET_ADD_32BIT=1
+  __DOTNET_PREFERRED_BITNESS=32
+  __VSCMD_PREINIT_INCLUDE=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include;;C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt;;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include;;C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include;
+  __VSCMD_PREINIT_LIBPATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86;
+  __VSCMD_PREINIT_PATH=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\tools;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\ide;C:\Program Files (x86)\HTML Help Workshop;;C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin;C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\;C:\WINDOWS\SysWow64;;C:\Program Files (x86)\Common Files\Oracle\Java\javapath;C:\PROGRA~2\MKSTOO~1\bin;C:\PROGRA~2\MKSTOO~1\bin\X11;C:\PROGRA~2\MKSTOO~1\mksnt;C:\Program Files\Intel\iCLS Client\;C:\ProgramData\Oracle\Java\javapath;C:\WINDOWS\system32;C:\WINDOWS;C:\WINDOWS\System32\Wbem;C:\WINDOWS\System32\WindowsPowerShell\v1.0\;C:\WINDOWS\System32\OpenSSH\;C:\Program Files (x86)\SoftDevLabs\HercPrt;C:\Program Files (x86)\SoftDevLabs\FishLib;C:\Program Files\Git\cmd;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\Intel\Intel(R) Management Engine Components\DAL;C:\Program Files\IBM\Trace Facility;C:\Program Files (x86)\IBM\Personal Communications\;C:\Users\juergen\AppData\Local\Microsoft\WindowsApps;C:\Program Files\CMake\bin;C:\Program Files\Intel\WiFi\bin\;C:\Program Files\Common Files\Intel\WirelessCommon\;
+  __VSCMD_PREINIT_VS150COMNTOOLS=C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools
+  
+  -------------------------- PATH, LIB, INCLUDE --------------------------
+  
+  PATH=
+  
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\VC\VCPackages
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TestWindow
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\CommonExtensions\Microsoft\TeamFoundation\Team Explorer
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\bin\Roslyn
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Team Tools\Performance Tools
+    C:\Program Files (x86)\Microsoft Visual Studio\Shared\Common\VSPerfCollectionTools\
+    C:\Program Files (x86)\HTML Help Workshop
+    C:\Program Files (x86)\Windows Kits\10\bin\10.0.16299.0\x86
+    C:\Program Files (x86)\Windows Kits\10\bin\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\\MSBuild\15.0\bin
+    C:\Windows\Microsoft.NET\Framework\v4.0.30319
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\IDE\
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\Tools\
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\bin\HostX86\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\tools
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\Common7\ide
+    C:\Program Files (x86)\HTML Help Workshop
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin
+    C:\WINDOWS\Microsoft.NET\Framework\v4.0.30319\
+    C:\WINDOWS\SysWow64
+    C:\Program Files (x86)\Common Files\Oracle\Java\javapath
+    C:\PROGRA~2\MKSTOO~1\bin
+    C:\PROGRA~2\MKSTOO~1\bin\X11
+    C:\PROGRA~2\MKSTOO~1\mksnt
+    C:\Program Files\Intel\iCLS Client\
+    C:\ProgramData\Oracle\Java\javapath
+    C:\WINDOWS\system32
+    C:\WINDOWS
+    C:\WINDOWS\System32\Wbem
+    C:\WINDOWS\System32\WindowsPowerShell\v1.0\
+    C:\WINDOWS\System32\OpenSSH\
+    C:\Program Files (x86)\SoftDevLabs\HercPrt
+    C:\Program Files (x86)\SoftDevLabs\FishLib
+    C:\Program Files\Git\cmd
+    C:\Program Files\Intel\WiFi\bin\
+    C:\Program Files\Common Files\Intel\WirelessCommon\
+    C:\Program Files (x86)\Intel\Intel(R) Management Engine Components\DAL
+    C:\Program Files\Intel\Intel(R) Management Engine Components\DAL
+    C:\Program Files\IBM\Trace Facility
+    C:\Program Files (x86)\IBM\Personal Communications\
+    C:\Users\juergen\AppData\Local\Microsoft\WindowsApps
+    C:\Program Files\CMake\bin
+    C:\Program Files\Intel\WiFi\bin\
+    C:\Program Files\Common Files\Intel\WirelessCommon\
+  
+  LIB=
+  
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\lib\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86
+    C:\Program Files (x86)\Windows Kits\10\lib\10.0.16299.0\ucrt\x86
+    C:\Program Files (x86)\Windows Kits\10\lib\10.0.16299.0\um\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\lib\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\lib\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\lib\x86
+    C:\Program Files (x86)\Windows Kits\10\lib\10.0.10240.0\ucrt\x86
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\lib
+    Lib\um\x86
+  
+  INCLUDE=
+  
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\ATLMFC\include
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include
+    C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\ucrt
+    C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\shared
+    C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\um
+    C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\winrt
+    C:\Program Files (x86)\Windows Kits\10\include\10.0.16299.0\cppwinrt
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include
+    C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include
+    C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\include
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Tools\MSVC\14.16.27023\atlmfc\include
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\include
+    C:\Program Files (x86)\Windows Kits\10\Include\10.0.10240.0\ucrt
+    C:\Program Files (x86)\Microsoft Visual Studio\2017\Community\VC\Auxiliary\VS\UnitTest\include
+    C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include
+  
+  ------------------------------ WIN32.MAK -------------------------------
+  
+   <win32.mak> will be !INCLUDEd from "C:\Program Files (x86)\Microsoft SDKs\Windows\v7.1A\Include\"...
+  
+  --------------------------------- MAKE ---------------------------------
+  
+  Makefile presuming VS2017 (VS15 = _MSC_VER 1910 - 1912)
+  Target processor type is 32-bit i386
+  ZLIB support will be included from "winbuild\zlib"
+  BZIP2 support will be included from "winbuild\bzip2"
+  PCRE support will be included from "winbuild\pcre"
+  IPV6   FLAGS  /D ENABLE_IPV6
+  build_pch.c
+  Target platform: WINNT_VISTA (0x0600)
+  hsys.c
+     Bibliothek "msvc.dllmod.obj\hsys.lib" und Objekt "msvc.dllmod.obj\hsys.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  codepage.c
+  fthreads.c
+  getopt.c
+  hdl.c
+  hostinfo.c
+  hscutl.c
+  hexdumpe.c
+  logger.c
+  logmsg.c
+  memrchr.c
+  parser.c
+  hthreads.c
+  pttrace.c
+  version.c
+  hsocket.c
+  w32util.c
+     Bibliothek "msvc.dllmod.obj\hutil.lib" und Objekt "msvc.dllmod.obj\hutil.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckddasd.c
+  cache.c
+  cckdutil.c
+  ckddasd.c
+  cckddasd64.c
+  cckdutil64.c
+  ckddasd64.c
+  dasdtab.c
+  dasdutil.c
+  fbadasd.c
+  dasdutil64.c
+  fbadasd64.c
+  shared.c
+     Bibliothek "msvc.dllmod.obj\hdasd.lib" und Objekt "msvc.dllmod.obj\hdasd.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hetlib.c
+  ftlib.c
+  sllib.c
+  w32stape.c
+     Bibliothek "msvc.dllmod.obj\htape.lib" und Objekt "msvc.dllmod.obj\htape.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  archlvl.c
+  assist.c
+  bldcfg.c
+  script.c
+  cgibin.c
+  channel.c
+  chsc.c
+  clock.c
+  cmdtab.c
+  cmpsc_2012.c
+  cmpscdbg.c
+  cmpscdct.c
+  cmpscget.c
+  cmpscmem.c
+  cmpscput.c
+  config.c
+  control.c
+  cpu.c
+  crypto.c
+  dat.c
+  decimal.c
+  dfp.c
+  diagmssf.c
+  diagnose.c
+  dyn76.c
+  ecpsvm.c
+  esame.c
+  external.c
+  facility.c
+  fillfnam.c
+  float.c
+  general1.c
+  general2.c
+  general3.c
+  hconsole.c
+  hdiagf18.c
+  history.c
+  hsccmd.c
+  hscemode.c
+  hscpufun.c
+  hscloc.c
+  hao.c
+  hscmisc.c
+  httpserv.c
+  ieee.c
+  impl.c
+  io.c
+  ipl.c
+  loadmem.c
+  loadparm.c
+  losc.c
+  machchk.c
+  opcode.c
+  panel.c
+  pfpo.c
+  plo.c
+  qdio.c
+  mpc.c
+  hRexx.c
+  hRexx_o.c
+  hRexx_r.c
+  service.c
+  scedasd.c
+  scescsi.c
+  sie.c
+  sr.c
+  stack.c
+  tcpip.c
+  timer.c
+  trace.c
+  transact.c
+  vector.c
+  vm.c
+  vmd250.c
+  x75.c
+  xstore.c
+  w32ctca.c
+     Bibliothek "msvc.dllmod.obj\hengine.lib" und Objekt "msvc.dllmod.obj\hengine.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dyncrypt.c
+     Bibliothek "msvc.dllmod.obj\dyncrypt.lib" und Objekt "msvc.dllmod.obj\dyncrypt.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dyngui.c
+     Bibliothek "msvc.dllmod.obj\dyngui.lib" und Objekt "msvc.dllmod.obj\dyngui.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  con1052c.c
+     Bibliothek "msvc.dllmod.obj\hdt1052c.lib" und Objekt "msvc.dllmod.obj\hdt1052c.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  printer.c
+  sockdev.c
+     Bibliothek "msvc.dllmod.obj\hdt1403.lib" und Objekt "msvc.dllmod.obj\hdt1403.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  commadpt.c
+     Bibliothek "msvc.dllmod.obj\hdt2703.lib" und Objekt "msvc.dllmod.obj\hdt2703.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hchan.c
+     Bibliothek "msvc.dllmod.obj\hdt2880.lib" und Objekt "msvc.dllmod.obj\hdt2880.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  ctc_lcs.c
+  ctc_ctci.c
+  ctcadpt.c
+  netsupp.c
+  tuntap.c
+  resolve.c
+     Bibliothek "msvc.dllmod.obj\hdt3088.lib" und Objekt "msvc.dllmod.obj\hdt3088.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  console.c
+     Bibliothek "msvc.dllmod.obj\hdt3270.lib" und Objekt "msvc.dllmod.obj\hdt3270.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  tapedev.c
+  tapeccws.c
+  awstape.c
+  faketape.c
+  hettape.c
+  omatape.c
+  scsitape.c
+  scsiutil.c
+     Bibliothek "msvc.dllmod.obj\hdt3420.lib" und Objekt "msvc.dllmod.obj\hdt3420.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cardrdr.c
+     Bibliothek "msvc.dllmod.obj\hdt3505.lib" und Objekt "msvc.dllmod.obj\hdt3505.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cardpch.c
+     Bibliothek "msvc.dllmod.obj\hdt3525.lib" und Objekt "msvc.dllmod.obj\hdt3525.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  comm3705.c
+     Bibliothek "msvc.dllmod.obj\hdt3705.lib" und Objekt "msvc.dllmod.obj\hdt3705.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dummydev.c
+     Bibliothek "msvc.dllmod.obj\hdtdummy.lib" und Objekt "msvc.dllmod.obj\hdtdummy.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hdteq.c
+     Bibliothek "msvc.dllmod.obj\hdteq.lib" und Objekt "msvc.dllmod.obj\hdteq.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  ctc_ptp.c
+     Bibliothek "msvc.dllmod.obj\hdtptp.lib" und Objekt "msvc.dllmod.obj\hdtptp.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  qeth.c
+     Bibliothek "msvc.dllmod.obj\hdtqeth.lib" und Objekt "msvc.dllmod.obj\hdtqeth.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  tcpnje.c
+     Bibliothek "msvc.dllmod.obj\hdttcpnje.lib" und Objekt "msvc.dllmod.obj\hdttcpnje.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  zfcp.c
+     Bibliothek "msvc.dllmod.obj\hdtzfcp.lib" und Objekt "msvc.dllmod.obj\hdtzfcp.exp" werden erstellt.
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdcdsk.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdcdsk64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdcomp.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdcomp64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckddiag.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckddiag64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdswap.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdswap64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  conspawn.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  convto64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  cckdmap.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdcat.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdconv.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdconv64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdcopy.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdcopy64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdinit.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdinit64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdisup.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdload.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdload64.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdls.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdpdsu.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdseq.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dasdser.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  dmap2hrc.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  herclin.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  bootstrap.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hetget.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hetinit.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hetmap.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  hetupd.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  maketape.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  tapecopy.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  tapemap.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  tapesplt.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  vmfplc2.c
+  Code wird generiert.
+  Codegenerierung ist abgeschlossen.
+  C:\Users\juergen\hyperion\winbuild\zlib\zlib1.dll -> C:\Users\juergen\hyperion\msvc.dllmod.bin\zlib1.dll
+  1 Datei(en) kopiert
+  C:\Users\juergen\hyperion\winbuild\bzip2\libbz2.dll -> C:\Users\juergen\hyperion\msvc.dllmod.bin\libbz2.dll
+  1 Datei(en) kopiert
+  C:\Users\juergen\hyperion\winbuild\pcre\bin\pcre3.dll -> C:\Users\juergen\hyperion\msvc.dllmod.bin\pcre3.dll
+  1 Datei(en) kopiert
+  C:\Users\juergen\hyperion\winbuild\pcre\bin\pcreposix3.dll -> C:\Users\juergen\hyperion\msvc.dllmod.bin\pcreposix3.dll
+  1 Datei(en) kopiert
+  
+  -- Hercules build complete --
+  makefile.bat ended on 24.05.2020 at 08:21:22.62, rc=0

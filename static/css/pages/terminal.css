@@ -1,0 +1,298 @@
+body {
+    font-family: 'IBM Plex Mono', monospace;
+    background: #000;
+    color: var(--terminal-green);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.toolbar {
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    padding: 0.75rem 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-shrink: 0;
+}
+
+.toolbar a {
+    color: var(--ibm-gray-30);
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.toolbar a:hover {
+    color: var(--ibm-white);
+}
+
+.toolbar .brand {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-right: 2rem;
+}
+
+.toolbar .brand img {
+    width: 24px;
+    height: 24px;
+}
+
+.toolbar input {
+    background: var(--ibm-gray-100);
+    border: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-10);
+    padding: 0.5rem 0.75rem;
+    font-family: inherit;
+    font-size: 0.8rem;
+    width: 200px;
+}
+
+.toolbar input:focus {
+    outline: none;
+    border-color: var(--ibm-blue);
+}
+
+.toolbar button {
+    background: var(--ibm-blue);
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.toolbar button:hover {
+    background: var(--ibm-blue-light);
+}
+
+.toolbar button.secondary {
+    background: var(--ibm-gray-80);
+    color: var(--ibm-gray-30);
+    border: 1px solid var(--ibm-gray-70);
+}
+
+.toolbar button.secondary:hover {
+    background: var(--ibm-gray-70);
+    color: var(--ibm-gray-10);
+}
+
+.toolbar button.danger {
+    background: var(--ibm-red);
+}
+
+.toolbar .status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    color: var(--ibm-gray-50);
+}
+
+.toolbar .status .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--ibm-red);
+}
+
+.toolbar .status .dot.connected {
+    background: var(--ibm-green);
+}
+
+.terminal-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem 1rem 0.5rem 1rem;
+    background: radial-gradient(ellipse at center, #111 0%, #000 100%);
+    overflow: hidden;
+}
+
+.terminal {
+    background: #0a0a0a;
+    border: 2px solid var(--ibm-gray-70);
+    padding: 1.5rem;
+    font-size: 14px;
+    line-height: 1.25;
+    white-space: pre;
+    width: 720px;
+    height: 520px;
+    max-width: min(80vw, 760px);
+    max-height: calc(100vh - 220px);
+    box-shadow: 0 0 60px rgba(51, 255, 51, 0.15);
+    position: relative;
+    outline: none;
+}
+
+.terminal::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
+    background-size: 100% 4px;
+    pointer-events: none;
+    opacity: 0.2;
+}
+
+.terminal.disconnected {
+    color: var(--ibm-gray-50);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+.terminal.disconnected h2 {
+    font-size: 1.5rem;
+    color: var(--ibm-blue-light);
+    margin-bottom: 1rem;
+}
+
+.pf-bar {
+    background: var(--ibm-gray-90);
+    border-top: 1px solid var(--ibm-gray-80);
+    padding: 0.75rem 1rem;
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.pf-key {
+    background: var(--ibm-gray-80);
+    border: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-30);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.7rem;
+    cursor: pointer;
+    min-width: 50px;
+    text-align: center;
+}
+
+.pf-key:hover {
+    background: var(--ibm-gray-70);
+    border-color: var(--ibm-blue);
+}
+
+.pf-key.special {
+    background: var(--ibm-blue);
+    border-color: var(--ibm-blue);
+    color: white;
+}
+
+.chat-float {
+    position: fixed;
+    right: 24px;
+    bottom: 120px;
+    width: 520px;
+    height: 640px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 160px);
+    background: var(--ibm-gray-90);
+    border: 1px solid var(--ibm-gray-70);
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
+    display: flex;
+    flex-direction: column;
+    z-index: 50;
+    resize: both;
+    overflow: hidden;
+    min-width: 360px;
+    min-height: 280px;
+}
+
+.chat-float.hidden {
+    display: none;
+}
+
+.chat-float.minimized {
+    height: 44px;
+    min-height: 44px;
+    resize: horizontal;
+}
+
+.chat-float-header {
+    height: 44px;
+    background: var(--ibm-gray-80);
+    border-bottom: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-30);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 0.75rem;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    flex-shrink: 0;
+    cursor: move;
+}
+
+.chat-float-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.chat-float-btn {
+    background: var(--ibm-gray-70);
+    border: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-30);
+    width: 26px;
+    height: 22px;
+    font-size: 0.9rem;
+    line-height: 1;
+    cursor: pointer;
+}
+
+.chat-float-btn:hover {
+    border-color: var(--ibm-blue);
+    color: var(--ibm-gray-10);
+}
+
+.chat-float-body {
+    flex: 1;
+    background: var(--ibm-gray-100);
+}
+
+.chat-float.minimized .chat-float-body {
+    display: none;
+}
+
+.chat-float iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+}
+
+.chat-float-resizer {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    width: 16px;
+    height: 16px;
+    cursor: se-resize;
+    background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.25) 60%, transparent 65%, transparent 100%);
+    pointer-events: auto;
+}
+
+@media (max-width: 900px) {
+    .terminal {
+        min-width: auto;
+        width: 100%;
+    }
+
+    .chat-float {
+        right: 12px;
+        left: 12px;
+        width: auto;
+        height: 55vh;
+        bottom: 100px;
+    }
+}

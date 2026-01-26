@@ -1,0 +1,8 @@
+facility enable HERC_370_EXTENSION
+facility enable 017_MSA
+facility enable 076_MSA_EXTENSION_3
+facility enable 077_MSA_EXTENSION_4
+facility enable HERC_MSA_EXTENSION_1
+facility enable HERC_MSA_EXTENSION_2
+facility enable HERC_TCPIP_EXTENSION
+facility enable HERC_TCPIP_PROB_STATE

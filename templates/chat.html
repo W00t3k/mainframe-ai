@@ -1,0 +1,665 @@
+{% extends "base.html" %}
+
+{% block title %}IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/chat.css">
+{% endblock %}
+
+{% block body_class %}{% if embed %}embed-mode{% endif %}{% endblock %}
+
+{% block head_extra %}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="container">
+        <!-- IBM Header -->
+        <header class="ibm-header">
+            <div class="brand">
+                <img src="/static/logo.svg" alt="IBM z/OS" class="logo">
+                <h1><span>IBM</span> z/OS AI Assistant</h1>
+            </div>
+            <div class="header-tabs">
+                <button class="header-tab active" onclick="showPanel('chat')">
+                    <span class="dot" id="chatDot"></span> Chat
+                </button>
+                <button class="header-tab" onclick="showPanel('terminal')">
+                    <span class="dot" id="termDot"></span> Terminal
+                </button>
+                <button class="header-tab" onclick="showPanel('agents')">
+                    <span class="dot" id="agentDot"></span> Agents
+                </button>
+                <button class="header-tab" onclick="showPanel('rag')">
+                    <span class="dot" id="ragDot"></span> RAG
+                </button>
+            </div>
+            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ibm-gray-50);">
+                v2.0 | Local LLM
+            </div>
+        </header>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-item">
+                <span class="label">LLM:</span>
+                <span class="value" id="llmStatus">Checking...</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Model:</span>
+                <span class="value" id="modelName">llama3.1:8b</span>
+            </div>
+            <div class="status-item">
+                <span class="label">TN3270:</span>
+                <span class="value" id="tn3270Status">Disconnected</span>
+            </div>
+            <div class="status-item">
+                <span class="label">Agent:</span>
+                <span class="value" id="agentStatus">General Assistant</span>
+            </div>
+            <div class="status-item">
+                <span class="label">RAG:</span>
+                <span class="value" id="ragStatus">3 sources</span>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- CHAT PANEL -->
+            <div class="panel active" id="chatPanel">
+                <div class="chat-panel">
+                    <div class="chat-main">
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message assistant">
+                                <div class="message-header">System</div>
+                                <div class="message-content">
+                                    <strong>IBM z/OS AI Assistant Ready</strong><br><br>
+                                    I can help you with:<br>
+                                    - ABEND codes and error analysis<br>
+                                    - JCL generation and debugging<br>
+                                    - COBOL, REXX, and Assembler<br>
+                                    - TSO/ISPF and CICS navigation<br>
+                                    - Live 3270 terminal control<br><br>
+                                    <strong>Connected RAG Sources:</strong> z/OS Documentation, ABEND Codes, JCL Templates<br><br>
+                                    Type <code>/connect localhost:3270</code> to connect to MVS, or click the <strong>Terminal</strong> tab.
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="input-area">
+                            <div class="input-wrapper">
+                                <textarea class="chat-input" id="chatInput" placeholder="Ask about z/OS, JCL, ABEND codes..." rows="1"></textarea>
+                                <button class="send-btn" id="sendBtn" onclick="sendMessage()">SUBMIT</button>
+                            </div>
+                            <div class="quick-commands">
+                                <button class="quick-cmd" onclick="insertCmd('/connect localhost:3270')">/connect</button>
+                                <button class="quick-cmd" onclick="insertCmd('/screen')">/screen</button>
+                                <button class="quick-cmd" onclick="insertCmd('What is ABEND S0C7?')">ABEND S0C7</button>
+                                <button class="quick-cmd" onclick="insertCmd('Generate JCL to copy a dataset')">JCL Copy</button>
+                                <button class="quick-cmd" onclick="insertCmd('/help')">/help</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Chat Sidebar -->
+                    <aside class="chat-sidebar">
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">Connection Status</div>
+                            <div class="sidebar-body">
+                                <div class="sidebar-row">
+                                    <span class="key">Ollama</span>
+                                    <span class="val" id="sbOllama">CHECKING</span>
+                                </div>
+                                <div class="sidebar-row">
+                                    <span class="key">Model</span>
+                                    <span class="val" id="sbModel">llama3.1:8b</span>
+                                </div>
+                                <div class="sidebar-row">
+                                    <span class="key">TN3270</span>
+                                    <span class="val" id="sbTN3270">OFFLINE</span>
+                                </div>
+                                <div class="sidebar-row">
+                                    <span class="key">Host</span>
+                                    <span class="val" id="sbHost">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">Active Agent</div>
+                            <div class="sidebar-body">
+                                <div class="sidebar-row">
+                                    <span class="key">Name</span>
+                                    <span class="val" id="sbAgent">General</span>
+                                </div>
+                                <div class="sidebar-row">
+                                    <span class="key">Mode</span>
+                                    <span class="val">Conversational</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">RAG Sources</div>
+                            <div class="sidebar-body">
+                                <div class="sidebar-row">
+                                    <span class="key">z/OS Docs</span>
+                                    <span class="val ok">ACTIVE</span>
+                                </div>
+                                <div class="sidebar-row">
+                                    <span class="key">ABEND Codes</span>
+                                    <span class="val ok">ACTIVE</span>
+                                </div>
+                                <div class="sidebar-row">
+                                    <span class="key">JCL Templates</span>
+                                    <span class="val ok">ACTIVE</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="sidebar-section">
+                            <div class="sidebar-header">3270 Preview</div>
+                            <div class="sidebar-body">
+                                <div class="terminal-mini" id="terminalMini" onclick="showPanel('terminal')">
+Not connected.
+
+Click to open Terminal tab
+or use /connect command.
+                                </div>
+                            </div>
+                        </div>
+                    </aside>
+                </div>
+            </div>
+
+            <!-- TERMINAL PANEL -->
+            <div class="panel" id="terminalPanel">
+                <div class="terminal-panel">
+                    <div class="terminal-toolbar">
+                        <label>Host:</label>
+                        <input type="text" id="termHost" value="localhost:3270" placeholder="host:port">
+                        <button id="termConnectBtn" onclick="terminalConnect()">Connect</button>
+                        <button class="disconnect" id="termDisconnectBtn" onclick="terminalDisconnect()" style="display:none;">Disconnect</button>
+                        <span style="flex:1;"></span>
+                        <span style="font-size:0.75rem;color:var(--ibm-gray-50);">
+                            Type directly in terminal when connected. Keys: Enter, Tab, PF1-PF24, Esc=Clear
+                        </span>
+                    </div>
+
+                    <div class="terminal-screen-container">
+                        <div class="terminal-screen disconnected" id="terminalScreen" tabindex="0">
+                            Not connected.<br><br>
+                            Enter host:port above and click Connect,<br>
+                            or type /connect in the chat.
+                        </div>
+                    </div>
+
+                    <div class="terminal-keys">
+                        <button class="pf-key special" onclick="sendKey('enter')">Enter</button>
+                        <button class="pf-key special" onclick="sendKey('clear')">Clear</button>
+                        <button class="pf-key special" onclick="sendKey('tab')">Tab</button>
+                        <button class="pf-key special" onclick="sendKey('reset')">Reset</button>
+                        <span style="width:1rem;"></span>
+                        <button class="pf-key" onclick="sendKey('pf', 1)">PF1</button>
+                        <button class="pf-key" onclick="sendKey('pf', 2)">PF2</button>
+                        <button class="pf-key" onclick="sendKey('pf', 3)">PF3</button>
+                        <button class="pf-key" onclick="sendKey('pf', 4)">PF4</button>
+                        <button class="pf-key" onclick="sendKey('pf', 5)">PF5</button>
+                        <button class="pf-key" onclick="sendKey('pf', 6)">PF6</button>
+                        <button class="pf-key" onclick="sendKey('pf', 7)">PF7</button>
+                        <button class="pf-key" onclick="sendKey('pf', 8)">PF8</button>
+                        <button class="pf-key" onclick="sendKey('pf', 9)">PF9</button>
+                        <button class="pf-key" onclick="sendKey('pf', 10)">PF10</button>
+                        <button class="pf-key" onclick="sendKey('pf', 11)">PF11</button>
+                        <button class="pf-key" onclick="sendKey('pf', 12)">PF12</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AGENTS PANEL -->
+            <div class="panel" id="agentsPanel">
+                <div class="agents-panel">
+                    <div class="agents-header">
+                        <h2>AI Agents</h2>
+                        <p>Select a specialized agent to assist with specific tasks. The active agent influences how the AI responds.</p>
+                    </div>
+                    <div class="agents-grid">
+                        <div class="agent-card active" onclick="selectAgent(this, 'general')">
+                            <div class="agent-icon">🤖</div>
+                            <h3>General Assistant</h3>
+                            <p>All-purpose z/OS assistant. Answers questions about JCL, COBOL, ABEND codes, TSO/ISPF, and more.</p>
+                            <div class="agent-status"><span class="dot"></span> Active</div>
+                        </div>
+                        <div class="agent-card" onclick="selectAgent(this, 'jcl')">
+                            <div class="agent-icon">📝</div>
+                            <h3>JCL Generator</h3>
+                            <p>Specialized in generating and debugging JCL. Describe your task and get production-ready JCL with explanations.</p>
+                            <div class="agent-status"><span class="dot"></span> Available</div>
+                        </div>
+                        <div class="agent-card" onclick="selectAgent(this, 'abend')">
+                            <div class="agent-icon">🔍</div>
+                            <h3>ABEND Analyzer</h3>
+                            <p>Expert at diagnosing system and user ABEND codes. Provides root cause analysis and resolution steps.</p>
+                            <div class="agent-status"><span class="dot"></span> Available</div>
+                        </div>
+                        <div class="agent-card" onclick="selectAgent(this, 'cobol')">
+                            <div class="agent-icon">💻</div>
+                            <h3>COBOL Expert</h3>
+                            <p>Explains and helps debug COBOL programs. Understands CICS, DB2, and batch processing patterns.</p>
+                            <div class="agent-status"><span class="dot"></span> Available</div>
+                        </div>
+                        <div class="agent-card" onclick="selectAgent(this, 'navigator')">
+                            <div class="agent-icon">🖥️</div>
+                            <h3>Screen Navigator</h3>
+                            <p>Helps navigate 3270 screens. Reads the current screen and suggests what to type or which PF key to press.</p>
+                            <div class="agent-status"><span class="dot"></span> Available</div>
+                        </div>
+                        <div class="agent-card" onclick="selectAgent(this, 'security')">
+                            <div class="agent-icon">🔐</div>
+                            <h3>RACF Security</h3>
+                            <p>Specializes in RACF commands, permissions, and security best practices for z/OS environments.</p>
+                            <div class="agent-status"><span class="dot"></span> Available</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RAG PANEL -->
+            <div class="panel" id="ragPanel">
+                <div class="rag-panel">
+                    <div class="rag-header">
+                        <h2>RAG Knowledge Sources</h2>
+                        <p>Retrieval-Augmented Generation sources connected to the AI. These provide specialized knowledge for accurate responses.</p>
+                    </div>
+                    <div class="rag-sources">
+                        <div class="rag-source connected">
+                            <div class="rag-icon">📚</div>
+                            <div class="rag-info">
+                                <h3>z/OS Documentation</h3>
+                                <p class="rag-desc">IBM z/OS documentation including MVS, JES2/JES3, DFSMS, and system programming guides.</p>
+                                <div class="rag-stats">15,432 documents | Last updated: 2024-01</div>
+                            </div>
+                            <button class="rag-toggle">Connected</button>
+                        </div>
+                        <div class="rag-source connected">
+                            <div class="rag-icon">⚠️</div>
+                            <div class="rag-info">
+                                <h3>ABEND Code Database</h3>
+                                <p class="rag-desc">Complete database of system and user ABEND codes with explanations, causes, and resolutions.</p>
+                                <div class="rag-stats">2,847 codes | Includes S0Cx, Sxxx, Uxxxx</div>
+                            </div>
+                            <button class="rag-toggle">Connected</button>
+                        </div>
+                        <div class="rag-source connected">
+                            <div class="rag-icon">📋</div>
+                            <div class="rag-info">
+                                <h3>JCL Templates</h3>
+                                <p class="rag-desc">Production-ready JCL templates for common tasks: IEBCOPY, IEBGENER, IDCAMS, SORT, and more.</p>
+                                <div class="rag-stats">847 templates | Commented & explained</div>
+                            </div>
+                            <button class="rag-toggle">Connected</button>
+                        </div>
+                        <div class="rag-source disconnected">
+                            <div class="rag-icon">🔧</div>
+                            <div class="rag-info">
+                                <h3>COBOL Patterns</h3>
+                                <p class="rag-desc">Common COBOL programming patterns, CICS/DB2 integration, and debugging techniques.</p>
+                                <div class="rag-stats">1,234 patterns | Enterprise COBOL</div>
+                            </div>
+                            <button class="rag-toggle">Connect</button>
+                        </div>
+                        <div class="rag-source disconnected">
+                            <div class="rag-icon">🔐</div>
+                            <div class="rag-info">
+                                <h3>RACF Commands</h3>
+                                <p class="rag-desc">RACF security commands, profiles, and best practices for z/OS security administration.</p>
+                                <div class="rag-stats">523 commands | Security policies</div>
+                            </div>
+                            <button class="rag-toggle">Connect</button>
+                        </div>
+                        <div class="rag-source disconnected">
+                            <div class="rag-icon">📖</div>
+                            <div class="rag-info">
+                                <h3>Custom Knowledge Base</h3>
+                                <p class="rag-desc">Upload your own documentation, runbooks, and internal procedures.</p>
+                                <div class="rag-stats">0 documents | Click to configure</div>
+                            </div>
+                            <button class="rag-toggle">Configure</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+        // State
+        let isProcessing = false;
+        let terminalConnected = false;
+        let ws = null;
+        let activeAgent = 'general';
+
+        // Panel switching
+        function showPanel(name) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.header-tab').forEach(t => t.classList.remove('active'));
+
+            document.getElementById(name + 'Panel').classList.add('active');
+            document.querySelector(`.header-tab[onclick="showPanel('${name}')"]`).classList.add('active');
+
+            if (name === 'terminal') {
+                document.getElementById('terminalScreen').focus();
+            }
+        }
+
+        // Agent selection
+        function selectAgent(card, agent) {
+            document.querySelectorAll('.agent-card').forEach(c => {
+                c.classList.remove('active');
+                c.querySelector('.agent-status').innerHTML = '<span class="dot"></span> Available';
+            });
+            card.classList.add('active');
+            card.querySelector('.agent-status').innerHTML = '<span class="dot"></span> Active';
+            activeAgent = agent;
+
+            const names = {
+                'general': 'General Assistant',
+                'jcl': 'JCL Generator',
+                'abend': 'ABEND Analyzer',
+                'cobol': 'COBOL Expert',
+                'navigator': 'Screen Navigator',
+                'security': 'RACF Security'
+            };
+            document.getElementById('agentStatus').textContent = names[agent];
+            document.getElementById('sbAgent').textContent = names[agent];
+            document.getElementById('agentDot').classList.add('active');
+        }
+
+        // Chat functions
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInput = document.getElementById('chatInput');
+        const sendBtn = document.getElementById('sendBtn');
+
+        chatInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.min(this.scrollHeight, 120) + 'px';
+        });
+
+        chatInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        function insertCmd(text) {
+            chatInput.value = text;
+            chatInput.focus();
+        }
+
+        function addMessage(content, isUser = false) {
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user' : 'assistant'}`;
+            div.innerHTML = `
+                <div class="message-header">${isUser ? 'You' : 'z/OS Assistant'}</div>
+                <div class="message-content">${isUser ? content : marked.parse(content)}</div>
+            `;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function showTyping() {
+            const div = document.createElement('div');
+            div.className = 'message assistant';
+            div.id = 'typingIndicator';
+            div.innerHTML = `
+                <div class="message-header">z/OS Assistant</div>
+                <div class="typing"><span></span><span></span><span></span></div>
+            `;
+            chatMessages.appendChild(div);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        function hideTyping() {
+            const el = document.getElementById('typingIndicator');
+            if (el) el.remove();
+        }
+
+        async function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message || isProcessing) return;
+
+            isProcessing = true;
+            sendBtn.disabled = true;
+
+            addMessage(message, true);
+            chatInput.value = '';
+            chatInput.style.height = 'auto';
+            showTyping();
+
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message, agent: activeAgent })
+                });
+
+                const data = await response.json();
+                hideTyping();
+
+                if (data.error) {
+                    addMessage(`Error: ${data.error}`);
+                } else {
+                    addMessage(data.response);
+                    updateStatus(data);
+                }
+            } catch (error) {
+                hideTyping();
+                addMessage(`Connection error: ${error.message}`);
+            }
+
+            isProcessing = false;
+            sendBtn.disabled = false;
+            chatInput.focus();
+        }
+
+        // Terminal functions
+        function updateTerminalScreen(screenData) {
+            const screen = document.getElementById('terminalScreen');
+            const mini = document.getElementById('terminalMini');
+
+            if (screenData.connected && screenData.screen) {
+                screen.classList.remove('disconnected');
+                screen.textContent = screenData.screen;
+                mini.textContent = screenData.screen;
+                terminalConnected = true;
+
+                document.getElementById('termDot').classList.add('active');
+                document.getElementById('tn3270Status').textContent = screenData.host || 'Connected';
+                document.getElementById('tn3270Status').className = 'value ok';
+                document.getElementById('sbTN3270').textContent = 'ONLINE';
+                document.getElementById('sbTN3270').className = 'val ok';
+                document.getElementById('sbHost').textContent = screenData.host || '-';
+
+                document.getElementById('termConnectBtn').style.display = 'none';
+                document.getElementById('termDisconnectBtn').style.display = '';
+            } else {
+                screen.classList.add('disconnected');
+                screen.innerHTML = 'Not connected.<br><br>Enter host:port above and click Connect.';
+                mini.textContent = 'Not connected.\n\nClick to open Terminal tab.';
+                terminalConnected = false;
+
+                document.getElementById('termDot').classList.remove('active');
+                document.getElementById('tn3270Status').textContent = 'Disconnected';
+                document.getElementById('tn3270Status').className = 'value err';
+                document.getElementById('sbTN3270').textContent = 'OFFLINE';
+                document.getElementById('sbTN3270').className = 'val err';
+                document.getElementById('sbHost').textContent = '-';
+
+                document.getElementById('termConnectBtn').style.display = '';
+                document.getElementById('termDisconnectBtn').style.display = 'none';
+            }
+        }
+
+        async function terminalConnect() {
+            const host = document.getElementById('termHost').value.trim();
+            if (!host) return;
+
+            try {
+                const response = await fetch('/api/terminal/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target: host })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    updateTerminalScreen(data.screen_data);
+                    connectWebSocket();
+                } else {
+                    showToast('Connection failed: ' + data.message, { type: 'error', title: 'Connection' });
+                }
+            } catch (error) {
+                showToast('Error: ' + error.message, { type: 'error', title: 'Connection' });
+            }
+        }
+
+        async function terminalDisconnect() {
+            try {
+                await fetch('/api/terminal/disconnect', { method: 'POST' });
+                updateTerminalScreen({ connected: false });
+                if (ws) {
+                    ws.close();
+                    ws = null;
+                }
+            } catch (error) {
+                console.error('Disconnect error:', error);
+            }
+        }
+
+        async function sendKey(keyType, value = '') {
+            if (!terminalConnected) return;
+
+            try {
+                const response = await fetch('/api/terminal/key', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key_type: keyType, value: String(value) })
+                });
+                const data = await response.json();
+                if (data.success && data.screen_data) {
+                    updateTerminalScreen(data.screen_data);
+                }
+            } catch (error) {
+                console.error('Key error:', error);
+            }
+        }
+
+        // Keyboard handling for terminal
+        document.getElementById('terminalScreen').addEventListener('keydown', function(e) {
+            if (!terminalConnected) return;
+
+            e.preventDefault();
+
+            if (e.key === 'Enter') {
+                sendKey('enter');
+            } else if (e.key === 'Escape') {
+                sendKey('clear');
+            } else if (e.key === 'Tab') {
+                sendKey(e.shiftKey ? 'backtab' : 'tab');
+            } else if (e.key === 'Backspace') {
+                sendKey('backspace');
+            } else if (e.key === 'Delete') {
+                sendKey('delete');
+            } else if (e.key === 'ArrowUp') {
+                sendKey('up');
+            } else if (e.key === 'ArrowDown') {
+                sendKey('down');
+            } else if (e.key === 'ArrowLeft') {
+                sendKey('left');
+            } else if (e.key === 'ArrowRight') {
+                sendKey('right');
+            } else if (e.key === 'Home') {
+                sendKey('home');
+            } else if (e.key.startsWith('F') && e.key.length <= 3) {
+                const num = parseInt(e.key.substring(1));
+                if (num >= 1 && num <= 12) {
+                    sendKey('pf', e.shiftKey ? num + 12 : num);
+                }
+            } else if (e.ctrlKey && e.key.toLowerCase() === 'r') {
+                sendKey('reset');
+            } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+                sendKey('string', e.key);
+            }
+        });
+
+        // WebSocket for real-time updates
+        function connectWebSocket() {
+            if (ws) ws.close();
+
+            const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+            ws = new WebSocket(`${protocol}//${window.location.host}/ws/terminal`);
+
+            ws.onmessage = function(event) {
+                const msg = JSON.parse(event.data);
+                if (msg.type === 'screen_update') {
+                    updateTerminalScreen(msg.data);
+                }
+            };
+
+            ws.onclose = function() {
+                console.log('WebSocket closed');
+            };
+        }
+
+        // Status update
+        function updateStatus(data) {
+            if (data.ollama_running !== undefined) {
+                const ok = data.ollama_running;
+                document.getElementById('llmStatus').textContent = ok ? 'Connected' : 'Offline';
+                document.getElementById('llmStatus').className = `value ${ok ? 'ok' : 'err'}`;
+                document.getElementById('sbOllama').textContent = ok ? 'ONLINE' : 'OFFLINE';
+                document.getElementById('sbOllama').className = `val ${ok ? 'ok' : 'err'}`;
+                document.getElementById('chatDot').classList.toggle('active', ok);
+            }
+
+            if (data.model) {
+                document.getElementById('modelName').textContent = data.model;
+                document.getElementById('sbModel').textContent = data.model;
+            }
+
+            if (data.connected !== undefined) {
+                updateTerminalScreen({
+                    connected: data.connected,
+                    screen: data.screen,
+                    host: data.host
+                });
+            }
+        }
+
+        // Initial status check
+        async function checkStatus() {
+            try {
+                const response = await fetch('/api/status');
+                const data = await response.json();
+                updateStatus(data);
+
+                if (data.connected) {
+                    connectWebSocket();
+                }
+            } catch (error) {
+                console.error('Status check failed:', error);
+            }
+        }
+
+        // Initialize
+        checkStatus();
+        setInterval(checkStatus, 10000);
+        chatInput.focus();
+
+        // Set RAG dot active
+        document.getElementById('ragDot').classList.add('active');
+    </script>
+{% endblock %}
