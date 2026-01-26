@@ -1,0 +1,37 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+.env
+
+# Large TK5 DASD files
+tk5/mvs-tk5/dasd/*.298
+tk5/mvs-tk5/dasd/*.299
+tk5/mvs-tk5/dasd/*.300
+tk5/mvs-tk5/dasd/*.301
+
+# Logs
+*.log
+tk5/mvs-tk5/log/
+tk5/mvs-tk5/prt/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# RAG data (user-specific)
+rag_data/
+
+# Screencaps (user-specific)
+screencaps/
