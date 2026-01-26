@@ -31,6 +31,11 @@ python mainframe_assistant.py
 python mainframe_assistant.py -t localhost:3270
 ```
 
+### TK5 Bundle (Local MVS)
+
+The TK5 distribution zip is not included in this repo. Download it from your
+custom MVS docs and unzip into `tk5/mvs-tk5` so the emulator assets are present.
+
 ## Usage
 
 ### Interactive Mode
