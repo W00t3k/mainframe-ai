@@ -1,727 +1,1373 @@
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+                                                    TTTTTTTTTTTT   SSSSSSSSSS   OOOOOOOOOOOO
+                                                   TTTTTTTTTTTT  SSSSSSSSSSSS  OOOOOOOOOOOO
+                                                       TT       SS        SS  OO        OO
+                                                      TT       SS            OO        OO
+                                                     TT       SSS           OO        OO
+                                                    TT        SSSSSSSSS    OO        OO
+                                                   TT         SSSSSSSSS   OO        OO
+                                                  TT                SSS  OO        OO
+                                                 TT                 SS  OO        OO
+                                                TT       SS        SS  OO        OO
+                                               TT       SSSSSSSSSSSS  OOOOOOOOOOOO
+                                              TT        SSSSSSSSSS   OOOOOOOOOOOO
 
 
 
-                   SSSSSSSSSS        11                                                               ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS      111                                                               ZZZZZZZZZZZZ
-                  SS        SS     1111                                                                        ZZ
-                  SS                 11                                                                       ZZ
-                  SSS                11                                                                      ZZ
-                   SSSSSSSSS         11                                                                  ZZZZZZZ
-                    SSSSSSSSS        11                                                                  ZZZZZZZ
-                           SSS       11                                                                   ZZ
-                            SS       11                                                                  ZZ
-                  SS        SS       11                                                                 ZZ
-                  SSSSSSSSSSSS   1111111111                                                            ZZZZZZZZZZZ
-                   SSSSSSSSSS    1111111111                                                           ZZZZZZZZZZZZ
+                   SSSSSSSSSS    2222222222        11                                                 ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222      111                                                 ZZZZZZZZZZZZ
+                  SS        SS  22        22     1111                                                          ZZ
+                  SS                      22       11                                                         ZZ
+                  SSS                     22       11                                                        ZZ
+                   SSSSSSSSS             22        11                                                    ZZZZZZZ
+                    SSSSSSSSS          22          11                                                    ZZZZZZZ
+                           SSS       22            11                                                     ZZ
+                            SS     22              11                                                    ZZ
+                  SS        SS   22                11                                                   ZZ
+                  SSSSSSSSSSSS  222222222222   1111111111                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222   1111111111                                             ZZZZZZZZZZZZ
 
 
-****Z  START  STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1  START  Z****
-****Z  START  STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1  START  Z****
-****Z  START  STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1  START  Z****
-****Z  START  STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1  START  Z****
+****Z  START  STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21  START  Z****
+****Z  START  STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21  START  Z****
+****Z  START  STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21  START  Z****
+****Z  START  STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21  START  Z****
                                                 J E S 2   J O B   L O G
 
 
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-         7 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //INIT     JOB MSGLEVEL=1                                               STC    1
-    2     //INIT     EXEC INIT
-    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
-IEF236I ALLOC. FOR INIT INIT
-IEF142I INIT INIT - STEP WAS EXECUTED - COND CODE 0000
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS        11                                                               ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS      111                                                               ZZZZZZZZZZZZ
-                  SS        SS     1111                                                                        ZZ
-                  SS                 11                                                                       ZZ
-                  SSS                11                                                                      ZZ
-                   SSSSSSSSS         11                                                                  ZZZZZZZ
-                    SSSSSSSSS        11                                                                  ZZZZZZZ
-                           SSS       11                                                                   ZZ
-                            SS       11                                                                  ZZ
-                  SS        SS       11                                                                 ZZ
-                  SSSSSSSSSSSS   1111111111                                                            ZZZZZZZZZZZ
-                   SSSSSSSSSS    1111111111                                                           ZZZZZZZZZZZZ
-
-
-****Z   END   STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1   END   Z****
-****Z   END   STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1   END   Z****
-****Z   END   STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1   END   Z****
-****Z   END   STC    1  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    1   END   Z****
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS    2222222222                                                           ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  222222222222                                                          ZZZZZZZZZZZZ
-                  SS        SS  22        22                                                                   ZZ
-                  SS                      22                                                                  ZZ
-                  SSS                     22                                                                 ZZ
-                   SSSSSSSSS             22                                                              ZZZZZZZ
-                    SSSSSSSSS          22                                                                ZZZZZZZ
-                           SSS       22                                                                   ZZ
-                            SS     22                                                                    ZZ
-                  SS        SS   22                                                                     ZZ
-                  SSSSSSSSSSSS  222222222222                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS   222222222222                                                          ZZZZZZZZZZZZ
-
-
-****Z  START  STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2  START  Z****
-****Z  START  STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2  START  Z****
-****Z  START  STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2  START  Z****
-****Z  START  STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2  START  Z****
-                                                J E S 2   J O B   L O G
-
-
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-         7 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //INIT     JOB MSGLEVEL=1                                               STC    2
-    2     //INIT     EXEC INIT
-    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
-IEF236I ALLOC. FOR INIT INIT
-IEF142I INIT INIT - STEP WAS EXECUTED - COND CODE 0000
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS    2222222222                                                           ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  222222222222                                                          ZZZZZZZZZZZZ
-                  SS        SS  22        22                                                                   ZZ
-                  SS                      22                                                                  ZZ
-                  SSS                     22                                                                 ZZ
-                   SSSSSSSSS             22                                                              ZZZZZZZ
-                    SSSSSSSSS          22                                                                ZZZZZZZ
-                           SSS       22                                                                   ZZ
-                            SS     22                                                                    ZZ
-                  SS        SS   22                                                                     ZZ
-                  SSSSSSSSSSSS  222222222222                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS   222222222222                                                          ZZZZZZZZZZZZ
-
-
-****Z   END   STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2   END   Z****
-****Z   END   STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2   END   Z****
-****Z   END   STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2   END   Z****
-****Z   END   STC    2  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    2   END   Z****
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS    3333333333                                                           ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  333333333333                                                          ZZZZZZZZZZZZ
-                  SS        SS  33        33                                                                   ZZ
-                  SS                      33                                                                  ZZ
-                  SSS                     33                                                                 ZZ
-                   SSSSSSSSS           3333                                                              ZZZZZZZ
-                    SSSSSSSSS          3333                                                              ZZZZZZZ
-                           SSS            33                                                              ZZ
-                            SS            33                                                             ZZ
-                  SS        SS  33        33                                                            ZZ
-                  SSSSSSSSSSSS  333333333333                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS    3333333333                                                           ZZZZZZZZZZZZ
-
-
-****Z  START  STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3  START  Z****
-****Z  START  STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3  START  Z****
-****Z  START  STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3  START  Z****
-****Z  START  STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3  START  Z****
-                                                J E S 2   J O B   L O G
-
-
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-         7 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //INIT     JOB MSGLEVEL=1                                               STC    3
-    2     //INIT     EXEC INIT
-    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
-IEF236I ALLOC. FOR INIT INIT
-IEF142I INIT INIT - STEP WAS EXECUTED - COND CODE 0000
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS    3333333333                                                           ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  333333333333                                                          ZZZZZZZZZZZZ
-                  SS        SS  33        33                                                                   ZZ
-                  SS                      33                                                                  ZZ
-                  SSS                     33                                                                 ZZ
-                   SSSSSSSSS           3333                                                              ZZZZZZZ
-                    SSSSSSSSS          3333                                                              ZZZZZZZ
-                           SSS            33                                                              ZZ
-                            SS            33                                                             ZZ
-                  SS        SS  33        33                                                            ZZ
-                  SSSSSSSSSSSS  333333333333                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS    3333333333                                                           ZZZZZZZZZZZZ
-
-
-****Z   END   STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3   END   Z****
-****Z   END   STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3   END   Z****
-****Z   END   STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3   END   Z****
-****Z   END   STC    3  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    3   END   Z****
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS         444                                                             ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS       4444                                                             ZZZZZZZZZZZZ
-                  SS        SS      44 44                                                                      ZZ
-                  SS               44  44                                                                     ZZ
-                  SSS             44   44                                                                    ZZ
-                   SSSSSSSSS     44444444444                                                             ZZZZZZZ
-                    SSSSSSSSS   444444444444                                                             ZZZZZZZ
-                           SSS         44                                                                 ZZ
-                            SS         44                                                                ZZ
-                  SS        SS         44                                                               ZZ
-                  SSSSSSSSSSSS         44                                                              ZZZZZZZZZZZ
-                   SSSSSSSSSS          44                                                             ZZZZZZZZZZZZ
-
-
-****Z  START  STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4  START  Z****
-****Z  START  STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4  START  Z****
-****Z  START  STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4  START  Z****
-****Z  START  STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4  START  Z****
-                                                J E S 2   J O B   L O G
-
-
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-         7 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //INIT     JOB MSGLEVEL=1                                               STC    4
-    2     //INIT     EXEC INIT
-    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
-IEF236I ALLOC. FOR INIT INIT
-IEF142I INIT INIT - STEP WAS EXECUTED - COND CODE 0000
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS         444                                                             ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS       4444                                                             ZZZZZZZZZZZZ
-                  SS        SS      44 44                                                                      ZZ
-                  SS               44  44                                                                     ZZ
-                  SSS             44   44                                                                    ZZ
-                   SSSSSSSSS     44444444444                                                             ZZZZZZZ
-                    SSSSSSSSS   444444444444                                                             ZZZZZZZ
-                           SSS         44                                                                 ZZ
-                            SS         44                                                                ZZ
-                  SS        SS         44                                                               ZZ
-                  SSSSSSSSSSSS         44                                                              ZZZZZZZZZZZ
-                   SSSSSSSSSS          44                                                             ZZZZZZZZZZZZ
-
-
-****Z   END   STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4   END   Z****
-****Z   END   STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4   END   Z****
-****Z   END   STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4   END   Z****
-****Z   END   STC    4  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    4   END   Z****
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS   555555555555                                                          ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  555555555555                                                          ZZZZZZZZZZZZ
-                  SS        SS  55                                                                             ZZ
-                  SS            55                                                                            ZZ
-                  SSS           55                                                                           ZZ
-                   SSSSSSSSS    555555555                                                                ZZZZZZZ
-                    SSSSSSSSS   5555555555                                                               ZZZZZZZ
-                           SSS           55                                                               ZZ
-                            SS            55                                                             ZZ
-                  SS        SS            55                                                            ZZ
-                  SSSSSSSSSSSS  555555555555                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS   55555555555                                                           ZZZZZZZZZZZZ
-
-
-****Z  START  STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5  START  Z****
-****Z  START  STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5  START  Z****
-****Z  START  STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5  START  Z****
-****Z  START  STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5  START  Z****
-                                                J E S 2   J O B   L O G
-
-
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-         7 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //INIT     JOB MSGLEVEL=1                                               STC    5
-    2     //INIT     EXEC INIT
-    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
-IEF236I ALLOC. FOR INIT INIT
-IEF142I INIT INIT - STEP WAS EXECUTED - COND CODE 0000
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS   555555555555                                                          ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  555555555555                                                          ZZZZZZZZZZZZ
-                  SS        SS  55                                                                             ZZ
-                  SS            55                                                                            ZZ
-                  SSS           55                                                                           ZZ
-                   SSSSSSSSS    555555555                                                                ZZZZZZZ
-                    SSSSSSSSS   5555555555                                                               ZZZZZZZ
-                           SSS           55                                                               ZZ
-                            SS            55                                                             ZZ
-                  SS        SS            55                                                            ZZ
-                  SSSSSSSSSSSS  555555555555                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS   55555555555                                                           ZZZZZZZZZZZZ
-
-
-****Z   END   STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5   END   Z****
-****Z   END   STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5   END   Z****
-****Z   END   STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5   END   Z****
-****Z   END   STC    5  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    5   END   Z****
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS    6666666666                                                           ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  666666666666                                                          ZZZZZZZZZZZZ
-                  SS        SS  66        66                                                                   ZZ
-                  SS            66                                                                            ZZ
-                  SSS           66                                                                           ZZ
-                   SSSSSSSSS    66666666666                                                              ZZZZZZZ
-                    SSSSSSSSS   666666666666                                                             ZZZZZZZ
-                           SSS  66        66                                                              ZZ
-                            SS  66        66                                                             ZZ
-                  SS        SS  66        66                                                            ZZ
-                  SSSSSSSSSSSS  666666666666                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS    6666666666                                                           ZZZZZZZZZZZZ
-
-
-****Z  START  STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6  START  Z****
-****Z  START  STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6  START  Z****
-****Z  START  STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6  START  Z****
-****Z  START  STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6  START  Z****
-                                                J E S 2   J O B   L O G
-
-
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-         7 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //INIT     JOB MSGLEVEL=1                                               STC    6
-    2     //INIT     EXEC INIT
-    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
-IEF236I ALLOC. FOR INIT INIT
-IEF142I INIT INIT - STEP WAS EXECUTED - COND CODE 0000
-                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
-                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
-                                                II       NNNN      NN       II            TT
-                                               II       NN NN     NN       II            TT
-                                              II       NN  NN    NN       II            TT
-                                             II       NN   NN   NN       II            TT
-                                            II       NN    NN  NN       II            TT
-                                           II       NN     NN NN       II            TT
-                                          II       NN      NNNN       II            TT
-                                         II       NN       NNN       II            TT
-                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
-                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
-
-
-
-                   SSSSSSSSSS    6666666666                                                           ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  666666666666                                                          ZZZZZZZZZZZZ
-                  SS        SS  66        66                                                                   ZZ
-                  SS            66                                                                            ZZ
-                  SSS           66                                                                           ZZ
-                   SSSSSSSSS    66666666666                                                              ZZZZZZZ
-                    SSSSSSSSS   666666666666                                                             ZZZZZZZ
-                           SSS  66        66                                                              ZZ
-                            SS  66        66                                                             ZZ
-                  SS        SS  66        66                                                            ZZ
-                  SSSSSSSSSSSS  666666666666                                                           ZZZZZZZZZZZ
-                   SSSSSSSSSS    6666666666                                                           ZZZZZZZZZZZZ
-
-
-****Z   END   STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6   END   Z****
-****Z   END   STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6   END   Z****
-****Z   END   STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6   END   Z****
-****Z   END   STC    6  INIT                            ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    6   END   Z****
-                 BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP    SSSSSSSSSS   EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPP   FFFFFFFFFFFF
-                BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  SSSSSSSSSSSS  EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPPP  FFFFFFFFFFFF
-               BB        BB  SS        SS  PP        PP  SS        SS  EE                 TT       PP        PP  FF
-              BB        BB  SS            PP        PP  SS            EE                 TT       PP        PP  FF
-             BB       BB   SSS           PP        PP  SSS           EE                 TT       PP        PP  FF
-            BBBBBBBBBB     SSSSSSSSS    PPPPPPPPPPPP   SSSSSSSSS    EEEEEEEE           TT       PPPPPPPPPPPP  FFFFFFFF
-           BBBBBBBBBB      SSSSSSSSS   PPPPPPPPPPP     SSSSSSSSS   EEEEEEEE           TT       PPPPPPPPPPP   FFFFFFFF
-          BB       BB            SSS  PP                     SSS  EE                 TT       PP            FF
-         BB        BB            SS  PP                      SS  EE                 TT       PP            FF
-        BB        BB  SS        SS  PP            SS        SS  EE                 TT       PP            FF
-       BBBBBBBBBBBB  SSSSSSSSSSSS  PP            SSSSSSSSSSSS  EEEEEEEEEEEE       TT       PP            FF
-      BBBBBBBBBBB    SSSSSSSSSS   PP             SSSSSSSSSS   EEEEEEEEEEEE       TT       PP            FF
-
-
-
-                   SSSSSSSSSS   777777777777                                                          ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  77777777777                                                           ZZZZZZZZZZZZ
-                  SS        SS  77      77                                                                     ZZ
-                  SS                   77                                                                     ZZ
-                  SSS                 77                                                                     ZZ
-                   SSSSSSSSS         77                                                                  ZZZZZZZ
-                    SSSSSSSSS        77                                                                  ZZZZZZZ
-                           SSS       77                                                                   ZZ
-                            SS       77                                                                  ZZ
-                  SS        SS       77                                                                 ZZ
-                  SSSSSSSSSSSS       77                                                                ZZZZZZZZZZZ
-                   SSSSSSSSSS        77                                                               ZZZZZZZZZZZZ
-
-
-****Z  START  STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7  START  Z****
-****Z  START  STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7  START  Z****
-****Z  START  STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7  START  Z****
-****Z  START  STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7  START  Z****
-                                                J E S 2   J O B   L O G
-
-
-13.49.38 STC    7  $HASP373 BSPSETPF STARTED
-13.49.38 STC    7  IEF403I BSPSETPF - STARTED - TIME=13.49.38
-13.49.39 STC    7  BSPSP91I - Parms passed: NOREPLYU
-13.49.39 STC    7  BSPSP93I - PFK definitions will be updated in memory
-13.49.39 STC    7  BSPSP22I - Dataset processed: SYS1.PARMLIB
-13.49.39 STC    7  BSPSP23I - on volume TK5RES
-13.49.39 STC    7  BSPSP21I - Member being processed: SETPFK01
-13.49.39 STC    7  +BSPSP98I - Member processed, LASTCC=0000
-13.49.39 STC    7  +BSPSP21I - Member being processed: SETPFK02
-13.49.39 STC    7  +BSPSP98I - Member processed, LASTCC=0000
-13.49.39 STC    7  +BSPSP99I - End of processing, MAXRC=0000
-13.49.39 STC    7  IEF404I BSPSETPF - ENDED - TIME=13.49.39
-13.49.39 STC    7  $HASP395 BSPSETPF ENDED
-
-
------- JES2 JOB STATISTICS ------
-
-
- 26 JUL 23 JOB EXECUTION DATE
-
-
-         2 CARDS READ
-
-
-        34 SYSOUT PRINT RECORDS
-
-
-         0 SYSOUT PUNCH RECORDS
-
-
-      0.00 MINUTES EXECUTION TIME
-    1     //BSPSETPF JOB MSGLEVEL=1                                               STC    7
-    2     //STARTING EXEC BSPSETPF,PARM=NOREPLYU
-    3     XXIEFPROC EXEC PGM=BSPSETPF,PARM=NOREPLYU
-IEF236I ALLOC. FOR BSPSETPF BSPSETPF
-IEF237I JES2 ALLOCATED TO SYSUDUMP
-BSPSP91I - Parms passed: NOREPLYU
-BSPSP93I - PFK definitions will be updated in memory
-IEF237I 390  ALLOCATED TO PARMLIB
-BSPSP22I - Dataset processed: SYS1.PARMLIB
-BSPSP23I - on volume TK5RES
-BSPSP21I - Member being processed: SETPFK01
-BSPSP98I - Member processed, LASTCC=0000
-BSPSP21I - Member being processed: SETPFK02
-BSPSP98I - Member processed, LASTCC=0000
-BSPSP99I - End of processing, MAXRC=0000
-IEF285I   SYS1.PARMLIB                                 KEPT
-IEF285I   VOL SER NOS= TK5RES.
-IEF142I BSPSETPF BSPSETPF - STEP WAS EXECUTED - COND CODE 0000
-IEF285I   JES2.STC00007.SO0101                         SYSOUT
-                 BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP    SSSSSSSSSS   EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPP   FFFFFFFFFFFF
-                BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  SSSSSSSSSSSS  EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPPP  FFFFFFFFFFFF
-               BB        BB  SS        SS  PP        PP  SS        SS  EE                 TT       PP        PP  FF
-              BB        BB  SS            PP        PP  SS            EE                 TT       PP        PP  FF
-             BB       BB   SSS           PP        PP  SSS           EE                 TT       PP        PP  FF
-            BBBBBBBBBB     SSSSSSSSS    PPPPPPPPPPPP   SSSSSSSSS    EEEEEEEE           TT       PPPPPPPPPPPP  FFFFFFFF
-           BBBBBBBBBB      SSSSSSSSS   PPPPPPPPPPP     SSSSSSSSS   EEEEEEEE           TT       PPPPPPPPPPP   FFFFFFFF
-          BB       BB            SSS  PP                     SSS  EE                 TT       PP            FF
-         BB        BB            SS  PP                      SS  EE                 TT       PP            FF
-        BB        BB  SS        SS  PP            SS        SS  EE                 TT       PP            FF
-       BBBBBBBBBBBB  SSSSSSSSSSSS  PP            SSSSSSSSSSSS  EEEEEEEEEEEE       TT       PP            FF
-      BBBBBBBBBBB    SSSSSSSSSS   PP             SSSSSSSSSS   EEEEEEEEEEEE       TT       PP            FF
-
-
-
-                   SSSSSSSSSS   777777777777                                                          ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  77777777777                                                           ZZZZZZZZZZZZ
-                  SS        SS  77      77                                                                     ZZ
-                  SS                   77                                                                     ZZ
-                  SSS                 77                                                                     ZZ
-                   SSSSSSSSS         77                                                                  ZZZZZZZ
-                    SSSSSSSSS        77                                                                  ZZZZZZZ
-                           SSS       77                                                                   ZZ
-                            SS       77                                                                  ZZ
-                  SS        SS       77                                                                 ZZ
-                  SSSSSSSSSSSS       77                                                                ZZZZZZZZZZZ
-                   SSSSSSSSSS        77                                                               ZZZZZZZZZZZZ
-
-
-****Z   END   STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7   END   Z****
-****Z   END   STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7   END   Z****
-****Z   END   STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7   END   Z****
-****Z   END   STC    7  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC    7   END   Z****
-                 BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP    SSSSSSSSSS   EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPP   FFFFFFFFFFFF
-                BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  SSSSSSSSSSSS  EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPPP  FFFFFFFFFFFF
-               BB        BB  SS        SS  PP        PP  SS        SS  EE                 TT       PP        PP  FF
-              BB        BB  SS            PP        PP  SS            EE                 TT       PP        PP  FF
-             BB       BB   SSS           PP        PP  SSS           EE                 TT       PP        PP  FF
-            BBBBBBBBBB     SSSSSSSSS    PPPPPPPPPPPP   SSSSSSSSS    EEEEEEEE           TT       PPPPPPPPPPPP  FFFFFFFF
-           BBBBBBBBBB      SSSSSSSSS   PPPPPPPPPPP     SSSSSSSSS   EEEEEEEE           TT       PPPPPPPPPPP   FFFFFFFF
-          BB       BB            SSS  PP                     SSS  EE                 TT       PP            FF
-         BB        BB            SS  PP                      SS  EE                 TT       PP            FF
-        BB        BB  SS        SS  PP            SS        SS  EE                 TT       PP            FF
-       BBBBBBBBBBBB  SSSSSSSSSSSS  PP            SSSSSSSSSSSS  EEEEEEEEEEEE       TT       PP            FF
-      BBBBBBBBBBB    SSSSSSSSSS   PP             SSSSSSSSSS   EEEEEEEEEEEE       TT       PP            FF
-
-
-
-                   SSSSSSSSSS        11        6666666666                                             ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS      111       666666666666                                            ZZZZZZZZZZZZ
-                  SS        SS     1111       66        66                                                     ZZ
-                  SS                 11       66                                                              ZZ
-                  SSS                11       66                                                             ZZ
-                   SSSSSSSSS         11       66666666666                                                ZZZZZZZ
-                    SSSSSSSSS        11       666666666666                                               ZZZZZZZ
-                           SSS       11       66        66                                                ZZ
-                            SS       11       66        66                                               ZZ
-                  SS        SS       11       66        66                                              ZZ
-                  SSSSSSSSSSSS   1111111111   666666666666                                             ZZZZZZZZZZZ
-                   SSSSSSSSSS    1111111111    6666666666                                             ZZZZZZZZZZZZ
-
-
-****Z  START  STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16  START  Z****
-****Z  START  STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16  START  Z****
-****Z  START  STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16  START  Z****
-****Z  START  STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16  START  Z****
-                                                J E S 2   J O B   L O G
-
-
- 4.33.32 STC   16  $HASP373 BSPSETPF STARTED
- 4.33.32 STC   16  BSPSP91I - Parms passed: NOREPLYU
- 4.33.32 STC   16  BSPSP93I - PFK definitions will be updated in memory
- 4.33.32 STC   16  BSPSP22I - Dataset processed: SYS1.PARMLIB
- 4.33.32 STC   16  BSPSP23I - on volume TK5RES
- 4.33.32 STC   16  BSPSP21I - Member being processed: SETPFK01
- 4.33.32 STC   16  +BSPSP98I - Member processed, LASTCC=0000
- 4.33.32 STC   16  +BSPSP21I - Member being processed: SETPFK02
- 4.33.32 STC   16  +BSPSP98I - Member processed, LASTCC=0000
- 4.33.32 STC   16  +BSPSP99I - End of processing, MAXRC=0000
- 4.33.32 STC   16  $HASP395 BSPSETPF ENDED
+ 4.34.07 STC   21  $HASP373 TSO      STARTED
 
 
 ------ JES2 JOB STATISTICS ------
 
 
  26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+        11 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //TSO      JOB MSGLEVEL=1                                               STC   21
+    2     //STARTING EXEC TSO
+    3     XXTSO     PROC MEM=00
+    4     XXSTEP1   EXEC PGM=IKTCAS00,TIME=1440
+    5     XXPARMLIB  DD  DISP=SHR,DSN=SYS1.PARMLIB(TSOKEY&MEM),FREE=CLOSE
+    6     XXPRINTOUT DD  SYSOUT=A,DCB=(LRECL=133,RECFM=FBB)
+ STMT NO. MESSAGE
+-
+    5     IEF653I SUBSTITUTION JCL - DISP=SHR,DSN=SYS1.PARMLIB(TSOKEY00),FREE=CLOSE
+                                                    TTTTTTTTTTTT   SSSSSSSSSS   OOOOOOOOOOOO
+                                                   TTTTTTTTTTTT  SSSSSSSSSSSS  OOOOOOOOOOOO
+                                                       TT       SS        SS  OO        OO
+                                                      TT       SS            OO        OO
+                                                     TT       SSS           OO        OO
+                                                    TT        SSSSSSSSS    OO        OO
+                                                   TT         SSSSSSSSS   OO        OO
+                                                  TT                SSS  OO        OO
+                                                 TT                 SS  OO        OO
+                                                TT       SS        SS  OO        OO
+                                               TT       SSSSSSSSSSSS  OOOOOOOOOOOO
+                                              TT        SSSSSSSSSS   OOOOOOOOOOOO
+
+
+
+                   SSSSSSSSSS    2222222222        11                                                 ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222      111                                                 ZZZZZZZZZZZZ
+                  SS        SS  22        22     1111                                                          ZZ
+                  SS                      22       11                                                         ZZ
+                  SSS                     22       11                                                        ZZ
+                   SSSSSSSSS             22        11                                                    ZZZZZZZ
+                    SSSSSSSSS          22          11                                                    ZZZZZZZ
+                           SSS       22            11                                                     ZZ
+                            SS     22              11                                                    ZZ
+                  SS        SS   22                11                                                   ZZ
+                  SSSSSSSSSSSS  222222222222   1111111111                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222   1111111111                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21   END   Z****
+****Z   END   STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21   END   Z****
+****Z   END   STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21   END   Z****
+****Z   END   STC   21  TSO                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   21   END   Z****
+                                SSSSSSSSSS   NN        NN   AAAAAAAAAA    SSSSSSSSSS   OOOOOOOOOOOO  LL
+                              SSSSSSSSSSSS  NNN       NN  AAAAAAAAAAAA  SSSSSSSSSSSS  OOOOOOOOOOOO  LL
+                             SS        SS  NNNN      NN  AA        AA  SS        SS  OO        OO  LL
+                            SS            NN NN     NN  AA        AA  SS            OO        OO  LL
+                           SSS           NN  NN    NN  AA        AA  SSS           OO        OO  LL
+                           SSSSSSSSS    NN   NN   NN  AAAAAAAAAAAA   SSSSSSSSS    OO        OO  LL
+                           SSSSSSSSS   NN    NN  NN  AAAAAAAAAAAA    SSSSSSSSS   OO        OO  LL
+                                 SSS  NN     NN NN  AA        AA           SSS  OO        OO  LL
+                                 SS  NN      NNNN  AA        AA            SS  OO        OO  LL
+                      SS        SS  NN       NNN  AA        AA  SS        SS  OO        OO  LL
+                     SSSSSSSSSSSS  NN        NN  AA        AA  SSSSSSSSSSSS  OOOOOOOOOOOO  LLLLLLLLLLLL
+                     SSSSSSSSSS   NN         N  AA        AA   SSSSSSSSSS   OOOOOOOOOOOO  LLLLLLLLLLLL
+
+
+
+                   SSSSSSSSSS    2222222222    2222222222                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222  222222222222                                            ZZZZZZZZZZZZ
+                  SS        SS  22        22  22        22                                                     ZZ
+                  SS                      22            22                                                    ZZ
+                  SSS                     22            22                                                   ZZ
+                   SSSSSSSSS             22            22                                                ZZZZZZZ
+                    SSSSSSSSS          22            22                                                  ZZZZZZZ
+                           SSS       22            22                                                     ZZ
+                            SS     22            22                                                      ZZ
+                  SS        SS   22            22                                                       ZZ
+                  SSSSSSSSSSSS  222222222222  222222222222                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222  222222222222                                            ZZZZZZZZZZZZ
+
+
+****Z  START  STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22  START  Z****
+****Z  START  STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22  START  Z****
+****Z  START  STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22  START  Z****
+****Z  START  STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.34.10 STC   22  $HASP373 SNASOL   STARTED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         7 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //SNASOL   JOB MSGLEVEL=1                                               STC   22
+    2     //STARTING EXEC SNASOL
+    3     XXSNASOL  PROC
+    4     XXSOLICIT EXEC PGM=SNASOL,REGION=4096K,TIME=1440,
+          XX        PARM='SNASOL'
+                                SSSSSSSSSS   NN        NN   AAAAAAAAAA    SSSSSSSSSS   OOOOOOOOOOOO  LL
+                              SSSSSSSSSSSS  NNN       NN  AAAAAAAAAAAA  SSSSSSSSSSSS  OOOOOOOOOOOO  LL
+                             SS        SS  NNNN      NN  AA        AA  SS        SS  OO        OO  LL
+                            SS            NN NN     NN  AA        AA  SS            OO        OO  LL
+                           SSS           NN  NN    NN  AA        AA  SSS           OO        OO  LL
+                           SSSSSSSSS    NN   NN   NN  AAAAAAAAAAAA   SSSSSSSSS    OO        OO  LL
+                           SSSSSSSSS   NN    NN  NN  AAAAAAAAAAAA    SSSSSSSSS   OO        OO  LL
+                                 SSS  NN     NN NN  AA        AA           SSS  OO        OO  LL
+                                 SS  NN      NNNN  AA        AA            SS  OO        OO  LL
+                      SS        SS  NN       NNN  AA        AA  SS        SS  OO        OO  LL
+                     SSSSSSSSSSSS  NN        NN  AA        AA  SSSSSSSSSSSS  OOOOOOOOOOOO  LLLLLLLLLLLL
+                     SSSSSSSSSS   NN         N  AA        AA   SSSSSSSSSS   OOOOOOOOOOOO  LLLLLLLLLLLL
+
+
+
+                   SSSSSSSSSS    2222222222    2222222222                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222  222222222222                                            ZZZZZZZZZZZZ
+                  SS        SS  22        22  22        22                                                     ZZ
+                  SS                      22            22                                                    ZZ
+                  SSS                     22            22                                                   ZZ
+                   SSSSSSSSS             22            22                                                ZZZZZZZ
+                    SSSSSSSSS          22            22                                                  ZZZZZZZ
+                           SSS       22            22                                                     ZZ
+                            SS     22            22                                                      ZZ
+                  SS        SS   22            22                                                       ZZ
+                  SSSSSSSSSSSS  222222222222  222222222222                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222  222222222222                                            ZZZZZZZZZZZZ
+
+
+****Z   END   STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22   END   Z****
+****Z   END   STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22   END   Z****
+****Z   END   STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22   END   Z****
+****Z   END   STC   22  SNASOL                          ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   22   END   Z****
+                                                      JJJJJJJJJJ  RRRRRRRRRRR   PPPPPPPPPPP
+                                                     JJJJJJJJJJ  RRRRRRRRRRRR  PPPPPPPPPPPP
+                                                        JJ      RR        RR  PP        PP
+                                                       JJ      RR        RR  PP        PP
+                                                      JJ      RR        RR  PP        PP
+                                                     JJ      RRRRRRRRRRRR  PPPPPPPPPPPP
+                                                    JJ      RRRRRRRRRRR   PPPPPPPPPPP
+                                                   JJ      RR    RR      PP
+                                            JJ    JJ      RR     RR     PP
+                                           JJ    JJ      RR      RR    PP
+                                          JJJJJJJJ      RR       RR   PP
+                                          JJJJJJ       RR        RR  PP
+
+
+
+                   SSSSSSSSSS    2222222222    3333333333                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222  333333333333                                            ZZZZZZZZZZZZ
+                  SS        SS  22        22  33        33                                                     ZZ
+                  SS                      22            33                                                    ZZ
+                  SSS                     22            33                                                   ZZ
+                   SSSSSSSSS             22          3333                                                ZZZZZZZ
+                    SSSSSSSSS          22            3333                                                ZZZZZZZ
+                           SSS       22                 33                                                ZZ
+                            SS     22                   33                                               ZZ
+                  SS        SS   22           33        33                                              ZZ
+                  SSSSSSSSSSSS  222222222222  333333333333                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222   3333333333                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23  START  Z****
+****Z  START  STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23  START  Z****
+****Z  START  STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23  START  Z****
+****Z  START  STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.34.10 STC   23  $HASP373 JRP      STARTED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+        30 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //JRP      JOB MSGLEVEL=1                                               STC   23
+    2     //STARTING EXEC JRP
+    3     XXJRP PROC M=JRPINIT
+          ********************************************************************
+          ***
+          ***    THE FOLLOWING PROGRAMS MUST RESIDE IN LINKLIST LIBRARY
+          ***
+          ***    JRP100    MAIN DRIVER MODULE FOR JES REMOTE PRINT
+          ***    JRP110    JRP INITIALIZATION MODULE
+          ***    JRP120    JRP CONTROL TERMINAL DRIVER
+          ***    JRP121    JRP CONTROL TERMINAL PARSE MODULE
+          ***    JRP122    JRP CONTROL TERMINAL LOGON PROCESSOR
+          ***    JRP123    JRP CONTROL TERMINAL LOGON PROCESSOR USER SECURITY EXIT
+          ***    JRP200    JRP JES2 PRINTER OUT-PUT CONTROL MODULE
+          ***    JRP210    JRP JES2 PRINTER OUT-PUT SECONDARY CONTROL MODULE
+          ***    JRP220    JRP JES2 PRINTER OUT-PUT DYNAMIC ALLOCATE/DEALLOCATE
+          ***    JRP300    JRP JES2 PRINT SUBTASK
+          ***    JRP310    JRP JES2 PRINT SUBTASK UNSOLICITED CONTROL TERMINAL
+          ***              INTERFACE
+          ********************************************************************
+          ***
+    4     XXJRP    EXEC PGM=JRP100,REGION=256K,TIME=1440
+    5     XXJRPDATA  DD DISP=SHR,DSN=SYS2.SYSINLIB(&M)
+    6     XXJRPLOG   DD SYSOUT=*
+    7     XXSYSABEND DD SYSOUT=*
+ STMT NO. MESSAGE
+-
+    5     IEF653I SUBSTITUTION JCL - DISP=SHR,DSN=SYS2.SYSINLIB(JRPINIT)
+                                                      JJJJJJJJJJ  RRRRRRRRRRR   PPPPPPPPPPP
+                                                     JJJJJJJJJJ  RRRRRRRRRRRR  PPPPPPPPPPPP
+                                                        JJ      RR        RR  PP        PP
+                                                       JJ      RR        RR  PP        PP
+                                                      JJ      RR        RR  PP        PP
+                                                     JJ      RRRRRRRRRRRR  PPPPPPPPPPPP
+                                                    JJ      RRRRRRRRRRR   PPPPPPPPPPP
+                                                   JJ      RR    RR      PP
+                                            JJ    JJ      RR     RR     PP
+                                           JJ    JJ      RR      RR    PP
+                                          JJJJJJJJ      RR       RR   PP
+                                          JJJJJJ       RR        RR  PP
+
+
+
+                   SSSSSSSSSS    2222222222    3333333333                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222  333333333333                                            ZZZZZZZZZZZZ
+                  SS        SS  22        22  33        33                                                     ZZ
+                  SS                      22            33                                                    ZZ
+                  SSS                     22            33                                                   ZZ
+                   SSSSSSSSS             22          3333                                                ZZZZZZZ
+                    SSSSSSSSS          22            3333                                                ZZZZZZZ
+                           SSS       22                 33                                                ZZ
+                            SS     22                   33                                               ZZ
+                  SS        SS   22           33        33                                              ZZ
+                  SSSSSSSSSSSS  222222222222  333333333333                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222   3333333333                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23   END   Z****
+****Z   END   STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23   END   Z****
+****Z   END   STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23   END   Z****
+****Z   END   STC   23  JRP                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   23   END   Z****
+                 BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP   PPPPPPPPPPP    IIIIIIIIII   LL            OOOOOOOOOOOO  TTTTTTTTTTTT
+                BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  PPPPPPPPPPPP   IIIIIIIIII   LL            OOOOOOOOOOOO  TTTTTTTTTTTT
+               BB        BB  SS        SS  PP        PP  PP        PP       II       LL            OO        OO       TT
+              BB        BB  SS            PP        PP  PP        PP       II       LL            OO        OO       TT
+             BB       BB   SSS           PP        PP  PP        PP       II       LL            OO        OO       TT
+            BBBBBBBBBB     SSSSSSSSS    PPPPPPPPPPPP  PPPPPPPPPPPP       II       LL            OO        OO       TT
+           BBBBBBBBBB      SSSSSSSSS   PPPPPPPPPPP   PPPPPPPPPPP        II       LL            OO        OO       TT
+          BB       BB            SSS  PP            PP                 II       LL            OO        OO       TT
+         BB        BB            SS  PP            PP                 II       LL            OO        OO       TT
+        BB        BB  SS        SS  PP            PP                 II       LL            OO        OO       TT
+       BBBBBBBBBBBB  SSSSSSSSSSSS  PP            PP             IIIIIIIIII   LLLLLLLLLLLL  OOOOOOOOOOOO       TT
+      BBBBBBBBBBB    SSSSSSSSSS   PP            PP             IIIIIIIIII   LLLLLLLLLLLL  OOOOOOOOOOOO       TT
+
+
+
+                   SSSSSSSSSS    9999999999                                                           ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  999999999999                                                          ZZZZZZZZZZZZ
+                  SS        SS  99        99                                                                   ZZ
+                  SS            99        99                                                                  ZZ
+                  SSS           99        99                                                                 ZZ
+                   SSSSSSSSS    999999999999                                                             ZZZZZZZ
+                    SSSSSSSSS   999999999999                                                             ZZZZZZZ
+                           SSS            99                                                              ZZ
+                            SS            99                                                             ZZ
+                  SS        SS  99        99                                                            ZZ
+                  SSSSSSSSSSSS  999999999999                                                           ZZZZZZZZZZZ
+                   SSSSSSSSSS    9999999999                                                           ZZZZZZZZZZZZ
+
+
+****Z  START  STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9  START  Z****
+****Z  START  STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9  START  Z****
+****Z  START  STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9  START  Z****
+****Z  START  STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.33.32 STC    9  $HASP373 BSPPILOT STARTED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         9 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //BSPPILOT JOB MSGLEVEL=1                                               STC    9
+    2     //STARTING EXEC BSPPILOT
+    3     XXBSPPILOT PROC P=NOWTO
+    4     XXC3PO     EXEC PGM=BSPPILOT,TIME=1440,PARM=&P
+ STMT NO. MESSAGE
+-
+    4     IEF653I SUBSTITUTION JCL - PGM=BSPPILOT,TIME=1440,PARM=NOWTO
+                 BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP   PPPPPPPPPPP    IIIIIIIIII   LL            OOOOOOOOOOOO  TTTTTTTTTTTT
+                BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  PPPPPPPPPPPP   IIIIIIIIII   LL            OOOOOOOOOOOO  TTTTTTTTTTTT
+               BB        BB  SS        SS  PP        PP  PP        PP       II       LL            OO        OO       TT
+              BB        BB  SS            PP        PP  PP        PP       II       LL            OO        OO       TT
+             BB       BB   SSS           PP        PP  PP        PP       II       LL            OO        OO       TT
+            BBBBBBBBBB     SSSSSSSSS    PPPPPPPPPPPP  PPPPPPPPPPPP       II       LL            OO        OO       TT
+           BBBBBBBBBB      SSSSSSSSS   PPPPPPPPPPP   PPPPPPPPPPP        II       LL            OO        OO       TT
+          BB       BB            SSS  PP            PP                 II       LL            OO        OO       TT
+         BB        BB            SS  PP            PP                 II       LL            OO        OO       TT
+        BB        BB  SS        SS  PP            PP                 II       LL            OO        OO       TT
+       BBBBBBBBBBBB  SSSSSSSSSSSS  PP            PP             IIIIIIIIII   LLLLLLLLLLLL  OOOOOOOOOOOO       TT
+      BBBBBBBBBBB    SSSSSSSSSS   PP            PP             IIIIIIIIII   LLLLLLLLLLLL  OOOOOOOOOOOO       TT
+
+
+
+                   SSSSSSSSSS    9999999999                                                           ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  999999999999                                                          ZZZZZZZZZZZZ
+                  SS        SS  99        99                                                                   ZZ
+                  SS            99        99                                                                  ZZ
+                  SSS           99        99                                                                 ZZ
+                   SSSSSSSSS    999999999999                                                             ZZZZZZZ
+                    SSSSSSSSS   999999999999                                                             ZZZZZZZ
+                           SSS            99                                                              ZZ
+                            SS            99                                                             ZZ
+                  SS        SS  99        99                                                            ZZ
+                  SSSSSSSSSSSS  999999999999                                                           ZZZZZZZZZZZ
+                   SSSSSSSSSS    9999999999                                                           ZZZZZZZZZZZZ
+
+
+****Z   END   STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9   END   Z****
+****Z   END   STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9   END   Z****
+****Z   END   STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9   END   Z****
+****Z   END   STC    9  BSPPILOT                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC    9   END   Z****
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11         00000000                                              ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111        0000000000                                             ZZZZZZZZZZZZ
+                  SS        SS     1111       00      0000                                                     ZZ
+                  SS                 11       00     00 00                                                    ZZ
+                  SSS                11       00    00  00                                                   ZZ
+                   SSSSSSSSS         11       00   00   00                                               ZZZZZZZ
+                    SSSSSSSSS        11       00  00    00                                               ZZZZZZZ
+                           SSS       11       00 00     00                                                ZZ
+                            SS       11       0000      00                                               ZZ
+                  SS        SS       11       000       00                                              ZZ
+                  SSSSSSSSSSSS   1111111111    0000000000                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111     00000000                                              ZZZZZZZZZZZZ
+
+
+****Z  START  STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10  START  Z****
+****Z  START  STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10  START  Z****
+****Z  START  STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10  START  Z****
+****Z  START  STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         5 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //INIT     JOB MSGLEVEL=1                                               STC   10
+    2     //INIT     EXEC INIT
+    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11         00000000                                              ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111        0000000000                                             ZZZZZZZZZZZZ
+                  SS        SS     1111       00      0000                                                     ZZ
+                  SS                 11       00     00 00                                                    ZZ
+                  SSS                11       00    00  00                                                   ZZ
+                   SSSSSSSSS         11       00   00   00                                               ZZZZZZZ
+                    SSSSSSSSS        11       00  00    00                                               ZZZZZZZ
+                           SSS       11       00 00     00                                                ZZ
+                            SS       11       0000      00                                               ZZ
+                  SS        SS       11       000       00                                              ZZ
+                  SSSSSSSSSSSS   1111111111    0000000000                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111     00000000                                              ZZZZZZZZZZZZ
+
+
+****Z   END   STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10   END   Z****
+****Z   END   STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10   END   Z****
+****Z   END   STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10   END   Z****
+****Z   END   STC   10  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   10   END   Z****
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11            11                                                 ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111           111                                                 ZZZZZZZZZZZZ
+                  SS        SS     1111          1111                                                          ZZ
+                  SS                 11            11                                                         ZZ
+                  SSS                11            11                                                        ZZ
+                   SSSSSSSSS         11            11                                                    ZZZZZZZ
+                    SSSSSSSSS        11            11                                                    ZZZZZZZ
+                           SSS       11            11                                                     ZZ
+                            SS       11            11                                                    ZZ
+                  SS        SS       11            11                                                   ZZ
+                  SSSSSSSSSSSS   1111111111    1111111111                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    1111111111                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11  START  Z****
+****Z  START  STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11  START  Z****
+****Z  START  STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11  START  Z****
+****Z  START  STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         5 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //INIT     JOB MSGLEVEL=1                                               STC   11
+    2     //INIT     EXEC INIT
+    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11            11                                                 ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111           111                                                 ZZZZZZZZZZZZ
+                  SS        SS     1111          1111                                                          ZZ
+                  SS                 11            11                                                         ZZ
+                  SSS                11            11                                                        ZZ
+                   SSSSSSSSS         11            11                                                    ZZZZZZZ
+                    SSSSSSSSS        11            11                                                    ZZZZZZZ
+                           SSS       11            11                                                     ZZ
+                            SS       11            11                                                    ZZ
+                  SS        SS       11            11                                                   ZZ
+                  SSSSSSSSSSSS   1111111111    1111111111                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    1111111111                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11   END   Z****
+****Z   END   STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11   END   Z****
+****Z   END   STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11   END   Z****
+****Z   END   STC   11  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   11   END   Z****
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11        2222222222                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       222222222222                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       22        22                                                     ZZ
+                  SS                 11                 22                                                    ZZ
+                  SSS                11                 22                                                   ZZ
+                   SSSSSSSSS         11                22                                                ZZZZZZZ
+                    SSSSSSSSS        11              22                                                  ZZZZZZZ
+                           SSS       11            22                                                     ZZ
+                            SS       11          22                                                      ZZ
+                  SS        SS       11        22                                                       ZZ
+                  SSSSSSSSSSSS   1111111111   222222222222                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111   222222222222                                            ZZZZZZZZZZZZ
+
+
+****Z  START  STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12  START  Z****
+****Z  START  STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12  START  Z****
+****Z  START  STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12  START  Z****
+****Z  START  STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         5 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //INIT     JOB MSGLEVEL=1                                               STC   12
+    2     //INIT     EXEC INIT
+    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11        2222222222                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       222222222222                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       22        22                                                     ZZ
+                  SS                 11                 22                                                    ZZ
+                  SSS                11                 22                                                   ZZ
+                   SSSSSSSSS         11                22                                                ZZZZZZZ
+                    SSSSSSSSS        11              22                                                  ZZZZZZZ
+                           SSS       11            22                                                     ZZ
+                            SS       11          22                                                      ZZ
+                  SS        SS       11        22                                                       ZZ
+                  SSSSSSSSSSSS   1111111111   222222222222                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111   222222222222                                            ZZZZZZZZZZZZ
+
+
+****Z   END   STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12   END   Z****
+****Z   END   STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12   END   Z****
+****Z   END   STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12   END   Z****
+****Z   END   STC   12  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   12   END   Z****
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11        3333333333                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       333333333333                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       33        33                                                     ZZ
+                  SS                 11                 33                                                    ZZ
+                  SSS                11                 33                                                   ZZ
+                   SSSSSSSSS         11              3333                                                ZZZZZZZ
+                    SSSSSSSSS        11              3333                                                ZZZZZZZ
+                           SSS       11                 33                                                ZZ
+                            SS       11                 33                                               ZZ
+                  SS        SS       11       33        33                                              ZZ
+                  SSSSSSSSSSSS   1111111111   333333333333                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    3333333333                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13  START  Z****
+****Z  START  STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13  START  Z****
+****Z  START  STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13  START  Z****
+****Z  START  STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         5 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //INIT     JOB MSGLEVEL=1                                               STC   13
+    2     //INIT     EXEC INIT
+    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11        3333333333                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       333333333333                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       33        33                                                     ZZ
+                  SS                 11                 33                                                    ZZ
+                  SSS                11                 33                                                   ZZ
+                   SSSSSSSSS         11              3333                                                ZZZZZZZ
+                    SSSSSSSSS        11              3333                                                ZZZZZZZ
+                           SSS       11                 33                                                ZZ
+                            SS       11                 33                                               ZZ
+                  SS        SS       11       33        33                                              ZZ
+                  SSSSSSSSSSSS   1111111111   333333333333                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    3333333333                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13   END   Z****
+****Z   END   STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13   END   Z****
+****Z   END   STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13   END   Z****
+****Z   END   STC   13  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   13   END   Z****
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11             444                                               ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111            4444                                               ZZZZZZZZZZZZ
+                  SS        SS     1111           44 44                                                        ZZ
+                  SS                 11          44  44                                                       ZZ
+                  SSS                11         44   44                                                      ZZ
+                   SSSSSSSSS         11        44444444444                                               ZZZZZZZ
+                    SSSSSSSSS        11       444444444444                                               ZZZZZZZ
+                           SSS       11              44                                                   ZZ
+                            SS       11              44                                                  ZZ
+                  SS        SS       11              44                                                 ZZ
+                  SSSSSSSSSSSS   1111111111          44                                                ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111          44                                               ZZZZZZZZZZZZ
+
+
+****Z  START  STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14  START  Z****
+****Z  START  STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14  START  Z****
+****Z  START  STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14  START  Z****
+****Z  START  STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         5 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //INIT     JOB MSGLEVEL=1                                               STC   14
+    2     //INIT     EXEC INIT
+    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11             444                                               ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111            4444                                               ZZZZZZZZZZZZ
+                  SS        SS     1111           44 44                                                        ZZ
+                  SS                 11          44  44                                                       ZZ
+                  SSS                11         44   44                                                      ZZ
+                   SSSSSSSSS         11        44444444444                                               ZZZZZZZ
+                    SSSSSSSSS        11       444444444444                                               ZZZZZZZ
+                           SSS       11              44                                                   ZZ
+                            SS       11              44                                                  ZZ
+                  SS        SS       11              44                                                 ZZ
+                  SSSSSSSSSSSS   1111111111          44                                                ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111          44                                               ZZZZZZZZZZZZ
+
+
+****Z   END   STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14   END   Z****
+****Z   END   STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14   END   Z****
+****Z   END   STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14   END   Z****
+****Z   END   STC   14  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   14   END   Z****
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11       555555555555                                            ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       555555555555                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       55                                                               ZZ
+                  SS                 11       55                                                              ZZ
+                  SSS                11       55                                                             ZZ
+                   SSSSSSSSS         11       555555555                                                  ZZZZZZZ
+                    SSSSSSSSS        11       5555555555                                                 ZZZZZZZ
+                           SSS       11                55                                                 ZZ
+                            SS       11                 55                                               ZZ
+                  SS        SS       11                 55                                              ZZ
+                  SSSSSSSSSSSS   1111111111   555555555555                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111   55555555555                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15  START  Z****
+****Z  START  STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15  START  Z****
+****Z  START  STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15  START  Z****
+****Z  START  STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+         5 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //INIT     JOB MSGLEVEL=1                                               STC   15
+    2     //INIT     EXEC INIT
+    3     XXIEFPROC   EXEC   PGM=IEFIIC,DPRTY=12                                  40000002
+                                              IIIIIIIIII   NN        NN   IIIIIIIIII   TTTTTTTTTTTT
+                                             IIIIIIIIII   NNN       NN   IIIIIIIIII   TTTTTTTTTTTT
+                                                II       NNNN      NN       II            TT
+                                               II       NN NN     NN       II            TT
+                                              II       NN  NN    NN       II            TT
+                                             II       NN   NN   NN       II            TT
+                                            II       NN    NN  NN       II            TT
+                                           II       NN     NN NN       II            TT
+                                          II       NN      NNNN       II            TT
+                                         II       NN       NNN       II            TT
+                                    IIIIIIIIII   NN        NN   IIIIIIIIII        TT
+                                   IIIIIIIIII   NN         N   IIIIIIIIII        TT
+
+
+
+                   SSSSSSSSSS        11       555555555555                                            ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       555555555555                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       55                                                               ZZ
+                  SS                 11       55                                                              ZZ
+                  SSS                11       55                                                             ZZ
+                   SSSSSSSSS         11       555555555                                                  ZZZZZZZ
+                    SSSSSSSSS        11       5555555555                                                 ZZZZZZZ
+                           SSS       11                55                                                 ZZ
+                            SS       11                 55                                               ZZ
+                  SS        SS       11                 55                                              ZZ
+                  SSSSSSSSSSSS   1111111111   555555555555                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111   55555555555                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15   END   Z****
+****Z   END   STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15   END   Z****
+****Z   END   STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15   END   Z****
+****Z   END   STC   15  INIT                            ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   15   END   Z****
+                                                    NN        NN  EEEEEEEEEEEE  TTTTTTTTTTTT
+                                                   NNN       NN  EEEEEEEEEEEE  TTTTTTTTTTTT
+                                                  NNNN      NN  EE                 TT
+                                                 NN NN     NN  EE                 TT
+                                                NN  NN    NN  EE                 TT
+                                               NN   NN   NN  EEEEEEEE           TT
+                                              NN    NN  NN  EEEEEEEE           TT
+                                             NN     NN NN  EE                 TT
+                                            NN      NNNN  EE                 TT
+                                           NN       NNN  EE                 TT
+                                          NN        NN  EEEEEEEEEEEE       TT
+                                         NN         N  EEEEEEEEEEEE       TT
+
+
+
+                   SSSSSSSSSS        11        8888888888                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       888888888888                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       88        88                                                     ZZ
+                  SS                 11       88        88                                                    ZZ
+                  SSS                11        88      88                                                    ZZ
+                   SSSSSSSSS         11         88888888                                                 ZZZZZZZ
+                    SSSSSSSSS        11         88888888                                                 ZZZZZZZ
+                           SSS       11        88      88                                                 ZZ
+                            SS       11       88        88                                               ZZ
+                  SS        SS       11       88        88                                              ZZ
+                  SSSSSSSSSSSS   1111111111   888888888888                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    8888888888                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18  START  Z****
+****Z  START  STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18  START  Z****
+****Z  START  STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18  START  Z****
+****Z  START  STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.34.04 STC   18  $HASP373 NET      STARTED
+ 4.34.04 STC   18  IEF403I NET - STARTED - TIME=04.34.04
+ 4.34.05 STC   18  IST025I  BLDL FAILED FOR IEDIAE   IN VTAMLIB
+ 4.34.05 STC   18  IST025I  BLDL FAILED FOR IEDIAE   IN VTAMLIB
+ 4.34.05 STC   18  IST025I  BLDL FAILED FOR IEDIAE   IN VTAMLIB
+ 4.34.05 STC   18  IST025I  BLDL FAILED FOR IEDIAE   IN VTAMLIB
+ 4.34.05 STC   18  IST025I  BLDL FAILED FOR IEDIAK   IN VTAMLIB
+ 4.34.05 STC   18  IST025I  BLDL FAILED FOR IEDIAK   IN VTAMLIB
+ 4.34.05 STC   18  IST110I  NETWORK SOLICITOR STARTED
+ 4.34.05 STC   18  IST093I  ATSO     ACTIVE
+ 4.34.05 STC   18  IST093I  ASTF     ACTIVE
+ 4.34.05 STC   18  IST093I  ARPF     ACTIVE
+ 4.34.05 STC   18  IST093I  AICOM    ACTIVE
+ 4.34.05 STC   18  IST093I  ASNASOL  ACTIVE
+ 4.34.06 STC   18  IST093I  AJRP     ACTIVE
+ 4.34.06 STC   18  IST093I  L3274    ACTIVE
+ 4.34.06 STC   18  IEA000I 0C1,IOE,05,0200,400000000001,,,NET     ,04.34.06
+ 4.34.06 STC   18  IST093I  L3791    ACTIVE
+ 4.34.06 STC   18  IEA000I 0C2,IOE,05,0200,400000000001,,,NET     ,04.34.06
+ 4.34.06 STC   18  IEA000I 0C3,IOE,05,0200,400000000001,,,NET     ,04.34.06
+ 4.34.06 STC   18  IST093I  S3705    ACTIVE
+ 4.34.06 STC   18  IEA000I 0C4,IOE,05,0200,400000000001,,,NET     ,04.34.06
+ 4.34.06 STC   18  IEA000I 0C5,IOE,05,0200,400000000001,,,NET     ,04.34.06
+ 4.34.06 STC   18  IEA000I 0C6,IOE,05,0200,400000000001,,,NET     ,04.34.06
+ 4.34.06 STC   18  IFL003I  IFLOADRN COMPLETED
+ 4.34.06 STC   18  IST270I  370X N07      NOW LOADED WITH LOADMOD N07
+ 4.34.07 STC   18  S TSO
+ 4.34.07 STC   18  IST020I  VTAM INITIALIZATION COMPLETE
+ 4.34.11 STC   18  IFL003I  IFLOADRN COMPLETED
+ 4.34.11 STC   18  IST270I  370X N10      NOW LOADED WITH LOADMOD N10
+ 4.34.11 STC   18  IST093I  N07      ACTIVE
+ 4.34.11 STC   18  IST093I  N07P3    ACTIVE
+ 4.34.11 STC   18  IST093I  N08      ACTIVE
+ 4.34.16 STC   18  IFL003I  IFLOADRN COMPLETED
+ 4.34.16 STC   18  IST270I  370X N12      NOW LOADED WITH LOADMOD N12
+ 4.34.16 STC   18  IST093I  N10      ACTIVE
+ 4.34.16 STC   18  IST093I  N10P3    ACTIVE
+ 4.34.16 STC   18  IST093I  N11      ACTIVE
+ 4.34.21 STC   18  IFL003I  IFLOADRN COMPLETED
+ 4.34.21 STC   18  IST270I  370X N14      NOW LOADED WITH LOADMOD N14
+ 4.34.21 STC   18  IST093I  N12      ACTIVE
+ 4.34.21 STC   18  IST093I  N12P3    ACTIVE
+ 4.34.21 STC   18  IST093I  N13      ACTIVE
+ 4.34.26 STC   18  IST093I  N14      ACTIVE
+ 4.34.26 STC   18  IST093I  N14P3    ACTIVE
+ 4.34.26 STC   18  IST093I  N15      ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3767S11 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3767S21 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3767S31 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3767S41 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3278S11 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3278S21 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3278S31 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3278S41 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3278L11 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3278L21 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+ 4.34.30 STC   18  IST093I  T3767L31 ACTIVE
+ 4.34.30 STC   18  IST097I  VARY     ACCEPTED
+
+
+$HASP185 PRINTER2 TERMINATED
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+        10 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //NET      JOB MSGLEVEL=1                                               STC   18
+    2     //STARTING EXEC NET
+    3     XXNET     PROC
+    4     XXIEFPROC EXEC PGM=ISTINM01,TIME=1440,REGION=4096K,DPRTY=(14,15)
+    5     XXVTAMLST  DD  DSN=SYS1.VTAMLST,DISP=SHR
+    6     XXVTAMLIB  DD  DSN=SYS1.VTAMLIB,DISP=SHR
+    7     XXVTAMOBJ  DD  UNIT=SYSDA,SPACE=(CYL,(1,1,5)),DISP=NEW,
+          XX             DCB=(RECFM=F,LRECL=3152,BLKSIZE=3152)
+                                                    NN        NN  EEEEEEEEEEEE  TTTTTTTTTTTT
+                                                   NNN       NN  EEEEEEEEEEEE  TTTTTTTTTTTT
+                                                  NNNN      NN  EE                 TT
+                                                 NN NN     NN  EE                 TT
+                                                NN  NN    NN  EE                 TT
+                                               NN   NN   NN  EEEEEEEE           TT
+                                              NN    NN  NN  EEEEEEEE           TT
+                                             NN     NN NN  EE                 TT
+                                            NN      NNNN  EE                 TT
+                                           NN       NNN  EE                 TT
+                                          NN        NN  EEEEEEEEEEEE       TT
+                                         NN         N  EEEEEEEEEEEE       TT
+
+
+
+                   SSSSSSSSSS        11        8888888888                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       888888888888                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       88        88                                                     ZZ
+                  SS                 11       88        88                                                    ZZ
+                  SSS                11        88      88                                                    ZZ
+                   SSSSSSSSS         11         88888888                                                 ZZZZZZZ
+                    SSSSSSSSS        11         88888888                                                 ZZZZZZZ
+                           SSS       11        88      88                                                 ZZ
+                            SS       11       88        88                                               ZZ
+                  SS        SS       11       88        88                                              ZZ
+                  SSSSSSSSSSSS   1111111111   888888888888                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    8888888888                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18   END   Z****
+****Z   END   STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18   END   Z****
+****Z   END   STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18   END   Z****
+****Z   END   STC   18  NET                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   18   END   Z****
+                                                           TTTTTTTTTTTT  PPPPPPPPPPP
+                                                          TTTTTTTTTTTT  PPPPPPPPPPPP
+                                                              TT       PP        PP
+                                                             TT       PP        PP
+                                                            TT       PP        PP
+                                                           TT       PPPPPPPPPPPP
+                                                          TT       PPPPPPPPPPP
+                                                         TT       PP
+                                                        TT       PP
+                                                       TT       PP
+                                                      TT       PP
+                                                     TT       PP
+
+
+
+                   SSSSSSSSSS        11        9999999999                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       999999999999                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       99        99                                                     ZZ
+                  SS                 11       99        99                                                    ZZ
+                  SSS                11       99        99                                                   ZZ
+                   SSSSSSSSS         11       999999999999                                               ZZZZZZZ
+                    SSSSSSSSS        11       999999999999                                               ZZZZZZZ
+                           SSS       11                 99                                                ZZ
+                            SS       11                 99                                               ZZ
+                  SS        SS       11       99        99                                              ZZ
+                  SSSSSSSSSSSS   1111111111   999999999999                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    9999999999                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19  START  Z****
+****Z  START  STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19  START  Z****
+****Z  START  STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19  START  Z****
+****Z  START  STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.34.04 STC   19  $HASP373 TP       STARTED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+        31 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //TP       JOB MSGLEVEL=1                                               STC   19
+    2     //STARTING EXEC TP
+    3     XXTCAM     EXEC PGM=IEDQTCAM,ROLL=(NO,NO),TIME=1440,DPRTY=(15,15),
+          XX             REGION=2M
+    4     XXSYSABEND DD  SYSOUT=A,SPACE=(CYL,(20,10),RLSE)
+    5     XXT07      DD  UNIT=664
+    6     XXT10      DD  UNIT=665
+    7     XXT12      DD  UNIT=666
+    8     XXT14      DD  UNIT=667
+    9     XXL3270    DD  UNIT=3C0
+   10     XX         DD  UNIT=3C1
+   11     XX         DD  UNIT=3C2
+   12     XX         DD  UNIT=3C3
+   13     XX         DD  UNIT=3C4
+   14     XX         DD  UNIT=3C5
+   15     XX         DD  UNIT=3C6
+   16     XX         DD  UNIT=3C7
+   17     XXLTTYA    DD  UNIT=680
+   18     XX         DD  UNIT=681
+   19     XX         DD  UNIT=682
+   20     XX         DD  UNIT=683
+   21     XXL2741C   DD  UNIT=688
+   22     XX         DD  UNIT=689
+   23     XX         DD  UNIT=68A
+   24     XX         DD  UNIT=68B
+   25     XXL2741P   DD  UNIT=68C
+   26     XX         DD  UNIT=68D
+   27     XX         DD  UNIT=68E
+   28     XX         DD  UNIT=68F
+                                                           TTTTTTTTTTTT  PPPPPPPPPPP
+                                                          TTTTTTTTTTTT  PPPPPPPPPPPP
+                                                              TT       PP        PP
+                                                             TT       PP        PP
+                                                            TT       PP        PP
+                                                           TT       PPPPPPPPPPPP
+                                                          TT       PPPPPPPPPPP
+                                                         TT       PP
+                                                        TT       PP
+                                                       TT       PP
+                                                      TT       PP
+                                                     TT       PP
+
+
+
+                   SSSSSSSSSS        11        9999999999                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS      111       999999999999                                            ZZZZZZZZZZZZ
+                  SS        SS     1111       99        99                                                     ZZ
+                  SS                 11       99        99                                                    ZZ
+                  SSS                11       99        99                                                   ZZ
+                   SSSSSSSSS         11       999999999999                                               ZZZZZZZ
+                    SSSSSSSSS        11       999999999999                                               ZZZZZZZ
+                           SSS       11                 99                                                ZZ
+                            SS       11                 99                                               ZZ
+                  SS        SS       11       99        99                                              ZZ
+                  SSSSSSSSSSSS   1111111111   999999999999                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    1111111111    9999999999                                             ZZZZZZZZZZZZ
+
+
+****Z   END   STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19   END   Z****
+****Z   END   STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19   END   Z****
+****Z   END   STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19   END   Z****
+****Z   END   STC   19  TP                              ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   19   END   Z****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS    2222222222     00000000                                              ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222   0000000000                                             ZZZZZZZZZZZZ
+                  SS        SS  22        22  00      0000                                                     ZZ
+                  SS                      22  00     00 00                                                    ZZ
+                  SSS                     22  00    00  00                                                   ZZ
+                   SSSSSSSSS             22   00   00   00                                               ZZZZZZZ
+                    SSSSSSSSS          22     00  00    00                                               ZZZZZZZ
+                           SSS       22       00 00     00                                                ZZ
+                            SS     22         0000      00                                               ZZ
+                  SS        SS   22           000       00                                              ZZ
+                  SSSSSSSSSSSS  222222222222   0000000000                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222    00000000                                              ZZZZZZZZZZZZ
+
+
+****Z  START  STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20  START  Z****
+****Z  START  STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20  START  Z****
+****Z  START  STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20  START  Z****
+****Z  START  STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.34.04 STC   20  $HASP373 MF1      STARTED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 26 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+       212 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+ (UNKNOWN) MINUTES EXECUTION TIME
+    1     //MF1      JOB MSGLEVEL=1                                               STC   20
+    2     //MF1      EXEC MF1
+    3     XXIEFPROC EXEC PGM=IRBMFMFC,DPRTY=(15,15),REGION=300K                   00010000
+    4     XXIEFRDER DD DSN=SYS1.PARMLIB,DISP=SHR                                  00020000
+    5     XXSYSUDUMP DD SYSOUT=A                                                  00030000
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS    2222222222     00000000                                              ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  222222222222   0000000000                                             ZZZZZZZZZZZZ
+                  SS        SS  22        22  00      0000                                                     ZZ
+                  SS                      22  00     00 00                                                    ZZ
+                  SSS                     22  00    00  00                                                   ZZ
+                   SSSSSSSSS             22   00   00   00                                               ZZZZZZZ
+                    SSSSSSSSS          22     00  00    00                                               ZZZZZZZ
+                           SSS       22       00 00     00                                                ZZ
+                            SS     22         0000      00                                               ZZ
+                  SS        SS   22           000       00                                              ZZ
+                  SSSSSSSSSSSS  222222222222   0000000000                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS   222222222222    00000000                                              ZZZZZZZZZZZZ
+
+
+****Z   END   STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20   END   Z****
+****Z   END   STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20   END   Z****
+****Z   END   STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20   END   Z****
+****Z   END   STC   20  MF1                             ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   20   END   Z****
+                 BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP    SSSSSSSSSS   EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPP   FFFFFFFFFFFF
+                BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  SSSSSSSSSSSS  EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPPP  FFFFFFFFFFFF
+               BB        BB  SS        SS  PP        PP  SS        SS  EE                 TT       PP        PP  FF
+              BB        BB  SS            PP        PP  SS            EE                 TT       PP        PP  FF
+             BB       BB   SSS           PP        PP  SSS           EE                 TT       PP        PP  FF
+            BBBBBBBBBB     SSSSSSSSS    PPPPPPPPPPPP   SSSSSSSSS    EEEEEEEE           TT       PPPPPPPPPPPP  FFFFFFFF
+           BBBBBBBBBB      SSSSSSSSS   PPPPPPPPPPP     SSSSSSSSS   EEEEEEEE           TT       PPPPPPPPPPP   FFFFFFFF
+          BB       BB            SSS  PP                     SSS  EE                 TT       PP            FF
+         BB        BB            SS  PP                      SS  EE                 TT       PP            FF
+        BB        BB  SS        SS  PP            SS        SS  EE                 TT       PP            FF
+       BBBBBBBBBBBB  SSSSSSSSSSSS  PP            SSSSSSSSSSSS  EEEEEEEEEEEE       TT       PP            FF
+      BBBBBBBBBBB    SSSSSSSSSS   PP             SSSSSSSSSS   EEEEEEEEEEEE       TT       PP            FF
+
+
+
+                   SSSSSSSSSS    3333333333    3333333333                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  333333333333  333333333333                                            ZZZZZZZZZZZZ
+                  SS        SS  33        33  33        33                                                     ZZ
+                  SS                      33            33                                                    ZZ
+                  SSS                     33            33                                                   ZZ
+                   SSSSSSSSS           3333          3333                                                ZZZZZZZ
+                    SSSSSSSSS          3333          3333                                                ZZZZZZZ
+                           SSS            33            33                                                ZZ
+                            SS            33            33                                               ZZ
+                  SS        SS  33        33  33        33                                              ZZ
+                  SSSSSSSSSSSS  333333333333  333333333333                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333    3333333333                                             ZZZZZZZZZZZZ
+
+
+****Z  START  STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33  START  Z****
+****Z  START  STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33  START  Z****
+****Z  START  STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33  START  Z****
+****Z  START  STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+22.32.22 STC   33  $HASP373 BSPSETPF STARTED
+22.32.22 STC   33  BSPSP91I - Parms passed: NOREPLYU
+22.32.22 STC   33  BSPSP93I - PFK definitions will be updated in memory
+22.32.22 STC   33  BSPSP22I - Dataset processed: SYS1.PARMLIB
+22.32.22 STC   33  BSPSP23I - on volume TK5RES
+22.32.22 STC   33  BSPSP21I - Member being processed: SETPFK01
+22.32.22 STC   33  +BSPSP98I - Member processed, LASTCC=0000
+22.32.22 STC   33  +BSPSP21I - Member being processed: SETPFK02
+22.32.22 STC   33  +BSPSP98I - Member processed, LASTCC=0000
+22.32.22 STC   33  +BSPSP99I - End of processing, MAXRC=0000
+22.32.22 STC   33  $HASP395 BSPSETPF ENDED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 28 JAN 26 JOB EXECUTION DATE
 
 
          2 CARDS READ
@@ -734,7 +1380,7 @@ IEF285I   JES2.STC00007.SO0101                         SYSOUT
 
 
       0.00 MINUTES EXECUTION TIME
-    1     //BSPSETPF JOB MSGLEVEL=1                                               STC   16
+    1     //BSPSETPF JOB MSGLEVEL=1                                               STC   33
     2     //STARTING EXEC BSPSETPF,PARM=NOREPLYU
     3     XXIEFPROC EXEC PGM=BSPSETPF,PARM=NOREPLYU
 IEF236I ALLOC. FOR BSPSETPF BSPSETPF
@@ -752,7 +1398,7 @@ BSPSP99I - End of processing, MAXRC=0000
 IEF285I   SYS1.PARMLIB                                 KEPT
 IEF285I   VOL SER NOS= TK5RES.
 IEF142I BSPSETPF BSPSETPF - STEP WAS EXECUTED - COND CODE 0000
-IEF285I   JES2.STC00016.SO0101                         SYSOUT
+IEF285I   JES2.STC00033.SO0101                         SYSOUT
                  BBBBBBBBBBB    SSSSSSSSSS   PPPPPPPPPPP    SSSSSSSSSS   EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPP   FFFFFFFFFFFF
                 BBBBBBBBBBBB  SSSSSSSSSSSS  PPPPPPPPPPPP  SSSSSSSSSSSS  EEEEEEEEEEEE  TTTTTTTTTTTT  PPPPPPPPPPPP  FFFFFFFFFFFF
                BB        BB  SS        SS  PP        PP  SS        SS  EE                 TT       PP        PP  FF
@@ -768,24 +1414,24 @@ IEF285I   JES2.STC00016.SO0101                         SYSOUT
 
 
 
-                   SSSSSSSSSS        11        6666666666                                             ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS      111       666666666666                                            ZZZZZZZZZZZZ
-                  SS        SS     1111       66        66                                                     ZZ
-                  SS                 11       66                                                              ZZ
-                  SSS                11       66                                                             ZZ
-                   SSSSSSSSS         11       66666666666                                                ZZZZZZZ
-                    SSSSSSSSS        11       666666666666                                               ZZZZZZZ
-                           SSS       11       66        66                                                ZZ
-                            SS       11       66        66                                               ZZ
-                  SS        SS       11       66        66                                              ZZ
-                  SSSSSSSSSSSS   1111111111   666666666666                                             ZZZZZZZZZZZ
-                   SSSSSSSSSS    1111111111    6666666666                                             ZZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333    3333333333                                             ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  333333333333  333333333333                                            ZZZZZZZZZZZZ
+                  SS        SS  33        33  33        33                                                     ZZ
+                  SS                      33            33                                                    ZZ
+                  SSS                     33            33                                                   ZZ
+                   SSSSSSSSS           3333          3333                                                ZZZZZZZ
+                    SSSSSSSSS          3333          3333                                                ZZZZZZZ
+                           SSS            33            33                                                ZZ
+                            SS            33            33                                               ZZ
+                  SS        SS  33        33  33        33                                              ZZ
+                  SSSSSSSSSSSS  333333333333  333333333333                                             ZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333    3333333333                                             ZZZZZZZZZZZZ
 
 
-****Z   END   STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16   END   Z****
-****Z   END   STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16   END   Z****
-****Z   END   STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16   END   Z****
-****Z   END   STC   16  BSPSETPF                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   16   END   Z****
+****Z   END   STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33   END   Z****
+****Z   END   STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33   END   Z****
+****Z   END   STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33   END   Z****
+****Z   END   STC   33  BSPSETPF                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   33   END   Z****
                  DDDDDDDDD     YY        YY  NN        NN   AAAAAAAAAA   MM        MM   AAAAAAAAAA    SSSSSSSSSS   KK        KK
                 DDDDDDDDDD    YY        YY  NNN       NN  AAAAAAAAAAAA  MMM      MMM  AAAAAAAAAAAA  SSSSSSSSSSSS  KK       KK
                DD       DD    YY      YY   NNNN      NN  AA        AA  MMMM    MMMM  AA        AA  SS        SS  KK      KK
@@ -801,39 +1447,39 @@ IEF285I   JES2.STC00016.SO0101                         SYSOUT
 
 
 
-                   SSSSSSSSSS        11       777777777777                                            ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS      111       77777777777                                             ZZZZZZZZZZZZ
-                  SS        SS     1111       77      77                                                       ZZ
-                  SS                 11              77                                                       ZZ
-                  SSS                11             77                                                       ZZ
-                   SSSSSSSSS         11            77                                                    ZZZZZZZ
-                    SSSSSSSSS        11            77                                                    ZZZZZZZ
-                           SSS       11            77                                                     ZZ
-                            SS       11            77                                                    ZZ
-                  SS        SS       11            77                                                   ZZ
-                  SSSSSSSSSSSS   1111111111        77                                                  ZZZZZZZZZZZ
-                   SSSSSSSSSS    1111111111        77                                                 ZZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333         444                                               ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  333333333333       4444                                               ZZZZZZZZZZZZ
+                  SS        SS  33        33      44 44                                                        ZZ
+                  SS                      33     44  44                                                       ZZ
+                  SSS                     33    44   44                                                      ZZ
+                   SSSSSSSSS           3333    44444444444                                               ZZZZZZZ
+                    SSSSSSSSS          3333   444444444444                                               ZZZZZZZ
+                           SSS            33         44                                                   ZZ
+                            SS            33         44                                                  ZZ
+                  SS        SS  33        33         44                                                 ZZ
+                  SSSSSSSSSSSS  333333333333         44                                                ZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333          44                                               ZZZZZZZZZZZZ
 
 
-****Z  START  STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17  START  Z****
-****Z  START  STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17  START  Z****
-****Z  START  STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17  START  Z****
-****Z  START  STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17  START  Z****
+****Z  START  STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34  START  Z****
+****Z  START  STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34  START  Z****
+****Z  START  STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34  START  Z****
+****Z  START  STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34  START  Z****
                                                 J E S 2   J O B   L O G
 
 
- 4.34.02 STC   17  $HASP373 DYNAMASK STARTED
- 4.34.02 STC   17  IEF403I DYNAMASK - STARTED - TIME=04.34.02
- 4.34.02 STC   17  DMSK00I DYNAMASK DONE ****
- 4.34.02 STC   17  DMSK06I  START
- 4.34.02 STC   17  IEF404I DYNAMASK - ENDED - TIME=04.34.02
- 4.34.02 STC   17  $HASP395 DYNAMASK ENDED
+22.32.52 STC   34  $HASP373 DYNAMASK STARTED
+22.32.52 STC   34  IEF403I DYNAMASK - STARTED - TIME=22.32.52
+22.32.52 STC   34  DMSK00I DYNAMASK DONE ****
+22.32.52 STC   34  DMSK06I  START
+22.32.52 STC   34  IEF404I DYNAMASK - ENDED - TIME=22.32.52
+22.32.52 STC   34  $HASP395 DYNAMASK ENDED
 
 
 ------ JES2 JOB STATISTICS ------
 
 
- 26 JAN 26 JOB EXECUTION DATE
+ 28 JAN 26 JOB EXECUTION DATE
 
 
          2 CARDS READ
@@ -846,7 +1492,7 @@ IEF285I   JES2.STC00016.SO0101                         SYSOUT
 
 
       0.00 MINUTES EXECUTION TIME
-    1     //DYNAMASK JOB MSGLEVEL=1                                               STC   17
+    1     //DYNAMASK JOB MSGLEVEL=1                                               STC   34
     2     //STARTING EXEC DYNAMASK
     3     XXDYNAMASK PROC M=EDT00,SO=A,P='START IPL POSTPROCESS'                  00010000
     4     XXDYNAMASK EXEC PGM=DYNAMASK,PARM=&P                                    00020000
@@ -865,7 +1511,7 @@ DMSK06I  START
 IEF142I DYNAMASK DYNAMASK - STEP WAS EXECUTED - COND CODE 0000
 IEF285I   SYS1.PARMLIB                                 KEPT
 IEF285I   VOL SER NOS= TK5RES.
-IEF285I   JES2.STC00017.SO0101                         SYSOUT
+IEF285I   JES2.STC00034.SO0101                         SYSOUT
                  DDDDDDDDD     YY        YY  NN        NN   AAAAAAAAAA   MM        MM   AAAAAAAAAA    SSSSSSSSSS   KK        KK
                 DDDDDDDDDD    YY        YY  NNN       NN  AAAAAAAAAAAA  MMM      MMM  AAAAAAAAAAAA  SSSSSSSSSSSS  KK       KK
                DD       DD    YY      YY   NNNN      NN  AA        AA  MMMM    MMMM  AA        AA  SS        SS  KK      KK
@@ -881,24 +1527,24 @@ IEF285I   JES2.STC00017.SO0101                         SYSOUT
 
 
 
-                   SSSSSSSSSS        11       777777777777                                            ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS      111       77777777777                                             ZZZZZZZZZZZZ
-                  SS        SS     1111       77      77                                                       ZZ
-                  SS                 11              77                                                       ZZ
-                  SSS                11             77                                                       ZZ
-                   SSSSSSSSS         11            77                                                    ZZZZZZZ
-                    SSSSSSSSS        11            77                                                    ZZZZZZZ
-                           SSS       11            77                                                     ZZ
-                            SS       11            77                                                    ZZ
-                  SS        SS       11            77                                                   ZZ
-                  SSSSSSSSSSSS   1111111111        77                                                  ZZZZZZZZZZZ
-                   SSSSSSSSSS    1111111111        77                                                 ZZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333         444                                               ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS  333333333333       4444                                               ZZZZZZZZZZZZ
+                  SS        SS  33        33      44 44                                                        ZZ
+                  SS                      33     44  44                                                       ZZ
+                  SSS                     33    44   44                                                      ZZ
+                   SSSSSSSSS           3333    44444444444                                               ZZZZZZZ
+                    SSSSSSSSS          3333   444444444444                                               ZZZZZZZ
+                           SSS            33         44                                                   ZZ
+                            SS            33         44                                                  ZZ
+                  SS        SS  33        33         44                                                 ZZ
+                  SSSSSSSSSSSS  333333333333         44                                                ZZZZZZZZZZZ
+                   SSSSSSSSSS    3333333333          44                                               ZZZZZZZZZZZZ
 
 
-****Z   END   STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17   END   Z****
-****Z   END   STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17   END   Z****
-****Z   END   STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17   END   Z****
-****Z   END   STC   17  DYNAMASK                        ROOM        4.34.05 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   17   END   Z****
+****Z   END   STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34   END   Z****
+****Z   END   STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34   END   Z****
+****Z   END   STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34   END   Z****
+****Z   END   STC   34  DYNAMASK                        ROOM       10.32.55 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   34   END   Z****
                   IIIIIIIIII   NN        NN   IIIIIIIIII    SSSSSSSSSS   DDDDDDDDD      SSSSSSSSSS   TTTTTTTTTTTT  DDDDDDDDD
                  IIIIIIIIII   NNN       NN   IIIIIIIIII   SSSSSSSSSSSS  DDDDDDDDDD    SSSSSSSSSSSS  TTTTTTTTTTTT  DDDDDDDDDD
                     II       NNNN      NN       II       SS        SS  DD       DD   SS        SS       TT       DD       DD
@@ -914,37 +1560,37 @@ IEF285I   JES2.STC00017.SO0101                         SYSOUT
 
 
 
-                   SSSSSSSSSS    2222222222         444                                               ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  222222222222       4444                                               ZZZZZZZZZZZZ
-                  SS        SS  22        22      44 44                                                        ZZ
-                  SS                      22     44  44                                                       ZZ
-                  SSS                     22    44   44                                                      ZZ
-                   SSSSSSSSS             22    44444444444                                               ZZZZZZZ
-                    SSSSSSSSS          22     444444444444                                               ZZZZZZZ
-                           SSS       22              44                                                   ZZ
-                            SS     22                44                                                  ZZ
-                  SS        SS   22                  44                                                 ZZ
-                  SSSSSSSSSSSS  222222222222         44                                                ZZZZZZZZZZZ
-                   SSSSSSSSSS   222222222222         44                                               ZZZZZZZZZZZZ
+                   SSSSSSSSSS         444          11                                                 ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS       4444         111                                                 ZZZZZZZZZZZZ
+                  SS        SS      44 44        1111                                                          ZZ
+                  SS               44  44          11                                                         ZZ
+                  SSS             44   44          11                                                        ZZ
+                   SSSSSSSSS     44444444444       11                                                    ZZZZZZZ
+                    SSSSSSSSS   444444444444       11                                                    ZZZZZZZ
+                           SSS         44          11                                                     ZZ
+                            SS         44          11                                                    ZZ
+                  SS        SS         44          11                                                   ZZ
+                  SSSSSSSSSSSS         44      1111111111                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS          44      1111111111                                             ZZZZZZZZZZZZ
 
 
-****Z  START  STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24  START  Z****
-****Z  START  STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24  START  Z****
-****Z  START  STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24  START  Z****
-****Z  START  STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24  START  Z****
+****Z  START  STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41  START  Z****
+****Z  START  STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41  START  Z****
+****Z  START  STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41  START  Z****
+****Z  START  STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41  START  Z****
                                                 J E S 2   J O B   L O G
 
 
- 4.34.58 STC   24  $HASP373 INISDSTD STARTED
- 4.34.58 STC   24  IEF403I INISDSTD - STARTED - TIME=04.34.58
- 4.34.58 STC   24  IEF404I INISDSTD - ENDED - TIME=04.34.58
- 4.34.58 STC   24  $HASP395 INISDSTD ENDED
+22.33.47 STC   41  $HASP373 INISDSTD STARTED
+22.33.47 STC   41  IEF403I INISDSTD - STARTED - TIME=22.33.47
+22.33.47 STC   41  IEF404I INISDSTD - ENDED - TIME=22.33.47
+22.33.47 STC   41  $HASP395 INISDSTD ENDED
 
 
 ------ JES2 JOB STATISTICS ------
 
 
- 26 JAN 26 JOB EXECUTION DATE
+ 28 JAN 26 JOB EXECUTION DATE
 
 
          2 CARDS READ
@@ -957,7 +1603,7 @@ IEF285I   JES2.STC00017.SO0101                         SYSOUT
 
 
       0.00 MINUTES EXECUTION TIME
-    1     //INISDSTD JOB MSGLEVEL=1                                               STC   24
+    1     //INISDSTD JOB MSGLEVEL=1                                               STC   41
     2     //STARTING EXEC INISDSTD
     3     XXINISDSTD PROC
     4     XXINIT     EXEC PGM=IKJEFT01
@@ -987,22 +1633,317 @@ IEF285I   VOL SER NOS= TK5RES.
 
 
 
-                   SSSSSSSSSS    2222222222         444                                               ZZZZZZZZZZZZ
-                  SSSSSSSSSSSS  222222222222       4444                                               ZZZZZZZZZZZZ
-                  SS        SS  22        22      44 44                                                        ZZ
-                  SS                      22     44  44                                                       ZZ
-                  SSS                     22    44   44                                                      ZZ
-                   SSSSSSSSS             22    44444444444                                               ZZZZZZZ
-                    SSSSSSSSS          22     444444444444                                               ZZZZZZZ
-                           SSS       22              44                                                   ZZ
-                            SS     22                44                                                  ZZ
-                  SS        SS   22                  44                                                 ZZ
-                  SSSSSSSSSSSS  222222222222         44                                                ZZZZZZZZZZZ
-                   SSSSSSSSSS   222222222222         44                                               ZZZZZZZZZZZZ
+                   SSSSSSSSSS         444          11                                                 ZZZZZZZZZZZZ
+                  SSSSSSSSSSSS       4444         111                                                 ZZZZZZZZZZZZ
+                  SS        SS      44 44        1111                                                          ZZ
+                  SS               44  44          11                                                         ZZ
+                  SSS             44   44          11                                                        ZZ
+                   SSSSSSSSS     44444444444       11                                                    ZZZZZZZ
+                    SSSSSSSSS   444444444444       11                                                    ZZZZZZZ
+                           SSS         44          11                                                     ZZ
+                            SS         44          11                                                    ZZ
+                  SS        SS         44          11                                                   ZZ
+                  SSSSSSSSSSSS         44      1111111111                                              ZZZZZZZZZZZ
+                   SSSSSSSSSS          44      1111111111                                             ZZZZZZZZZZZZ
 
 
-****Z   END   STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24   END   Z****
-****Z   END   STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24   END   Z****
-****Z   END   STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24   END   Z****
-****Z   END   STC   24  INISDSTD                        ROOM        4.34.58 AM 26 JAN 26  PRINTER2  SYS TK5R  STC   24   END   Z****
+****Z   END   STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41   END   Z****
+****Z   END   STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41   END   Z****
+****Z   END   STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41   END   Z****
+****Z   END   STC   41  INISDSTD                        ROOM       10.33.47 PM 28 JAN 26  PRINTER2  SYS TK5R  STC   41   END   Z****
+                               HH        HH  EEEEEEEEEEEE  RRRRRRRRRRR    CCCCCCCCCC     00000000         11
+                              HH        HH  EEEEEEEEEEEE  RRRRRRRRRRRR  CCCCCCCCCCCC   0000000000       111
+                             HH        HH  EE            RR        RR  CC        CC  00      0000     1111
+                            HH        HH  EE            RR        RR  CC            00     00 00       11
+                           HH        HH  EE            RR        RR  CC            00    00  00       11
+                          HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRRR  CC            00   00   00       11
+                         HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRR   CC            00  00    00       11
+                        HH        HH  EE            RR    RR      CC            00 00     00       11
+                       HH        HH  EE            RR     RR     CC            0000      00       11
+                      HH        HH  EE            RR      RR    CC        CC  000       00       11
+                     HH        HH  EEEEEEEEEEEE  RR       RR   CCCCCCCCCCCC   0000000000    1111111111
+                    HH        HH  EEEEEEEEEEEE  RR        RR   CCCCCCCCCC     00000000     1111111111
+
+
+
+                  TTTTTTTTTTTT       11                                                               ZZZZZZZZZZZZ
+                  TTTTTTTTTTTT      111                                                               ZZZZZZZZZZZZ
+                       TT          1111                                                                        ZZ
+                       TT            11                                                                       ZZ
+                       TT            11                                                                      ZZ
+                       TT            11                                                                  ZZZZZZZ
+                       TT            11                                                                  ZZZZZZZ
+                       TT            11                                                                   ZZ
+                       TT            11                                                                  ZZ
+                       TT            11                                                                 ZZ
+                       TT        1111111111                                                            ZZZZZZZZZZZ
+                       TT        1111111111                                                           ZZZZZZZZZZZZ
+
+
+****Z  START  TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1  START  Z****
+****Z  START  TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1  START  Z****
+****Z  START  TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1  START  Z****
+****Z  START  TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+22.38.14 TSU    1  $HASP373 HERC01   STARTED
+22.38.14 TSU    1  IEF125I HERC01 - LOGGED ON - TIME=22.38.14
+23.42.26 TSU    1  IEF450I HERC01 ISPFTSO ISPLOGON - ABEND S522 U0000 - TIME=23.42.26
+23.42.26 TSU    1  IEFACTRT - Stepname  Procstep  Program   Retcode
+23.42.26 TSU    1  IEF126I HERC01 - LOGGED OFF - TIME=23.42.26
+23.42.26 TSU    1  $HASP395 HERC01   ENDED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 28 JAN 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+       210 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+     64.20 MINUTES EXECUTION TIME
+    1     //HERC01  JOB  REGION=08192K                                            TSU    1
+    2     //ISPLOGON EXEC ISPLOGON
+    3     XXISPLOGON PROC
+    4     XXISPFTSO  EXEC PGM=IKJEFT01,PARM=ISPLOGON,DYNAMNBR=64
+    5     XXSTEPLIB  DD  DISP=SHR,DSN=ISP.V2R2M0.LLIB
+    6     XXSYSEXEC  DD  DISP=SHR,DSN=SYS2.EXEC
+    7     XXSYSHELP  DD  DISP=SHR,DSN=SYS1.HELP
+    8     XX         DD  DISP=SHR,DSN=SYS2.HELP
+    9     XXSYSPROC  DD  DISP=SHR,DSN=SYS1.CMDPROC
+   10     XX         DD  DISP=SHR,DSN=SYS2.CMDPROC
+   11     XX         DD  DISP=SHR,DSN=SYS2.REVIEW.CLIB
+   12     XXISPCLIB  DD  DSN=SYS2.ISP.CLIB,DISP=SHR
+   13     XX         DD  DSN=ISP.V2R2M0.CLIB,DISP=SHR
+   14     XXISPLLIB  DD  DSN=SYS2.ISP.LLIB,DISP=SHR
+   15     XXISPMLIB  DD  DSN=SYS2.ISP.MLIB,DISP=SHR
+   16     XX         DD  DSN=ISP.V2R2M0.MLIB,DISP=SHR
+   17     XXISPPLIB  DD  DSN=SYS2.ISP.PLIB,DISP=SHR
+   18     XX         DD  DSN=ISP.V2R2M0.PLIB,DISP=SHR
+   19     XX         DD  DSN=SYS2.REVIEW.PLIB,DISP=SHR
+   20     XXISPSLIB  DD  DSN=SYS2.ISP.SLIB,DISP=SHR
+   21     XX         DD  DSN=ISP.V2R2M0.SLIB,DISP=SHR
+   22     XXISPTLIB  DD  DSN=SYS2.ISP.TLIB,DISP=SHR
+   23     XX         DD  DSN=ISP.V2R2M0.TLIB,DISP=SHR
+   24     XXISPTABL  DD  DSN=SYS2.ISP.TLIB,DISP=SHR
+   25     XXISPTRACE DD  TERM=TS
+IEF236I ALLOC. FOR HERC01 ISPFTSO ISPLOGON
+IEF237I 298  ALLOCATED TO STEPLIB
+IEF237I 390  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYSHELP
+IEF237I 390  ALLOCATED TO
+IEF237I 390  ALLOCATED TO SYSPROC
+IEF237I 390  ALLOCATED TO
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPCLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPLLIB
+IEF237I 298  ALLOCATED TO ISPMLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPPLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPSLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPTLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPTABL
+IEF237I TRM  ALLOCATED TO ISPTRACE
+IEF237I 298  ALLOCATED TO SYS00002
+IEF237I 299  ALLOCATED TO SYS00001
+IEF285I   BREXX.V2R5M3.RXLIB                           KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF237I 299  ALLOCATED TO RXLIB
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO SYS00003
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.ISP.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.ISP.PLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.REVIEW.PLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 190  ALLOCATED TO ISPPLIB
+IEF237I 298  ALLOCATED TO SYS00004
+IEF237I 298  ALLOCATED TO SYS00005
+IEF237I 298  ALLOCATED TO SYS00006
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.EXEC                                  KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *-------21
+IEF285I   VOL SER NOS= TK5RES.
+IEF237I 190  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYS00007
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 299  ALLOCATED TO JCC00003
+IEF285I   BREXX.V2R5M3.SAMPLES                         KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *--------3
+IEF285I   VOL SER NOS= TK5RES.
+IEF237I 190  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYS00008
+IEF237I 299  ALLOCATED TO SYS00009
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.CMDPROC                               KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS1.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.REVIEW.CLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 190  ALLOCATED TO SYSPROC
+IEF237I 390  ALLOCATED TO SYS00010
+IEF237I 390  ALLOCATED TO SYS00011
+IEF237I 298  ALLOCATED TO SYS00012
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.EXEC                                  KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO SYSUEXEC
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO SYS00013
+IEF285I   HERC01.CMDPROC                               KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO SYS00014
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO ISPPROF
+IEF472I HERC01 ISPFTSO ISPLOGON - COMPLETION CODE - SYSTEM=522 USER=0000
+IEF285I   ISP.V2R2M0.LLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS1.HELP                                    KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.HELP                                    KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.ISP.CLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.CLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.LLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.MLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.MLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.SLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.SLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.TLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.TLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.TLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS1.UCAT.TK5                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   BREXX.V2R5M3.RXLIB                           KEPT          *--------6
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   SYS1.UCAT.TSO                                KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   HERC01.ISP.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.ISP.PLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.REVIEW.PLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   HERC01.EXEC                                  KEPT          *--------2
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *--------6
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   BREXX.V2R5M3.SAMPLES                         KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   HERC01.CMDPROC                               KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS1.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.REVIEW.CLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   HERC01.ISP.PROF                              KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+                               HH        HH  EEEEEEEEEEEE  RRRRRRRRRRR    CCCCCCCCCC     00000000         11
+                              HH        HH  EEEEEEEEEEEE  RRRRRRRRRRRR  CCCCCCCCCCCC   0000000000       111
+                             HH        HH  EE            RR        RR  CC        CC  00      0000     1111
+                            HH        HH  EE            RR        RR  CC            00     00 00       11
+                           HH        HH  EE            RR        RR  CC            00    00  00       11
+                          HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRRR  CC            00   00   00       11
+                         HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRR   CC            00  00    00       11
+                        HH        HH  EE            RR    RR      CC            00 00     00       11
+                       HH        HH  EE            RR     RR     CC            0000      00       11
+                      HH        HH  EE            RR      RR    CC        CC  000       00       11
+                     HH        HH  EEEEEEEEEEEE  RR       RR   CCCCCCCCCCCC   0000000000    1111111111
+                    HH        HH  EEEEEEEEEEEE  RR        RR   CCCCCCCCCC     00000000     1111111111
+
+
+
+                  TTTTTTTTTTTT       11                                                               ZZZZZZZZZZZZ
+                  TTTTTTTTTTTT      111                                                               ZZZZZZZZZZZZ
+                       TT          1111                                                                        ZZ
+                       TT            11                                                                       ZZ
+                       TT            11                                                                      ZZ
+                       TT            11                                                                  ZZZZZZZ
+                       TT            11                                                                  ZZZZZZZ
+                       TT            11                                                                   ZZ
+                       TT            11                                                                  ZZ
+                       TT            11                                                                 ZZ
+                       TT        1111111111                                                            ZZZZZZZZZZZ
+                       TT        1111111111                                                           ZZZZZZZZZZZZ
+
+
+****Z   END   TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1   END   Z****
+****Z   END   TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1   END   Z****
+****Z   END   TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1   END   Z****
+****Z   END   TSU    1  HERC01                          ROOM       11.42.26 PM 28 JAN 26  PRINTER2  SYS TK5R  TSU    1   END   Z****
 

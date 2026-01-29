@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust Graph - Mainframe AI Assistant</title>
+    <link rel="stylesheet" href="/static/css/base.css">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #1a1a1a;
+            --bg-tertiary: #2a2a2a;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #00ff88;
+            --accent-dim: #00aa55;
+            --border: #333;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            font-family: 'SF Mono', 'Consolas', monospace;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 280px 1fr 320px;
+            grid-template-rows: 50px 1fr;
+            height: 100vh;
+            gap: 1px;
+            background: var(--border);
+        }
+
+        header {
+            grid-column: 1 / -1;
+            background: var(--bg-secondary);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        header h1 {
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--accent);
+        }
+
+        .stats {
+            display: flex;
+            gap: 20px;
+            font-size: 12px;
+        }
+
+        .stat {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .stat-value {
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .sidebar {
+            background: var(--bg-secondary);
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .sidebar h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+            padding-bottom: 5px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .node-types, .queries {
+            margin-bottom: 20px;
+        }
+
+        .node-type, .query-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 10px;
+            margin-bottom: 4px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: background 0.2s;
+        }
+
+        .node-type:hover, .query-btn:hover {
+            background: var(--bg-tertiary);
+        }
+
+        .node-type.active {
+            background: var(--accent-dim);
+            color: var(--bg-primary);
+        }
+
+        .node-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .node-count {
+            margin-left: auto;
+            color: var(--text-secondary);
+            font-size: 10px;
+        }
+
+        .graph-container {
+            background: var(--bg-primary);
+            position: relative;
+        }
+
+        #graph {
+            width: 100%;
+            height: 100%;
+        }
+
+        .controls {
+            position: absolute;
+            bottom: 15px;
+            left: 15px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .control-btn {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+
+        .right-panel {
+            background: var(--bg-secondary);
+            padding: 15px;
+            overflow-y: auto;
+        }
+
+        .panel-section {
+            margin-bottom: 20px;
+        }
+
+        .panel-section h3 {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--text-secondary);
+            margin-bottom: 10px;
+        }
+
+        .node-details {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 12px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: var(--text-secondary);
+        }
+
+        .detail-value {
+            color: var(--accent);
+            font-weight: 500;
+            text-align: right;
+            max-width: 60%;
+            word-break: break-all;
+        }
+
+        .ingest-form {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .ingest-form textarea {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 11px;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .ingest-form select, .ingest-form button {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .ingest-form button {
+            background: var(--accent-dim);
+            border-color: var(--accent);
+        }
+
+        .ingest-form button:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .query-results {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 12px;
+            font-size: 11px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .query-results pre {
+            white-space: pre-wrap;
+            word-break: break-all;
+        }
+
+        .ws-status {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 11px;
+        }
+
+        .ws-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #ff4444;
+        }
+
+        .ws-dot.connected {
+            background: var(--accent);
+        }
+
+        /* D3 Graph Styles */
+        .node {
+            cursor: pointer;
+        }
+
+        .node circle {
+            stroke: var(--bg-primary);
+            stroke-width: 2px;
+        }
+
+        .node text {
+            font-size: 10px;
+            fill: var(--text-primary);
+            pointer-events: none;
+        }
+
+        .link {
+            stroke: var(--border);
+            stroke-opacity: 0.6;
+        }
+
+        .link.highlighted {
+            stroke: var(--accent);
+            stroke-opacity: 1;
+            stroke-width: 2px;
+        }
+
+        .node.highlighted circle {
+            stroke: var(--accent);
+            stroke-width: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Mainframe Trust Graph</h1>
+            <div class="stats">
+                <div class="stat">
+                    <span>Nodes:</span>
+                    <span class="stat-value" id="node-count">0</span>
+                </div>
+                <div class="stat">
+                    <span>Edges:</span>
+                    <span class="stat-value" id="edge-count">0</span>
+                </div>
+                <div class="ws-status">
+                    <div class="ws-dot" id="ws-indicator"></div>
+                    <span id="ws-status-text">Disconnected</span>
+                </div>
+            </div>
+        </header>
+
+        <div class="sidebar">
+            <div class="node-types">
+                <h3>Node Types</h3>
+                <div id="node-type-list"></div>
+            </div>
+
+            <div class="queries">
+                <h3>Queries</h3>
+                <div class="query-btn" data-query="paths_to_job_submit">Paths to Job Submit</div>
+                <div class="query-btn" data-query="library_load_chain">Library Load Chain</div>
+                <div class="query-btn" data-query="shared_datasets">Shared Datasets</div>
+                <div class="query-btn" data-query="boundary_crossings">Boundary Crossings</div>
+                <div class="query-btn" data-query="abend_chains">ABEND Chains</div>
+                <div class="query-btn" data-query="dataset_conflicts">Dataset Conflicts</div>
+            </div>
+        </div>
+
+        <div class="graph-container">
+            <svg id="graph"></svg>
+            <div class="controls">
+                <button class="control-btn" id="btn-refresh">Refresh</button>
+                <button class="control-btn" id="btn-reset">Reset View</button>
+                <button class="control-btn" id="btn-export">Export DOT</button>
+                <button class="control-btn" id="btn-ingest-screen">Ingest Screen</button>
+            </div>
+        </div>
+
+        <div class="right-panel">
+            <div class="panel-section">
+                <h3>Selected Node</h3>
+                <div class="node-details" id="node-details">
+                    <div class="detail-row">
+                        <span class="detail-label">Select a node to view details</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Ingest Data</h3>
+                <div class="ingest-form">
+                    <select id="ingest-type">
+                        <option value="jcl">JCL</option>
+                        <option value="sysout">SYSOUT</option>
+                    </select>
+                    <textarea id="ingest-content" placeholder="Paste JCL or SYSOUT here..."></textarea>
+                    <button id="btn-ingest">Ingest to Graph</button>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <h3>Query Results</h3>
+                <div class="query-results" id="query-results">
+                    <pre>Run a query to see results</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Node type colors
+        const nodeColors = {
+            'EntryPoint': '#ff6b6b',
+            'Panel': '#4ecdc4',
+            'CICSRegion': '#45b7d1',
+            'Transaction': '#96ceb4',
+            'Job': '#ffeaa7',
+            'Proc': '#dfe6e9',
+            'Program': '#a29bfe',
+            'Dataset': '#fd79a8',
+            'Loadlib': '#00b894',
+            'ReturnCode': '#e17055'
+        };
+
+        // Graph state
+        let graphData = { nodes: [], links: [] };
+        let simulation = null;
+        let ws = null;
+
+        // D3 setup
+        const svg = d3.select('#graph');
+        const width = svg.node().parentElement.clientWidth;
+        const height = svg.node().parentElement.clientHeight;
+
+        svg.attr('width', width).attr('height', height);
+
+        const g = svg.append('g');
+
+        // Zoom behavior
+        const zoom = d3.zoom()
+            .scaleExtent([0.1, 4])
+            .on('zoom', (event) => g.attr('transform', event.transform));
+
+        svg.call(zoom);
+
+        // Link and node groups
+        const linkGroup = g.append('g').attr('class', 'links');
+        const nodeGroup = g.append('g').attr('class', 'nodes');
+
+        // Initialize simulation
+        function initSimulation() {
+            simulation = d3.forceSimulation(graphData.nodes)
+                .force('link', d3.forceLink(graphData.links).id(d => d.id).distance(100))
+                .force('charge', d3.forceManyBody().strength(-300))
+                .force('center', d3.forceCenter(width / 2, height / 2))
+                .force('collision', d3.forceCollide().radius(40))
+                .on('tick', ticked);
+        }
+
+        function ticked() {
+            linkGroup.selectAll('line')
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            nodeGroup.selectAll('.node')
+                .attr('transform', d => `translate(${d.x},${d.y})`);
+        }
+
+        function updateGraph() {
+            // Update links
+            const links = linkGroup.selectAll('line')
+                .data(graphData.links, d => d.id);
+
+            links.exit().remove();
+
+            links.enter()
+                .append('line')
+                .attr('class', 'link')
+                .attr('stroke-width', 1);
+
+            // Update nodes
+            const nodes = nodeGroup.selectAll('.node')
+                .data(graphData.nodes, d => d.id);
+
+            nodes.exit().remove();
+
+            const nodeEnter = nodes.enter()
+                .append('g')
+                .attr('class', 'node')
+                .call(d3.drag()
+                    .on('start', dragstarted)
+                    .on('drag', dragged)
+                    .on('end', dragended))
+                .on('click', (event, d) => selectNode(d));
+
+            nodeEnter.append('circle')
+                .attr('r', 15)
+                .attr('fill', d => nodeColors[d.type] || '#666');
+
+            nodeEnter.append('text')
+                .attr('dy', 25)
+                .attr('text-anchor', 'middle')
+                .text(d => d.label.substring(0, 12));
+
+            // Restart simulation
+            if (simulation) {
+                simulation.nodes(graphData.nodes);
+                simulation.force('link').links(graphData.links);
+                simulation.alpha(0.3).restart();
+            }
+
+            // Update stats
+            document.getElementById('node-count').textContent = graphData.nodes.length;
+            document.getElementById('edge-count').textContent = graphData.links.length;
+
+            // Update node type list
+            updateNodeTypeList();
+        }
+
+        function dragstarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragended(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        function selectNode(node) {
+            // Update details panel
+            const details = document.getElementById('node-details');
+            details.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Type</span>
+                    <span class="detail-value">${node.type}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Label</span>
+                    <span class="detail-value">${node.label}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">ID</span>
+                    <span class="detail-value">${node.id.substring(0, 16)}...</span>
+                </div>
+                ${Object.entries(node.properties || {}).map(([k, v]) => `
+                    <div class="detail-row">
+                        <span class="detail-label">${k}</span>
+                        <span class="detail-value">${v}</span>
+                    </div>
+                `).join('')}
+            `;
+
+            // Highlight connected nodes and edges
+            highlightConnections(node.id);
+        }
+
+        function highlightConnections(nodeId) {
+            // Reset all
+            nodeGroup.selectAll('.node').classed('highlighted', false);
+            linkGroup.selectAll('line').classed('highlighted', false);
+
+            // Highlight selected and connected
+            const connectedNodes = new Set([nodeId]);
+            graphData.links.forEach(link => {
+                const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+                const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+                if (sourceId === nodeId || targetId === nodeId) {
+                    connectedNodes.add(sourceId);
+                    connectedNodes.add(targetId);
+                }
+            });
+
+            nodeGroup.selectAll('.node')
+                .classed('highlighted', d => connectedNodes.has(d.id));
+
+            linkGroup.selectAll('line')
+                .classed('highlighted', d => {
+                    const sourceId = typeof d.source === 'object' ? d.source.id : d.source;
+                    const targetId = typeof d.target === 'object' ? d.target.id : d.target;
+                    return sourceId === nodeId || targetId === nodeId;
+                });
+        }
+
+        function updateNodeTypeList() {
+            const counts = {};
+            graphData.nodes.forEach(n => {
+                counts[n.type] = (counts[n.type] || 0) + 1;
+            });
+
+            const list = document.getElementById('node-type-list');
+            list.innerHTML = Object.entries(nodeColors).map(([type, color]) => `
+                <div class="node-type" data-type="${type}">
+                    <div class="node-color" style="background: ${color}"></div>
+                    <span>${type}</span>
+                    <span class="node-count">${counts[type] || 0}</span>
+                </div>
+            `).join('');
+        }
+
+        // WebSocket connection
+        function connectWebSocket() {
+            ws = new WebSocket(`ws://${window.location.host}/ws/graph`);
+
+            ws.onopen = () => {
+                document.getElementById('ws-indicator').classList.add('connected');
+                document.getElementById('ws-status-text').textContent = 'Connected';
+            };
+
+            ws.onclose = () => {
+                document.getElementById('ws-indicator').classList.remove('connected');
+                document.getElementById('ws-status-text').textContent = 'Disconnected';
+                setTimeout(connectWebSocket, 3000);
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+
+                if (msg.type === 'initial_state' || msg.type === 'refresh') {
+                    graphData = msg.data;
+                    updateGraph();
+                } else if (msg.type === 'node_added' || msg.type === 'edge_added' ||
+                           msg.type === 'jcl_ingested' || msg.type === 'sysout_ingested' ||
+                           msg.type === 'screen_ingested') {
+                    // Refresh full graph on updates
+                    fetchGraph();
+                } else if (msg.type === 'query_result') {
+                    showQueryResults(msg);
+                }
+            };
+        }
+
+        // Fetch graph data via REST
+        async function fetchGraph() {
+            try {
+                const response = await fetch('/api/graph/export/d3');
+                const data = await response.json();
+                if (!data.error) {
+                    graphData = data;
+                    updateGraph();
+                }
+            } catch (e) {
+                console.error('Failed to fetch graph:', e);
+            }
+        }
+
+        // Query execution
+        async function runQuery(queryName) {
+            try {
+                const response = await fetch(`/api/graph/query/${queryName}`);
+                const data = await response.json();
+                showQueryResults({ query: queryName, results: data.results || [] });
+            } catch (e) {
+                console.error('Query failed:', e);
+            }
+        }
+
+        function showQueryResults(data) {
+            const results = document.getElementById('query-results');
+            results.innerHTML = `<pre>${JSON.stringify(data.results, null, 2)}</pre>`;
+        }
+
+        // Ingest data
+        async function ingestData() {
+            const type = document.getElementById('ingest-type').value;
+            const content = document.getElementById('ingest-content').value;
+
+            if (!content.trim()) {
+                alert('Please enter content to ingest');
+                return;
+            }
+
+            try {
+                const endpoint = type === 'jcl' ? '/api/graph/ingest-jcl' : '/api/graph/ingest-sysout';
+                const body = type === 'jcl' ? { jcl: content } : { sysout: content };
+
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(body)
+                });
+
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    document.getElementById('ingest-content').value = '';
+                    fetchGraph();
+                }
+            } catch (e) {
+                console.error('Ingest failed:', e);
+            }
+        }
+
+        async function ingestScreen() {
+            try {
+                const response = await fetch('/api/graph/ingest-screen', { method: 'POST' });
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    fetchGraph();
+                }
+            } catch (e) {
+                console.error('Screen ingest failed:', e);
+            }
+        }
+
+        async function exportDot() {
+            try {
+                const response = await fetch('/api/graph/export/dot');
+                const data = await response.json();
+                if (data.dot) {
+                    const blob = new Blob([data.dot], { type: 'text/plain' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'trust_graph.dot';
+                    a.click();
+                }
+            } catch (e) {
+                console.error('Export failed:', e);
+            }
+        }
+
+        // Event listeners
+        document.getElementById('btn-refresh').addEventListener('click', fetchGraph);
+        document.getElementById('btn-reset').addEventListener('click', () => {
+            svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+        });
+        document.getElementById('btn-export').addEventListener('click', exportDot);
+        document.getElementById('btn-ingest').addEventListener('click', ingestData);
+        document.getElementById('btn-ingest-screen').addEventListener('click', ingestScreen);
+
+        document.querySelectorAll('.query-btn').forEach(btn => {
+            btn.addEventListener('click', () => runQuery(btn.dataset.query));
+        });
+
+        // Initialize
+        initSimulation();
+        updateNodeTypeList();
+        connectWebSocket();
+        fetchGraph();
+    </script>
+</body>
+</html>

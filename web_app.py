@@ -857,6 +857,180 @@ Answer in an educational, thorough manner. Relate concepts to modern security th
         return JSONResponse({"answer": f"Error: {str(e)}"})
 
 
+@app.post("/api/tutor/event")
+async def api_tutor_event(request: Request):
+    """
+    Orchestrated tutor endpoint that handles Ask/Analyze/Next events.
+    Performs:
+    1. Pull TN3270 snapshot (screenText, cursor, signature)
+    2. Call RAG retrieval with query + screenText + module + persona
+    3. Call LLM with system prompt + user prompt + terminal snapshot + retrieved context
+    Returns structured JSON for UI rendering.
+    """
+    data = await request.json()
+    event_type = data.get("event", "ask")  # ask, analyze, next
+    question = data.get("question", "")
+    module_id = data.get("module", "free-explore")
+    tutor_id = data.get("tutor_id", "mentor")
+    step = data.get("step", {})
+
+    result = {
+        "messages": [],
+        "steps": [],
+        "canAdvance": False,
+        "diagnostics": {
+            "ragUsed": False,
+            "k": 0,
+            "llmUsed": False,
+            "terminalConnected": connection.connected
+        }
+    }
+
+    # 1. Pull TN3270 snapshot
+    screen_text = ""
+    screen_signature = ""
+    if connection.connected:
+        try:
+            screen_text = read_screen()
+            screen_signature = screen_text[:80] if screen_text else ""
+            result["diagnostics"]["terminalConnected"] = True
+        except Exception as e:
+            result["messages"].append({
+                "role": "system",
+                "content": f"Warning: Could not read terminal screen: {str(e)}"
+            })
+    else:
+        result["diagnostics"]["terminalConnected"] = False
+
+    # 2. RAG retrieval
+    rag_context = ""
+    rag_warning = ""
+    try:
+        module_info = pathCatalog.get(module_id, {}) if 'pathCatalog' in dir() else {}
+        rag_query = f"{question}\n{module_info.get('description', '')}\n{screen_text[:1200]}"
+        rag_context = await build_rag_context(rag_query, n_results=4)
+        if rag_context:
+            result["diagnostics"]["ragUsed"] = True
+            result["diagnostics"]["k"] = 4
+    except Exception as e:
+        rag_warning = f"RAG unavailable: {str(e)}"
+        result["messages"].append({
+            "role": "system",
+            "content": f"Warning: {rag_warning}"
+        })
+
+    # 3. Build prompt based on event type
+    if event_type == "ask":
+        prompt = f"""{build_tutor_prompt(tutor_id)}{rag_context}
+
+Module: {module_id}
+Current screen:
+```
+{screen_text[:1500]}
+```
+
+User question: {question}
+
+Answer thoroughly and educationally. If the question relates to the current screen, explain what they're seeing."""
+
+    elif event_type == "analyze":
+        prompt = f"""{build_tutor_prompt(tutor_id)}{rag_context}
+
+Module: {module_id}
+Analyze this TN3270 screen:
+```
+{screen_text}
+```
+
+Provide your analysis following the structured format:
+1. CURRENT SCREEN: Plain English summary
+2. WHAT THIS IS: Panel/subsystem identification
+3. WHY IT EXISTS: Historical/architectural rationale
+4. RED TEAM INSIGHT: Trust boundary or control-plane implication
+5. NEXT ACTION: What to do next"""
+
+    elif event_type == "next":
+        step_context = f"Current step: {step.get('title', '')}\nInstruction: {step.get('instruction', '')}" if step else ""
+        prompt = f"""{build_tutor_prompt(tutor_id)}{rag_context}
+
+Module: {module_id}
+{step_context}
+Current screen:
+```
+{screen_text[:1500]}
+```
+
+What should the learner do next to progress? Be specific about keystrokes or text to type."""
+
+    else:
+        prompt = f"{build_tutor_prompt(tutor_id)}\n\n{question}"
+
+    # 4. Call LLM
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.7, "num_predict": 1200}
+                },
+                timeout=60.0
+            )
+
+            if response.status_code == 200:
+                llm_response = response.json().get("response", "")
+                result["diagnostics"]["llmUsed"] = True
+                result["messages"].append({
+                    "role": "assistant",
+                    "content": llm_response
+                })
+            else:
+                result["messages"].append({
+                    "role": "error",
+                    "content": f"LLM returned status {response.status_code}"
+                })
+
+    except httpx.TimeoutException:
+        result["messages"].append({
+            "role": "error",
+            "content": "LLM request timed out. The model may be loading - please try again."
+        })
+    except Exception as e:
+        result["messages"].append({
+            "role": "error",
+            "content": f"LLM error: {str(e)}"
+        })
+
+    return JSONResponse(result)
+
+
+# Module catalog used by /api/tutor/event
+pathCatalog = {
+    'session-stack': {
+        'id': 'session-stack',
+        'title': 'Session Stack',
+        'description': 'Connect VTAM→TSO→ISPF and learn navigation, PF keys, panels, and command flow.',
+    },
+    'batch-execution': {
+        'id': 'batch-execution',
+        'title': 'Batch Execution',
+        'description': 'Create and submit JCL, interpret JES output, and trace job logs and return codes.',
+    },
+    'dataset-trust': {
+        'id': 'dataset-trust',
+        'title': 'Dataset Trust',
+        'description': 'Understand RACF/Dataset profiles, access checks, and common misconfig trust breaks.',
+    },
+    'free-explore': {
+        'id': 'free-explore',
+        'title': 'Free Explore',
+        'description': 'Explore with guardrails—ask questions and get contextual help on the current screen.',
+    }
+}
+
+
 @app.post("/api/tutor/path_explain")
 async def api_tutor_path_explain(request: Request):
     data = await request.json()
@@ -1069,10 +1243,104 @@ Return JSON in this shape:
             if response.status_code == 200:
                 raw = response.json().get("response", "")
                 payload = _extract_json_block(raw)
-                return JSONResponse(payload if payload else {"session": {"steps": []}})
-            return JSONResponse({"session": {"steps": []}})
+                if payload and payload.get("session", {}).get("steps"):
+                    return JSONResponse(payload)
+                # Fall back to local steps if LLM didn't return anything useful
+                raise ValueError("LLM returned no steps")
+            raise ValueError("LLM request failed")
     except Exception as e:
-        return JSONResponse({"session": {"steps": []}})
+        fallback_steps = {
+            "session-stack": [
+                {
+                    "title": "Find the LOGON prompt",
+                    "instruction": "Look for the LOGON ===> prompt on the terminal. If you don't see it, press Enter once.",
+                    "rationale": "VTAM/TN3270 sessions typically start at the LOGON prompt before TSO.",
+                    "expected": "A screen with LOGON ===> or similar prompt.",
+                    "expected_signature": ["LOGON", "LOGON ===>"],
+                    "hints": ["Press Enter once", "If you see a blank screen, press Clear"]
+                },
+                {
+                    "title": "Enter TSO",
+                    "instruction": "Type TSO and press Enter.",
+                    "rationale": "TSO is the interactive shell used to access ISPF and datasets.",
+                    "expected": "A TSO/E logon panel or READY prompt.",
+                    "expected_signature": ["TSO", "READY", "IKJ"],
+                    "hints": ["If you see IKJ, you are in TSO", "If denied, verify your user ID"]
+                },
+                {
+                    "title": "Launch ISPF",
+                    "instruction": "At the TSO READY prompt, type ISPF and press Enter.",
+                    "rationale": "ISPF is the menu-driven interface for dataset and panel navigation.",
+                    "expected": "ISPF Primary Option Menu.",
+                    "expected_signature": ["ISPF", "Primary Option Menu"],
+                    "hints": ["If you see option menu, you’re in ISPF"]
+                }
+            ],
+            "batch-execution": [
+                {
+                    "title": "Locate a JCL member",
+                    "instruction": "In ISPF, go to option 3.4 and locate a dataset with JCL members.",
+                    "rationale": "Batch execution starts with JCL source members.",
+                    "expected": "ISPF Dataset List panel.",
+                    "expected_signature": ["DATA SET LIST", "DSLIST", "3.4"],
+                    "hints": ["If not in ISPF, launch it first", "Use wildcards like HLQ.*"]
+                },
+                {
+                    "title": "Submit a job",
+                    "instruction": "Select a JCL member and submit it (SUB or JCL submit action).",
+                    "rationale": "Submitting a job sends it to JES for execution.",
+                    "expected": "A message that the job was submitted.",
+                    "expected_signature": ["SUBMITTED", "JOB", "JES"],
+                    "hints": ["Look for a confirmation line", "If you see error, review the JOB card"]
+                },
+                {
+                    "title": "View job output",
+                    "instruction": "Go to SDSF or JES output panel and find your job output.",
+                    "rationale": "Output verification confirms batch execution.",
+                    "expected": "Job output listing or SDSF panel.",
+                    "expected_signature": ["SDSF", "OUTPUT", "JOBNAME"],
+                    "hints": ["If SDSF unavailable, use JES panels"]
+                }
+            ],
+            "dataset-trust": [
+                {
+                    "title": "Open dataset list",
+                    "instruction": "In ISPF, open option 3.4 and list datasets under your HLQ.",
+                    "rationale": "Dataset access is central to mainframe trust boundaries.",
+                    "expected": "ISPF Dataset List panel.",
+                    "expected_signature": ["DATA SET LIST", "DSLIST", "3.4"],
+                    "hints": ["Use HLQ.* to filter"]
+                },
+                {
+                    "title": "Inspect dataset attributes",
+                    "instruction": "Select a dataset and view its attributes (DSORG, LRECL, BLKSIZE).",
+                    "rationale": "Attributes affect how data is stored and protected.",
+                    "expected": "Dataset attributes panel.",
+                    "expected_signature": ["DSORG", "LRECL", "BLKSIZE"],
+                    "hints": ["Use the info/attributes action from the list"]
+                },
+                {
+                    "title": "Understand DISP",
+                    "instruction": "Open a JCL member and locate DISP parameters.",
+                    "rationale": "DISP controls dataset disposition and access behavior.",
+                    "expected": "JCL member view with DISP=...",
+                    "expected_signature": ["DISP="],
+                    "hints": ["Search for DISP in the JCL"]
+                }
+            ],
+            "free-explore": [
+                {
+                    "title": "Take a look around",
+                    "instruction": "Use the menu or panels available and describe what you see.",
+                    "rationale": "Exploration builds familiarity and context.",
+                    "expected": "Any stable panel to discuss.",
+                    "expected_signature": ["MENU", "OPTION", "TSO", "ISPF"],
+                    "hints": ["Ask the tutor what the current panel is"]
+                }
+            ]
+        }
+        steps = fallback_steps.get(path.get("id", ""), fallback_steps["free-explore"])
+        return JSONResponse({"session": {"path_id": path.get("id", ""), "steps": steps}})
 
 
 @app.post("/api/tutor/path_verify")

@@ -22,3 +22,6 @@ fastapi>=0.100.0
 uvicorn>=0.20.0
 python-multipart>=0.0.6  # For file uploads
 jinja2>=3.0.0  # Templates
+
+# MCP (Model Context Protocol) for Claude Desktop integration
+mcp>=1.0.0

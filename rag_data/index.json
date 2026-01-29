@@ -15,6 +15,14 @@
       "doc_type": "pdf",
       "chunks": 38,
       "added": "2026-01-25 08:13"
+    },
+    {
+      "id": "64a378c341bb",
+      "name": "TK5 Quick Start Guide",
+      "source": "rag_data/documents/tk5_guide.txt",
+      "doc_type": "txt",
+      "chunks": 25,
+      "added": "2026-01-28 20:10"
     }
   ]
 }

@@ -183,6 +183,35 @@ main {
 .option-card.screens .option-icon { color: var(--ibm-cyan); }
 .option-card.rag .option-icon { color: var(--ibm-green); }
 .option-card.arch .option-icon { color: var(--ibm-teal); }
+.option-card.tutor .option-icon { color: #ff6b6b; }
+.option-card.graph .option-icon { color: #00ff88; }
+
+/* Featured card styling */
+.option-card.featured {
+    grid-column: 1 / -1;
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(0, 0, 0, 0) 50%);
+    border-color: rgba(255, 107, 107, 0.3);
+}
+
+.option-card.featured::before {
+    background: #ff6b6b;
+}
+
+.option-card.featured:hover {
+    border-color: #ff6b6b;
+}
+
+.featured-badge {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: #ff6b6b;
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 4px 10px;
+    letter-spacing: 1px;
+}
 
 footer {
     background: var(--ibm-gray-90);

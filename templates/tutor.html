@@ -8,777 +8,693 @@
 {% endblock %}
 
 {% block body %}
-<div class="tutor-container">
-    <!-- Header -->
-    <header class="tutor-header">
-        <div class="header-left">
+<div class="tutor-app">
+    <!-- Sidebar -->
+    <aside class="tutor-sidebar">
+        <div class="sidebar-header">
             <a href="/" class="back-link">← Back</a>
-            <div class="title-group">
-                <h1>Red Team Tutor</h1>
-                <span class="subtitle">Mainframe Security Training</span>
+            <h1>Red Team Tutor</h1>
+        </div>
+
+        <!-- Modules Section (Primary) -->
+        <div class="sidebar-section">
+            <div class="section-title">Modules</div>
+            <div class="module-list" id="moduleList">
+                <div class="module-item" data-module="session-stack">
+                    <div class="module-header">
+                        <span class="module-name">Session Stack</span>
+                        <span class="module-time">~15m</span>
+                    </div>
+                    <div class="module-desc">VTAM→TSO→ISPF navigation and PF keys</div>
+                    <div class="module-meta">
+                        <span class="module-level beginner">Beginner</span>
+                        <span class="module-status">Not started</span>
+                    </div>
+                </div>
+                <div class="module-item" data-module="batch-execution">
+                    <div class="module-header">
+                        <span class="module-name">Batch Execution</span>
+                        <span class="module-time">~25m</span>
+                    </div>
+                    <div class="module-desc">JCL, job submission, JES output</div>
+                    <div class="module-meta">
+                        <span class="module-level intermediate">Intermediate</span>
+                        <span class="module-status">Not started</span>
+                    </div>
+                </div>
+                <div class="module-item" data-module="dataset-trust">
+                    <div class="module-header">
+                        <span class="module-name">Dataset Trust</span>
+                        <span class="module-time">~20m</span>
+                    </div>
+                    <div class="module-desc">RACF profiles and access patterns</div>
+                    <div class="module-meta">
+                        <span class="module-level intermediate">Intermediate</span>
+                        <span class="module-status">Not started</span>
+                    </div>
+                </div>
+                <div class="module-item" data-module="free-explore">
+                    <div class="module-header">
+                        <span class="module-name">Free Explore</span>
+                        <span class="module-time">Open</span>
+                    </div>
+                    <div class="module-desc">Ask questions about any screen</div>
+                    <div class="module-meta">
+                        <span class="module-level any">Any Level</span>
+                        <span class="module-status">Not started</span>
+                    </div>
+                </div>
             </div>
         </div>
-        <div class="header-center">
-            <div class="goal-display">
-                <span class="goal-label">Goal:</span>
-                <span class="goal-text" id="currentGoal">Select a learning path</span>
-            </div>
-            <div class="goal-display">
-                <span class="goal-label">Tutor:</span>
-                <span class="goal-text" id="currentTutorName">The Mentor</span>
+
+        <!-- Persona Section (Secondary) -->
+        <div class="sidebar-section">
+            <div class="section-title">Tutor Persona</div>
+            <div class="persona-list" id="personaList">
+                <div class="persona-item selected" data-persona="mentor">
+                    <span class="persona-icon">🎓</span>
+                    <span class="persona-name">The Mentor</span>
+                </div>
+                <div class="persona-item" data-persona="operator">
+                    <span class="persona-icon">🧰</span>
+                    <span class="persona-name">The Operator</span>
+                </div>
+                <div class="persona-item" data-persona="redteam">
+                    <span class="persona-icon">🩸</span>
+                    <span class="persona-name">Red Teamer</span>
+                </div>
+                <div class="persona-item" data-persona="forensics">
+                    <span class="persona-icon">🔎</span>
+                    <span class="persona-name">Forensics</span>
+                </div>
+                <div class="persona-item" data-persona="architect">
+                    <span class="persona-icon">🏗️</span>
+                    <span class="persona-name">Architect</span>
+                </div>
             </div>
         </div>
-        <div class="header-right">
-            <div class="session-stats">
-                <div class="stat">
-                    <span class="stat-value" id="stepsCompleted">0</span>
-                    <span class="stat-label">Steps</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="nodesDiscovered">0</span>
-                    <span class="stat-label">Nodes</span>
-                </div>
-                <div class="stat">
-                    <span class="stat-value" id="insightsGained">0</span>
-                    <span class="stat-label">Insights</span>
-                </div>
-            </div>
-            <div class="connection-status">
-                <span class="status-dot" id="connDot"></span>
-                <span id="connText">Disconnected</span>
+
+        <!-- Connection Status -->
+        <div class="sidebar-footer">
+            <div class="conn-status" id="connStatus">
+                <span class="conn-dot"></span>
+                <span class="conn-text">Disconnected</span>
             </div>
         </div>
-    </header>
+    </aside>
 
-    <!-- Workspace with floating windows -->
-    <div class="tutor-workspace" id="workspace">
-
-        <!-- Terminal Window -->
-        <div class="floating-window" id="terminalWindow" style="left:20px;top:20px;width:450px;height:500px;">
-            <div class="resize-handle n"></div>
-            <div class="resize-handle s"></div>
-            <div class="resize-handle e"></div>
-            <div class="resize-handle w"></div>
-            <div class="resize-handle ne"></div>
-            <div class="resize-handle nw"></div>
-            <div class="resize-handle se"></div>
-            <div class="resize-handle sw"></div>
-
-            <div class="window-titlebar">
-                <div class="window-title">
-                    <span class="window-title-icon">🖥️</span>
-                    TN3270 Terminal
-                </div>
-                <div class="window-controls">
-                    <button class="window-btn minimize" title="Minimize"></button>
-                    <button class="window-btn maximize" title="Maximize"></button>
-                </div>
+    <!-- Main Content -->
+    <main class="tutor-main">
+        <!-- Header Bar -->
+        <header class="main-header">
+            <div class="breadcrumb">
+                <span class="crumb-module" id="crumbModule">No module selected</span>
+                <span class="crumb-sep">•</span>
+                <span class="crumb-persona" id="crumbPersona">The Mentor</span>
             </div>
-            <div class="window-toolbar">
-                <div class="terminal-controls">
-                    <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port">
-                    <button id="connectBtn" onclick="connectTerminal()">Connect</button>
-                    <button id="disconnectBtn" onclick="disconnectTerminal()" style="display:none;">Disconnect</button>
-                </div>
+            <div class="header-actions">
+                <button class="action-btn" id="analyzeBtn">Analyze</button>
+                <button class="action-btn" id="verifyBtn">Verify</button>
+                <button class="action-btn primary" id="nextBtn">Next Step</button>
             </div>
-            <div class="window-content">
+        </header>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Terminal Panel -->
+            <div class="panel terminal-panel">
+                <div class="panel-header">
+                    <span class="panel-title">TN3270 Terminal</span>
+                    <div class="terminal-controls">
+                        <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port">
+                        <button id="connectBtn">Connect</button>
+                        <button id="disconnectBtn" style="display:none;">Disconnect</button>
+                    </div>
+                </div>
                 <div class="terminal-screen" id="terminalScreen" tabindex="0">
-                    <div class="disconnected-msg">
-                        <div class="icon">🖥️</div>
+                    <div class="terminal-placeholder">
+                        <div class="placeholder-icon">🖥️</div>
                         <h3>Terminal Not Connected</h3>
-                        <p>Connect to TK5 (MVS 3.8J)</p>
-                        <p class="hint">localhost:3270</p>
+                        <p>Connect to TK5 (localhost:3270)</p>
                     </div>
                 </div>
                 <div class="pf-keys">
-                    <button onclick="sendKey('enter')">Enter</button>
-                    <button onclick="sendKey('clear')">Clear</button>
-                    <button onclick="sendKey('tab')">Tab</button>
-                    <button onclick="sendKey('pf', 1)">PF1</button>
-                    <button onclick="sendKey('pf', 3)">PF3</button>
-                    <button onclick="sendKey('pf', 7)">PF7</button>
-                    <button onclick="sendKey('pf', 8)">PF8</button>
+                    <button data-key="enter">Enter</button>
+                    <button data-key="clear">Clear</button>
+                    <button data-key="tab">Tab</button>
+                    <button data-key="pf1">PF1</button>
+                    <button data-key="pf3">PF3</button>
+                    <button data-key="pf7">PF7</button>
+                    <button data-key="pf8">PF8</button>
+                </div>
+            </div>
+
+            <!-- Tutor Panel -->
+            <div class="panel tutor-panel">
+                <div class="panel-header">
+                    <span class="panel-title">Tutor</span>
+                    <span class="panel-subtitle" id="stepIndicator"></span>
+                </div>
+
+                <!-- Step Card (shown when module active) -->
+                <div class="step-card" id="stepCard" style="display:none;">
+                    <div class="step-number" id="stepNumber">Step 1</div>
+                    <h3 class="step-title" id="stepTitle">Getting Started</h3>
+                    <div class="step-field">
+                        <label>What to do:</label>
+                        <p id="stepInstruction">Select a module to begin.</p>
+                    </div>
+                    <div class="step-field">
+                        <label>Why:</label>
+                        <p id="stepRationale">Understanding the basics is essential.</p>
+                    </div>
+                    <div class="step-field">
+                        <label>Expected:</label>
+                        <p id="stepExpected">You'll see the expected screen.</p>
+                    </div>
+                    <div class="step-progress" id="stepProgress"></div>
+                </div>
+
+                <!-- Welcome (shown when no module) -->
+                <div class="welcome-card" id="welcomeCard">
+                    <h2>Welcome to Red Team Tutor</h2>
+                    <p>Learn mainframe security through guided exploration.</p>
+                    <div class="welcome-cta">
+                        <p>Select a module from the sidebar to begin.</p>
+                    </div>
+                </div>
+
+                <!-- Messages Area -->
+                <div class="messages-area" id="messagesArea">
+                    <div class="messages-scroll" id="messagesScroll"></div>
+                </div>
+
+                <!-- Input Footer -->
+                <div class="tutor-footer">
+                    <div class="quick-chips">
+                        <button class="chip" data-q="What am I looking at?">What am I looking at?</button>
+                        <button class="chip" data-q="What do I type?">What do I type?</button>
+                        <button class="chip" data-q="Explain this error">Explain error</button>
+                    </div>
+                    <div class="ask-row">
+                        <input type="text" id="askInput" placeholder="Ask the tutor...">
+                        <button class="send-btn" id="sendBtn">Send</button>
+                    </div>
                 </div>
             </div>
         </div>
-
-        <!-- Tutor Window -->
-        <div class="floating-window" id="tutorWindow" style="left:490px;top:20px;width:500px;height:600px;">
-            <div class="resize-handle n"></div>
-            <div class="resize-handle s"></div>
-            <div class="resize-handle e"></div>
-            <div class="resize-handle w"></div>
-            <div class="resize-handle ne"></div>
-            <div class="resize-handle nw"></div>
-            <div class="resize-handle se visible-grip"></div>
-            <div class="resize-handle sw"></div>
-
-            <div class="window-titlebar">
-                <div class="window-title">
-                    <span class="window-title-icon">🎓</span>
-                    Tutor
-                </div>
-                <div class="window-controls">
-                    <div class="tutor-controls">
-                        <button class="control-btn" data-action="tutor-analyze">🔍 Analyze</button>
-                        <button class="control-btn" data-action="tutor-suggest">➡️ Next</button>
-                    </div>
-                    <div class="tutor-layout-controls">
-                        <button class="control-btn" title="Dock Left" data-action="dock-left">⟵</button>
-                        <button class="control-btn" title="Dock Center" data-action="dock-center">•</button>
-                        <button class="control-btn" title="Dock Right" data-action="dock-right">⟶</button>
-                        <button class="control-btn" title="Expand Center" data-action="dock-full">⤢</button>
-                        <button class="control-btn" title="Collapse" data-action="tutor-collapse">▁</button>
-                    </div>
-                    <button class="window-btn minimize" title="Minimize"></button>
-                    <button class="window-btn maximize" title="Maximize"></button>
-                </div>
-            </div>
-            <div class="window-content">
-                <div class="ui-error-banner" id="uiErrorBanner" style="display:none;"></div>
-                <div class="ui-action-banner" id="uiActionBanner" style="display:none;"></div>
-                <!-- Learning Paths -->
-                <div class="learning-paths" id="learningPaths">
-                    <h2>Choose Your Path</h2>
-                    <p class="paths-intro">Learn mainframe security through guided exploration.</p>
-                    <div class="tutor-roster">
-                        <h3>Red Team Tutors</h3>
-                        <p class="paths-intro">Pick a persona to guide your session. Each tutor is expandable.</p>
-                        <div class="path-grid tutor-grid" id="tutorList">
-                            <div class="path-card tutor-card" data-tutor-id="mentor" role="button" tabindex="0">
-                                <div class="tutor-icon-rail">🎓</div>
-                                <div class="tutor-header">
-                                    <h4 class="tutor-title">The Mentor</h4>
-                                    <span class="tutor-tags">Foundations · Systems Thinking</span>
-                                </div>
-                                <div class="tutor-desc">
-                                    Explains how the system fits together and why legacy design choices still matter.
-                                </div>
-                                <div class="tutor-footer">
-                                    <div class="tutor-badges">
-                                        <span class="difficulty beginner">Core</span>
-                                        <span class="difficulty any">Architecture</span>
-                                    </div>
-                                    <div class="tutor-actions">
-                                        <button class="tutor-select" data-action="tutor-select" data-tutor-id="mentor">Select</button>
-                                    </div>
-                                </div>
-                                <div class="tutor-hint" data-hint-id="mentor"></div>
-                            </div>
-                            <div class="path-card tutor-card" data-tutor-id="operator" role="button" tabindex="0">
-                                <div class="tutor-icon-rail">🧰</div>
-                                <div class="tutor-header">
-                                    <h4 class="tutor-title">The Operator</h4>
-                                    <span class="tutor-tags">Console Flow · SOPs</span>
-                                </div>
-                                <div class="tutor-desc">
-                                    Guides you through exact actions and the operational gotchas that break runs.
-                                </div>
-                                <div class="tutor-footer">
-                                    <div class="tutor-badges">
-                                        <span class="difficulty intermediate">Ops</span>
-                                        <span class="difficulty any">Execution</span>
-                                    </div>
-                                    <div class="tutor-actions">
-                                        <button class="tutor-select" data-action="tutor-select" data-tutor-id="operator">Select</button>
-                                    </div>
-                                </div>
-                                <div class="tutor-hint" data-hint-id="operator"></div>
-                            </div>
-                            <div class="path-card tutor-card" data-tutor-id="redteam" role="button" tabindex="0">
-                                <div class="tutor-icon-rail">🩸</div>
-                                <div class="tutor-header">
-                                    <h4 class="tutor-title">The Red Teamer</h4>
-                                    <span class="tutor-tags">Abuse Paths · Misconfig</span>
-                                </div>
-                                <div class="tutor-desc">
-                                    Finds trust gaps, abuse paths, and unintended privilege escalation.
-                                </div>
-                                <div class="tutor-footer">
-                                    <div class="tutor-badges">
-                                        <span class="difficulty advanced">Offense</span>
-                                        <span class="difficulty intermediate">Adversary</span>
-                                    </div>
-                                    <div class="tutor-actions">
-                                        <button class="tutor-select" data-action="tutor-select" data-tutor-id="redteam">Select</button>
-                                    </div>
-                                </div>
-                                <div class="tutor-hint" data-hint-id="redteam"></div>
-                            </div>
-                            <div class="path-card tutor-card" data-tutor-id="forensics" role="button" tabindex="0">
-                                <div class="tutor-icon-rail">🔎</div>
-                                <div class="tutor-header">
-                                    <h4 class="tutor-title">The Forensics Lead</h4>
-                                    <span class="tutor-tags">Logs · Evidence · IR</span>
-                                </div>
-                                <div class="tutor-desc">
-                                    Focuses on artifacts, audit trails, and what survives after an incident.
-                                </div>
-                                <div class="tutor-footer">
-                                    <div class="tutor-badges">
-                                        <span class="difficulty intermediate">IR</span>
-                                        <span class="difficulty any">Forensics</span>
-                                    </div>
-                                    <div class="tutor-actions">
-                                        <button class="tutor-select" data-action="tutor-select" data-tutor-id="forensics">Select</button>
-                                    </div>
-                                </div>
-                                <div class="tutor-hint" data-hint-id="forensics"></div>
-                            </div>
-                            <div class="path-card tutor-card" data-tutor-id="architect" role="button" tabindex="0">
-                                <div class="tutor-icon-rail">🏗️</div>
-                                <div class="tutor-header">
-                                    <h4 class="tutor-title">The Architect</h4>
-                                    <span class="tutor-tags">Subsystems · Boundaries</span>
-                                </div>
-                                <div class="tutor-desc">
-                                    Explains subsystems, boundaries, and how control planes fail at scale.
-                                </div>
-                                <div class="tutor-footer">
-                                    <div class="tutor-badges">
-                                        <span class="difficulty any">Design</span>
-                                        <span class="difficulty beginner">Core</span>
-                                    </div>
-                                    <div class="tutor-actions">
-                                        <button class="tutor-select" data-action="tutor-select" data-tutor-id="architect">Select</button>
-                                    </div>
-                                </div>
-                                <div class="tutor-hint" data-hint-id="architect"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="path-grid" id="pathGrid">
-                        <div class="path-card" data-path-id="session-stack" role="button" tabindex="0">
-                            <div class="path-icon">🔐</div>
-                            <h3>Session Stack</h3>
-                            <p>VTAM → TSO → ISPF sessions</p>
-                            <div class="path-meta">
-                                <span class="difficulty beginner">Beginner</span>
-                                <span class="duration">~15 min</span>
-                            </div>
-                        </div>
-                        <div class="path-card" data-path-id="batch-execution" role="button" tabindex="0">
-                            <div class="path-icon">⚙️</div>
-                            <h3>Batch Execution</h3>
-                            <p>JCL → JES → Initiator</p>
-                            <div class="path-meta">
-                                <span class="difficulty intermediate">Intermediate</span>
-                                <span class="duration">~25 min</span>
-                            </div>
-                        </div>
-                        <div class="path-card" data-path-id="dataset-trust" role="button" tabindex="0">
-                            <div class="path-icon">📁</div>
-                            <h3>Dataset Trust</h3>
-                            <p>DISP, RACF, access control</p>
-                            <div class="path-meta">
-                                <span class="difficulty intermediate">Intermediate</span>
-                                <span class="duration">~20 min</span>
-                            </div>
-                        </div>
-                        <div class="path-card" data-path-id="free-explore" role="button" tabindex="0">
-                            <div class="path-icon">🧭</div>
-                            <h3>Free Explore</h3>
-                            <p>Navigate with guidance</p>
-                            <div class="path-meta">
-                                <span class="difficulty any">Any Level</span>
-                                <span class="duration">Open</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="path-assistant" id="pathAssistant" style="display:none;">
-                        <div class="path-assistant-header">
-                            <span class="path-assistant-title" id="pathAssistantTitle">Path Overview</span>
-                            <span class="path-assistant-meta" id="pathAssistantMeta"></span>
-                        </div>
-                        <div class="path-assistant-body" id="pathAssistantBody"></div>
-                        <div class="path-assistant-actions">
-                            <button class="path-action primary" data-action="path-start">Start</button>
-                            <button class="path-action" data-action="path-preview">Preview</button>
-                            <button class="path-action" data-action="path-ask-toggle">Ask a Question</button>
-                        </div>
-                        <div class="path-assistant-ask" id="pathAssistantAsk" style="display:none;">
-                            <input type="text" id="pathQuestion" placeholder="Ask about this path..." onkeydown="if(event.key==='Enter')askPathQuestion()">
-                            <button data-action="path-ask-send">Ask</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Active Path Session -->
-                <div class="path-session" id="pathSession" style="display:none;">
-                    <div class="path-session-header">
-                        <div class="path-session-title">
-                            <span id="sessionPathName">Path Session</span>
-                            <span class="path-session-meta" id="sessionPathMeta"></span>
-                        </div>
-                        <div class="path-session-actions">
-                            <button class="path-action" data-action="path-exit">Change Path</button>
-                        </div>
-                    </div>
-                    <div class="path-session-body">
-                        <div class="path-step-card" id="currentStepCard">
-                            <div class="step-title" id="currentStepTitle">Current Step</div>
-                            <div class="step-why" id="currentStepWhy"></div>
-                            <div class="step-do" id="currentStepDo"></div>
-                            <div class="step-expected" id="currentStepExpected"></div>
-                        </div>
-                        <div class="path-session-controls">
-                            <button class="path-action" data-action="path-verify">Verify screen</button>
-                            <button class="path-action primary" id="nextStepBtn" data-action="path-next" disabled>Next</button>
-                            <button class="path-action" data-action="path-help">Help</button>
-                        </div>
-                        <div class="path-steps-list" id="pathStepsList"></div>
-                    </div>
-                </div>
-
-                <!-- Tutor Output -->
-                <div class="tutor-output" id="tutorOutput" style="display:none;">
-                    <div class="output-scroll" id="outputScroll"></div>
-                    <div class="tutor-input">
-                        <input type="text" id="tutorQuestion" placeholder="Ask a question..." onkeydown="if(event.key==='Enter')askTutor()">
-                        <button data-action="tutor-ask">Ask</button>
-                    </div>
-                </div>
-
-                <!-- Milestones -->
-                <div class="milestones-panel" id="milestonesPanel" style="display:none;">
-                    <h4>Milestones</h4>
-                    <div class="milestones-list" id="milestonesList"></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Graph Window -->
-        <div class="floating-window" id="graphWindow" style="right:20px;top:20px;width:380px;height:450px;">
-            <div class="resize-handle n"></div>
-            <div class="resize-handle s"></div>
-            <div class="resize-handle e"></div>
-            <div class="resize-handle w"></div>
-            <div class="resize-handle ne"></div>
-            <div class="resize-handle nw"></div>
-            <div class="resize-handle se"></div>
-            <div class="resize-handle sw"></div>
-
-            <div class="window-titlebar">
-                <div class="window-title">
-                    <span class="window-title-icon">🕸️</span>
-                    Trust Graph
-                </div>
-                <div class="window-controls">
-                    <a href="/graph" target="_blank" class="expand-link">Expand ↗</a>
-                    <button class="window-btn minimize" title="Minimize"></button>
-                    <button class="window-btn maximize" title="Maximize"></button>
-                </div>
-            </div>
-            <div class="window-content">
-                <div class="graph-container">
-                    <svg id="miniGraph"></svg>
-                </div>
-                <div class="graph-legend">
-                    <div class="legend-item"><span class="dot" style="background:#f85149"></span> Entry</div>
-                    <div class="legend-item"><span class="dot" style="background:#58a6ff"></span> Panel</div>
-                    <div class="legend-item"><span class="dot" style="background:#d29922"></span> Job</div>
-                    <div class="legend-item"><span class="dot" style="background:#a371f7"></span> Program</div>
-                    <div class="legend-item"><span class="dot" style="background:#3fb950"></span> Dataset</div>
-                </div>
-                <div class="graph-stats">
-                    <span id="graphNodes">0 nodes</span> · <span id="graphEdges">0 edges</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Dock for minimized windows -->
-        <div class="window-dock" id="windowDock"></div>
-    </div>
+    </main>
 </div>
 {% endblock %}
 
 {% block page_scripts %}
-<script src="https://d3js.org/d3.v7.min.js" crossorigin="anonymous"></script>
 <script>
-// ============ FLOATING WINDOW MANAGER ============
-class WindowManager {
-    constructor() {
-        this.windows = {};
-        this.zIndex = 100;
-        this.init();
+// ============ STATE ============
+const state = {
+    connected: false,
+    host: '',
+    currentModule: null,
+    currentPersona: 'mentor',
+    currentStep: 0,
+    session: null,
+    messages: [],
+    isLoading: false
+};
+
+const personas = {
+    mentor: { name: 'The Mentor', icon: '🎓' },
+    operator: { name: 'The Operator', icon: '🧰' },
+    redteam: { name: 'Red Teamer', icon: '🩸' },
+    forensics: { name: 'Forensics', icon: '🔎' },
+    architect: { name: 'Architect', icon: '🏗️' }
+};
+
+const modules = {
+    'session-stack': {
+        id: 'session-stack',
+        title: 'Session Stack',
+        description: 'VTAM→TSO→ISPF navigation and PF keys',
+        level: 'Beginner',
+        time: '~15m'
+    },
+    'batch-execution': {
+        id: 'batch-execution',
+        title: 'Batch Execution',
+        description: 'JCL, job submission, JES output',
+        level: 'Intermediate',
+        time: '~25m'
+    },
+    'dataset-trust': {
+        id: 'dataset-trust',
+        title: 'Dataset Trust',
+        description: 'RACF profiles and access patterns',
+        level: 'Intermediate',
+        time: '~20m'
+    },
+    'free-explore': {
+        id: 'free-explore',
+        title: 'Free Explore',
+        description: 'Ask questions about any screen',
+        level: 'Any',
+        time: 'Open'
     }
+};
 
-    init() {
-        document.querySelectorAll('.floating-window').forEach(win => {
-            this.windows[win.id] = {
-                el: win,
-                minimized: false,
-                maximized: false,
-                savedState: null
-            };
-            this.setupWindow(win);
-        });
-    }
+// ============ DOM ELEMENTS ============
+const $ = (sel) => document.querySelector(sel);
+const $$ = (sel) => document.querySelectorAll(sel);
 
-    setupWindow(win) {
-        const titlebar = win.querySelector('.window-titlebar');
-        const minimizeBtn = win.querySelector('.window-btn.minimize');
-        const maximizeBtn = win.querySelector('.window-btn.maximize');
+// ============ RENDERING ============
+function render() {
+    // Breadcrumb
+    $('#crumbModule').textContent = state.currentModule
+        ? modules[state.currentModule]?.title || 'Module'
+        : 'No module selected';
+    $('#crumbPersona').textContent = personas[state.currentPersona]?.name || 'Tutor';
 
-        // Focus on click
-        win.addEventListener('mousedown', () => this.focus(win));
+    // Connection status
+    const connStatus = $('#connStatus');
+    connStatus.classList.toggle('connected', state.connected);
+    connStatus.querySelector('.conn-text').textContent = state.connected
+        ? state.host
+        : 'Disconnected';
 
-        // Drag by titlebar
-        titlebar.addEventListener('mousedown', (e) => {
-            if (e.target.closest('.window-controls')) return;
-            this.startDrag(win, e);
-        });
+    // Module selection
+    $$('.module-item').forEach(el => {
+        el.classList.toggle('selected', el.dataset.module === state.currentModule);
+    });
 
-        // Window buttons
-        if (minimizeBtn) minimizeBtn.addEventListener('click', () => this.minimize(win));
-        if (maximizeBtn) maximizeBtn.addEventListener('click', () => this.maximize(win));
+    // Persona selection
+    $$('.persona-item').forEach(el => {
+        el.classList.toggle('selected', el.dataset.persona === state.currentPersona);
+    });
 
-        // Resize handles
-        win.querySelectorAll('.resize-handle').forEach(handle => {
-            handle.addEventListener('mousedown', (e) => {
-                e.stopPropagation();
-                this.startResize(win, handle, e);
-            });
-        });
-
-        // Convert right position to left
-        if (win.style.right && !win.style.left) {
-            const rect = win.getBoundingClientRect();
-            const parent = win.parentElement.getBoundingClientRect();
-            win.style.left = (parent.width - rect.width - parseInt(win.style.right)) + 'px';
-            win.style.right = '';
-        }
-    }
-
-    clampToWorkspace(win) {
-        const workspace = document.getElementById('workspace');
-        if (!workspace) return;
-        const wsRect = workspace.getBoundingClientRect();
-        const maxLeft = Math.max(0, wsRect.width - win.offsetWidth);
-        const maxTop = Math.max(0, wsRect.height - win.offsetHeight);
-        const left = Math.min(Math.max(0, win.offsetLeft), maxLeft);
-        const top = Math.min(Math.max(0, win.offsetTop), maxTop);
-        win.style.left = left + 'px';
-        win.style.top = top + 'px';
-    }
-
-    focus(win) {
-        document.querySelectorAll('.floating-window').forEach(w => w.classList.remove('focused'));
-        win.classList.add('focused');
-        win.style.zIndex = ++this.zIndex;
-    }
-
-    startDrag(win, e) {
-        if (this.windows[win.id].maximized) {
-            this.maximize(win);
-        }
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startLeft = win.offsetLeft;
-        const startTop = win.offsetTop;
-
-        document.body.classList.add('dragging');
-
-        const onMove = (e) => {
-            win.style.left = (startLeft + e.clientX - startX) + 'px';
-            win.style.top = (startTop + e.clientY - startY) + 'px';
-            this.clampToWorkspace(win);
-        };
-
-        const onUp = () => {
-            document.body.classList.remove('dragging');
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            this.savePositions();
-        };
-
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-    }
-
-    startResize(win, handle, e) {
-        if (this.windows[win.id].maximized) return;
-
-        const startX = e.clientX;
-        const startY = e.clientY;
-        const startW = win.offsetWidth;
-        const startH = win.offsetHeight;
-        const startL = win.offsetLeft;
-        const startT = win.offsetTop;
-        const dir = handle.className.split(' ')[1];
-
-        document.body.classList.add('resizing');
-
-        const onMove = (e) => {
-            const dx = e.clientX - startX;
-            const dy = e.clientY - startY;
-            const minW = 280;
-            const minH = 200;
-
-            if (dir.includes('e')) win.style.width = Math.max(minW, startW + dx) + 'px';
-            if (dir.includes('w')) {
-                const newW = Math.max(minW, startW - dx);
-                win.style.width = newW + 'px';
-                win.style.left = (startL + startW - newW) + 'px';
-            }
-            if (dir.includes('s')) win.style.height = Math.max(minH, startH + dy) + 'px';
-            if (dir.includes('n')) {
-                const newH = Math.max(minH, startH - dy);
-                win.style.height = newH + 'px';
-                win.style.top = (startT + startH - newH) + 'px';
-            }
-            this.clampToWorkspace(win);
-        };
-
-        const onUp = () => {
-            document.body.classList.remove('resizing');
-            document.removeEventListener('mousemove', onMove);
-            document.removeEventListener('mouseup', onUp);
-            this.savePositions();
-            if (typeof simulation !== 'undefined' && simulation) {
-                simulation.alpha(0.3).restart();
-            }
-        };
-
-        document.addEventListener('mousemove', onMove);
-        document.addEventListener('mouseup', onUp);
-    }
-
-    minimize(win) {
-        const state = this.windows[win.id];
-        if (state.minimized) return;
-
-        state.minimized = true;
-        state.savedState = {
-            display: win.style.display,
-            left: win.style.left,
-            top: win.style.top,
-            width: win.style.width,
-            height: win.style.height
-        };
-
-        win.style.display = 'none';
-
-        // Add to dock
-        const dock = document.getElementById('windowDock');
-        const title = win.querySelector('.window-title').textContent.trim();
-        const icon = win.querySelector('.window-title-icon')?.textContent || '📁';
-
-        const docked = document.createElement('div');
-        docked.className = 'docked-window';
-        docked.dataset.windowId = win.id;
-        docked.innerHTML = `<span>${icon}</span> ${title}`;
-        docked.onclick = () => this.restore(win);
-        dock.appendChild(docked);
-    }
-
-    restore(win) {
-        const state = this.windows[win.id];
-        if (!state.minimized) return;
-
-        state.minimized = false;
-        win.style.display = '';
-
-        // Remove from dock
-        const docked = document.querySelector(`.docked-window[data-window-id="${win.id}"]`);
-        if (docked) docked.remove();
-
-        this.focus(win);
-    }
-
-    maximize(win) {
-        const state = this.windows[win.id];
-        const workspace = document.getElementById('workspace');
-
-        if (state.maximized) {
-            // Restore
-            Object.assign(win.style, state.savedState);
-            state.maximized = false;
-        } else {
-            // Maximize
-            state.savedState = {
-                left: win.style.left,
-                top: win.style.top,
-                width: win.style.width,
-                height: win.style.height
-            };
-            win.style.left = '10px';
-            win.style.top = '10px';
-            win.style.width = (workspace.offsetWidth - 20) + 'px';
-            win.style.height = (workspace.offsetHeight - 20) + 'px';
-            state.maximized = true;
-        }
-        this.focus(win);
-    }
-
-    savePositions() {
-        const positions = {};
-        Object.keys(this.windows).forEach(id => {
-            const win = document.getElementById(id);
-            if (win && !this.windows[id].minimized) {
-                positions[id] = {
-                    left: win.style.left,
-                    top: win.style.top,
-                    width: win.style.width,
-                    height: win.style.height
-                };
-            }
-        });
-        localStorage.setItem('tutorWindowPositions', JSON.stringify(positions));
-    }
-
-    loadPositions() {
-        try {
-            const positions = JSON.parse(localStorage.getItem('tutorWindowPositions') || '{}');
-            Object.keys(positions).forEach(id => {
-                const win = document.getElementById(id);
-                if (win && positions[id]) {
-                    Object.assign(win.style, positions[id]);
-                    this.clampToWorkspace(win);
-                }
-            });
-        } catch (e) {}
-    }
-}
-
-// Initialize window manager and restore layout
-const wm = new WindowManager();
-wm.loadPositions();
-const tutorWindow = document.getElementById('tutorWindow');
-const tutorContent = tutorWindow.querySelector('.window-content');
-let tutorCollapsed = false;
-let tutorSavedState = null;
-
-function dockTutor(position) {
-    const workspace = document.getElementById('workspace');
-    const margin = 10;
-    const maxWidth = Math.max(320, workspace.offsetWidth - margin * 2);
-    const maxHeight = Math.max(260, workspace.offsetHeight - margin * 2);
-    let width = Math.max(360, Math.floor((workspace.offsetWidth - margin * 4) / 2));
-
-    if (position === 'left' || position === 'right') {
-        width = Math.max(320, Math.floor((workspace.offsetWidth - margin * 4) / 3));
-    }
-    if (position === 'full') {
-        width = maxWidth;
-    }
-
-    tutorWindow.style.width = width + 'px';
-    tutorWindow.style.top = margin + 'px';
-    tutorWindow.style.height = Math.min(maxHeight, tutorWindow.offsetHeight) + 'px';
-
-    if (position === 'left') {
-        tutorWindow.style.left = margin + 'px';
-    } else if (position === 'right') {
-        tutorWindow.style.left = (workspace.offsetWidth - width - margin) + 'px';
+    // Welcome vs Step card
+    if (state.currentModule && state.session?.steps?.length) {
+        $('#welcomeCard').style.display = 'none';
+        $('#stepCard').style.display = 'block';
+        renderStep();
+    } else if (state.currentModule) {
+        $('#welcomeCard').style.display = 'none';
+        $('#stepCard').style.display = 'block';
+        $('#stepNumber').textContent = 'Loading...';
+        $('#stepTitle').textContent = modules[state.currentModule]?.title || 'Module';
+        $('#stepInstruction').textContent = 'Loading steps...';
+        $('#stepRationale').textContent = '';
+        $('#stepExpected').textContent = '';
+        $('#stepProgress').innerHTML = '';
     } else {
-        tutorWindow.style.left = Math.max(margin, (workspace.offsetWidth - width) / 2) + 'px';
+        $('#welcomeCard').style.display = 'block';
+        $('#stepCard').style.display = 'none';
     }
 
-    wm.focus(tutorWindow);
-    wm.savePositions();
+    // Messages
+    renderMessages();
 }
 
-function toggleTutorCollapse() {
-    if (!tutorCollapsed) {
-        tutorSavedState = {
-            height: tutorWindow.style.height
-        };
-        tutorContent.style.display = 'none';
-        tutorWindow.style.height = '46px';
-        tutorCollapsed = true;
-    } else {
-        tutorContent.style.display = '';
-        tutorWindow.style.height = tutorSavedState?.height || '600px';
-        tutorCollapsed = false;
+function renderStep() {
+    if (!state.session?.steps?.length) return;
+
+    const step = state.session.steps[state.currentStep];
+    const total = state.session.steps.length;
+
+    $('#stepNumber').textContent = `Step ${state.currentStep + 1} of ${total}`;
+    $('#stepTitle').textContent = step.title || `Step ${state.currentStep + 1}`;
+    $('#stepInstruction').textContent = step.instruction || '';
+    $('#stepRationale').textContent = step.rationale || '';
+    $('#stepExpected').textContent = step.expected || '';
+
+    // Progress dots
+    $('#stepProgress').innerHTML = state.session.steps.map((s, i) => `
+        <span class="progress-dot ${i === state.currentStep ? 'current' : ''} ${i < state.currentStep ? 'done' : ''}">
+            ${i < state.currentStep ? '✓' : i + 1}
+        </span>
+    `).join('');
+
+    $('#stepIndicator').textContent = `${state.currentStep + 1}/${total}`;
+}
+
+function renderMessages() {
+    const scroll = $('#messagesScroll');
+    scroll.innerHTML = '';
+
+    for (const msg of state.messages) {
+        const el = document.createElement('div');
+        el.className = `message ${msg.type}`;
+        el.innerHTML = `
+            <div class="message-header">${msg.title}</div>
+            <div class="message-body">${msg.content}</div>
+        `;
+        scroll.appendChild(el);
     }
-    wm.focus(tutorWindow);
-    wm.savePositions();
+
+    requestAnimationFrame(() => {
+        scroll.scrollTop = scroll.scrollHeight;
+    });
 }
 
-if (!localStorage.getItem('tutorWindowPositions')) {
-    dockTutor('center');
+function addMessage(type, title, content) {
+    state.messages.push({ type, title, content, ts: Date.now() });
+    renderMessages();
 }
 
-window.addEventListener('resize', () => {
-    document.querySelectorAll('.floating-window').forEach(win => wm.clampToWorkspace(win));
-});
+function showLoading(text = 'Thinking...') {
+    state.isLoading = true;
+    addMessage('loading', 'Status', text);
+}
 
-// ============ TERMINAL FUNCTIONS ============
-let connected = false;
-const terminalScreen = document.getElementById('terminalScreen');
+function hideLoading() {
+    state.isLoading = false;
+    state.messages = state.messages.filter(m => m.type !== 'loading');
+    renderMessages();
+}
 
+// ============ TERMINAL ============
 async function connectTerminal() {
-    const host = document.getElementById('hostInput').value.trim();
+    const host = $('#hostInput').value.trim();
     if (!host) return;
 
     try {
-        const response = await fetch('/api/terminal/connect', {
+        const resp = await fetch('/api/terminal/connect', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ target: host })
         });
-        const data = await response.json();
+        const data = await resp.json();
 
         if (data.success) {
-            connected = true;
+            state.connected = true;
+            state.host = host;
             updateTerminalDisplay(data.screen_data);
-            updateConnectionStatus(true, host);
-            setTimeout(() => analyzeScreen(), 500);
+            $('#connectBtn').style.display = 'none';
+            $('#disconnectBtn').style.display = '';
+            addMessage('success', 'Connected', `Connected to ${host}`);
         } else {
-            addTutorMessage('error', 'Connection Failed', data.message);
+            addMessage('error', 'Connection Failed', data.message || 'Could not connect');
         }
     } catch (e) {
-        addTutorMessage('error', 'Connection Error', e.message);
+        addMessage('error', 'Error', e.message);
     }
+    render();
 }
 
 async function disconnectTerminal() {
     await fetch('/api/terminal/disconnect', { method: 'POST' });
-    connected = false;
-    updateConnectionStatus(false);
-    terminalScreen.innerHTML = `
-        <div class="disconnected-msg">
-            <div class="icon">🖥️</div>
+    state.connected = false;
+    state.host = '';
+    $('#terminalScreen').innerHTML = `
+        <div class="terminal-placeholder">
+            <div class="placeholder-icon">🖥️</div>
             <h3>Disconnected</h3>
             <p>Connect to continue</p>
         </div>
     `;
+    $('#connectBtn').style.display = '';
+    $('#disconnectBtn').style.display = 'none';
+    render();
 }
 
 function updateTerminalDisplay(data) {
-    if (data && data.connected && data.screen) {
-        terminalScreen.textContent = data.screen;
+    if (data?.connected && data?.screen) {
+        $('#terminalScreen').textContent = data.screen;
     }
 }
 
-function updateConnectionStatus(isConnected, host = '') {
-    document.getElementById('connDot').className = 'status-dot ' + (isConnected ? 'connected' : '');
-    document.getElementById('connText').textContent = isConnected ? host : 'Disconnected';
-    document.getElementById('connectBtn').style.display = isConnected ? 'none' : '';
-    document.getElementById('disconnectBtn').style.display = isConnected ? '' : 'none';
-}
-
 async function sendKey(keyType, value = '') {
-    if (!connected) return;
+    if (!state.connected) return;
 
-    const response = await fetch('/api/terminal/key', {
+    const resp = await fetch('/api/terminal/key', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ key_type: keyType, value: String(value) })
     });
-    const data = await response.json();
+    const data = await resp.json();
     if (data.success && data.screen_data) {
         updateTerminalDisplay(data.screen_data);
-        document.getElementById('stepsCompleted').textContent =
-            parseInt(document.getElementById('stepsCompleted').textContent) + 1;
     }
 }
 
-// Keyboard handling
-terminalScreen.addEventListener('keydown', function(e) {
-    if (!connected) return;
+// ============ MODULE SELECTION ============
+async function selectModule(moduleId) {
+    state.currentModule = moduleId;
+    state.currentStep = 0;
+    state.session = null;
+    state.messages = [];
+
+    // Update module status
+    const moduleItem = $(`.module-item[data-module="${moduleId}"]`);
+    if (moduleItem) {
+        moduleItem.querySelector('.module-status').textContent = 'In progress';
+    }
+
+    render();
+
+    // Load session steps
+    await loadSession(moduleId);
+}
+
+async function loadSession(moduleId) {
+    showLoading('Loading module steps...');
+
+    try {
+        // Get current screen
+        const screenResp = await fetch('/api/screen');
+        const screenData = await screenResp.json();
+        const screenText = screenData?.screen || '';
+
+        const resp = await fetch('/api/tutor/path_start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                path: modules[moduleId],
+                tutor_id: state.currentPersona,
+                screen: screenText
+            })
+        });
+        const data = await resp.json();
+        state.session = data.session || { steps: [] };
+
+        if (!state.session.steps?.length) {
+            state.session = { steps: getFallbackSteps(moduleId) };
+        }
+    } catch (e) {
+        state.session = { steps: getFallbackSteps(moduleId) };
+    }
+
+    hideLoading();
+    render();
+}
+
+function getFallbackSteps(moduleId) {
+    const fallbacks = {
+        'session-stack': [
+            { title: 'Find LOGON prompt', instruction: 'Look for LOGON ===> on the screen', rationale: 'VTAM/TN3270 sessions start at LOGON', expected: 'LOGON ===> visible' },
+            { title: 'Enter TSO', instruction: 'Type TSO and press Enter', rationale: 'TSO is the interactive shell', expected: 'TSO/E logon panel or READY prompt' },
+            { title: 'Launch ISPF', instruction: 'At READY prompt, type ISPF and Enter', rationale: 'ISPF is the menu interface', expected: 'ISPF Primary Option Menu' }
+        ],
+        'batch-execution': [
+            { title: 'Find JCL', instruction: 'In ISPF 3.4, locate a JCL dataset', rationale: 'Batch work starts from JCL', expected: 'Dataset list showing JCL member' },
+            { title: 'Submit job', instruction: 'Select JCL and submit (SUB)', rationale: 'Submitting sends to JES', expected: 'Job submitted message' }
+        ],
+        'dataset-trust': [
+            { title: 'Open dataset list', instruction: 'Go to ISPF 3.4', rationale: 'Dataset access is core to trust', expected: 'Dataset List panel' }
+        ],
+        'free-explore': [
+            { title: 'Explore freely', instruction: 'Navigate and ask questions', rationale: 'Learning by exploration', expected: 'Any screen - ask the tutor' }
+        ]
+    };
+    return fallbacks[moduleId] || fallbacks['free-explore'];
+}
+
+// ============ PERSONA SELECTION ============
+function selectPersona(personaId) {
+    state.currentPersona = personaId;
+    render();
+}
+
+// ============ TUTOR ACTIONS ============
+async function analyzeScreen() {
+    if (!state.connected) {
+        addMessage('warning', 'Not Connected', 'Connect to the terminal first.');
+        return;
+    }
+
+    showLoading('Analyzing screen...');
+
+    try {
+        const resp = await fetch('/api/tutor/analyze', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                goal: state.currentModule || 'free-explore',
+                tutor_id: state.currentPersona
+            })
+        });
+        const data = await resp.json();
+
+        hideLoading();
+
+        if (data.current_screen) {
+            addMessage('analysis', 'Screen Analysis', data.current_screen);
+        }
+        if (data.red_team_insight) {
+            addMessage('insight', 'Red Team Insight', data.red_team_insight);
+        }
+        if (data.next_action) {
+            addMessage('action', 'Next Action', data.next_action);
+        }
+        if (data.error) {
+            addMessage('error', 'Error', data.error);
+        }
+    } catch (e) {
+        hideLoading();
+        addMessage('error', 'Error', e.message);
+    }
+}
+
+async function verifyStep() {
+    if (!state.session?.steps?.length) return;
+
+    showLoading('Verifying step...');
+
+    const step = state.session.steps[state.currentStep];
+
+    try {
+        const screenResp = await fetch('/api/screen');
+        const screenData = await screenResp.json();
+
+        const resp = await fetch('/api/tutor/path_verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                step,
+                screen: screenData?.screen || '',
+                tutor_id: state.currentPersona
+            })
+        });
+        const data = await resp.json();
+
+        hideLoading();
+
+        if (data.verified) {
+            addMessage('success', 'Verified', 'Step completed successfully!');
+            // Auto-advance if possible
+            if (state.currentStep < state.session.steps.length - 1) {
+                state.currentStep++;
+                render();
+            } else {
+                addMessage('success', 'Complete', 'Module completed!');
+                const moduleItem = $(`.module-item[data-module="${state.currentModule}"]`);
+                if (moduleItem) {
+                    moduleItem.querySelector('.module-status').textContent = 'Completed';
+                }
+            }
+        } else {
+            addMessage('warning', 'Not Yet', data.feedback || 'Step not completed. Check your terminal.');
+        }
+    } catch (e) {
+        hideLoading();
+        addMessage('error', 'Error', e.message);
+    }
+}
+
+function nextStep() {
+    if (!state.session?.steps?.length) return;
+
+    if (state.currentStep < state.session.steps.length - 1) {
+        state.currentStep++;
+        render();
+        addMessage('info', 'Next Step', 'Moved to next step. Follow the instructions above.');
+    }
+}
+
+async function askTutor() {
+    const input = $('#askInput');
+    const question = input.value.trim();
+    if (!question) return;
+
+    input.value = '';
+    addMessage('user', 'You', question);
+    showLoading('Thinking...');
+
+    try {
+        const resp = await fetch('/api/tutor/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question,
+                goal: state.currentModule || 'free-explore',
+                tutor_id: state.currentPersona
+            })
+        });
+
+        if (!resp.ok) {
+            throw new Error(`Server error: ${resp.status}`);
+        }
+
+        const data = await resp.json();
+        hideLoading();
+
+        if (data.error) {
+            addMessage('error', 'Error', data.error);
+        } else if (data.answer) {
+            const persona = personas[state.currentPersona];
+            const rendered = window.marked ? marked.parse(data.answer) : data.answer;
+            addMessage('assistant', persona.name, rendered);
+        } else {
+            addMessage('warning', 'No Response', 'No response received. Try again.');
+        }
+    } catch (e) {
+        hideLoading();
+        addMessage('error', 'Error', e.message);
+    }
+}
+
+// ============ EVENT LISTENERS ============
+$('#connectBtn').addEventListener('click', connectTerminal);
+$('#disconnectBtn').addEventListener('click', disconnectTerminal);
+
+$('#analyzeBtn').addEventListener('click', analyzeScreen);
+$('#verifyBtn').addEventListener('click', verifyStep);
+$('#nextBtn').addEventListener('click', nextStep);
+
+$('#sendBtn').addEventListener('click', askTutor);
+$('#askInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') askTutor();
+});
+
+// Module clicks
+$$('.module-item').forEach(el => {
+    el.addEventListener('click', () => selectModule(el.dataset.module));
+});
+
+// Persona clicks
+$$('.persona-item').forEach(el => {
+    el.addEventListener('click', () => selectPersona(el.dataset.persona));
+});
+
+// Quick chips
+$$('.chip').forEach(el => {
+    el.addEventListener('click', () => {
+        $('#askInput').value = el.dataset.q;
+        askTutor();
+    });
+});
+
+// PF keys
+$$('.pf-keys button').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const key = btn.dataset.key;
+        if (key === 'enter') sendKey('enter');
+        else if (key === 'clear') sendKey('clear');
+        else if (key === 'tab') sendKey('tab');
+        else if (key.startsWith('pf')) sendKey('pf', key.substring(2));
+    });
+});
+
+// Terminal keyboard
+$('#terminalScreen').addEventListener('keydown', (e) => {
+    if (!state.connected) return;
     e.preventDefault();
 
     if (e.key === 'Enter') sendKey('enter');
@@ -793,897 +709,27 @@ terminalScreen.addEventListener('keydown', function(e) {
     }
 });
 
-// ============ TUTOR FUNCTIONS ============
-let currentGoal = null;
-let milestones = [];
-let completedMilestones = [];
-let currentTutor = 'mentor';
-let isAnalyzing = false;
-let lastScreenSnapshot = null;
-
-const tutorProfiles = {
-    mentor: { name: 'The Mentor' },
-    operator: { name: 'The Operator' },
-    redteam: { name: 'The Red Teamer' },
-    forensics: { name: 'The Forensics Lead' },
-    architect: { name: 'The Architect' }
-};
-
-const goals = {
-    'session-stack': {
-        title: 'VTAM → TSO → ISPF Session Stack',
-        milestones: ['Identify VTAM screen', 'Log into TSO', 'Enter ISPF', 'Navigate menus']
-    },
-    'batch-execution': {
-        title: 'Batch Execution & JES',
-        milestones: ['Find JCL source', 'Understand JOB card', 'Submit a job', 'View output']
-    },
-    'dataset-trust': {
-        title: 'Dataset Trust Boundaries',
-        milestones: ['Navigate to 3.4', 'View dataset attributes', 'Understand DISP']
-    },
-    'free-explore': {
-        title: 'Free Exploration',
-        milestones: []
-    }
-};
-
-const pathCatalog = {
-    'session-stack': {
-        id: 'session-stack',
-        title: 'Session Stack',
-        objective: 'Understand how VTAM, TSO, and ISPF chain together in interactive sessions.',
-        level: 'Beginner',
-        time: '~15 min',
-        domain: 'VTAM/TSO/ISPF',
-        intent: 'Architecture',
-        summary: 'See the interactive layers that handle login and menus.'
-    },
-    'batch-execution': {
-        id: 'batch-execution',
-        title: 'Batch Execution',
-        objective: 'Learn how JCL, JES, and initiators run work outside the terminal.',
-        level: 'Intermediate',
-        time: '~25 min',
-        domain: 'JCL/JES',
-        intent: 'Offense/Defense',
-        summary: 'Follow a job from submission to output.'
-    },
-    'dataset-trust': {
-        id: 'dataset-trust',
-        title: 'Dataset Trust',
-        objective: 'Map dataset access controls and understand DISP implications.',
-        level: 'Intermediate',
-        time: '~20 min',
-        domain: 'RACF/DSN',
-        intent: 'Defense',
-        summary: 'Learn how datasets are protected and where mistakes happen.'
-    },
-    'free-explore': {
-        id: 'free-explore',
-        title: 'Free Explore',
-        objective: 'Navigate freely with guidance while you discover panels.',
-        level: 'Any',
-        time: 'Open',
-        domain: 'General',
-        intent: 'Exploration',
-        summary: 'Ask questions and move around at your own pace.'
-    }
-};
-
-let selectedPathId = null;
-const pathHints = {};
-const tutorHints = {};
-let pathSession = null;
-let currentStepIndex = 0;
-let lastVerifyOk = false;
-
-function expandTutorForPath() {
-    if (tutorCollapsed) toggleTutorCollapse();
-    dockTutor('full');
-    const minH = 620;
-    if (tutorWindow.offsetHeight < minH) {
-        tutorWindow.style.height = minH + 'px';
-    }
-    wm.focus(tutorWindow);
-    wm.savePositions();
-}
-
-function selectGoal(goalId) {
-    currentGoal = goalId;
-    const goal = goals[goalId];
-
-    document.getElementById('currentGoal').textContent = goal.title;
-    document.getElementById('learningPaths').style.display = 'none';
-    document.getElementById('tutorOutput').style.display = 'flex';
-
-    if (goal.milestones.length > 0) {
-        document.getElementById('milestonesPanel').style.display = 'block';
-        milestones = [...goal.milestones];
-        renderMilestones();
-    }
-
-    addTutorMessage('system', 'Path Selected', `
-        <p><strong>${goal.title}</strong></p>
-        <p>${connected ? 'Analyzing current screen...' : 'Connect to TK5 to begin.'}</p>
-    `);
-
-    if (connected) setTimeout(() => analyzeScreen(), 300);
-}
-
-function renderMilestones() {
-    document.getElementById('milestonesList').innerHTML = milestones.map((m, i) => `
-        <div class="milestone ${completedMilestones.includes(i) ? 'completed' : ''}">
-            <span class="milestone-check">${completedMilestones.includes(i) ? '✓' : (i + 1)}</span>
-            <span class="milestone-text">${m}</span>
-        </div>
-    `).join('');
-}
-
-function addTutorMessage(type, title, content) {
-    const scroll = document.getElementById('outputScroll');
-    const msg = document.createElement('div');
-    msg.className = `tutor-message ${type}`;
-    msg.innerHTML = `
-        <div class="message-header">${title}</div>
-        <div class="message-body">${content}</div>
-    `;
-    scroll.appendChild(msg);
-    scroll.scrollTop = scroll.scrollHeight;
-
-    if (type === 'insight') {
-        document.getElementById('insightsGained').textContent =
-            parseInt(document.getElementById('insightsGained').textContent) + 1;
-    }
-}
-
-function ensureTutorOutputVisible() {
-    const output = document.getElementById('tutorOutput');
-    const paths = document.getElementById('learningPaths');
-    if (output && output.style.display === 'none') {
-        output.style.display = 'flex';
-    }
-    if (paths && paths.style.display !== 'none') {
-        paths.style.display = 'none';
-    }
-}
-
-function selectPathCard(pathId) {
-    selectedPathId = pathId;
-    document.querySelectorAll('.path-card').forEach(card => {
-        card.classList.toggle('selected', card.dataset.pathId === pathId);
-    });
-    const meta = pathCatalog[pathId];
-    if (!meta) return;
-
-    expandTutorForPath();
-    document.getElementById('pathAssistant').style.display = 'block';
-    document.getElementById('pathAssistantTitle').textContent = meta.title;
-    document.getElementById('pathAssistantMeta').textContent =
-        `${meta.level} · ${meta.time} · ${meta.domain} · ${meta.intent}`;
-
-    explainSelectedPath();
-}
-
-async function explainSelectedPath() {
-    const meta = pathCatalog[selectedPathId];
-    if (!meta) return;
-    document.getElementById('pathAssistantBody').textContent = 'Thinking...';
-    try {
-        const response = await fetch('/api/tutor/path_explain', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: meta, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-        document.getElementById('pathAssistantBody').innerHTML =
-            data.explanation ? marked.parse(data.explanation) : 'No response.';
-    } catch (e) {
-        document.getElementById('pathAssistantBody').textContent = e.message;
-    }
-}
-
-function startSelectedPath() {
-    if (!selectedPathId) return;
-    startPathSession(selectedPathId);
-}
-
-function previewSelectedPath() {
-    if (!selectedPathId) return;
-    explainSelectedPath();
-}
-
-function togglePathQuestion() {
-    const ask = document.getElementById('pathAssistantAsk');
-    ask.style.display = ask.style.display === 'none' ? 'flex' : 'none';
-    if (ask.style.display === 'flex') {
-        document.getElementById('pathQuestion').focus();
-    }
-}
-
-async function askPathQuestion() {
-    const input = document.getElementById('pathQuestion');
-    const question = input.value.trim();
-    if (!question || !selectedPathId) return;
-    input.value = '';
-    const meta = pathCatalog[selectedPathId];
-    document.getElementById('pathAssistantBody').textContent = 'Thinking...';
-    try {
-        const response = await fetch('/api/tutor/path_explain', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: meta, tutor_id: currentTutor, question })
-        });
-        const data = await response.json();
-        document.getElementById('pathAssistantBody').innerHTML =
-            data.explanation ? marked.parse(data.explanation) : 'No response.';
-    } catch (e) {
-        document.getElementById('pathAssistantBody').textContent = e.message;
-    }
-}
-
-async function requestPathHint(pathId) {
-    const meta = pathCatalog[pathId];
-    if (!meta || pathHints[pathId]) return;
-    try {
-        const response = await fetch('/api/tutor/path_hint', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: meta, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-        if (data.hint) {
-            pathHints[pathId] = data.hint;
-            const card = document.querySelector(`.path-card[data-path-id="${pathId}"]`);
-            if (card) card.setAttribute('title', data.hint);
-        }
-    } catch (e) {}
-}
-
-async function startPathSession(pathId) {
-    const meta = pathCatalog[pathId];
-    if (!meta) return;
-    expandTutorForPath();
-    document.getElementById('learningPaths').style.display = 'none';
-    document.getElementById('pathSession').style.display = 'flex';
-    document.getElementById('sessionPathName').textContent = meta.title;
-    document.getElementById('sessionPathMeta').textContent =
-        `${meta.level} · ${meta.time} · ${meta.domain} · ${meta.intent} · ${tutorProfiles[currentTutor]?.name || 'Tutor'}`;
-
-    const screenResp = await fetch('/api/screen');
-    const screenData = await screenResp.json();
-    const screenText = screenData?.screen || '';
-
-    try {
-        const response = await fetch('/api/tutor/path_start', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ path: meta, tutor_id: currentTutor, screen: screenText })
-        });
-        const data = await response.json();
-        pathSession = data.session || { steps: [] };
-    } catch (e) {
-        pathSession = { steps: [] };
-    }
-
-    currentStepIndex = 0;
-    renderPathSession();
-    highlightTerminal(true);
-}
-
-function renderPathSession() {
-    if (!pathSession || !pathSession.steps?.length) {
-        document.getElementById('currentStepTitle').textContent = 'No steps';
-        document.getElementById('currentStepWhy').textContent = 'Unable to load steps. Try Preview or Ask.';
-        document.getElementById('currentStepDo').textContent = '';
-        document.getElementById('currentStepExpected').textContent = '';
-        document.getElementById('pathStepsList').innerHTML = '';
-        document.getElementById('nextStepBtn').disabled = true;
-        return;
-    }
-    const step = pathSession.steps[currentStepIndex];
-    document.getElementById('currentStepTitle').textContent = step.title || `Step ${currentStepIndex + 1}`;
-    document.getElementById('currentStepWhy').textContent = step.rationale || '';
-    document.getElementById('currentStepDo').textContent = step.instruction || '';
-    document.getElementById('currentStepExpected').textContent = step.expected || '';
-
-    document.getElementById('pathStepsList').innerHTML = pathSession.steps.map((s, idx) => `
-        <div class="path-step-item ${idx === currentStepIndex ? 'current' : ''} ${idx < currentStepIndex ? 'done' : ''}">
-            <span>${idx < currentStepIndex ? '✓' : idx + 1}</span>
-            <span>${s.title || `Step ${idx + 1}`}</span>
-        </div>
-    `).join('');
-    document.getElementById('nextStepBtn').disabled = !lastVerifyOk;
-}
-
-async function verifyPathStep() {
-    if (!pathSession?.steps?.length) return;
-    const step = pathSession.steps[currentStepIndex];
-    const screenResp = await fetch('/api/screen');
-    const screenData = await screenResp.json();
-    const screenText = screenData?.screen || '';
-
-    try {
-        const response = await fetch('/api/tutor/path_verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ step, screen: screenText, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-        lastVerifyOk = !!data.verified;
-        if (!data.verified && data.feedback) {
-            document.getElementById('currentStepExpected').textContent = data.feedback;
-        }
-    } catch (e) {
-        lastVerifyOk = false;
-    }
-    renderPathSession();
-}
-
-function advancePathStep() {
-    if (!lastVerifyOk) return;
-    if (currentStepIndex < pathSession.steps.length - 1) {
-        currentStepIndex += 1;
-        lastVerifyOk = false;
-        renderPathSession();
-    }
-}
-
-async function helpPathStep() {
-    if (!pathSession?.steps?.length) return;
-    const step = pathSession.steps[currentStepIndex];
-    const screenResp = await fetch('/api/screen');
-    const screenData = await screenResp.json();
-    const screenText = screenData?.screen || '';
-
-    try {
-        const response = await fetch('/api/tutor/path_help', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ step, screen: screenText, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-        if (data.help) {
-            document.getElementById('currentStepExpected').textContent = data.help;
-        }
-    } catch (e) {}
-}
-
-function exitPathSession() {
-    pathSession = null;
-    currentStepIndex = 0;
-    lastVerifyOk = false;
-    document.getElementById('pathSession').style.display = 'none';
-    document.getElementById('learningPaths').style.display = 'block';
-    highlightTerminal(false);
-}
-
-function highlightTerminal(active) {
-    const terminal = document.getElementById('terminalWindow');
-    if (terminal) terminal.classList.toggle('active-path', active);
-}
-
-function selectTutor(tutorId) {
-    currentTutor = tutorId;
-    document.getElementById('currentTutorName').textContent =
-        tutorProfiles[tutorId]?.name || 'Tutor';
-    document.querySelectorAll('.tutor-card').forEach(card => {
-        card.classList.toggle('selected', card.dataset.tutorId === tutorId);
-    });
-    if (tutorCollapsed) toggleTutorCollapse();
-    wm.focus(tutorWindow);
-    openTutorPersonaWindow(tutorId);
-    if (connected) setTimeout(() => analyzeScreen(), 150);
-}
-
-function openTutorPersonaWindow(tutorId) {
-    const existing = document.getElementById(`tutorPersona_${tutorId}`);
-    if (existing) {
-        existing.style.display = '';
-        wm.focus(existing);
-        wm.clampToWorkspace(existing);
-        return;
-    }
-
-    const workspace = document.getElementById('workspace');
-    const win = document.createElement('div');
-    win.className = 'floating-window';
-    win.id = `tutorPersona_${tutorId}`;
-    win.style.left = '40px';
-    win.style.top = '80px';
-    win.style.width = '320px';
-    win.style.height = '260px';
-
-    const title = tutorProfiles[tutorId]?.name || 'Tutor';
-    win.innerHTML = `
-        <div class="resize-handle n"></div>
-        <div class="resize-handle s"></div>
-        <div class="resize-handle e"></div>
-        <div class="resize-handle w"></div>
-        <div class="resize-handle ne"></div>
-        <div class="resize-handle nw"></div>
-        <div class="resize-handle se"></div>
-        <div class="resize-handle sw"></div>
-        <div class="window-titlebar">
-            <div class="window-title">
-                <span class="window-title-icon">🎓</span>
-                ${title}
-            </div>
-            <div class="window-controls">
-                <button class="window-btn minimize" title="Minimize"></button>
-                <button class="window-btn maximize" title="Maximize"></button>
-                <button class="window-btn close" title="Close"></button>
-            </div>
-        </div>
-        <div class="window-content tutor-persona-window">
-            <div class="persona-blurb" id="personaBlurb_${tutorId}">Loading persona…</div>
-            <div class="persona-actions">
-                <button class="control-btn" data-action="tutor-analyze" data-tutor-id="${tutorId}">Analyze</button>
-                <button class="control-btn" data-action="tutor-suggest" data-tutor-id="${tutorId}">Next</button>
-            </div>
-            <div class="persona-ask">
-                <input type="text" id="personaQuestion_${tutorId}" placeholder="Ask this tutor..." />
-                <button class="control-btn" data-action="persona-ask" data-tutor-id="${tutorId}">Ask</button>
-            </div>
-            <div class="persona-response" id="personaResponse_${tutorId}"></div>
-        </div>
-    `;
-
-    workspace.appendChild(win);
-    wm.windows[win.id] = { el: win, minimized: false, maximized: false, savedState: null };
-    wm.setupWindow(win);
-    wm.focus(win);
-    wm.clampToWorkspace(win);
-    wm.savePositions();
-
-    const closeBtn = win.querySelector('.window-btn.close');
-    if (closeBtn) closeBtn.addEventListener('click', () => win.remove());
-
-    requestTutorHint(tutorId);
-    const blurb = win.querySelector(`#personaBlurb_${tutorId}`);
-    if (blurb && tutorHints[tutorId]) blurb.textContent = tutorHints[tutorId];
-    if (blurb) {
-        setTimeout(() => {
-            if (blurb.textContent.includes('Loading')) {
-                blurb.textContent = 'Persona ready. Ask a question to begin.';
-            }
-        }, 1500);
-    }
-}
-
-async function requestTutorHint(tutorId) {
-    if (tutorHints[tutorId]) return;
-    try {
-        const response = await fetch('/api/tutor/persona_hint', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ tutor_id: tutorId })
-        });
-        const data = await response.json();
-        if (data.hint) {
-            tutorHints[tutorId] = data.hint;
-            const hintEl = document.querySelector(`.tutor-hint[data-hint-id="${tutorId}"]`);
-            if (hintEl) hintEl.textContent = data.hint;
-            const blurb = document.querySelector(`#personaBlurb_${tutorId}`);
-            if (blurb) blurb.textContent = data.hint;
-        }
-    } catch (e) {}
-}
-
-async function analyzeScreen() {
-    if (isAnalyzing) return;
-    ensureTutorOutputVisible();
-    if (!connected) {
-        addTutorMessage('system', 'Not Connected', 'Connect to analyze screens.');
-        return;
-    }
-    isAnalyzing = true;
-
-    try {
-        const response = await fetch('/api/tutor/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal: currentGoal, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-
-        if (data.current_screen) addTutorMessage('analysis', 'Screen', data.current_screen);
-        if (data.red_team_insight) addTutorMessage('insight', 'Insight', data.red_team_insight);
-        if (data.next_action) addTutorMessage('action', 'Next', data.next_action);
-        if (data.graph_updated) refreshGraph();
-    } catch (e) {
-        addTutorMessage('error', 'Error', e.message);
-    } finally {
-        isAnalyzing = false;
-    }
-}
-
-async function suggestNext() {
-    ensureTutorOutputVisible();
-    if (!connected) return;
-
-    try {
-        const response = await fetch('/api/tutor/suggest', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal: currentGoal, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-        if (data.suggestion) addTutorMessage('action', 'Suggestion', data.suggestion);
-    } catch (e) {}
-}
-
-async function analyzePersonaScreen(tutorId) {
-    const responseEl = document.getElementById(`personaResponse_${tutorId}`);
-    if (responseEl) responseEl.textContent = 'Analyzing screen...';
-    if (!connected) {
-        if (responseEl) responseEl.textContent = 'Not connected to TN3270.';
-        return;
-    }
-    try {
-        const response = await fetch('/api/tutor/analyze', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal: currentGoal, tutor_id: tutorId })
-        });
-        const data = await response.json();
-        const parts = [];
-        if (data.current_screen) parts.push(`Screen: ${data.current_screen}`);
-        if (data.red_team_insight) parts.push(`Insight: ${data.red_team_insight}`);
-        if (data.next_action) parts.push(`Next: ${data.next_action}`);
-        if (responseEl) responseEl.textContent = parts.join('\n\n') || 'No response.';
-    } catch (e) {
-        if (responseEl) responseEl.textContent = e.message || 'Error';
-    }
-}
-
-async function suggestPersonaNext(tutorId) {
-    const responseEl = document.getElementById(`personaResponse_${tutorId}`);
-    if (responseEl) responseEl.textContent = 'Getting next step...';
-    if (!connected) {
-        if (responseEl) responseEl.textContent = 'Not connected to TN3270.';
-        return;
-    }
-    try {
-        const response = await fetch('/api/tutor/suggest', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ goal: currentGoal, tutor_id: tutorId })
-        });
-        const data = await response.json();
-        if (responseEl) responseEl.textContent = data.suggestion || 'No suggestion.';
-    } catch (e) {
-        if (responseEl) responseEl.textContent = e.message || 'Error';
-    }
-}
-
-async function askTutor() {
-    const input = document.getElementById('tutorQuestion');
-    const question = input.value.trim();
-    if (!question) return;
-
-    input.value = '';
-    addTutorMessage('user', 'You', question);
-
-    try {
-        const response = await fetch('/api/tutor/ask', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ question, goal: currentGoal, tutor_id: currentTutor })
-        });
-        const data = await response.json();
-        if (data.answer) {
-            const name = tutorProfiles[currentTutor]?.name || 'Tutor';
-            const rendered = window.marked ? marked.parse(data.answer) : data.answer;
-            addTutorMessage('system', name, rendered);
-        }
-    } catch (e) {}
-}
-
-// ============ GRAPH ============
-const nodeColors = {
-    'EntryPoint': '#f85149',
-    'Panel': '#58a6ff',
-    'Job': '#d29922',
-    'Program': '#a371f7',
-    'Dataset': '#3fb950'
-};
-
-let graphData = { nodes: [], links: [] };
-let simulation = null;
-let graphError = null;
-
-function normalizeGraph(raw) {
-    const nodes = [];
-    const nodeMap = new Map();
-    (raw.nodes || []).forEach(n => {
-        if (typeof n === 'string') {
-            const obj = { id: n };
-            nodes.push(obj);
-            nodeMap.set(obj.id, obj);
-        } else if (n && typeof n === 'object') {
-            const id = n.id || n.name || n.key;
-            if (!id) return;
-            const obj = { ...n, id };
-            nodes.push(obj);
-            nodeMap.set(obj.id, obj);
-        }
-    });
-
-    const links = [];
-    (raw.links || []).forEach(l => {
-        if (!l) return;
-        const sourceId = typeof l.source === 'object' ? (l.source.id || l.source.name) : l.source;
-        const targetId = typeof l.target === 'object' ? (l.target.id || l.target.name) : l.target;
-        if (!sourceId || !targetId) return;
-        if (!nodeMap.has(sourceId)) {
-            const obj = { id: sourceId };
-            nodes.push(obj);
-            nodeMap.set(sourceId, obj);
-        }
-        if (!nodeMap.has(targetId)) {
-            const obj = { id: targetId };
-            nodes.push(obj);
-            nodeMap.set(targetId, obj);
-        }
-        links.push({ ...l, source: sourceId, target: targetId });
-    });
-
-    return { nodes, links };
-}
-
-function setGraphError(message) {
-    graphError = message;
-    const banner = document.getElementById('uiErrorBanner');
-    if (banner && message) {
-        banner.style.display = 'block';
-        banner.textContent = `Graph error: ${message}`;
-    }
-}
-
-function initMiniGraph() {
-    const svg = d3.select('#miniGraph');
-    const container = svg.node().parentElement;
-    const width = container.clientWidth || 300;
-    const height = container.clientHeight || 300;
-
-    svg.attr('width', width).attr('height', height);
-    const g = svg.append('g');
-
-    simulation = d3.forceSimulation()
-        .force('link', d3.forceLink().id(d => d.id).distance(40))
-        .force('charge', d3.forceManyBody().strength(-80))
-        .force('center', d3.forceCenter(width / 2, height / 2))
-        .on('tick', () => {
-            g.selectAll('line')
-                .attr('x1', d => d.source.x)
-                .attr('y1', d => d.source.y)
-                .attr('x2', d => d.target.x)
-                .attr('y2', d => d.target.y);
-            g.selectAll('circle')
-                .attr('cx', d => d.x)
-                .attr('cy', d => d.y);
-        });
-
-    refreshGraph();
-}
-
-async function refreshGraph() {
-    try {
-        const response = await fetch('/api/graph/export/d3');
-        const data = await response.json();
-        if (!data.error) {
-            graphData = normalizeGraph(data);
-            updateMiniGraph();
-            document.getElementById('graphNodes').textContent = `${data.nodes.length} nodes`;
-            document.getElementById('graphEdges').textContent = `${data.links.length} edges`;
-            document.getElementById('nodesDiscovered').textContent = data.nodes.length;
-        }
-    } catch (e) {}
-}
-
-function updateMiniGraph() {
-    try {
-        const svg = d3.select('#miniGraph');
-        const g = svg.select('g');
-
-        const links = g.selectAll('line').data(graphData.links, d => d.id || `${d.source}-${d.target}`);
-        links.exit().remove();
-        links.enter().append('line').attr('stroke', '#30363d').attr('stroke-width', 1);
-
-        const nodes = g.selectAll('circle').data(graphData.nodes, d => d.id);
-        nodes.exit().remove();
-        nodes.enter().append('circle').attr('r', 5).attr('fill', d => nodeColors[d.type] || '#666');
-
-        simulation.nodes(graphData.nodes);
-        simulation.force('link').links(graphData.links);
-        simulation.alpha(0.3).restart();
-    } catch (e) {
-        setGraphError(e.message || 'Graph update failed');
-    }
-}
-
 // ============ INIT ============
-async function checkStatus() {
+async function init() {
+    // Check connection status
     try {
-        const response = await fetch('/api/status');
-        const data = await response.json();
+        const resp = await fetch('/api/status');
+        const data = await resp.json();
         if (data.connected) {
-            connected = true;
-            updateConnectionStatus(true, data.host);
+            state.connected = true;
+            state.host = data.host;
+            $('#connectBtn').style.display = 'none';
+            $('#disconnectBtn').style.display = '';
+
             const screenResp = await fetch('/api/screen');
             const screenData = await screenResp.json();
             updateTerminalDisplay(screenData);
         }
     } catch (e) {}
+
+    render();
 }
 
-document.querySelectorAll('.tutor-card').forEach(card => {
-    const tutorId = card.dataset.tutorId;
-    card.addEventListener('click', () => selectTutor(tutorId));
-    card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') selectTutor(tutorId);
-    });
-    let hoverTimer = null;
-    card.addEventListener('mouseenter', () => {
-        hoverTimer = setTimeout(() => requestTutorHint(tutorId), 350);
-    });
-    card.addEventListener('mouseleave', () => {
-        if (hoverTimer) clearTimeout(hoverTimer);
-    });
-});
-
-document.querySelectorAll('.path-card[data-path-id]').forEach(card => {
-    const pathId = card.dataset.pathId;
-    card.addEventListener('click', () => selectPathCard(pathId));
-    card.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') selectPathCard(pathId);
-    });
-    let hoverTimer = null;
-    card.addEventListener('mouseenter', () => {
-        hoverTimer = setTimeout(() => requestPathHint(pathId), 350);
-    });
-    card.addEventListener('mouseleave', () => {
-        if (hoverTimer) clearTimeout(hoverTimer);
-    });
-});
-
-function logUiAction(message) {
-    const banner = document.getElementById('uiActionBanner');
-    if (banner) {
-        banner.style.display = 'block';
-        banner.textContent = message;
-    }
-}
-
-document.addEventListener('click', async (e) => {
-    const actionTarget = e.target.closest('[data-action]');
-    if (!actionTarget) return;
-    const action = actionTarget.dataset.action;
-    logUiAction(`Action: ${action}`);
-    try {
-        const personaId = actionTarget.dataset.tutorId;
-        if (action === 'tutor-select') {
-            const tutorId = actionTarget.dataset.tutorId || actionTarget.closest('.tutor-card')?.dataset.tutorId;
-            if (tutorId) selectTutor(tutorId);
-        } else if (action === 'tutor-analyze') {
-            if (personaId) {
-                await analyzePersonaScreen(personaId);
-            } else {
-                analyzeScreen();
-            }
-        } else if (action === 'tutor-suggest') {
-            if (personaId) {
-                await suggestPersonaNext(personaId);
-            } else {
-                suggestNext();
-            }
-        } else if (action === 'tutor-ask') {
-            askTutor();
-        } else if (action === 'dock-left') {
-            dockTutor('left');
-        } else if (action === 'dock-center') {
-            dockTutor('center');
-        } else if (action === 'dock-right') {
-            dockTutor('right');
-        } else if (action === 'dock-full') {
-            dockTutor('full');
-        } else if (action === 'tutor-collapse') {
-            toggleTutorCollapse();
-        } else if (action === 'path-start') {
-            startSelectedPath();
-        } else if (action === 'path-preview') {
-            previewSelectedPath();
-        } else if (action === 'path-ask-toggle') {
-            togglePathQuestion();
-        } else if (action === 'path-ask-send') {
-            askPathQuestion();
-        } else if (action === 'path-exit') {
-            exitPathSession();
-        } else if (action === 'path-verify') {
-            verifyPathStep();
-        } else if (action === 'path-next') {
-            advancePathStep();
-        } else if (action === 'path-help') {
-            helpPathStep();
-        } else if (action === 'persona-ask') {
-            const tutorId = actionTarget.dataset.tutorId;
-            const input = document.getElementById(`personaQuestion_${tutorId}`);
-            const responseEl = document.getElementById(`personaResponse_${tutorId}`);
-            const question = input?.value?.trim();
-            if (!question) return;
-            input.value = '';
-            if (!responseEl) {
-                const banner = document.getElementById('uiErrorBanner');
-                if (banner) {
-                    banner.style.display = 'block';
-                    banner.textContent = 'UI error: persona response container missing.';
-                }
-                return;
-            }
-            responseEl.textContent = 'Thinking...';
-            logUiAction(`Action: persona-ask (${tutorId})`);
-            try {
-                const resp = await fetch('/api/tutor/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ question, goal: currentGoal, tutor_id: tutorId })
-                });
-                if (!resp.ok) {
-                    responseEl.textContent = `LLM error: ${resp.status}`;
-                    return;
-                }
-                const data = await resp.json();
-                responseEl.innerHTML = data.answer ? (window.marked ? marked.parse(data.answer) : data.answer) : 'No response.';
-            } catch (e) {
-                responseEl.textContent = e.message || 'Error';
-            }
-        }
-    } catch (err) {
-        const banner = document.getElementById('uiErrorBanner');
-        if (banner) {
-            banner.style.display = 'block';
-            banner.textContent = `UI action error: ${err.message || err}`;
-        }
-    }
-}, true);
-
-window.addEventListener('error', (e) => {
-    const banner = document.getElementById('uiErrorBanner');
-    if (banner) {
-        banner.style.display = 'block';
-        const detail = e.error?.stack || e.message || 'Unknown error';
-        banner.textContent = `UI error: ${detail}`;
-    }
-});
-
-window.addEventListener('unhandledrejection', (e) => {
-    const banner = document.getElementById('uiErrorBanner');
-    if (banner) {
-        banner.style.display = 'block';
-        const detail = e.reason?.stack || e.reason?.message || String(e.reason || 'Unknown rejection');
-        banner.textContent = `UI rejection: ${detail}`;
-    }
-});
-
-checkStatus();
-if (window.d3) {
-    try { initMiniGraph(); } catch (e) {}
-}
-setInterval(refreshGraph, 10000);
-selectTutor('mentor');
-
-setInterval(async () => {
-    if (!connected || isAnalyzing || !currentGoal) return;
-    try {
-        const response = await fetch('/api/screen');
-        const screenData = await response.json();
-        const screenText = screenData?.screen || screenData?.current_screen || screenData?.data || '';
-        if (screenText && screenText !== lastScreenSnapshot) {
-            lastScreenSnapshot = screenText;
-            analyzeScreen();
-        }
-    } catch (e) {}
-}, 8000);
+init();
 </script>
 {% endblock %}
