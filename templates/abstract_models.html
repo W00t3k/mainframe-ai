@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}Abstract Models - Mainframe AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/tutor.css">
+<link rel="stylesheet" href="/static/css/pages/abstract_models.css">
+{% endblock %}
+
+{% block body %}
+<div class="tutor-app abstract-app">
+    <aside class="tutor-sidebar">
+        <div class="sidebar-header">
+            <a href="/" class="back-link">← Back</a>
+            <h1>Abstract Models</h1>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-title">Sections</div>
+            <div class="module-list">
+                <div class="module-item selected" data-target="abstract" data-section="abstract">
+                    <div class="module-header">
+                        <span class="module-name">Abstract</span>
+                        <span class="module-time">Core</span>
+                    </div>
+                    <div class="module-desc">Platform thesis and learning contract.</div>
+                </div>
+                <div class="module-item" data-target="mental-models" data-section="mental-models">
+                    <div class="module-header">
+                        <span class="module-name">Mental Models</span>
+                        <span class="module-time">Core</span>
+                    </div>
+                    <div class="module-desc">Foundational concepts you’ll use everywhere.</div>
+                </div>
+                <div class="module-item" data-target="navigation" data-section="navigation">
+                    <div class="module-header">
+                        <span class="module-name">Navigation</span>
+                        <span class="module-time">Flow</span>
+                    </div>
+                    <div class="module-desc">Abstract → modules → personas → terminal.</div>
+                </div>
+                <div class="module-item" data-target="behavior" data-section="behavior">
+                    <div class="module-header">
+                        <span class="module-name">Behavior</span>
+                        <span class="module-time">Rules</span>
+                    </div>
+                    <div class="module-desc">Steps and questions grounded in screen state.</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-section">
+            <div class="section-title">Default Credentials</div>
+            <div class="module-list compact">
+                <div class="module-item">
+                    <div class="module-header">
+                        <span class="module-name">TK5 Login</span>
+                    </div>
+                    <div class="module-desc">HERC01 / CUL8TR</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-header">
+                        <span class="module-name">TN3270</span>
+                    </div>
+                    <div class="module-desc">localhost:3270</div>
+                </div>
+                <div class="module-item">
+                    <div class="module-header">
+                        <span class="module-name">Key Hints</span>
+                    </div>
+                    <div class="module-desc">PF3 back, PF7/PF8 scroll</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="conn-status connected">
+                <span class="conn-dot"></span>
+                <span class="conn-text">Thesis Loaded</span>
+            </div>
+        </div>
+    </aside>
+
+    <main class="tutor-main">
+        <header class="main-header">
+            <div class="breadcrumb">
+                <span class="crumb-module">Abstract Models</span>
+                <span class="crumb-sep">•</span>
+                <span class="crumb-persona">Platform Thesis</span>
+            </div>
+        </header>
+
+        <div class="content-grid">
+            <div class="panel terminal-panel abstract-panel accent-green">
+                <div class="panel-header">
+                    <span class="panel-title">TN3270 Terminal</span>
+                    <span class="panel-subtitle">Click a region to map mental models</span>
+                </div>
+                <div class="terminal-controls abstract-controls">
+                    <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port">
+                    <button id="connectBtn">Connect</button>
+                    <button id="disconnectBtn" style="display:none;">Disconnect</button>
+                    <button id="refreshBtn">Refresh</button>
+                </div>
+                <div class="terminal-screen" id="terminalScreen" tabindex="0">
+                    <div class="terminal-highlight" id="terminalHighlight"></div>
+                    <pre class="terminal-text" id="terminalText">Click Connect to load the live TN3270 screen.</pre>
+                </div>
+                <div class="pf-keys">
+                    <button onclick="sendKey('enter')">Enter</button>
+                    <button onclick="sendKey('clear')">Clear</button>
+                    <button onclick="sendKey('tab')">Tab</button>
+                    <button onclick="sendKey('reset')">Reset</button>
+                    <button onclick="sendKey('pf', 1)">PF1</button>
+                    <button onclick="sendKey('pf', 2)">PF2</button>
+                    <button onclick="sendKey('pf', 3)">PF3</button>
+                    <button onclick="sendKey('pf', 4)">PF4</button>
+                    <button onclick="sendKey('pf', 5)">PF5</button>
+                    <button onclick="sendKey('pf', 6)">PF6</button>
+                    <button onclick="sendKey('pf', 7)">PF7</button>
+                    <button onclick="sendKey('pf', 8)">PF8</button>
+                    <button onclick="sendKey('pf', 9)">PF9</button>
+                    <button onclick="sendKey('pf', 10)">PF10</button>
+                    <button onclick="sendKey('pf', 11)">PF11</button>
+                    <button onclick="sendKey('pf', 12)">PF12</button>
+                </div>
+            </div>
+
+            <div class="panel tutor-panel abstract-panel accent-green" id="mental-models">
+                <div class="panel-header">
+                    <span class="panel-title">Mental Models You&#39;ll Learn</span>
+                    <span class="panel-subtitle">Foundational concepts</span>
+                </div>
+                <div class="abstract-scroll" id="abstractScroll">
+                <div class="abstract-body" id="abstract">
+                    <p>
+                        Mainframes reward people who build the right mental model: layered session state,
+                        control planes that enforce policy, and artifacts that persist long after commands run.
+                            This platform teaches those models through live TN3270 interaction, a step-gated tutor,
+                            and a trust graph that explains what each action touches (panels, jobs, programs, datasets).
+                            An LLM tutor backed by retrieval answers questions in context, using the current screen
+                            state and lab environment. The goal is not memorizing commands, but learning how to reason
+                            about MVS/z/OS the way experienced operators, auditors, and red teamers do.
+                        </p>
+                    </div>
+
+                    <div class="abstract-body">
+                    <ul class="model-list">
+                        <li data-model="session-stack"><strong>Session Stack</strong> — VTAM → TSO → ISPF as layered state, not a single login.</li>
+                        <li data-model="control-planes"><strong>Control Planes</strong> — RACF, JES, ISPF, CICS, DB2 determine access and execution.</li>
+                        <li data-model="artifacts-evidence"><strong>Artifacts &amp; Evidence</strong> — Spool, logs, datasets, and what survives execution.</li>
+                        <li data-model="trust-boundaries"><strong>Trust Boundaries</strong> — Dataset profiles, program paths, APF, and authorization.</li>
+                        <li data-model="batch-interactive"><strong>Batch vs Interactive</strong> — Why JCL behaves differently than panels and commands.</li>
+                        <li data-model="graph-thinking"><strong>Graph Thinking</strong> — Panels, jobs, programs, datasets as nodes with edges.</li>
+                    </ul>
+                    </div>
+
+                    <div class="abstract-divider"></div>
+
+                    <div class="abstract-body insight-block" id="insightBlock">
+                        <h3 class="abstract-subtitle">Ask + Mapping</h3>
+                        <div class="insight-feed" id="insightScroll">
+                            <p class="insight-line"><strong>Click Insight:</strong> Click a region in the TN3270 panel to map it to a mental model and get a focused explanation.</p>
+                        </div>
+
+                        <div class="chat-box" id="chatBox">
+                            <div class="ask-row">
+                                <input type="text" id="abstractAsk" placeholder="Ask about the current screen or model...">
+                                <button class="send-btn" id="abstractAskBtn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="abstract-divider"></div>
+
+                    <div class="abstract-body" id="navigation">
+                        <h3 class="abstract-subtitle">Navigation Hierarchy</h3>
+                        <ol class="flow-list">
+                            <li>Abstract + Mental Models</li>
+                            <li>Module selection (what you will learn)</li>
+                            <li>Tutor persona selection (how it is taught)</li>
+                            <li>Live TN3270 interaction + LLM guidance</li>
+                        </ol>
+                        <p class="flow-note">
+                            Modules drive behavior. Personas adjust perspective, tone, and emphasis.
+                        </p>
+                    </div>
+
+                    <div class="abstract-divider"></div>
+
+                    <div class="abstract-body" id="behavior">
+                        <h3 class="abstract-subtitle">Behavioral Expectations</h3>
+                        <ul class="model-list">
+                            <li>Selecting a module or tutor informs the LLM of the mental model focus.</li>
+                            <li>Steps are gated by terminal state, not by free-form conversation.</li>
+                            <li>Questions always reference the current screen and lab environment.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+const scrollToTarget = (targetId) => {
+    const el = document.getElementById(targetId);
+    const container = document.getElementById('abstractScroll');
+    if (!el || !container) return;
+    const elRect = el.getBoundingClientRect();
+    const containerRect = container.getBoundingClientRect();
+    const delta = elRect.top - containerRect.top;
+    container.scrollTo({ top: container.scrollTop + delta - 12, behavior: 'smooth' });
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 600);
+};
+
+const sectionItems = document.querySelectorAll('.module-item[data-target]');
+sectionItems.forEach(item => {
+    item.addEventListener('click', (e) => {
+        sectionItems.forEach(i => i.classList.remove('selected'));
+        e.currentTarget.classList.add('selected');
+        const target = e.currentTarget.getAttribute('data-target');
+        if (target) {
+            scrollToTarget(target);
+        }
+    });
+});
+
+const state = {
+    connected: false,
+    host: ''
+};
+
+const terminalScreen = document.getElementById('terminalScreen');
+const terminalText = document.getElementById('terminalText');
+const highlightEl = document.getElementById('terminalHighlight');
+const insightScroll = document.getElementById('insightScroll');
+const askInput = document.getElementById('abstractAsk');
+const askBtn = document.getElementById('abstractAskBtn');
+
+function addInsight(title, content) {
+    const wrapper = document.createElement('div');
+    wrapper.className = 'insight-line';
+    wrapper.innerHTML = `<strong>${title}:</strong> ${content}`;
+    insightScroll.appendChild(wrapper);
+    insightScroll.scrollTop = insightScroll.scrollHeight;
+}
+
+function highlightModelsFromText(text) {
+    const map = {
+        'session-stack': ['session stack', 'vtam', 'tso', 'ispf'],
+        'control-planes': ['control plane', 'control planes', 'racf', 'jes', 'cics', 'db2', 'ispf'],
+        'artifacts-evidence': ['artifacts', 'evidence', 'spool', 'log', 'logs', 'dataset', 'datasets'],
+        'trust-boundaries': ['trust boundary', 'trust boundaries', 'apf', 'authorization', 'profiles', 'dataset profile'],
+        'batch-interactive': ['batch', 'interactive', 'jcl', 'panel', 'panels'],
+        'graph-thinking': ['graph', 'nodes', 'edges', 'relationships']
+    };
+    const lower = (text || '').toLowerCase();
+    document.querySelectorAll('.model-list [data-model]').forEach(item => {
+        item.classList.remove('model-hit');
+    });
+    let matched = false;
+    Object.entries(map).forEach(([key, tokens]) => {
+        if (tokens.some(t => lower.includes(t))) {
+            const item = document.querySelector(`.model-list [data-model="${key}"]`);
+            if (item) {
+                item.classList.add('model-hit');
+                matched = true;
+            }
+        }
+    });
+    if (!matched && (lower.includes('mental model') || lower.includes('mental models'))) {
+        matched = true;
+    }
+    const mentalPanel = document.getElementById('mental-models');
+    if (mentalPanel) {
+        mentalPanel.classList.toggle('panel-hit', matched);
+    }
+    return matched;
+}
+
+function mapSectionsFromText(text) {
+    const map = {
+        abstract: ['abstract', 'thesis', 'platform'],
+        'mental-models': ['mental model', 'mental models', 'session stack', 'control plane', 'trust boundary', 'batch', 'graph', 'artifacts', 'evidence'],
+        navigation: ['navigation', 'flow', 'modules', 'module selection', 'persona', 'terminal', 'sequence'],
+        behavior: ['behavior', 'expectations', 'gated', 'screen state', 'current screen', 'questions', 'ask', 'context', 'step']
+    };
+    const lower = (text || '').toLowerCase();
+    const hits = [];
+    Object.entries(map).forEach(([key, tokens]) => {
+        if (tokens.some(t => lower.includes(t))) hits.push(key);
+    });
+    const items = document.querySelectorAll('.module-item[data-section]');
+    items.forEach(item => item.classList.remove('selected'));
+    if (hits.length) {
+        const item = document.querySelector(`.module-item[data-section="${hits[0]}"]`);
+        if (item) item.classList.add('selected');
+    }
+    return hits;
+}
+
+
+function updateTerminalDisplay(data) {
+    const screen =
+        data?.screen_data?.screen ??
+        data?.screen ??
+        data?.screen_data?.current_screen ??
+        '';
+    if (screen) {
+        terminalText.textContent = screen;
+    }
+    if (data?.connected !== undefined) {
+        state.connected = !!data.connected;
+    }
+}
+
+async function connectTerminal() {
+    const host = document.getElementById('hostInput').value.trim();
+    if (!host) return;
+
+    const resp = await fetch('/api/terminal/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ target: host })
+    });
+    const data = await resp.json();
+    if (data.success) {
+        state.connected = true;
+        state.host = host;
+        updateTerminalDisplay(data.screen_data);
+        document.getElementById('connectBtn').style.display = 'none';
+        document.getElementById('disconnectBtn').style.display = '';
+        addInsight('Connected', `Connected to ${host}`);
+    } else {
+        addInsight('Connection Failed', data.message || 'Unable to connect.');
+    }
+}
+
+async function disconnectTerminal() {
+    await fetch('/api/terminal/disconnect', { method: 'POST' });
+    state.connected = false;
+    state.host = '';
+    terminalText.textContent = 'Click Connect to load the live TN3270 screen.';
+    document.getElementById('connectBtn').style.display = '';
+    document.getElementById('disconnectBtn').style.display = 'none';
+}
+
+async function sendKey(keyType, value = '') {
+    if (!state.connected) return;
+    const resp = await fetch('/api/terminal/key', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key_type: keyType, value: String(value) })
+    });
+    const data = await resp.json();
+    if (data.success && data.screen_data) {
+        updateTerminalDisplay(data.screen_data);
+    }
+}
+
+function handleTerminalKey(e) {
+    if (!state.connected) return;
+    e.preventDefault();
+
+    if (e.key === 'Enter') sendKey('enter');
+    else if (e.key === 'Escape') sendKey('clear');
+    else if (e.key === 'Tab') sendKey(e.shiftKey ? 'backtab' : 'tab');
+    else if (e.key === 'Backspace') sendKey('backspace');
+    else if (e.key === 'Delete') sendKey('delete');
+    else if (e.key.startsWith('F') && e.key.length <= 3) {
+        const num = parseInt(e.key.substring(1));
+        if (num >= 1 && num <= 12) sendKey('pf', e.shiftKey ? num + 12 : num);
+    } else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) {
+        sendKey('string', e.key);
+    }
+}
+
+function getCharSize() {
+    const span = document.createElement('span');
+    span.textContent = 'M';
+    span.style.visibility = 'hidden';
+    span.style.position = 'absolute';
+    span.style.fontFamily = getComputedStyle(terminalText).fontFamily;
+    span.style.fontSize = getComputedStyle(terminalText).fontSize;
+    document.body.appendChild(span);
+    const size = { w: span.getBoundingClientRect().width, h: span.getBoundingClientRect().height };
+    span.remove();
+    return size;
+}
+
+function handleTerminalClick(e) {
+    if (!state.connected) {
+        addInsight('Not Connected', 'Connect to the terminal first.');
+        return;
+    }
+
+    const rect = terminalScreen.getBoundingClientRect();
+    const style = getComputedStyle(terminalScreen);
+    const paddingLeft = parseFloat(style.paddingLeft);
+    const paddingTop = parseFloat(style.paddingTop);
+    const { w: charW, h: charH } = getCharSize();
+
+    const x = e.clientX - rect.left - paddingLeft + terminalScreen.scrollLeft;
+    const y = e.clientY - rect.top - paddingTop + terminalScreen.scrollTop;
+    const col = Math.max(0, Math.floor(x / charW));
+    const row = Math.max(0, Math.floor(y / charH));
+
+    const lines = terminalText.textContent.split('\n');
+    const lineText = lines[row] || '';
+
+    highlightEl.style.display = 'block';
+    highlightEl.style.top = `${paddingTop + row * charH}px`;
+    highlightEl.style.left = `${paddingLeft}px`;
+    highlightEl.style.height = `${charH}px`;
+    highlightEl.style.width = `${terminalScreen.clientWidth - paddingLeft * 2}px`;
+
+    addInsight('Selection', `Row ${row + 1}, Col ${col + 1}: <code>${lineText.trim() || '(blank)'}</code>`);
+    requestInsight(row + 1, col + 1, lineText);
+}
+
+async function requestInsight(row, col, lineText) {
+    const question = `User clicked row ${row}, col ${col} on the TN3270 screen. Line text: \"${lineText}\". Map this to the mental models (Session Stack, Control Planes, Artifacts & Evidence, Trust Boundaries, Batch vs Interactive, Graph Thinking) and explain which models apply and why.`;
+    addInsight('Mapping...', 'Analyzing the selected region against the mental models.');
+    try {
+        const resp = await fetch('/api/tutor/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question,
+                goal: 'abstract-models',
+                tutor_id: 'mentor'
+            })
+        });
+        const data = await resp.json();
+        if (data.answer) {
+            if (data.answer.startsWith('Error:')) {
+                addInsight('LLM Error', data.answer);
+            } else {
+                addInsight('Abstract Model Mapping', data.answer);
+                highlightModelsFromText(data.answer);
+                const hits = mapSectionsFromText(data.answer);
+                if (hits.length) {
+                    addInsight('Mapped Sections', hits.map(h => h.replace('-', ' ')).join(', '));
+                }
+                if (insightBlock) insightBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } else {
+            addInsight('Abstract Model Mapping', 'No response available.');
+        }
+    } catch (e) {
+        addInsight('LLM Error', e.message || 'Request failed.');
+    }
+}
+
+terminalScreen.addEventListener('click', handleTerminalClick);
+terminalScreen.addEventListener('keydown', handleTerminalKey);
+
+document.getElementById('connectBtn').addEventListener('click', connectTerminal);
+document.getElementById('disconnectBtn').addEventListener('click', disconnectTerminal);
+document.getElementById('refreshBtn').addEventListener('click', async () => {
+    const resp = await fetch('/api/screen');
+    const data = await resp.json();
+    updateTerminalDisplay(data);
+});
+
+async function askLLM() {
+    const question = askInput.value.trim();
+    if (!question) return;
+    addInsight('You', question);
+    askInput.value = '';
+    try {
+        const resp = await fetch('/api/tutor/ask', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                question,
+                goal: 'abstract-models',
+                tutor_id: 'mentor'
+            })
+        });
+        const data = await resp.json();
+        if (data.answer) {
+            if (data.answer.startsWith('Error:')) {
+                addInsight('LLM Error', data.answer);
+            } else {
+                addInsight('Tutor', data.answer);
+                highlightModelsFromText(data.answer);
+                const hits = mapSectionsFromText(data.answer);
+                if (hits.length) {
+                    addInsight('Mapped Sections', hits.map(h => h.replace('-', ' ')).join(', '));
+                }
+                if (insightBlock) insightBlock.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+        } else {
+            addInsight('LLM', 'No response available.');
+        }
+    } catch (e) {
+        addInsight('LLM Error', e.message || 'Request failed.');
+    }
+}
+
+askBtn.addEventListener('click', askLLM);
+askInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') askLLM();
+});
+
+setInterval(async () => {
+    try {
+        const resp = await fetch('/api/screen');
+        const data = await resp.json();
+        updateTerminalDisplay(data);
+    } catch (e) {}
+}, 2000);
+</script>
+{% endblock %}

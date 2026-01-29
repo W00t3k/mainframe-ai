@@ -179,8 +179,53 @@
                 <div class="welcome-card" id="welcomeCard">
                     <h2>Welcome to Red Team Tutor</h2>
                     <p>Learn mainframe security through guided exploration.</p>
-                    <div class="welcome-cta">
-                        <p>Select a module from the sidebar to begin.</p>
+                    <div class="welcome-highlights">
+                        <div class="welcome-panel">
+                            <h3>Red Team Focus</h3>
+                            <ul>
+                                <li>Map the session stack (VTAM → TSO → ISPF)</li>
+                                <li>Spot access controls (RACF, dataset profiles)</li>
+                                <li>Find weak links (permissive datasets, defaults)</li>
+                                <li>Capture evidence (screens, JES output, logs)</li>
+                            </ul>
+                        </div>
+                        <div class="welcome-panel">
+                            <h3>Starter Objectives</h3>
+                            <ul>
+                                <li>Connect to TK5 and reach the TSO logon</li>
+                                <li>List jobs in JES spool and read output</li>
+                                <li>Inspect dataset security metadata</li>
+                                <li>Ask the tutor to explain a screen or error</li>
+                            </ul>
+                        </div>
+                        <div class="welcome-panel">
+                            <h3>Engagement Checklist</h3>
+                            <ul>
+                                <li>Scope: TK5 lab only, no external targets</li>
+                                <li>Evidence: note steps, panels, timestamps</li>
+                                <li>Minimize: change nothing unless instructed</li>
+                                <li>Exit: document findings and clean up</li>
+                            </ul>
+                        </div>
+                        <div class="welcome-panel">
+                            <h3>Common Pitfalls</h3>
+                            <ul>
+                                <li>PF keys vary; try PF3 to exit, PF7/PF8 to page</li>
+                                <li>Uppercase matters in TSO and dataset names</li>
+                                <li>JES output appears after job completes</li>
+                                <li>ISPF panels may hide commands in line 1</li>
+                            </ul>
+                        </div>
+                        <div class="welcome-panel full-width">
+                            <h3>First 5 Commands</h3>
+                            <ul>
+                                <li>TSO: `LOGON USET` then password `PASS`</li>
+                                <li>ISPF: `3.4` to browse datasets</li>
+                                <li>TSO: `LISTCAT` to enumerate catalogs</li>
+                                <li>JES: `SDSF` then `ST` for job status</li>
+                                <li>ISPF: `6` for command shell</li>
+                            </ul>
+                        </div>
                     </div>
                 </div>
 
@@ -195,6 +240,9 @@
                         <button class="chip" data-q="What am I looking at?">What am I looking at?</button>
                         <button class="chip" data-q="What do I type?">What do I type?</button>
                         <button class="chip" data-q="Explain this error">Explain error</button>
+                        <button class="chip" data-q="Show the engagement checklist">Engagement checklist</button>
+                        <button class="chip" data-q="Common pitfalls in TK5/ISPF?">Common pitfalls</button>
+                        <button class="chip" data-q="Give me the first 5 commands">First 5 commands</button>
                     </div>
                     <div class="ask-row">
                         <input type="text" id="askInput" placeholder="Ask the tutor...">
@@ -290,11 +338,14 @@ function render() {
     });
 
     // Welcome vs Step card
+    const tutorPanel = document.querySelector('.tutor-panel');
     if (state.currentModule && state.session?.steps?.length) {
+        tutorPanel.classList.remove('mode-welcome');
         $('#welcomeCard').style.display = 'none';
         $('#stepCard').style.display = 'block';
         renderStep();
     } else if (state.currentModule) {
+        tutorPanel.classList.remove('mode-welcome');
         $('#welcomeCard').style.display = 'none';
         $('#stepCard').style.display = 'block';
         $('#stepNumber').textContent = 'Loading...';
@@ -304,6 +355,7 @@ function render() {
         $('#stepExpected').textContent = '';
         $('#stepProgress').innerHTML = '';
     } else {
+        tutorPanel.classList.add('mode-welcome');
         $('#welcomeCard').style.display = 'block';
         $('#stepCard').style.display = 'none';
     }

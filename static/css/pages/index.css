@@ -107,11 +107,17 @@ main {
 }
 
 .options {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     gap: 1.5rem;
     max-width: 1200px;
     width: 100%;
+    margin: 0 auto;
+    justify-content: center;
+}
+
+.option-card {
+    flex: 0 1 320px;
 }
 
 .option-card {
@@ -143,6 +149,17 @@ main {
     border-color: var(--ibm-blue);
     transform: translateY(-4px);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+
+.option-card:focus,
+.option-card:focus-visible {
+    outline: 2px solid var(--ibm-blue-light);
+    outline-offset: 2px;
+}
+
+.option-card.abstract:focus,
+.option-card.abstract:focus-visible {
+    outline: 2px solid var(--ibm-green);
 }
 
 .option-card:hover::before {
@@ -178,6 +195,7 @@ main {
 }
 
 .option-card.terminal .option-icon { color: #33ff33; }
+.option-card.abstract .option-icon { color: var(--ibm-green); }
 .option-card.chat .option-icon { color: var(--ibm-blue-light); }
 .option-card.scan .option-icon { color: var(--ibm-purple); }
 .option-card.screens .option-icon { color: var(--ibm-cyan); }
@@ -186,19 +204,79 @@ main {
 .option-card.tutor .option-icon { color: #ff6b6b; }
 .option-card.graph .option-icon { color: #00ff88; }
 
+.option-card.abstract {
+    border-color: rgba(66, 190, 101, 0.5) !important;
+    background: linear-gradient(135deg, rgba(66, 190, 101, 0.12) 0%, rgba(0, 0, 0, 0) 55%) !important;
+}
+
+.option-card.abstract::before {
+    background: var(--ibm-green) !important;
+}
+
+.option-card.abstract.featured {
+    border-color: rgba(66, 190, 101, 0.6) !important;
+}
+
+.option-card.tutor.featured {
+    border-color: rgba(255, 107, 107, 0.3);
+}
+
 /* Featured card styling */
 .option-card.featured {
-    grid-column: 1 / -1;
+    flex: 1 1 100%;
+    max-width: 1200px;
     background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(0, 0, 0, 0) 50%);
     border-color: rgba(255, 107, 107, 0.3);
 }
 
+.option-card.arch {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.option-card.abstract.featured {
+    background: linear-gradient(135deg, rgba(66, 190, 101, 0.16) 0%, rgba(0, 0, 0, 0) 55%) !important;
+    border-color: rgba(66, 190, 101, 0.6) !important;
+}
+
+.option-card.abstract.featured::before {
+    background: var(--ibm-green) !important;
+}
+
+.option-card.abstract:hover {
+    border-color: var(--ibm-green) !important;
+    box-shadow: 0 8px 32px rgba(66, 190, 101, 0.25) !important;
+}
+
+.option-card.abstract:hover::before {
+    background: var(--ibm-green) !important;
+}
+
+.option-card.abstract:active {
+    border-color: var(--ibm-green) !important;
+}
+
+.option-card.abstract.featured::before {
+    background: var(--ibm-green) !important;
+}
+
+.option-card.abstract:hover {
+    border-color: var(--ibm-green);
+}
 .option-card.featured::before {
     background: #ff6b6b;
 }
 
 .option-card.featured:hover {
     border-color: #ff6b6b;
+}
+
+.option-card.abstract.featured::before {
+    background: var(--ibm-green) !important;
+}
+
+.option-card.abstract.featured:hover {
+    border-color: var(--ibm-green) !important;
 }
 
 .featured-badge {

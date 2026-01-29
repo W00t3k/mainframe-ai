@@ -521,6 +521,11 @@ async def architecture_page(request: Request):
     return templates.TemplateResponse("architecture.html", {"request": request})
 
 
+@app.get("/abstract-models", response_class=HTMLResponse)
+async def abstract_models_page(request: Request):
+    return templates.TemplateResponse("abstract_models.html", {"request": request})
+
+
 @app.get("/tutor", response_class=HTMLResponse)
 async def tutor_page(request: Request):
     """Red Team Tutor - guided mainframe learning"""
@@ -835,6 +840,10 @@ Learner's question: {question}
 Answer in an educational, thorough manner. Relate concepts to modern security thinking where relevant."""
 
     try:
+        # Keep abstract-models quick to avoid timeouts
+        fast_mode = goal == "abstract-models"
+        timeout_s = 20.0 if fast_mode else 60.0
+        num_predict = 400 if fast_mode else 1000
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
@@ -842,9 +851,9 @@ Answer in an educational, thorough manner. Relate concepts to modern security th
                     "model": OLLAMA_MODEL,
                     "prompt": prompt,
                     "stream": False,
-                    "options": {"temperature": 0.7, "num_predict": 1000}
+                    "options": {"temperature": 0.7, "num_predict": num_predict}
                 },
-                timeout=45.0
+                timeout=timeout_s
             )
 
             if response.status_code == 200:
@@ -853,8 +862,10 @@ Answer in an educational, thorough manner. Relate concepts to modern security th
             else:
                 return JSONResponse({"answer": "Unable to answer right now."})
 
+    except httpx.ReadTimeout:
+        return JSONResponse({"answer": "Error: ReadTimeout: LLM took too long. Try again or ask a shorter question."})
     except Exception as e:
-        return JSONResponse({"answer": f"Error: {str(e)}"})
+        return JSONResponse({"answer": f"Error: {type(e).__name__}: {str(e)}"})
 
 
 @app.post("/api/tutor/event")

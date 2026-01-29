@@ -552,6 +552,64 @@ body {
     color: var(--muted);
 }
 
+.welcome-highlights {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    text-align: left;
+}
+
+.welcome-panel {
+    padding: 14px;
+    background: var(--panel-2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+}
+
+.welcome-panel h3 {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--dim);
+    margin-bottom: 8px;
+}
+
+.welcome-panel ul {
+    list-style: none;
+}
+
+.welcome-panel li {
+    font-size: 12px;
+    color: var(--text);
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+    margin-bottom: 6px;
+}
+
+.welcome-panel li::before {
+    content: "•";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+}
+
+.welcome-panel li:last-child {
+    margin-bottom: 0;
+}
+
+.welcome-panel.full-width {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.welcome-panel.full-width ul {
+    max-width: 520px;
+    margin: 0 auto;
+    text-align: left;
+}
+
 .welcome-cta {
     margin-top: 20px;
     padding: 16px;
@@ -561,6 +619,15 @@ body {
 
 .welcome-cta p {
     color: var(--dim);
+}
+
+.tutor-panel.mode-welcome .welcome-card {
+    flex: 1;
+    overflow-y: auto;
+}
+
+.tutor-panel.mode-welcome .messages-area {
+    display: none;
 }
 
 /* Messages Area */
@@ -835,5 +902,9 @@ body {
     .action-btn {
         padding: 6px 10px;
         font-size: 11px;
+    }
+
+    .welcome-highlights {
+        grid-template-columns: 1fr;
     }
 }
