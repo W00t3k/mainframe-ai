@@ -3,6 +3,11 @@
 Mainframe AI Assistant - Web Application
 FastAPI backend with chat interface and TN3270 connectivity
 Uses LOCAL LLM via Ollama (no API key required!)
+
+Enhanced with:
+- Agentic tool-calling loop
+- Trust Graph for mainframe relationship mapping
+- Real-time graph visualization via WebSocket
 """
 
 import os
@@ -13,7 +18,7 @@ import asyncio
 import httpx
 import ipaddress
 import threading
-from typing import Optional
+from typing import Optional, List, Dict
 from dataclasses import dataclass, field
 from datetime import datetime
 
@@ -32,24 +37,33 @@ except ImportError as e:
     print(f"RAG import error: {e}")
     RAG_AVAILABLE = False
 
-# BIRP modules are now local
-BIRP_AVAILABLE = False
+# Import agent tools (connection management, tool definitions)
 try:
-    from birpv2_modules.emulator.wrapper import WrappedEmulator
-    from birpv2_modules.core.models import Screen
-    BIRP_AVAILABLE = True
+    from agent_tools import (
+        connection, BIRP_AVAILABLE, TOOL_DEFINITIONS,
+        connect_mainframe, disconnect_mainframe, read_screen,
+        send_terminal_key, get_screen_data, get_cached_screen_data,
+        capture_screen, get_connection_status, execute_tool_async,
+        set_screen_update_callback, screencaps, SCREENCAPS_DIR
+    )
+    AGENT_TOOLS_AVAILABLE = True
 except ImportError as e:
-    print(f"BIRP import error: {e}")
-    # Fallback: try from original location
-    BIRP_PATH = os.path.expanduser("~/Desktop/STuFF /birp")
-    if os.path.exists(BIRP_PATH):
-        sys.path.insert(0, BIRP_PATH)
-        try:
-            from birpv2_modules.emulator.wrapper import WrappedEmulator
-            from birpv2_modules.core.models import Screen
-            BIRP_AVAILABLE = True
-        except ImportError:
-            pass
+    print(f"Agent tools import error: {e}")
+    AGENT_TOOLS_AVAILABLE = False
+    BIRP_AVAILABLE = False
+
+# Import trust graph
+try:
+    from trust_graph import get_trust_graph, TrustGraph
+    from graph_tools import (
+        classify_panel, extract_identifiers, parse_jcl, parse_sysout,
+        update_graph_from_jcl, update_graph_from_sysout, update_graph_from_screen,
+        generate_finding, ScreenMapperAgent, BatchTrustAgent, CICSRelationshipAgent
+    )
+    GRAPH_AVAILABLE = True
+except ImportError as e:
+    print(f"Trust graph import error: {e}")
+    GRAPH_AVAILABLE = False
 
 # Initialize FastAPI
 app = FastAPI(title="Mainframe AI Assistant")
@@ -96,32 +110,12 @@ Suggest what keys to press (Enter, PF3, PF1, etc.) or what to type.
 - SB37: Dataset out of space"""
 
 
-@dataclass
-class ConnectionState:
-    """Global connection state"""
-    host: str = ""
-    port: int = 23
-    connected: bool = False
-    emulator: Optional[object] = None
-    current_screen: str = ""
-    screen_rows: int = 24
-    screen_cols: int = 80
-    cursor_row: int = 0
-    cursor_col: int = 0
-    poller_thread: Optional[threading.Thread] = None
-    poller_stop: threading.Event = field(default_factory=threading.Event)
-    command_lock: threading.Lock = field(default_factory=threading.Lock)
-
-
-# Global state
-connection = ConnectionState()
+# Global state (connection imported from agent_tools)
 conversation_history = []
 websocket_clients = set()
-screencaps = []  # Store captured screens
+graph_websocket_clients = set()  # For real-time graph visualization
 
-# Screencaps storage directory
-SCREENCAPS_DIR = os.path.join(BASE_DIR, "screencaps")
-os.makedirs(SCREENCAPS_DIR, exist_ok=True)
+# Note: screencaps and SCREENCAPS_DIR imported from agent_tools
 
 
 async def check_ollama() -> bool:
@@ -175,250 +169,144 @@ async def chat_with_ollama(messages: list) -> str:
         return f"Error communicating with Ollama: {str(e)}"
 
 
-def connect_mainframe(target: str) -> tuple[bool, str]:
-    """Connect to mainframe via TN3270"""
-    global connection
+async def agentic_chat(messages: list, max_iterations: int = 10) -> dict:
+    """
+    Agentic chat loop using Ollama /api/chat with tool calling.
+    The LLM can invoke tools and observe results before responding.
 
-    if not BIRP_AVAILABLE:
-        return False, "BIRP modules not available. Install from ~/Desktop/STuFF /birp/"
+    Returns:
+        {
+            "response": str,
+            "agent_steps": list of {tool, arguments, result},
+            "iterations": int
+        }
+    """
+    if not AGENT_TOOLS_AVAILABLE:
+        # Fall back to basic chat
+        response = await chat_with_ollama(messages)
+        return {"response": response, "agent_steps": [], "iterations": 0}
 
-    try:
-        if ":" in target:
-            host, port = target.rsplit(":", 1)
-            port = int(port)
-        else:
-            host = target
-            port = 23
+    # Build system message with tools context
+    system_message = SYSTEM_PROMPT + """
 
-        if connection.connected and connection.emulator:
-            try:
-                connection.emulator.terminate()
-            except:
-                pass
+## Available Tools
+You can use these tools to interact with the mainframe:
+- connect_mainframe: Connect to a mainframe via TN3270
+- disconnect_mainframe: Disconnect from mainframe
+- read_screen: Read the current 3270 screen
+- send_text: Type text on the terminal
+- send_enter: Press Enter key
+- send_pf_key: Press a PF key (1-24)
+- send_clear: Press Clear key
+- send_tab: Press Tab key
+- query_knowledge_base: Search the knowledge base
+- capture_screen: Save a screen capture
+- get_connection_status: Check connection status
 
-        connection.emulator = WrappedEmulator(visible=False, command_timeout=5)
-        try:
-            connection.emulator.connect(f"{host}:{port}", timeout=5)
-        except TypeError:
-            connection.emulator.connect(f"{host}:{port}")
-        connection.host = host
-        connection.port = port
-        connection.connected = True
+When you need information from the mainframe, use the appropriate tool.
+After using tools, provide your analysis and recommendations."""
 
-        try:
-            exec_emulator_command(b'Wait(1,3270Mode)', timeout=5)
-        except Exception:
-            pass
-        try:
-            read_screen()
-        except Exception:
-            pass
-        return True, f"Connected to {host}:{port}"
+    # Format messages for Ollama /api/chat
+    chat_messages = [{"role": "system", "content": system_message}]
+    for msg in messages:
+        chat_messages.append({"role": msg["role"], "content": msg["content"]})
 
-    except Exception as e:
-        return False, f"Connection failed: {str(e)}"
-
-
-def disconnect_mainframe() -> str:
-    """Disconnect from mainframe"""
-    global connection
-
-    if connection.connected and connection.emulator:
-        try:
-            connection.emulator.terminate()
-        except:
-            pass
-
-    connection.connected = False
-    connection.emulator = None
-    connection.current_screen = ""
-    return "Disconnected"
-
-
-def read_screen() -> str:
-    """Read current 3270 screen"""
-    global connection
-
-    if not connection.connected or not connection.emulator:
-        return "[Not connected]"
+    agent_steps = []
+    iterations = 0
 
     try:
-        response = exec_emulator_command(b'ReadBuffer(Ascii)', timeout=6)
-        buffer = response.data if response else ""
-        screen_text = screen_from_readbuffer(buffer)
-        connection.current_screen = screen_text
-        return connection.current_screen
-    except Exception:
-        return connection.current_screen or "[Screen unavailable]"
+        async with httpx.AsyncClient() as client:
+            while iterations < max_iterations:
+                iterations += 1
 
+                # Call Ollama with tools
+                response = await client.post(
+                    f"{OLLAMA_URL}/api/chat",
+                    json={
+                        "model": OLLAMA_MODEL,
+                        "messages": chat_messages,
+                        "tools": TOOL_DEFINITIONS,
+                        "stream": False,
+                        "options": {
+                            "temperature": 0.7,
+                            "num_predict": 2048,
+                        }
+                    },
+                    timeout=120.0
+                )
 
-def get_screen_data() -> dict:
-    """Get screen data for web terminal"""
-    global connection
+                if response.status_code != 200:
+                    return {
+                        "response": f"Ollama error: {response.status_code}",
+                        "agent_steps": agent_steps,
+                        "iterations": iterations
+                    }
 
-    if not connection.connected or not connection.emulator:
+                data = response.json()
+                message = data.get("message", {})
+
+                # Check for tool calls
+                tool_calls = message.get("tool_calls", [])
+
+                if not tool_calls:
+                    # No tool calls - return the response
+                    return {
+                        "response": message.get("content", "No response generated."),
+                        "agent_steps": agent_steps,
+                        "iterations": iterations
+                    }
+
+                # Execute tool calls
+                chat_messages.append(message)  # Add assistant message with tool calls
+
+                for tool_call in tool_calls:
+                    tool_name = tool_call.get("function", {}).get("name", "")
+                    tool_args = tool_call.get("function", {}).get("arguments", {})
+
+                    # Execute the tool
+                    tool_result = await execute_tool_async(tool_name, tool_args)
+
+                    step = {
+                        "tool": tool_name,
+                        "arguments": tool_args,
+                        "result": tool_result
+                    }
+                    agent_steps.append(step)
+
+                    # Add tool result to messages
+                    chat_messages.append({
+                        "role": "tool",
+                        "content": json.dumps(tool_result) if isinstance(tool_result, dict) else str(tool_result)
+                    })
+
+                    # Broadcast screen updates if terminal state changed
+                    if tool_name in ["connect_mainframe", "send_text", "send_enter",
+                                     "send_pf_key", "send_clear", "send_tab", "read_screen"]:
+                        await broadcast_screen()
+
+            # Max iterations reached
+            return {
+                "response": "Maximum iterations reached. The agent may need more steps to complete the task.",
+                "agent_steps": agent_steps,
+                "iterations": iterations
+            }
+
+    except httpx.TimeoutException:
         return {
-            "connected": False,
-            "screen": "",
-            "rows": 24,
-            "cols": 80,
-            "cursor_row": 0,
-            "cursor_col": 0
+            "response": "Request timed out. The model may be loading - please try again.",
+            "agent_steps": agent_steps,
+            "iterations": iterations
+        }
+    except Exception as e:
+        return {
+            "response": f"Error in agentic chat: {str(e)}",
+            "agent_steps": agent_steps,
+            "iterations": iterations
         }
 
-    return get_cached_screen_data()
 
-
-def normalize_screen_buffer(buffer):
-    """Ensure screen buffer is a list of text lines for Screen()."""
-    if isinstance(buffer, bytes):
-        text = buffer.decode("latin-1", errors="ignore")
-        return text.splitlines()
-    if isinstance(buffer, str):
-        return buffer.splitlines()
-    if isinstance(buffer, list):
-        normalized = []
-        for line in buffer:
-            if isinstance(line, bytes):
-                normalized.append(line.decode("latin-1", errors="ignore"))
-            else:
-                normalized.append(str(line))
-        return normalized
-    return [str(buffer)]
-
-
-def normalize_screen_text(buffer):
-    """Normalize screen output into a printable string."""
-    if isinstance(buffer, bytes):
-        return buffer.decode("latin-1", errors="ignore")
-    if isinstance(buffer, str):
-        return buffer
-    if isinstance(buffer, list):
-        lines = []
-        for line in buffer:
-            if isinstance(line, bytes):
-                lines.append(line.decode("latin-1", errors="ignore"))
-            else:
-                lines.append(str(line))
-        return "\n".join(lines)
-    return str(buffer)
-
-
-def screen_from_readbuffer(buffer):
-    """Convert ReadBuffer(Ascii) output to a printable screen."""
-    lines = normalize_screen_buffer(buffer)
-    if not lines:
-        return ""
-    try:
-        return str(Screen(lines))
-    except Exception:
-        return "\n".join(lines)
-
-
-def exec_emulator_command(command: bytes, timeout: float = 3):
-    """Execute emulator command serialized to avoid s3270 desync."""
-    em = connection.emulator
-    if not em:
-        return None
-    with connection.command_lock:
-        return em.exec_command(command)
-
-
-def start_screen_poller():
-    """Start background screen polling to avoid blocking requests."""
-    connection.poller_stop.clear()
-
-    def poll():
-        while not connection.poller_stop.is_set() and connection.connected and connection.emulator:
-            try:
-                read_screen()
-            except Exception:
-                pass
-            connection.poller_stop.wait(1.0)
-
-    if connection.poller_thread and connection.poller_thread.is_alive():
-        return
-    connection.poller_thread = threading.Thread(target=poll, daemon=True)
-    connection.poller_thread.start()
-
-
-def stop_screen_poller():
-    """Stop background screen polling."""
-    connection.poller_stop.set()
-
-
-def get_cached_screen_data() -> dict:
-    """Return cached screen data without hitting the emulator."""
-    return {
-        "connected": connection.connected,
-        "screen": connection.current_screen,
-        "rows": connection.screen_rows,
-        "cols": connection.screen_cols,
-        "cursor_row": connection.cursor_row,
-        "cursor_col": connection.cursor_col,
-        "host": f"{connection.host}:{connection.port}" if connection.connected else ""
-    }
-
-
-def send_terminal_key(key_type: str, value: str = "") -> dict:
-    """Send a key to the terminal"""
-    global connection
-
-    if not connection.connected or not connection.emulator:
-        return {"success": False, "error": "Not connected"}
-
-    try:
-        try:
-            exec_emulator_command(b'Wait(1,Unlock)')
-        except Exception:
-            try:
-                exec_emulator_command(b'Reset()')
-            except Exception:
-                pass
-        if key_type == "string":
-            if value:
-                exec_emulator_command(f'String("{value}")'.encode())
-        elif key_type == "enter":
-            exec_emulator_command(b'Enter()')
-        elif key_type == "pf":
-            exec_emulator_command(f'PF({value})'.encode())
-        elif key_type == "pa":
-            exec_emulator_command(f'PA({value})'.encode())
-        elif key_type == "clear":
-            exec_emulator_command(b'Clear()')
-        elif key_type == "tab":
-            exec_emulator_command(b'Tab()')
-        elif key_type == "backtab":
-            exec_emulator_command(b'BackTab()')
-        elif key_type == "up":
-            exec_emulator_command(b'Up()')
-        elif key_type == "down":
-            exec_emulator_command(b'Down()')
-        elif key_type == "left":
-            exec_emulator_command(b'Left()')
-        elif key_type == "right":
-            exec_emulator_command(b'Right()')
-        elif key_type == "home":
-            exec_emulator_command(b'Home()')
-        elif key_type == "delete":
-            exec_emulator_command(b'Delete()')
-        elif key_type == "backspace":
-            exec_emulator_command(b'BackSpace()')
-        elif key_type == "eraseeof":
-            exec_emulator_command(b'EraseEOF()')
-        elif key_type == "reset":
-            exec_emulator_command(b'Reset()')
-        try:
-            exec_emulator_command(b'Wait(1,Unlock)')
-        except Exception:
-            pass
-        try:
-            read_screen()
-        except Exception:
-            pass
-        return {"success": True, "screen_data": get_cached_screen_data()}
-    except Exception as e:
-        return {"success": False, "error": str(e)}
+# Note: connect_mainframe, disconnect_mainframe, read_screen, send_terminal_key,
+# get_screen_data, get_cached_screen_data are all imported from agent_tools.py
 
 
 async def broadcast_screen():
@@ -631,6 +519,646 @@ async def rag_page(request: Request):
 @app.get("/architecture", response_class=HTMLResponse)
 async def architecture_page(request: Request):
     return templates.TemplateResponse("architecture.html", {"request": request})
+
+
+@app.get("/tutor", response_class=HTMLResponse)
+async def tutor_page(request: Request):
+    """Red Team Tutor - guided mainframe learning"""
+    return templates.TemplateResponse("tutor.html", {"request": request})
+
+
+# ============================================================================
+# Red Team Tutor API Endpoints
+# ============================================================================
+
+TUTOR_SYSTEM_PROMPT = """You are a senior mainframe mentor guiding modern red teamers through IBM MVS systems.
+
+Your role is to make mainframe systems LEGIBLE to security professionals who did not grow up with them.
+
+When analyzing a screen, structure your response as:
+1. CURRENT SCREEN: What we see (plain English summary)
+2. WHAT THIS IS: Panel or subsystem identification
+3. WHY IT EXISTS: Historical/architectural rationale
+4. RED TEAM INSIGHT: Trust boundary or control-plane implication
+5. NEXT ACTION: What to do next and why
+
+Key teaching principles:
+- Correct Unix/cloud assumptions explicitly
+- Explain trust boundaries (interactive vs batch, user vs system)
+- Relate to modern concepts (control planes, blast radius, delayed execution)
+- Default to READ-ONLY navigation
+- Never skip steps for speed - teaching matters more
+
+Environment: MVS 3.8J under Hercules (TK5). No DB2, IMS, or modern z/OS middleware.
+Focus on: TN3270, TSO, ISPF, JCL, JES, batch execution, datasets, panels."""
+
+PATH_SYSTEM_PROMPT = """You are a red-team learning path advisor for mainframe security.
+Your job is to explain each learning path in plain language to someone new to mainframes.
+
+Requirements:
+- Be clear and non-intimidating.
+- Explain what the path teaches and why it matters.
+- Answer "Is this right for me?" before the user starts.
+- Use short paragraphs or bullets.
+- Avoid jargon unless the user opts in explicitly.
+"""
+
+PATH_SESSION_PROMPT = """You are building a step-by-step learning path for a red-team session.
+Return JSON only. No markdown. No prose outside JSON.
+
+Each step must include:
+- title
+- instruction (what to do in TN3270)
+- rationale (why this matters)
+- expected (what should appear on screen)
+- expected_signature (short strings to match in the screen)
+- hints (array of short recovery tips)
+"""
+
+TUTOR_PERSONAS = {
+    "mentor": {
+        "name": "The Mentor",
+        "style": "Patient, methodical, and big-picture. Emphasize conceptual models and historical rationale.",
+        "focus": "Foundations, systems thinking, and mapping mainframe concepts to modern control planes."
+    },
+    "operator": {
+        "name": "The Operator",
+        "style": "Practical and procedural. Give step-by-step guidance and real-world operational cautions.",
+        "focus": "Console flow, SOPs, and precise keystrokes or commands."
+    },
+    "redteam": {
+        "name": "The Red Teamer",
+        "style": "Direct and threat-focused. Call out abuse paths and misconfig risks.",
+        "focus": "Trust gaps, over-privilege, and offensive tradecraft implications."
+    },
+    "forensics": {
+        "name": "The Forensics Lead",
+        "style": "Evidence-driven. Highlight audit trails and what artifacts persist.",
+        "focus": "Logs, dataset provenance, and incident response traces."
+    },
+    "architect": {
+        "name": "The Architect",
+        "style": "Systems-depth. Explain subsystem boundaries and address spaces.",
+        "focus": "Long-lived control boundaries, blast radius, and design tradeoffs."
+    }
+}
+
+
+def build_tutor_prompt(tutor_id: str) -> str:
+    persona = TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS["mentor"])
+    return f"""{TUTOR_SYSTEM_PROMPT}
+
+Tutor persona: {persona['name']}
+Style: {persona['style']}
+Focus: {persona['focus']}
+"""
+
+
+async def build_rag_context(query: str, n_results: int = 2) -> str:
+    if not RAG_AVAILABLE or not query:
+        return ""
+    try:
+        engine = get_rag_engine()
+        rag_results = await engine.query_simple(query, n_results=n_results)
+        if rag_results:
+            rag_context = "\n\n[Relevant Knowledge Base Information]\n"
+            for r in rag_results:
+                rag_context += f"---\n{r['content']}\n"
+            return rag_context
+    except Exception as e:
+        print(f"RAG query error: {e}")
+    return ""
+
+
+@app.post("/api/tutor/analyze")
+async def api_tutor_analyze(request: Request):
+    """Analyze current screen with tutor context"""
+    data = await request.json()
+    goal = data.get("goal", "free-explore")
+    tutor_id = data.get("tutor_id", "mentor")
+
+    if not connection.connected:
+        return JSONResponse({"error": "Not connected to mainframe"})
+
+    screen_text = read_screen()
+    if not screen_text or screen_text == "[Not connected]":
+        return JSONResponse({"error": "Could not read screen"})
+
+    # Classify the panel
+    panel_info = {}
+    if GRAPH_AVAILABLE:
+        panel_info = classify_panel(screen_text)
+        identifiers = extract_identifiers(screen_text)
+
+        # Update trust graph with screen data
+        graph = get_trust_graph()
+        update_graph_from_screen(graph, screen_text, f"{connection.host}:{connection.port}")
+
+    # Build prompt for LLM analysis
+    goal_context = {
+        'session-stack': "Focus on explaining the VTAM→TSO→ISPF session layers.",
+        'batch-execution': "Focus on JCL, JES, and batch execution concepts.",
+        'dataset-trust': "Focus on dataset access patterns and trust implications.",
+        'panel-navigation': "Focus on panel IDs, PF keys, and navigation patterns.",
+        'job-tracing': "Focus on job execution chains and program loading.",
+        'free-explore': "Provide general mainframe education."
+    }.get(goal, "Provide general mainframe education.")
+
+    rag_query = f"{goal_context}\n{panel_info.get('panel_type', 'Unknown')}\n{screen_text[:1200]}"
+    rag_context = await build_rag_context(rag_query, n_results=2)
+
+    prompt = f"""{build_tutor_prompt(tutor_id)}{rag_context}
+
+Current learning goal: {goal_context}
+
+Analyze this 3270 screen:
+```
+{screen_text}
+```
+
+Panel classification: {panel_info.get('panel_type', 'Unknown')}
+Environment: {panel_info.get('environment', 'Unknown')}
+
+Provide your analysis in the structured format. Be educational and thorough."""
+
+    # Call Ollama
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.7, "num_predict": 1500}
+                },
+                timeout=60.0
+            )
+
+            if response.status_code == 200:
+                result = response.json().get("response", "")
+
+                # Parse structured response
+                sections = {}
+                current_section = None
+                current_content = []
+
+                for line in result.split('\n'):
+                    line_upper = line.upper().strip()
+                    if 'CURRENT SCREEN' in line_upper:
+                        if current_section:
+                            sections[current_section] = '\n'.join(current_content).strip()
+                        current_section = 'current_screen'
+                        current_content = []
+                    elif 'WHAT THIS IS' in line_upper:
+                        if current_section:
+                            sections[current_section] = '\n'.join(current_content).strip()
+                        current_section = 'what_this_is'
+                        current_content = []
+                    elif 'WHY IT EXISTS' in line_upper:
+                        if current_section:
+                            sections[current_section] = '\n'.join(current_content).strip()
+                        current_section = 'why_it_exists'
+                        current_content = []
+                    elif 'RED TEAM INSIGHT' in line_upper:
+                        if current_section:
+                            sections[current_section] = '\n'.join(current_content).strip()
+                        current_section = 'red_team_insight'
+                        current_content = []
+                    elif 'NEXT ACTION' in line_upper:
+                        if current_section:
+                            sections[current_section] = '\n'.join(current_content).strip()
+                        current_section = 'next_action'
+                        current_content = []
+                    elif 'CONFIDENCE' in line_upper:
+                        if current_section:
+                            sections[current_section] = '\n'.join(current_content).strip()
+                        current_section = 'confidence'
+                        current_content = []
+                    else:
+                        current_content.append(line)
+
+                if current_section:
+                    sections[current_section] = '\n'.join(current_content).strip()
+
+                # If parsing failed, return raw
+                if not sections:
+                    sections = {'current_screen': result}
+
+                sections['graph_updated'] = GRAPH_AVAILABLE
+                sections['panel_type'] = panel_info.get('panel_type', 'Unknown')
+
+                return JSONResponse(sections)
+            else:
+                return JSONResponse({"error": f"LLM error: {response.status_code}"})
+
+    except Exception as e:
+        return JSONResponse({"error": str(e)})
+
+
+@app.post("/api/tutor/suggest")
+async def api_tutor_suggest(request: Request):
+    """Suggest next action based on goal and current screen"""
+    data = await request.json()
+    goal = data.get("goal", "free-explore")
+    tutor_id = data.get("tutor_id", "mentor")
+
+    if not connection.connected:
+        return JSONResponse({"suggestion": "Connect to TK5 (localhost:3270) to begin live navigation."})
+
+    screen_text = read_screen()
+    panel_info = classify_panel(screen_text) if GRAPH_AVAILABLE else {}
+
+    rag_query = f"{goal}\n{panel_info.get('panel_type', 'Unknown')}\n{screen_text[:1200]}"
+    rag_context = await build_rag_context(rag_query, n_results=2)
+
+    prompt = f"""{build_tutor_prompt(tutor_id)}{rag_context}
+
+Learning goal: {goal}
+Current panel: {panel_info.get('panel_type', 'Unknown')}
+
+Screen:
+```
+{screen_text[:1500]}
+```
+
+What should the learner do next to progress toward their goal? Be specific about what to type or which key to press."""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.7, "num_predict": 500}
+                },
+                timeout=30.0
+            )
+
+            if response.status_code == 200:
+                suggestion = response.json().get("response", "")
+                return JSONResponse({"suggestion": suggestion})
+            else:
+                return JSONResponse({"suggestion": "Unable to generate suggestion."})
+
+    except Exception as e:
+        return JSONResponse({"suggestion": f"Error: {str(e)}"})
+
+
+@app.post("/api/tutor/ask")
+async def api_tutor_ask(request: Request):
+    """Answer a question from the learner"""
+    data = await request.json()
+    question = data.get("question", "")
+    goal = data.get("goal", "free-explore")
+    tutor_id = data.get("tutor_id", "mentor")
+
+    screen_context = ""
+    if connection.connected:
+        screen_text = read_screen()
+        screen_context = f"\n\nCurrent screen:\n```\n{screen_text[:1000]}\n```"
+    else:
+        screen_text = ""
+
+    rag_query = f"{question}\n{screen_text[:1200]}" if question else screen_text[:1200]
+    rag_context = await build_rag_context(rag_query, n_results=3)
+
+    prompt = f"""{build_tutor_prompt(tutor_id)}{rag_context}
+
+Learning goal: {goal}
+{screen_context}
+
+Learner's question: {question}
+
+Answer in an educational, thorough manner. Relate concepts to modern security thinking where relevant."""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.7, "num_predict": 1000}
+                },
+                timeout=45.0
+            )
+
+            if response.status_code == 200:
+                answer = response.json().get("response", "")
+                return JSONResponse({"answer": answer})
+            else:
+                return JSONResponse({"answer": "Unable to answer right now."})
+
+    except Exception as e:
+        return JSONResponse({"answer": f"Error: {str(e)}"})
+
+
+@app.post("/api/tutor/path_explain")
+async def api_tutor_path_explain(request: Request):
+    data = await request.json()
+    path = data.get("path", {})
+    tutor_id = data.get("tutor_id", "mentor")
+    question = data.get("question", "")
+
+    meta = "\n".join([
+        f"Title: {path.get('title', '')}",
+        f"Objective: {path.get('objective', '')}",
+        f"Level: {path.get('level', '')}",
+        f"Time: {path.get('time', '')}",
+        f"Domain: {path.get('domain', '')}",
+        f"Intent: {path.get('intent', '')}",
+        f"Summary: {path.get('summary', '')}",
+    ])
+
+    rag_context = await build_rag_context(meta, n_results=2)
+    prompt = f"""{PATH_SYSTEM_PROMPT}{rag_context}
+Tutor persona: {TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS['mentor'])['name']}
+
+Path metadata:
+{meta}
+
+User question (optional): {question or "N/A"}
+
+Respond with:
+1) What this path teaches (1-2 sentences)
+2) Why it matters (1-2 sentences)
+3) Is this right for me? (1-2 sentences)
+4) Suggested next step: Start / Preview / Ask (1 short sentence)
+"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.6, "num_predict": 400}
+                },
+                timeout=30.0
+            )
+            if response.status_code == 200:
+                explanation = response.json().get("response", "")
+                return JSONResponse({"explanation": explanation})
+            return JSONResponse({"explanation": "Unable to generate explanation."})
+    except Exception as e:
+        return JSONResponse({"explanation": f"Error: {str(e)}"})
+
+
+@app.post("/api/tutor/path_hint")
+async def api_tutor_path_hint(request: Request):
+    data = await request.json()
+    path = data.get("path", {})
+    tutor_id = data.get("tutor_id", "mentor")
+
+    meta = "\n".join([
+        f"Title: {path.get('title', '')}",
+        f"Objective: {path.get('objective', '')}",
+        f"Level: {path.get('level', '')}",
+        f"Time: {path.get('time', '')}",
+        f"Domain: {path.get('domain', '')}",
+        f"Intent: {path.get('intent', '')}",
+    ])
+
+    rag_context = await build_rag_context(meta, n_results=1)
+    prompt = f"""{PATH_SYSTEM_PROMPT}{rag_context}
+Tutor persona: {TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS['mentor'])['name']}
+
+Path metadata:
+{meta}
+
+Provide a single-sentence hint that helps a beginner decide if this path is for them.
+"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.6, "num_predict": 120}
+                },
+                timeout=20.0
+            )
+            if response.status_code == 200:
+                hint = response.json().get("response", "")
+                return JSONResponse({"hint": hint})
+            return JSONResponse({"hint": ""})
+    except Exception as e:
+        return JSONResponse({"hint": ""})
+
+
+@app.post("/api/tutor/persona_hint")
+async def api_tutor_persona_hint(request: Request):
+    data = await request.json()
+    tutor_id = data.get("tutor_id", "mentor")
+    persona = TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS["mentor"])
+
+    prompt = f"""You are the tutor persona speaking in first person.
+Provide a single, calm sentence that explains how you guide the learner.
+Keep it short and non-intimidating.
+
+Persona: {persona['name']}
+Style: {persona['style']}
+Focus: {persona['focus']}
+"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.5, "num_predict": 80}
+                },
+                timeout=20.0
+            )
+            if response.status_code == 200:
+                hint = response.json().get("response", "")
+                return JSONResponse({"hint": hint})
+            return JSONResponse({"hint": ""})
+    except Exception as e:
+        return JSONResponse({"hint": ""})
+
+
+def _extract_json_block(text: str) -> dict:
+    import json
+    if not text:
+        return {}
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    start = text.find("{")
+    end = text.rfind("}")
+    if start != -1 and end != -1 and end > start:
+        try:
+            return json.loads(text[start:end + 1])
+        except Exception:
+            return {}
+    return {}
+
+
+@app.post("/api/tutor/path_start")
+async def api_tutor_path_start(request: Request):
+    data = await request.json()
+    path = data.get("path", {})
+    tutor_id = data.get("tutor_id", "mentor")
+    screen = data.get("screen", "")
+
+    meta = "\n".join([
+        f"Title: {path.get('title', '')}",
+        f"Objective: {path.get('objective', '')}",
+        f"Level: {path.get('level', '')}",
+        f"Time: {path.get('time', '')}",
+        f"Domain: {path.get('domain', '')}",
+        f"Intent: {path.get('intent', '')}",
+        f"Summary: {path.get('summary', '')}",
+    ])
+
+    rag_context = await build_rag_context(meta + "\n" + screen, n_results=2)
+    prompt = f"""{PATH_SESSION_PROMPT}
+Tutor persona: {TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS['mentor'])['name']}
+
+Path metadata:
+{meta}
+
+Current screen:
+{screen[:1500]}
+
+Return JSON in this shape:
+{{
+  "session": {{
+    "path_id": "{path.get('id', '')}",
+    "steps": [
+      {{
+        "title": "Step 1 title",
+        "instruction": "Exact action to perform",
+        "rationale": "Why this matters",
+        "expected": "What should appear on screen",
+        "expected_signature": ["LOGON", "ISPF"],
+        "hints": ["Tip 1", "Tip 2"]
+      }}
+    ]
+  }}
+}}
+{rag_context}
+"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.4, "num_predict": 900}
+                },
+                timeout=45.0
+            )
+            if response.status_code == 200:
+                raw = response.json().get("response", "")
+                payload = _extract_json_block(raw)
+                return JSONResponse(payload if payload else {"session": {"steps": []}})
+            return JSONResponse({"session": {"steps": []}})
+    except Exception as e:
+        return JSONResponse({"session": {"steps": []}})
+
+
+@app.post("/api/tutor/path_verify")
+async def api_tutor_path_verify(request: Request):
+    data = await request.json()
+    step = data.get("step", {})
+    screen = data.get("screen", "")
+    tutor_id = data.get("tutor_id", "mentor")
+    expected_signatures = step.get("expected_signature", [])
+    if isinstance(expected_signatures, str):
+        expected_signatures = [expected_signatures]
+
+    # Fast local match
+    if expected_signatures and screen:
+        hit = any(sig.lower() in screen.lower() for sig in expected_signatures if sig)
+        if hit:
+            return JSONResponse({"verified": True})
+
+    prompt = f"""You are validating a TN3270 screen against an expected step.
+Answer with JSON only: {{"verified": true/false, "feedback": "short guidance"}}
+
+Tutor persona: {TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS['mentor'])['name']}
+Expected: {step.get('expected', '')}
+Expected signature: {expected_signatures}
+
+Screen:
+{screen[:1500]}
+"""
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.2, "num_predict": 200}
+                },
+                timeout=25.0
+            )
+            if response.status_code == 200:
+                raw = response.json().get("response", "")
+                payload = _extract_json_block(raw)
+                if "verified" in payload:
+                    return JSONResponse(payload)
+            return JSONResponse({"verified": False, "feedback": "Screen does not match expected state."})
+    except Exception as e:
+        return JSONResponse({"verified": False, "feedback": "Unable to verify screen."})
+
+
+@app.post("/api/tutor/path_help")
+async def api_tutor_path_help(request: Request):
+    data = await request.json()
+    step = data.get("step", {})
+    screen = data.get("screen", "")
+    tutor_id = data.get("tutor_id", "mentor")
+
+    prompt = f"""You are a red-team tutor helping a learner who is stuck.
+Provide 2-3 short bullets with recovery steps.
+
+Tutor persona: {TUTOR_PERSONAS.get(tutor_id, TUTOR_PERSONAS['mentor'])['name']}
+Step instruction: {step.get('instruction', '')}
+Expected: {step.get('expected', '')}
+
+Screen:
+{screen[:1500]}
+"""
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.5, "num_predict": 250}
+                },
+                timeout=25.0
+            )
+            if response.status_code == 200:
+                help_text = response.json().get("response", "")
+                return JSONResponse({"help": help_text})
+            return JSONResponse({"help": "Try returning to the previous screen and re-entering the command."})
+    except Exception as e:
+        return JSONResponse({"help": "Unable to provide help right now."})
 
 
 @app.post("/api/chat")
@@ -990,6 +1518,293 @@ async def api_rag_query(request: Request):
     response = await engine.query(query, n_results, include_highlights)
     return JSONResponse(response)
 
+
+# ============================================================================
+# Trust Graph API Endpoints
+# ============================================================================
+
+@app.get("/graph", response_class=HTMLResponse)
+async def graph_page(request: Request):
+    """Trust Graph visualization page"""
+    return templates.TemplateResponse("graph.html", {"request": request})
+
+
+@app.get("/api/graph/stats")
+async def api_graph_stats():
+    """Get trust graph statistics"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available", "nodes": 0, "edges": 0})
+    graph = get_trust_graph()
+    stats = graph.get_stats()
+    return JSONResponse(stats)
+
+
+@app.get("/api/graph/nodes")
+async def api_graph_nodes():
+    """Get all nodes in the trust graph"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"nodes": []})
+    graph = get_trust_graph()
+    nodes = [
+        {
+            "id": node.id,
+            "type": node.node_type,
+            "label": node.label,
+            "properties": node.properties,
+            "first_seen": node.first_seen,
+            "last_seen": node.last_seen
+        }
+        for node in graph.nodes.values()
+    ]
+    return JSONResponse({"nodes": nodes})
+
+
+@app.get("/api/graph/edges")
+async def api_graph_edges():
+    """Get all edges in the trust graph"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"edges": []})
+    graph = get_trust_graph()
+    edges = [
+        {
+            "id": edge.id,
+            "type": edge.edge_type,
+            "source": edge.source_id,
+            "target": edge.target_id,
+            "properties": edge.properties,
+            "confidence": edge.confidence
+        }
+        for edge in graph.edges.values()
+    ]
+    return JSONResponse({"edges": edges})
+
+
+@app.get("/api/graph/query/{query_name}")
+async def api_graph_query(query_name: str, request: Request):
+    """Run a named query against the trust graph"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available", "results": []})
+
+    graph = get_trust_graph()
+    params = dict(request.query_params)
+
+    try:
+        results = graph.query(query_name, **params)
+        return JSONResponse({
+            "query": query_name,
+            "results": results,
+            "count": len(results)
+        })
+    except ValueError as e:
+        return JSONResponse({"error": str(e), "results": []}, status_code=400)
+
+
+@app.post("/api/graph/ingest-jcl")
+async def api_graph_ingest_jcl(request: Request):
+    """Ingest JCL text into the trust graph"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+
+    data = await request.json()
+    jcl_text = data.get("jcl", "")
+    source = data.get("source", "manual_upload")
+
+    if not jcl_text:
+        return JSONResponse({"error": "No JCL provided"}, status_code=400)
+
+    # Parse JCL first, then update graph
+    jcl_parsed = parse_jcl(jcl_text)
+    graph = get_trust_graph()
+    result = update_graph_from_jcl(graph, jcl_parsed, {"type": "jcl", "source": source})
+
+    # Broadcast graph update
+    await broadcast_graph_update("jcl_ingested", result)
+
+    return JSONResponse(result)
+
+
+@app.post("/api/graph/ingest-sysout")
+async def api_graph_ingest_sysout(request: Request):
+    """Ingest SYSOUT text into the trust graph"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+
+    data = await request.json()
+    sysout_text = data.get("sysout", "")
+    source = data.get("source", "manual_upload")
+
+    if not sysout_text:
+        return JSONResponse({"error": "No SYSOUT provided"}, status_code=400)
+
+    # Parse SYSOUT first, then update graph
+    sysout_parsed = parse_sysout(sysout_text)
+    graph = get_trust_graph()
+    result = update_graph_from_sysout(graph, sysout_parsed, {"type": "sysout", "source": source})
+
+    # Broadcast graph update
+    await broadcast_graph_update("sysout_ingested", result)
+
+    return JSONResponse(result)
+
+
+@app.post("/api/graph/ingest-screen")
+async def api_graph_ingest_screen(request: Request):
+    """Ingest current screen into the trust graph"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+
+    if not connection.connected:
+        return JSONResponse({"error": "Not connected to mainframe"}, status_code=400)
+
+    screen_text = read_screen()
+    graph = get_trust_graph()
+    result = update_graph_from_screen(graph, screen_text, f"{connection.host}:{connection.port}")
+
+    # Broadcast graph update
+    await broadcast_graph_update("screen_ingested", result)
+
+    return JSONResponse(result)
+
+
+@app.get("/api/graph/export/json")
+async def api_graph_export_json():
+    """Export trust graph as JSON"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+    graph = get_trust_graph()
+    return JSONResponse(graph.export_json())
+
+
+@app.get("/api/graph/export/dot")
+async def api_graph_export_dot():
+    """Export trust graph as Graphviz DOT format"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+    graph = get_trust_graph()
+    dot_content = graph.export_dot()
+    return JSONResponse({"dot": dot_content})
+
+
+@app.get("/api/graph/export/d3")
+async def api_graph_export_d3():
+    """Export trust graph in D3.js-compatible format"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+    graph = get_trust_graph()
+    return JSONResponse(graph.export_d3_json())
+
+
+@app.post("/api/graph/finding")
+async def api_graph_generate_finding(request: Request):
+    """Generate a defensive finding from graph analysis"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+
+    data = await request.json()
+    graph = get_trust_graph()
+
+    finding = generate_finding(
+        title=data.get("title", "Untitled Finding"),
+        evidence=data.get("evidence", []),
+        reasoning=data.get("reasoning", ""),
+        confidence=data.get("confidence", "MEDIUM"),
+        graph_context=data.get("graph_context", {})
+    )
+
+    return JSONResponse(finding)
+
+
+@app.delete("/api/graph/clear")
+async def api_graph_clear():
+    """Clear the trust graph (for testing)"""
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"error": "Trust graph not available"}, status_code=400)
+    graph = get_trust_graph()
+    graph.nodes.clear()
+    graph.edges.clear()
+    graph.save()
+
+    await broadcast_graph_update("graph_cleared", {"nodes": 0, "edges": 0})
+    return JSONResponse({"success": True, "message": "Graph cleared"})
+
+
+# Graph WebSocket for real-time updates
+async def broadcast_graph_update(event_type: str, data: dict):
+    """Broadcast graph update to all graph WebSocket clients"""
+    if not graph_websocket_clients:
+        return
+
+    message = json.dumps({
+        "type": event_type,
+        "data": data,
+        "timestamp": datetime.now().isoformat()
+    })
+
+    disconnected = set()
+    for ws in graph_websocket_clients:
+        try:
+            await ws.send_text(message)
+        except:
+            disconnected.add(ws)
+
+    graph_websocket_clients.difference_update(disconnected)
+
+
+@app.websocket("/ws/graph")
+async def websocket_graph(websocket: WebSocket):
+    """WebSocket for real-time graph visualization updates"""
+    await websocket.accept()
+    graph_websocket_clients.add(websocket)
+
+    try:
+        # Send initial graph state
+        if GRAPH_AVAILABLE:
+            graph = get_trust_graph()
+            await websocket.send_text(json.dumps({
+                "type": "initial_state",
+                "data": graph.export_d3_json()
+            }))
+
+        while True:
+            # Handle client messages (e.g., query requests)
+            data = await websocket.receive_text()
+            msg = json.loads(data)
+
+            if msg.get("type") == "query":
+                query_name = msg.get("query_name", "")
+                params = msg.get("params", {})
+                if GRAPH_AVAILABLE:
+                    graph = get_trust_graph()
+                    try:
+                        results = graph.query(query_name, **params)
+                        await websocket.send_text(json.dumps({
+                            "type": "query_result",
+                            "query": query_name,
+                            "results": results
+                        }))
+                    except ValueError as e:
+                        await websocket.send_text(json.dumps({
+                            "type": "query_error",
+                            "error": str(e)
+                        }))
+
+            elif msg.get("type") == "refresh":
+                if GRAPH_AVAILABLE:
+                    graph = get_trust_graph()
+                    await websocket.send_text(json.dumps({
+                        "type": "refresh",
+                        "data": graph.export_d3_json()
+                    }))
+
+    except WebSocketDisconnect:
+        graph_websocket_clients.discard(websocket)
+    except Exception as e:
+        graph_websocket_clients.discard(websocket)
+
+
+# ============================================================================
+# Terminal WebSocket
+# ============================================================================
 
 @app.websocket("/ws/terminal")
 async def websocket_terminal(websocket: WebSocket):
