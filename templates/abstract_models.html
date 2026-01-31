@@ -5,6 +5,9 @@
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/tutor.css">
 <link rel="stylesheet" href="/static/css/pages/abstract_models.css">
+<style>
+  .abstract-app .content-grid { grid-template-columns: 60fr 40fr !important; }
+</style>
 {% endblock %}
 
 {% block body %}
@@ -159,6 +162,10 @@
 
                     <div class="abstract-body insight-block" id="insightBlock">
                         <h3 class="abstract-subtitle">Ask + Mapping</h3>
+                        <div class="walkthrough-controls">
+                            <button class="send-btn" id="walkStartBtn">Start Walkthrough</button>
+                            <button class="send-btn secondary" id="walkNextBtn" disabled>Next Step</button>
+                        </div>
                         <div class="insight-feed" id="insightScroll">
                             <p class="insight-line"><strong>Click Insight:</strong> Click a region in the TN3270 panel to map it to a mental model and get a focused explanation.</p>
                         </div>
@@ -194,6 +201,19 @@
                             <li>Selecting a module or tutor informs the LLM of the mental model focus.</li>
                             <li>Steps are gated by terminal state, not by free-form conversation.</li>
                             <li>Questions always reference the current screen and lab environment.</li>
+                        </ul>
+                    </div>
+
+                    <div class="abstract-divider"></div>
+
+                    <div class="abstract-body" id="mental-walkthrough">
+                        <h3 class="abstract-subtitle">Mental Model Walkthrough</h3>
+                        <ul class="model-list">
+                            <li>Start at a TN3270 login screen.</li>
+                            <li>Show panel → transaction → job → dataset relationships.</li>
+                            <li>Walk a user to a concrete goal (e.g., DB2 access, job submit, credential abuse).</li>
+                            <li>Explain why each step exists historically.</li>
+                            <li>Map each action to a mental model (not MITRE).</li>
                         </ul>
                     </div>
                 </div>
@@ -240,6 +260,46 @@ const highlightEl = document.getElementById('terminalHighlight');
 const insightScroll = document.getElementById('insightScroll');
 const askInput = document.getElementById('abstractAsk');
 const askBtn = document.getElementById('abstractAskBtn');
+const walkStartBtn = document.getElementById('walkStartBtn');
+const walkNextBtn = document.getElementById('walkNextBtn');
+let walkIndex = -1;
+const walkthroughSteps = [
+    {
+        title: 'Start at the TN3270 login',
+        what: 'Connect to the host and wait for the LOGON screen. If blank, press Enter once.',
+        why: 'Mainframe sessions are layered; the login panel establishes session state.',
+        expected: 'A LOGON prompt or a system welcome panel.',
+        models: ['session-stack']
+    },
+    {
+        title: 'Panel → Transaction → Job → Dataset',
+        what: 'Identify the current panel, the transaction it represents, and what job/dataset it touches.',
+        why: 'Panels are UI; transactions trigger work; jobs run programs; datasets persist evidence.',
+        expected: 'A clear chain from panel name to job/dataset references.',
+        models: ['graph-thinking', 'artifacts-evidence']
+    },
+    {
+        title: 'Walk to a concrete goal',
+        what: 'Pick one goal (DB2 access or a job submit) and navigate to the exact panel/command.',
+        why: 'Goals anchor the session stack and reveal which control plane is enforcing access.',
+        expected: 'A panel or command that initiates DB2 access or job submission.',
+        models: ['control-planes', 'batch-interactive']
+    },
+    {
+        title: 'Explain the historical reason',
+        what: 'Note why the step exists historically (batch scheduling, security auditing, shared compute).',
+        why: 'Legacy design choices explain modern constraints and behavior.',
+        expected: 'A short rationale tying the step to mainframe history.',
+        models: ['artifacts-evidence']
+    },
+    {
+        title: 'Map each action to a mental model',
+        what: 'State which mental model each action belongs to (session stack, control planes, trust boundaries).',
+        why: 'Learning the model beats memorizing commands.',
+        expected: 'Each action labeled to a model.',
+        models: ['session-stack', 'control-planes', 'trust-boundaries']
+    }
+];
 
 function addInsight(title, content) {
     const wrapper = document.createElement('div');
@@ -280,6 +340,20 @@ function highlightModelsFromText(text) {
         mentalPanel.classList.toggle('panel-hit', matched);
     }
     return matched;
+}
+
+function highlightModelsByKeys(keys) {
+    document.querySelectorAll('.model-list [data-model]').forEach(item => {
+        item.classList.remove('model-hit');
+    });
+    (keys || []).forEach(key => {
+        const item = document.querySelector(`.model-list [data-model="${key}"]`);
+        if (item) item.classList.add('model-hit');
+    });
+    const mentalPanel = document.getElementById('mental-models');
+    if (mentalPanel) {
+        mentalPanel.classList.toggle('panel-hit', (keys || []).length > 0);
+    }
 }
 
 function mapSectionsFromText(text) {
@@ -439,6 +513,8 @@ async function requestInsight(row, col, lineText) {
         if (data.answer) {
             if (data.answer.startsWith('Error:')) {
                 addInsight('LLM Error', data.answer);
+                addInsight('Fallback Mapping', `Row ${row}, Col ${col} looks like a panel boundary or UI frame. This maps to Panel → Transaction (UI layer) and Artifacts & Evidence (screen output).`);
+                highlightModelsByKeys(['graph-thinking', 'artifacts-evidence']);
             } else {
                 addInsight('Abstract Model Mapping', data.answer);
                 highlightModelsFromText(data.answer);
@@ -453,6 +529,8 @@ async function requestInsight(row, col, lineText) {
         }
     } catch (e) {
         addInsight('LLM Error', e.message || 'Request failed.');
+        addInsight('Fallback Mapping', `Row ${row}, Col ${col} looks like a panel boundary or UI frame. This maps to Panel → Transaction (UI layer) and Artifacts & Evidence (screen output).`);
+        highlightModelsByKeys(['graph-thinking', 'artifacts-evidence']);
     }
 }
 
@@ -500,12 +578,40 @@ async function askLLM() {
         }
     } catch (e) {
         addInsight('LLM Error', e.message || 'Request failed.');
+        addInsight('Fallback Mapping', 'No LLM response. You can still map this step to: Session Stack (current panel), Control Planes (access gates), Artifacts & Evidence (spool/datasets).');
+        highlightModelsByKeys(['session-stack', 'control-planes', 'artifacts-evidence']);
     }
 }
 
 askBtn.addEventListener('click', askLLM);
 askInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') askLLM();
+});
+
+function renderWalkthroughStep() {
+    if (walkIndex < 0 || walkIndex >= walkthroughSteps.length) return;
+    const step = walkthroughSteps[walkIndex];
+    addInsight(`Step ${walkIndex + 1}: ${step.title}`,
+        `What: ${step.what}<br>Why: ${step.why}<br>Expected: ${step.expected}`);
+    highlightModelsByKeys(step.models);
+}
+
+walkStartBtn.addEventListener('click', () => {
+    walkIndex = 0;
+    walkNextBtn.disabled = false;
+    addInsight('Walkthrough', 'Starting the mental model walkthrough.');
+    renderWalkthroughStep();
+});
+
+walkNextBtn.addEventListener('click', () => {
+    if (walkIndex < 0) return;
+    walkIndex += 1;
+    if (walkIndex >= walkthroughSteps.length) {
+        addInsight('Walkthrough', 'Completed. Ask questions or click a screen region to map it.');
+        walkNextBtn.disabled = true;
+        return;
+    }
+    renderWalkthroughStep();
 });
 
 setInterval(async () => {

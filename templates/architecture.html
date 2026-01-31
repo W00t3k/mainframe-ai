@@ -12,6 +12,9 @@
     {'href': '/', 'label': 'Home'},
     {'href': '/terminal', 'label': 'Terminal'},
     {'href': '/chat', 'label': 'AI Chat'},
+    {'href': '/tutor', 'label': 'Red Team Tutor'},
+    {'href': '/abstract-models', 'label': 'Abstract Models'},
+    {'href': '/graph', 'label': 'Trust Graph'},
     {'href': '/rag', 'label': 'RAG'},
     {'href': '/scanner', 'label': 'Scanner'}
 ] %}
@@ -19,6 +22,7 @@
 
 <main class="page">
     <section class="arch-hero">
+        <a href="/" class="back-link">← Back</a>
         <h1>System Architecture</h1>
         <p>
             A local-first mainframe operations assistant with FastAPI at the center, Ollama for LLM + embeddings,
@@ -43,8 +47,16 @@
             <p>FastAPI endpoints for chat, terminal I/O, RAG ingestion, scanner operations, and screencaps.</p>
         </div>
         <div class="arch-card">
+            <h3>Red Team Tutor</h3>
+            <p>Step-gated learning modules with persona-aware guidance and screen-context analysis.</p>
+        </div>
+        <div class="arch-card">
             <h3>LLM + RAG</h3>
             <p>Ollama handles generation and embeddings; the RAG engine stores chunks and metadata locally.</p>
+        </div>
+        <div class="arch-card">
+            <h3>Trust Graph</h3>
+            <p>Graph model for panels, jobs, programs, datasets, and relationships with live updates.</p>
         </div>
         <div class="arch-card">
             <h3>TN3270 Stack</h3>
@@ -66,19 +78,29 @@
                 <div class="detail">Routes to chat, RAG, or terminal handlers.</div>
             </div>
             <div class="flow-step">
-                <div class="label">03 RAG</div>
+                <div class="label">03 Tutor</div>
+                <div class="title">Red Team Tutor</div>
+                <div class="detail">Step gating + persona context + screen analysis.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">04 RAG</div>
                 <div class="title">Knowledge Retrieval</div>
                 <div class="detail">Vector search enriches prompt context.</div>
             </div>
             <div class="flow-step">
-                <div class="label">04 LLM</div>
+                <div class="label">05 LLM</div>
                 <div class="title">Ollama Generation</div>
                 <div class="detail">Response composed with system + RAG context.</div>
             </div>
             <div class="flow-step">
-                <div class="label">05 TN3270</div>
+                <div class="label">06 TN3270</div>
                 <div class="title">Screen + Keys</div>
                 <div class="detail">Optional terminal updates and screen refresh.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">07 Graph</div>
+                <div class="title">Trust Graph</div>
+                <div class="detail">Ingests artifacts and updates relationships.</div>
             </div>
         </div>
     </section>
@@ -97,6 +119,16 @@
                     </tr>
                 </thead>
                 <tbody>
+                    <tr>
+                        <td>Red Team Tutor</td>
+                        <td>Step-gated learning paths with screen-aware guidance.</td>
+                        <td><code>/api/tutor/*</code></td>
+                    </tr>
+                    <tr>
+                        <td>Trust Graph</td>
+                        <td>Graph view + ingestion of JCL, SYSOUT, and screens.</td>
+                        <td><code>/api/graph/*</code>, <code>/ws/graph</code></td>
+                    </tr>
                     <tr>
                         <td>Chat</td>
                         <td>Natural language interface to z/OS expertise.</td>

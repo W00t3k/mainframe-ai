@@ -490,7 +490,8 @@ async function sendKey(keyType, value = '') {
 async function selectModule(moduleId) {
     state.currentModule = moduleId;
     state.currentStep = 0;
-    state.session = null;
+    // Show fallback steps immediately to avoid "Loading..." placeholders.
+    state.session = { steps: getFallbackSteps(moduleId) };
     state.messages = [];
 
     // Update module status
@@ -506,8 +507,6 @@ async function selectModule(moduleId) {
 }
 
 async function loadSession(moduleId) {
-    showLoading('Loading module steps...');
-
     try {
         // Get current screen
         const screenResp = await fetch('/api/screen');

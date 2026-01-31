@@ -28,13 +28,25 @@
     padding-top: 12px;
 }
 
+.walkthrough-controls {
+    display: flex;
+    gap: 8px;
+    margin: 8px 0 12px;
+}
+
+.walkthrough-controls .secondary {
+    background: var(--panel-2);
+    color: var(--muted);
+    border: 1px solid var(--border);
+}
+
 .abstract-panel {
     min-height: 0;
     height: 100%;
 }
 
 .abstract-app .content-grid {
-    grid-template-columns: 1fr 1fr !important;
+    grid-template-columns: 8fr 2fr !important;
     align-items: start;
     min-height: 0;
 }

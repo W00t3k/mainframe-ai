@@ -840,10 +840,10 @@ Learner's question: {question}
 Answer in an educational, thorough manner. Relate concepts to modern security thinking where relevant."""
 
     try:
-        # Keep abstract-models quick to avoid timeouts
+        # Give abstract-models more time to avoid timeouts
         fast_mode = goal == "abstract-models"
-        timeout_s = 20.0 if fast_mode else 60.0
-        num_predict = 400 if fast_mode else 1000
+        timeout_s = 35.0 if fast_mode else 60.0
+        num_predict = 500 if fast_mode else 1000
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 f"{OLLAMA_URL}/api/generate",
@@ -1239,28 +1239,7 @@ Return JSON in this shape:
 {rag_context}
 """
 
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{OLLAMA_URL}/api/generate",
-                json={
-                    "model": OLLAMA_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0.4, "num_predict": 900}
-                },
-                timeout=45.0
-            )
-            if response.status_code == 200:
-                raw = response.json().get("response", "")
-                payload = _extract_json_block(raw)
-                if payload and payload.get("session", {}).get("steps"):
-                    return JSONResponse(payload)
-                # Fall back to local steps if LLM didn't return anything useful
-                raise ValueError("LLM returned no steps")
-            raise ValueError("LLM request failed")
-    except Exception as e:
-        fallback_steps = {
+    fallback_steps = {
             "session-stack": [
                 {
                     "title": "Find the LOGON prompt",
@@ -1350,6 +1329,31 @@ Return JSON in this shape:
                 }
             ]
         }
+
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                f"{OLLAMA_URL}/api/generate",
+                json={
+                    "model": OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.4, "num_predict": 700}
+                },
+                timeout=15.0
+            )
+            if response.status_code == 200:
+                raw = response.json().get("response", "")
+                payload = _extract_json_block(raw)
+                if payload and payload.get("session", {}).get("steps"):
+                    return JSONResponse(payload)
+                # Fall back to local steps if LLM didn't return anything useful
+                raise ValueError("LLM returned no steps")
+            raise ValueError("LLM request failed")
+    except httpx.ReadTimeout:
+        steps = fallback_steps.get(path.get("id", ""), fallback_steps["free-explore"])
+        return JSONResponse({"session": {"path_id": path.get("id", ""), "steps": steps}})
+    except Exception:
         steps = fallback_steps.get(path.get("id", ""), fallback_steps["free-explore"])
         return JSONResponse({"session": {"path_id": path.get("id", ""), "steps": steps}})
 

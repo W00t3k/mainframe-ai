@@ -103,13 +103,14 @@ body {
 }
 
 .terminal-container {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem 1rem 0.5rem 1rem;
-    background: radial-gradient(ellipse at center, #111 0%, #000 100%);
-    overflow: hidden;
+    position: fixed;
+    left: 24px;
+    top: 96px;
+    width: min(80vw, 760px);
+    height: min(70vh, 560px);
+    padding: 0;
+    background: transparent;
+    z-index: 2;
 }
 
 .terminal {
@@ -119,10 +120,8 @@ body {
     font-size: 14px;
     line-height: 1.25;
     white-space: pre;
-    width: 720px;
-    height: 520px;
-    max-width: min(80vw, 760px);
-    max-height: calc(100vh - 220px);
+    width: 100%;
+    height: 100%;
     box-shadow: 0 0 60px rgba(51, 255, 51, 0.15);
     position: relative;
     outline: none;
@@ -157,6 +156,10 @@ body {
 }
 
 .pf-bar {
+    position: fixed;
+    left: 24px;
+    top: calc(96px + min(70vh, 560px) + 12px);
+    width: min(80vw, 760px);
     background: var(--ibm-gray-90);
     border-top: 1px solid var(--ibm-gray-80);
     padding: 0.75rem 1rem;
@@ -164,7 +167,7 @@ body {
     gap: 0.5rem;
     flex-wrap: wrap;
     justify-content: center;
-    flex-shrink: 0;
+    z-index: 2;
 }
 
 .pf-key {
@@ -192,11 +195,11 @@ body {
 .chat-float {
     position: fixed;
     right: 24px;
-    bottom: 120px;
+    top: 96px;
     width: 520px;
     height: 640px;
     max-width: calc(100vw - 48px);
-    max-height: calc(100vh - 160px);
+    max-height: calc(100vh - 120px);
     background: var(--ibm-gray-90);
     border: 1px solid var(--ibm-gray-70);
     box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
