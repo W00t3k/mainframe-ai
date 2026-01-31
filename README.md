@@ -1,17 +1,17 @@
 # Mainframe AI Assistant
 
-Natural language interface for z/OS mainframe operations, powered by Claude AI.
+Natural language interface for z/OS mainframe operations. Uses a local LLM by default (Ollama), with a pluggable backend.
 
 ## Features
 
 - **Conversational Interface**: Ask questions in plain English about z/OS, JCL, COBOL, ABEND codes
 - **Live Connection**: Connect to real mainframes via TN3270 (uses BIRP modules)
-- **Screen Analysis**: Claude can read and explain 3270 terminal screens
+- **Screen Analysis**: LLM can read and explain 3270 terminal screens
 - **JCL Generation**: Generate JCL for common tasks from natural language descriptions
 - **ABEND Debugging**: Get explanations and fix suggestions for system abends
 - **Offline Mode**: Works without mainframe connection for Q&A and code generation
 
-## Quick Start
+## Quick Start (Web UI, Ollama default)
 
 ```bash
 # 1. Set up virtual environment
@@ -21,10 +21,26 @@ source venv/bin/activate
 # 2. Install dependencies
 pip install -r requirements.txt
 
-# 3. Set API key
-export ANTHROPIC_API_KEY="your-key-here"
+# 3. Start Ollama (in another terminal)
+ollama serve
+ollama pull llama3.1:8b
 
-# 4. Run
+# 4. Run the web app
+python web_app.py
+```
+
+Open:
+
+- `http://127.0.0.1:8080/chat` (AI chat)
+- `http://127.0.0.1:8080/tutor` (red team tutor)
+- `http://127.0.0.1:8080/graph` (trust graph)
+
+### CLI (Optional)
+
+The CLI uses Anthropic by default. If you want the CLI:
+
+```bash
+export ANTHROPIC_API_KEY="your-key-here"
 python mainframe_assistant.py
 
 # Or connect directly to a mainframe
@@ -87,10 +103,27 @@ $ python mainframe_assistant.py
 - "Navigate to ISPF option 3.4"
 - "Submit the JCL on this screen"
 
+**Demo Without a Mainframe:**
+- Start Ollama (`ollama serve`)
+- Run the web app (`python web_app.py`)
+- Open `/chat`, `/tutor`, and `/graph`
+- `/terminal` requires a TN3270 target (TK5 or a real mainframe)
+
 **COBOL/Code:**
 - "Explain this COBOL paragraph: [paste code]"
 - "How do I read a VSAM file in COBOL?"
 - "Convert this PERFORM VARYING to a modern loop"
+
+### Screenshots / Demo Media
+
+Add 2–4 visuals before publishing a blog post. Suggested captures:
+
+- `/terminal` with the floating chat panel
+- `/tutor` learning path screen
+- `/graph` trust graph view
+- `/chat` answer explaining an ABEND
+
+Place assets under `docs/assets/` (see `docs/assets/README.md` for naming).
 
 ## Architecture
 
@@ -108,8 +141,8 @@ $ python mainframe_assistant.py
 └──────────┬────────────────────────┬─────────────────┘
            │                        │
 ┌──────────▼──────────┐  ┌─────────▼─────────────────┐
-│   Claude API        │  │   BIRP TN3270 Layer       │
-│   (Anthropic)       │  │   - Screen reading        │
+│   LLM Backend       │  │   BIRP TN3270 Layer       │
+│   (Ollama default)  │  │   - Screen reading        │
 │   - Q&A             │  │   - Command execution     │
 │   - Code generation │  │   - Session history       │
 │   - Analysis        │  │   - Field parsing         │
@@ -134,9 +167,11 @@ Without BIRP, the assistant runs in offline mode (Q&A only, no live connection).
 
 | Variable | Description |
 |----------|-------------|
-| `ANTHROPIC_API_KEY` | Required. Your Claude API key |
+| `OLLAMA_URL` | Ollama API endpoint (default: `http://localhost:11434`) |
+| `OLLAMA_MODEL` | Default Ollama model (default: `llama3.1:8b`) |
 | `MAINFRAME_HOST` | Default mainframe target |
 | `MAINFRAME_USER` | Default TSO userid |
+| `ANTHROPIC_API_KEY` | Optional. Only needed for CLI usage |
 
 ### CLI Options
 

@@ -9,16 +9,16 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
 | Feature | Description |
 |---------|-------------|
 | **TN3270 Terminal** | Full 3270 terminal emulation via BIRP v2 |
-| **AI Chat** | Local LLM (Ollama) for mainframe Q&A |
+| **AI Chat** | Local LLM (Ollama default, pluggable backend) for mainframe Q&A |
 | **Red Team Tutor** | Guided learning paths for security professionals |
 | **Trust Graph** | BloodHound-inspired relationship visualization |
 | **RAG Knowledge Base** | Retrieval-augmented generation with mainframe docs |
-| **MCP Server** | Model Context Protocol for Claude Desktop |
+| **MCP Server** | Model Context Protocol for Claude Desktop (optional) |
 | **Network Scanner** | Discover TN3270 services on networks |
 
 ### What Makes This Different
 
-- **100% Local**: No API keys, no cloud dependencies. Ollama runs locally.
+- **Local by Default**: No API keys required unless you choose a cloud backend. Ollama runs locally.
 - **Security-Focused**: Designed for understanding trust boundaries, not exploitation.
 - **Educational**: Every feature teaches mainframe mental models.
 - **Graph-Based**: Visualize relationships like BloodHound does for AD.
@@ -37,8 +37,8 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
         │            │            │            │            │
         ▼            ▼            ▼            ▼            ▼
 ┌───────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────────┐
-│  BIRP v2      │ │  Ollama    │ │ Trust      │ │  RAG Engine        │
-│  (TN3270)     │ │  (LLM)     │ │ Graph      │ │  (Embeddings)      │
+│  BIRP v2      │ │  LLM       │ │ Trust      │ │  RAG Engine        │
+│  (TN3270)     │ │  (Ollama)  │ │ Graph      │ │  (Embeddings)      │
 │               │ │            │ │            │ │                    │
 │ WrappedEmulator │ llama3.1:8b │ │ Nodes/Edges│ │ File-based vectors │
 └───────┬───────┘ └────────────┘ └────────────┘ └────────────────────┘
@@ -67,12 +67,12 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
 # Clone/navigate to the project
 cd mainframe_ai_assistant
 
-# Create virtual environment (use a path without spaces)
-python3 -m venv /tmp/mainframe_venv
-source /tmp/mainframe_venv/bin/activate
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate
 
 # Install dependencies
-pip install httpx fastapi uvicorn jinja2 python-multipart numpy colorama py3270 websockets
+pip install -r requirements.txt
 
 # Optional: Install MCP for Claude Desktop integration
 pip install mcp
@@ -97,6 +97,22 @@ python web_app.py
 | http://127.0.0.1:8080/chat | AI Chat |
 | http://127.0.0.1:8080/graph | Trust Graph |
 | http://127.0.0.1:8080/rag | Knowledge Base |
+
+### Demo Without a Mainframe
+
+You can use `/chat`, `/tutor`, `/graph`, and `/rag` without a live TN3270 connection.
+The `/terminal` page requires a TN3270 target (TK5 or a real mainframe).
+
+### Screenshots / Demo Media
+
+Add 2–4 visuals before publishing a blog post. Suggested captures:
+
+- `/terminal` with the floating chat panel
+- `/tutor` learning path screen
+- `/graph` trust graph view
+- `/chat` answer explaining an ABEND
+
+Place assets under `docs/assets/` (see `docs/assets/README.md` for naming).
 
 ---
 
@@ -162,7 +178,7 @@ BloodHound-inspired visualization of mainframe relationships.
 
 ### 3. AI Chat (`/chat`)
 
-Conversational interface powered by local Ollama LLM.
+Conversational interface powered by Ollama by default (pluggable backend).
 
 **Capabilities:**
 - Explain ABEND codes (S0C7, S0C4, S913, etc.)
@@ -405,6 +421,8 @@ The tutor operates on these principles:
 |----------|---------|-------------|
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama API endpoint |
 | `OLLAMA_MODEL` | `llama3.1:8b` | Default LLM model |
+
+You can point `OLLAMA_URL` to any Ollama-compatible `/api/chat` server. For non-Ollama backends, add a small adapter in `web_app.py`.
 
 ---
 

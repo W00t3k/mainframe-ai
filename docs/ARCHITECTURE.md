@@ -16,10 +16,11 @@ This document describes the architecture of the Mainframe AI Assistant and BIRP 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      AI / RAG Layer                                      │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  Claude API (Anthropic)  │  rag_engine.py (RAG)                          │
-│  - Q&A                   │  - Document embedding                         │
-│  - Code generation       │  - Semantic search                            │
-│  - Screen analysis       │  - Context augmentation                       │
+│  LLM Backend             │  rag_engine.py (RAG)                          │
+│  (Ollama default)        │  - Document embedding                         │
+│  - Q&A                   │  - Semantic search                            │
+│  - Code generation       │  - Context augmentation                       │
+│  - Screen analysis       │                                             │
 └─────────────────────┬───────────────────────────────────────────────────┘
                       │
                       ▼
@@ -52,7 +53,8 @@ Command-line interface for conversational mainframe interaction.
 
 - Natural language queries
 - Command parsing (/connect, /screen, etc.)
-- Action extraction from Claude responses
+- Action extraction from LLM responses
+- CLI currently uses Anthropic client by default; can be swapped for other backends
 - Rich terminal output
 
 #### web_app.py
@@ -75,9 +77,9 @@ Native Python interfaces for direct mainframe interaction.
 
 ### AI / RAG Layer
 
-#### Claude API Integration
+#### LLM Backend Integration (Ollama default)
 
-Uses Anthropic's Claude for:
+Uses an Ollama-compatible `/api/chat` backend for:
 - Natural language understanding
 - z/OS knowledge queries
 - JCL generation
@@ -200,8 +202,8 @@ User Query
            │
            ▼
 ┌─────────────────────┐     ┌─────────────────────┐
-│    Claude API       │◄────│   RAG Engine        │
-│   (if knowledge Q)  │     │ (context retrieval) │
+│   LLM Backend       │◄────│   RAG Engine        │
+│  (Ollama default)   │     │ (context retrieval) │
 └──────────┬──────────┘     └─────────────────────┘
            │
            ▼
