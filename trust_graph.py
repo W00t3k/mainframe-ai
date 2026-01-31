@@ -404,6 +404,11 @@ class TrustGraph:
         - boundary_crossings
         - abend_chains
         - shortest_to_sensitive
+        - loadlib_hotspots
+        - dataset_fanout
+        - job_program_chain
+        - orphan_datasets
+        - boundary_summary
         """
         queries = {
             "paths_to_job_submit": self._query_paths_to_job_submit,
@@ -416,6 +421,11 @@ class TrustGraph:
             "boundary_crossings": self._query_boundary_crossings,
             "abend_chains": self._query_abend_chains,
             "shortest_to_sensitive": self._query_shortest_to_sensitive,
+            "loadlib_hotspots": self._query_loadlib_hotspots,
+            "dataset_fanout": self._query_dataset_fanout,
+            "job_program_chain": self._query_job_program_chain,
+            "orphan_datasets": self._query_orphan_datasets,
+            "boundary_summary": self._query_boundary_summary,
         }
 
         if query_name not in queries:
@@ -605,6 +615,121 @@ class TrustGraph:
 
         # Sort by hop count
         results.sort(key=lambda x: x["hops"])
+        return results
+
+    def _query_loadlib_hotspots(self, **params) -> List[Dict]:
+        """Which loadlibs are used by the most programs?"""
+        loadlib_programs = {}
+        for edge in self.get_edges_by_type("LOADS_FROM"):
+            program = self.nodes.get(edge.source_id)
+            loadlib = self.nodes.get(edge.target_id)
+            if not program or not loadlib:
+                continue
+            loadlib_programs.setdefault(loadlib.id, set()).add(program.label)
+
+        results = []
+        for loadlib_id, programs in loadlib_programs.items():
+            loadlib = self.nodes.get(loadlib_id)
+            if not loadlib:
+                continue
+            results.append({
+                "loadlib": loadlib.label,
+                "program_count": len(programs),
+                "programs": sorted(programs)
+            })
+        results.sort(key=lambda x: x["program_count"], reverse=True)
+        return results
+
+    def _query_dataset_fanout(self, **params) -> List[Dict]:
+        """Which datasets are accessed by the most jobs?"""
+        access_map = {}
+        for edge in self.edges.values():
+            if edge.edge_type not in ("READS", "WRITES"):
+                continue
+            job = self.nodes.get(edge.source_id)
+            dataset = self.nodes.get(edge.target_id)
+            if not job or not dataset:
+                continue
+            access = access_map.setdefault(dataset.id, {"readers": set(), "writers": set()})
+            if edge.edge_type == "READS":
+                access["readers"].add(job.label)
+            else:
+                access["writers"].add(job.label)
+
+        results = []
+        for dataset_id, access in access_map.items():
+            dataset = self.nodes.get(dataset_id)
+            if not dataset:
+                continue
+            results.append({
+                "dataset": dataset.label,
+                "readers": sorted(access["readers"]),
+                "writers": sorted(access["writers"]),
+                "total_jobs": len(access["readers"] | access["writers"])
+            })
+        results.sort(key=lambda x: x["total_jobs"], reverse=True)
+        return results
+
+    def _query_job_program_chain(self, **params) -> List[Dict]:
+        """Summarize job -> program -> loadlib chains."""
+        results = []
+        for job in self.get_nodes_by_type("Job"):
+            programs = []
+            loadlibs = set()
+            for neighbor in self.get_neighbors(job.id, ["EXECUTES"], "outgoing"):
+                program = neighbor["node"]
+                programs.append(program.label)
+                for lib_neighbor in self.get_neighbors(program.id, ["LOADS_FROM"], "outgoing"):
+                    loadlibs.add(lib_neighbor["node"].label)
+            results.append({
+                "job": job.label,
+                "programs": sorted(set(programs)),
+                "program_count": len(set(programs)),
+                "loadlibs": sorted(loadlibs),
+                "loadlib_count": len(loadlibs)
+            })
+        results.sort(key=lambda x: x["program_count"], reverse=True)
+        return results
+
+    def _query_orphan_datasets(self, **params) -> List[Dict]:
+        """Datasets with no READS/WRITES edges."""
+        dataset_ids = {n.id for n in self.get_nodes_by_type("Dataset")}
+        attached = set()
+        for edge in self.edges.values():
+            if edge.edge_type in ("READS", "WRITES") and edge.target_id in dataset_ids:
+                attached.add(edge.target_id)
+        results = []
+        for dataset_id in dataset_ids - attached:
+            dataset = self.nodes.get(dataset_id)
+            if dataset:
+                results.append({"dataset": dataset.label})
+        return results
+
+    def _query_boundary_summary(self, **params) -> List[Dict]:
+        """Summarize edges that cross node type boundaries."""
+        summary = {}
+        boundary_types = {"NAVIGATES_TO", "SUBMITS_JOB", "EXECUTES", "CALLS_PROC", "READS", "WRITES", "LOADS_FROM"}
+        for edge in self.edges.values():
+            if edge.edge_type not in boundary_types:
+                continue
+            source = self.nodes.get(edge.source_id)
+            target = self.nodes.get(edge.target_id)
+            if not source or not target:
+                continue
+            if source.node_type == target.node_type:
+                continue
+            key = (edge.edge_type, source.node_type, target.node_type)
+            summary[key] = summary.get(key, 0) + 1
+
+        results = []
+        for (edge_type, source_type, target_type), count in summary.items():
+            results.append({
+                "edge": edge_type,
+                "source_type": source_type,
+                "target_type": target_type,
+                "count": count
+            })
+        results.sort(key=lambda x: x["count"], reverse=True)
         return results
 
     # -------------------------------------------------------------------------

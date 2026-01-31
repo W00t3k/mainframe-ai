@@ -1,0 +1,25 @@
+{
+  "id": "batch-basics",
+  "title": "Batch Execution Basics",
+  "description": "Submit a simple job and map the JCL -> JES -> program execution chain.",
+  "steps": [
+    {
+      "title": "JCL Review",
+      "screen": "//DEMOJOB JOB (ACCT),'DEMO'\n//STEP1 EXEC PGM=IEBGENER\n//SYSUT1 DD DSN=PROD.DATA.FILE,DISP=SHR\n//SYSUT2 DD DSN=TEST.DATA.FILE,DISP=(NEW,CATLG,DELETE)",
+      "expected": "Identify the job, step, and datasets referenced.",
+      "hint": "Look for JOB, EXEC, and DD statements."
+    },
+    {
+      "title": "Submit Job",
+      "screen": "Job DEMOJOB submitted.\nJES2 assigns JOB00012.",
+      "expected": "Explain why JES is the control plane for batch.",
+      "hint": "JES queues and schedules work before it runs on an initiator."
+    },
+    {
+      "title": "SYSOUT",
+      "screen": "IEF142I DEMOJOB STEP1 - STEP WAS EXECUTED - COND CODE 0000",
+      "expected": "Interpret the return code and tie it back to execution.",
+      "hint": "COND CODE 0000 means success."
+    }
+  ]
+}

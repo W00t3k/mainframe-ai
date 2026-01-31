@@ -1,0 +1,181 @@
+.labs-layout {
+    min-height: 100vh;
+    background: var(--ibm-gray-100);
+    color: var(--ibm-gray-10);
+    display: flex;
+    flex-direction: column;
+}
+
+.labs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2rem 3rem 1rem;
+    border-bottom: 1px solid var(--ibm-gray-80);
+}
+
+.labs-title h1 {
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.labs-title p {
+    color: var(--ibm-gray-40);
+}
+
+.labs-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.btn {
+    background: var(--ibm-blue);
+    color: var(--ibm-white);
+    border: none;
+    padding: 0.75rem 1.25rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.btn:hover:not(:disabled) {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-20);
+}
+
+.labs-body {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    gap: 1.5rem;
+    padding: 2rem 3rem 3rem;
+    flex: 1;
+}
+
+.labs-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.lab-card {
+    text-align: left;
+    background: var(--ibm-gray-90);
+    border: 1px solid var(--ibm-gray-80);
+    padding: 1.5rem;
+    border-radius: 8px;
+    color: inherit;
+    cursor: pointer;
+    transition: border 0.2s ease, transform 0.2s ease;
+}
+
+.lab-card:hover {
+    border-color: var(--ibm-blue-light);
+    transform: translateY(-2px);
+}
+
+.lab-card.active {
+    border-color: var(--ibm-blue);
+    box-shadow: 0 0 0 1px var(--ibm-blue);
+}
+
+.lab-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.lab-desc {
+    color: var(--ibm-gray-40);
+    margin-bottom: 0.75rem;
+}
+
+.lab-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--ibm-gray-50);
+}
+
+.labs-detail {
+    background: var(--ibm-gray-90);
+    border: 1px solid var(--ibm-gray-80);
+    border-radius: 12px;
+    padding: 2rem;
+}
+
+.lab-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+.lab-header p {
+    color: var(--ibm-gray-40);
+}
+
+.lab-step-counter {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--ibm-gray-50);
+}
+
+.lab-step h3 {
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+}
+
+.lab-screen {
+    background: #0c0f14;
+    border-radius: 8px;
+    padding: 1rem;
+    color: #d7f9ff;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    margin-bottom: 1rem;
+    white-space: pre-wrap;
+}
+
+.lab-note,
+.lab-hint {
+    margin-bottom: 0.75rem;
+    color: var(--ibm-gray-30);
+}
+
+.lab-controls {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+}
+
+.empty {
+    color: var(--ibm-gray-50);
+    font-style: italic;
+}
+
+@media (max-width: 980px) {
+    .labs-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+    }
+
+    .labs-body {
+        grid-template-columns: 1fr;
+        padding: 1.5rem;
+    }
+}

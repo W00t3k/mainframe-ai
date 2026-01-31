@@ -818,7 +818,8 @@ def update_graph_from_screen(graph: TrustGraph, screen_text: str,
 def generate_finding(title: str, evidence: List[Dict], reasoning: str,
                      confidence: str, graph_path: List[str] = None,
                      affected_nodes: List[str] = None,
-                     severity: str = "MEDIUM") -> Dict:
+                     severity: str = "MEDIUM",
+                     graph_context: Dict = None) -> Dict:
     """Generate a structured defensive finding.
 
     Args:
@@ -847,6 +848,7 @@ def generate_finding(title: str, evidence: List[Dict], reasoning: str,
         "affected_nodes": affected_nodes or [],
         "graph_path": graph_path or [],
         "defensive_verification": [],  # Filled in by caller
+        "graph_context": graph_context or {},
         "timestamp": datetime.now().isoformat()
     }
 

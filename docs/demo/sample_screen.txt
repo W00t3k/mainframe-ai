@@ -1,0 +1,15 @@
+ISPF Primary Option Menu                        
+Option ===>                                    
+
+0  Settings      Terminal and user parameters  
+1  View          Display source data or output 
+2  Edit          Create or change data         
+3  Utilities     Perform utility functions     
+4  Foreground    Interactive language processing
+5  Batch         Submit batch jobs             
+6  Command       Enter TSO command or CLIST    
+7  Dialog Test   Perform dialog testing        
+8  LM Facility   Library management            
+9  IBM Products  IBM program development       
+
+F1=Help F3=Exit F4=Return F7=Up F8=Down F9=Swap

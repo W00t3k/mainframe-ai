@@ -198,6 +198,7 @@ main {
 .option-card.abstract .option-icon { color: var(--ibm-green); }
 .option-card.chat .option-icon { color: var(--ibm-blue-light); }
 .option-card.scan .option-icon { color: var(--ibm-purple); }
+.option-card.labs .option-icon { color: #ffb020; }
 .option-card.screens .option-icon { color: var(--ibm-cyan); }
 .option-card.rag .option-icon { color: var(--ibm-green); }
 .option-card.arch .option-icon { color: var(--ibm-teal); }

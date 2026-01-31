@@ -1,0 +1,16 @@
+{
+  "labs": [
+    {
+      "id": "session-stack",
+      "title": "Session Stack Walkthrough",
+      "description": "Walk the VTAM -> TSO -> ISPF layers and learn where trust boundaries shift.",
+      "steps": 4
+    },
+    {
+      "id": "batch-basics",
+      "title": "Batch Execution Basics",
+      "description": "Submit a simple job and map the JCL -> JES -> program execution chain.",
+      "steps": 3
+    }
+  ]
+}

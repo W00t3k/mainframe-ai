@@ -243,6 +243,47 @@
             color: var(--bg-primary);
         }
 
+        .finding-form {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .finding-form input {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+
+        .finding-form button {
+            background: var(--accent-dim);
+            border: 1px solid var(--accent);
+            color: var(--text-primary);
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .finding-form button:hover {
+            background: var(--accent);
+            color: var(--bg-primary);
+        }
+
+        .finding-output {
+            background: var(--bg-tertiary);
+            border-radius: 6px;
+            padding: 10px;
+            font-size: 11px;
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+            max-height: 200px;
+            overflow: auto;
+        }
+
         .query-results {
             background: var(--bg-tertiary);
             border-radius: 6px;
@@ -342,6 +383,16 @@
                 <div class="query-btn" data-query="boundary_crossings">Boundary Crossings</div>
                 <div class="query-btn" data-query="abend_chains">ABEND Chains</div>
                 <div class="query-btn" data-query="dataset_conflicts">Dataset Conflicts</div>
+                <div class="query-btn" data-query="loadlib_hotspots">Loadlib Hotspots</div>
+                <div class="query-btn" data-query="dataset_fanout">Dataset Fan-out</div>
+                <div class="query-btn" data-query="job_program_chain">Job→Program Chains</div>
+                <div class="query-btn" data-query="orphan_datasets">Orphan Datasets</div>
+                <div class="query-btn" data-query="boundary_summary">Boundary Summary</div>
+            </div>
+
+            <div class="queries">
+                <h3>Demo Data</h3>
+                <div class="query-btn" id="btn-demo-load">Load Sample JCL/SYSOUT</div>
             </div>
         </div>
 
@@ -378,6 +429,15 @@
             </div>
 
             <div class="panel-section">
+                <h3>Finding Draft</h3>
+                <div class="finding-form">
+                    <input id="finding-title" type="text" placeholder="Finding title">
+                    <button id="btn-finding">Generate from Query</button>
+                </div>
+                <div class="finding-output" id="finding-output">No finding generated yet.</div>
+            </div>
+
+            <div class="panel-section">
                 <h3>Query Results</h3>
                 <div class="query-results" id="query-results">
                     <pre>Run a query to see results</pre>
@@ -405,6 +465,7 @@
         let graphData = { nodes: [], links: [] };
         let simulation = null;
         let ws = null;
+        let lastQueryResults = [];
 
         // D3 setup
         const svg = d3.select('#graph');
@@ -645,6 +706,7 @@
 
         function showQueryResults(data) {
             const results = document.getElementById('query-results');
+            lastQueryResults = data.results || [];
             results.innerHTML = `<pre>${JSON.stringify(data.results, null, 2)}</pre>`;
         }
 
@@ -694,6 +756,27 @@
             }
         }
 
+        async function loadDemoData() {
+            try {
+                const response = await fetch('/api/demo/load', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'all' })
+                });
+                const data = await response.json();
+                if (data.error || data.success === false) {
+                    alert('Error: ' + (data.error || 'Demo load failed'));
+                    return;
+                }
+                fetchGraph();
+                if (window.showToast) {
+                    window.showToast('Loaded demo data into the trust graph.', { type: 'success' });
+                }
+            } catch (e) {
+                console.error('Demo load failed:', e);
+            }
+        }
+
         async function exportDot() {
             try {
                 const response = await fetch('/api/graph/export/dot');
@@ -711,6 +794,36 @@
             }
         }
 
+        async function generateFinding() {
+            const titleInput = document.getElementById('finding-title');
+            const output = document.getElementById('finding-output');
+            const title = titleInput.value.trim() || 'Trust Graph Finding';
+            if (!lastQueryResults.length) {
+                alert('Run a query first to generate a finding.');
+                return;
+            }
+            try {
+                const response = await fetch('/api/graph/finding', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        title,
+                        evidence: lastQueryResults,
+                        reasoning: 'Generated from the most recent trust graph query.',
+                        confidence: 'MEDIUM'
+                    })
+                });
+                const data = await response.json();
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                    return;
+                }
+                output.textContent = JSON.stringify(data, null, 2);
+            } catch (e) {
+                console.error('Finding generation failed:', e);
+            }
+        }
+
         // Event listeners
         document.getElementById('btn-refresh').addEventListener('click', fetchGraph);
         document.getElementById('btn-reset').addEventListener('click', () => {
@@ -719,8 +832,13 @@
         document.getElementById('btn-export').addEventListener('click', exportDot);
         document.getElementById('btn-ingest').addEventListener('click', ingestData);
         document.getElementById('btn-ingest-screen').addEventListener('click', ingestScreen);
+        document.getElementById('btn-finding').addEventListener('click', generateFinding);
+        const demoLoadBtn = document.getElementById('btn-demo-load');
+        if (demoLoadBtn) {
+            demoLoadBtn.addEventListener('click', loadDemoData);
+        }
 
-        document.querySelectorAll('.query-btn').forEach(btn => {
+        document.querySelectorAll('.query-btn[data-query]').forEach(btn => {
             btn.addEventListener('click', () => runQuery(btn.dataset.query));
         });
 

@@ -72,6 +72,8 @@ app = FastAPI(title="Mainframe AI Assistant")
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
+LAB_DATA_DIR = os.path.join(BASE_DIR, "lab_data")
+DEMO_DATA_DIR = os.path.join(BASE_DIR, "docs", "demo")
 
 # Ollama configuration
 OLLAMA_URL = os.getenv("OLLAMA_URL", "http://localhost:11434")
@@ -116,6 +118,24 @@ websocket_clients = set()
 graph_websocket_clients = set()  # For real-time graph visualization
 
 # Note: screencaps and SCREENCAPS_DIR imported from agent_tools
+
+
+def read_json_file(path: str, default: dict) -> dict:
+    if not os.path.exists(path):
+        return default
+    try:
+        with open(path, "r") as handle:
+            return json.load(handle)
+    except Exception as exc:
+        print(f"Failed to read JSON {path}: {exc}")
+        return default
+
+
+def read_text_file(path: str) -> str:
+    if not os.path.exists(path):
+        raise FileNotFoundError(path)
+    with open(path, "r") as handle:
+        return handle.read()
 
 
 async def check_ollama() -> bool:
@@ -501,6 +521,10 @@ async def connect_page(request: Request):
 async def terminal_page(request: Request):
     return templates.TemplateResponse("terminal.html", {"request": request})
 
+@app.get("/labs", response_class=HTMLResponse)
+async def labs_page(request: Request):
+    return templates.TemplateResponse("labs.html", {"request": request})
+
 
 @app.get("/scanner", response_class=HTMLResponse)
 async def scanner_page(request: Request):
@@ -563,6 +587,7 @@ Your job is to explain each learning path in plain language to someone new to ma
 Requirements:
 - Be clear and non-intimidating.
 - Explain what the path teaches and why it matters.
+- Emphasize defensive outcomes, safe lab practice, and auditability.
 - Answer "Is this right for me?" before the user starts.
 - Use short paragraphs or bullets.
 - Avoid jargon unless the user opts in explicitly.
@@ -605,6 +630,11 @@ TUTOR_PERSONAS = {
         "name": "The Architect",
         "style": "Systems-depth. Explain subsystem boundaries and address spaces.",
         "focus": "Long-lived control boundaries, blast radius, and design tradeoffs."
+    },
+    "policy": {
+        "name": "Policy Coach",
+        "style": "Guardrail-focused. Emphasize least privilege, auditability, and change control.",
+        "focus": "Defensive outcomes, compliance evidence, and safe operational patterns."
     }
 }
 
@@ -1023,21 +1053,25 @@ pathCatalog = {
         'id': 'session-stack',
         'title': 'Session Stack',
         'description': 'Connect VTAM→TSO→ISPF and learn navigation, PF keys, panels, and command flow.',
+        'defender_outcome': 'Understand where authentication, authorization, and auditing occur in the session stack.'
     },
     'batch-execution': {
         'id': 'batch-execution',
         'title': 'Batch Execution',
         'description': 'Create and submit JCL, interpret JES output, and trace job logs and return codes.',
+        'defender_outcome': 'Know where jobs are queued, scheduled, and logged so you can trace execution safely.'
     },
     'dataset-trust': {
         'id': 'dataset-trust',
         'title': 'Dataset Trust',
         'description': 'Understand RACF/Dataset profiles, access checks, and common misconfig trust breaks.',
+        'defender_outcome': 'Map dataset access patterns to least-privilege controls and audit evidence.'
     },
     'free-explore': {
         'id': 'free-explore',
         'title': 'Free Explore',
         'description': 'Explore with guardrails—ask questions and get contextual help on the current screen.',
+        'defender_outcome': 'Practice safe exploration while maintaining system integrity.'
     }
 }
 
@@ -1057,6 +1091,7 @@ async def api_tutor_path_explain(request: Request):
         f"Domain: {path.get('domain', '')}",
         f"Intent: {path.get('intent', '')}",
         f"Summary: {path.get('summary', '')}",
+        f"Defender Outcome: {path.get('defender_outcome', '')}",
     ])
 
     rag_context = await build_rag_context(meta, n_results=2)
@@ -1448,6 +1483,70 @@ Screen:
 async def api_chat(request: ChatRequest):
     result = await process_chat(request.message)
     return JSONResponse(result)
+
+
+@app.get("/api/labs")
+async def api_labs_index():
+    index_path = os.path.join(LAB_DATA_DIR, "index.json")
+    data = read_json_file(index_path, {"labs": []})
+    return JSONResponse(data)
+
+
+@app.get("/api/labs/{lab_id}")
+async def api_labs_detail(lab_id: str):
+    lab_path = os.path.join(LAB_DATA_DIR, f"{lab_id}.json")
+    if not os.path.exists(lab_path):
+        return JSONResponse({"error": "Lab not found"}, status_code=404)
+    data = read_json_file(lab_path, {})
+    if not data:
+        return JSONResponse({"error": "Lab not available"}, status_code=404)
+    return JSONResponse(data)
+
+
+@app.post("/api/demo/load")
+async def api_demo_load(request: Request):
+    if not GRAPH_AVAILABLE:
+        return JSONResponse({"success": False, "error": "Trust graph not available"}, status_code=400)
+
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+
+    load_type = payload.get("type", "all")
+    graph = get_trust_graph()
+    results = {}
+
+    try:
+        if load_type in ("jcl", "all"):
+            jcl_text = read_text_file(os.path.join(DEMO_DATA_DIR, "sample_jcl.txt"))
+            parsed_jcl = parse_jcl(jcl_text)
+            results["jcl"] = update_graph_from_jcl(
+                graph, parsed_jcl, {"type": "demo", "source": "sample_jcl"}
+            )
+
+        if load_type in ("sysout", "all"):
+            sysout_text = read_text_file(os.path.join(DEMO_DATA_DIR, "sample_sysout.txt"))
+            parsed_sysout = parse_sysout(sysout_text)
+            if not parsed_sysout.get("jobname"):
+                parsed_sysout["jobname"] = "DEMOJOB"
+            if not parsed_sysout.get("jobid"):
+                parsed_sysout["jobid"] = "JOB00012"
+            results["sysout"] = update_graph_from_sysout(
+                graph, parsed_sysout, {"type": "demo", "source": "sample_sysout"}
+            )
+
+        if load_type in ("screen", "all"):
+            screen_text = read_text_file(os.path.join(DEMO_DATA_DIR, "sample_screen.txt"))
+            results["screen"] = update_graph_from_screen(graph, screen_text, "demo:3270")
+
+        graph.save()
+        await broadcast_graph_update("demo_loaded", results)
+        return JSONResponse({"success": True, "results": results})
+    except FileNotFoundError as exc:
+        return JSONResponse({"success": False, "error": f"Missing demo file: {exc}"}, status_code=404)
+    except Exception as exc:
+        return JSONResponse({"success": False, "error": str(exc)}, status_code=500)
 
 
 @app.get("/api/status")

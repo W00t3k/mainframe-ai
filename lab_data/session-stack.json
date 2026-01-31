@@ -1,0 +1,31 @@
+{
+  "id": "session-stack",
+  "title": "Session Stack Walkthrough",
+  "description": "Walk the VTAM -> TSO -> ISPF layers and learn where trust boundaries shift.",
+  "steps": [
+    {
+      "title": "VTAM Logon",
+      "screen": "WELCOME TO VTAM\nAPPLID ===> TSO\n\nEnter the application ID to connect.",
+      "expected": "Identify the VTAM boundary and the application ID prompt.",
+      "hint": "Type TSO and press Enter."
+    },
+    {
+      "title": "TSO Logon",
+      "screen": "TSO/E LOGON\nUser ID  ===>\nPassword ===>\n\nEnter credentials to establish a TSO session.",
+      "expected": "Recognize the authentication boundary (user identity).",
+      "hint": "Logon credentials establish the user context; this is not SSH."
+    },
+    {
+      "title": "ISPF Primary Menu",
+      "screen": "ISPF Primary Option Menu\nOption ===>\n\n0  Settings\n1  View\n2  Edit\n3  Utilities\n5  Batch\n6  Command\n\nF1=Help F3=Exit F4=Return",
+      "expected": "Note the subsystem boundary between TSO and ISPF.",
+      "hint": "ISPF is a program running under TSO; note the menu-driven access model."
+    },
+    {
+      "title": "Batch Boundary",
+      "screen": "Submit batch job from ISPF option 5.\nYou are moving from interactive to deferred execution.",
+      "expected": "Explain why batch introduces delayed execution and different trust controls.",
+      "hint": "Batch runs under JES with different scheduling and authority checks."
+    }
+  ]
+}
