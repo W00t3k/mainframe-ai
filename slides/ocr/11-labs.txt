@@ -1,0 +1,30 @@
+@@@ @ Labs- Mainframe Al Assistan x + Gemini
+
+© 127.0.0.1:8080/labs r )
+
+‘o) Google Chrome isn't your default browser Set as default
+
+v
+Secu rity La bs | Lond Dame orphan Open Trust Graph
+
+Deterministic walkthroughs you can run without a live mainframe.
+
+Session Stack Walkthrough . .
+Walk the VTAM -> TSO -> ISPF layers and learn Batch Execution Basics
+
+where trust boundaries shift. Submit a simple job and map the JCL -> JES -> program execution chain.
+
+Steps: 4
+
+JCL Review
+
+Batch Execution Basics //DEMOJOB JOB (ACCT), 'DEMO'
+Submit a simple job and map the JCL -> JES -> //STEP1 EXEC PGM=IEBGENER
+program execution chain. //SYSUT1 DD DSN=PROD.DATA.FILE, DISP=SHR
+
+Steps: 3 //SYSUT2 DD DSN=TEST.DATA.FILE, DISP= (NEW, CATLG, DELETE)
+
+Expected: Identify the job, step, and datasets referenced.
+
+Hint: Look for JOB, EXEC, and DD statements.
+

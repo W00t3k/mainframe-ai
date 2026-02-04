@@ -114,6 +114,16 @@
     text-transform: uppercase;
 }
 
+.arch-card--recon {
+    border-color: rgba(255, 107, 107, 0.4);
+    background: linear-gradient(135deg, rgba(255, 107, 107, 0.08), var(--ibm-gray-90));
+    grid-column: 1 / -1;
+}
+
+.arch-card--recon h3 {
+    color: #ff6b6b;
+}
+
 @media (max-width: 700px) {
     .arch-hero {
         padding: 2rem 1.5rem;

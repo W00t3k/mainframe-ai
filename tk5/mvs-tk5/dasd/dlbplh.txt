@@ -1,8 +1,3 @@
-*
-* This is the placeholder TO detemine if tk5dlb.392 should be replaced or not.
-* The existence of this file will be tested in the Windows batchfile cleanup.bat or in 
-* the Linux/Unix script cleanup.
-*
-* DO NOT DELETE THIS FILE.
-*
-
+version https://git-lfs.github.com/spec/v1
+oid sha256:b247f35cc2cfc5dfaaa5fe20bda173cde96ced4759e3ee1972dd7d162231476f
+size 242

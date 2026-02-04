@@ -1,0 +1,27 @@
+@ @@ @ Recon&Assessment -IBMz xX + + Gemini
+
+€ CG @® 127.0.0.1:8080/recon
+
+© Google Chrome isn't your default browser Set as default
+
+Methodology Assess Findings Report
+
+v_ The Core Problem
+
+Mainframes are assessed using incorrect OS assumptions. Failures are methodological, not technical. Exploits are rarely
+required when authority is misunderstood.
+
+z/OS is not a server. It is a federation of subsystems where security decisions occur outside the kernel. Modern assessors import
+assumptions from Unix and cloud that do not apply. The result: critical exposure is missed not because testers lack skill, but
+because they ask the wrong questions.
+
+Broken Assumptions
+
+5 assumptions modern assessors import that do not apply to z/OS:
+
+ASSUMPTION ASSUMPTION ASSUMPTION
+
+"There is a root user" "Processes are short-lived" "Ports define exposure"
+
+Click to reveal z/OS reality Click to reveal z/OS reality Click to reveal z/OS reality
+

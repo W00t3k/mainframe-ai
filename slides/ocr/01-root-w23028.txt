@@ -1,0 +1,19 @@
+@ BM Z/OS Al Assistant x + Gemini
+
+€ > G © 1227.0.0.1:8080 * oO ff & @
+
+AlI-Powered z/OS Operations
+
+Natural language interface for mainframe operations. Connect to TN3270 terminals,
+ask questions about JCL and ABEND codes, and get AlI-powered assistance - all
+running locally with no API keys required.
+
+@ 100% Local LLM @ 1N3270 Terminal @ BIRP v2 Integration
+
+Abstract Models
+
+Platform thesis and mental models. Understand the session stack, control planes, and trust boundaries that shape every action.
+
+View Abstract >
+
+—.

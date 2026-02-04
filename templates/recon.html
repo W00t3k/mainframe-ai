@@ -1,0 +1,1356 @@
+{% extends "base.html" %}
+
+{% block title %}Recon & Assessment - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/recon.css">
+{% endblock %}
+
+{% block head_extra %}
+<script src="/static/js/vendor/marked.min.js"></script>
+{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    <header class="recon-header">
+        <div class="brand">
+            <img src="/static/logo.svg" alt="IBM z/OS">
+            <h1><span>Recon</span> & Assessment</h1>
+        </div>
+        <a href="/" class="back-link">&larr; Back to Dashboard</a>
+    </header>
+
+    <!-- Connection bar -->
+    <div class="recon-status">
+        <div class="conn-controls">
+            <span class="label">Target:</span>
+            <input type="text" id="connTarget" placeholder="localhost:3270" value="localhost:3270"
+                   style="background:var(--ibm-gray-80);border:1px solid var(--ibm-gray-70);color:var(--ibm-gray-10);
+                          padding:3px 8px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;width:180px;outline:none;">
+            <button class="btn-inline" id="connBtn" onclick="toggleConnection()">Connect</button>
+            <button class="btn-inline disconnect" id="disconnBtn" onclick="toggleConnection()" style="display:none;">Disconnect</button>
+        </div>
+        <div>
+            <span class="label">Status:</span>
+            <span class="value" id="connStatus">Disconnected</span>
+        </div>
+        <div>
+            <span class="label">Host:</span>
+            <span class="value" id="connHost">-</span>
+        </div>
+        <div>
+            <span class="label">BIRP:</span>
+            <span class="value" id="birpStatus">-</span>
+        </div>
+    </div>
+
+    <!-- Tab bar -->
+    <div class="tab-bar">
+        <button class="tab-btn active" data-tab="methodology">Methodology</button>
+        <button class="tab-btn" data-tab="assess">Assess</button>
+        <button class="tab-btn" data-tab="findings">Findings</button>
+        <button class="tab-btn" data-tab="report">Report</button>
+    </div>
+
+    <!-- Main content -->
+    <div class="recon-main">
+
+        <!-- ============ METHODOLOGY TAB ============ -->
+        <div class="tab-panel active" id="tab-methodology">
+            <div class="panel-section methodology-content">
+
+                <!-- The Core Problem -->
+                <div class="methodology-section">
+                    <h2 class="section-toggle" onclick="toggleSection(this)">
+                        <span class="toggle-icon">&#9660;</span>
+                        The Core Problem
+                    </h2>
+                    <div class="section-body open">
+                        <blockquote class="methodology-quote">
+                            Mainframes are assessed using incorrect OS assumptions. Failures are methodological,
+                            not technical. Exploits are rarely required when authority is misunderstood.
+                        </blockquote>
+                        <p class="methodology-text">
+                            z/OS is not a server. It is a federation of subsystems where security decisions occur
+                            outside the kernel. Modern assessors import assumptions from Unix and cloud that do not
+                            apply. The result: critical exposure is missed not because testers lack skill, but
+                            because they ask the wrong questions.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Broken Assumptions -->
+                <div class="methodology-section">
+                    <h2 class="section-toggle" onclick="toggleSection(this)">
+                        <span class="toggle-icon">&#9660;</span>
+                        Broken Assumptions
+                    </h2>
+                    <div class="section-body open">
+                        <p class="methodology-text" style="margin-bottom:1rem;">
+                            5 assumptions modern assessors import that do not apply to z/OS:
+                        </p>
+                        <div class="assumption-cards">
+
+                            <div class="assumption-card" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">
+                                        <div class="card-label">Assumption</div>
+                                        <div class="card-text">"There is a root user"</div>
+                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                    </div>
+                                    <div class="card-back">
+                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-text">RACF distributes authority across profiles, not a single account. There is no omnipotent root -- authority is granted per-resource through profile definitions.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="assumption-card" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">
+                                        <div class="card-label">Assumption</div>
+                                        <div class="card-text">"Processes are short-lived"</div>
+                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                    </div>
+                                    <div class="card-back">
+                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-text">Address spaces persist. Identity outlives sessions. A CICS region may run for months. The security context you inherit depends on when and how you entered, not just who you are.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="assumption-card" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">
+                                        <div class="card-label">Assumption</div>
+                                        <div class="card-text">"Ports define exposure"</div>
+                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                    </div>
+                                    <div class="card-back">
+                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-text">VTAM sessions outlive TCP connections. Network exposure does not equal authority. The session fabric exists independently of IP ports -- scanning nmap-style misses the real attack surface.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="assumption-card" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">
+                                        <div class="card-label">Assumption</div>
+                                        <div class="card-text">"Authentication = Authorization"</div>
+                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                    </div>
+                                    <div class="card-back">
+                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-text">RACF separates these completely. Subsystems ask "may this identity do this action?" -- authentication proves who you are, but every resource access is a separate authorization decision.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="assumption-card" onclick="flipCard(this)">
+                                <div class="card-inner">
+                                    <div class="card-front">
+                                        <div class="card-label">Assumption</div>
+                                        <div class="card-text">"Work executes immediately"</div>
+                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                    </div>
+                                    <div class="card-back">
+                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-text">JES brokers deferred privileged execution. Jobs are declared, queued, and run later -- often under a different identity context. Authority decisions precede execution by minutes, hours, or days.</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The 5 Control Planes -->
+                <div class="methodology-section">
+                    <h2 class="section-toggle" onclick="toggleSection(this)">
+                        <span class="toggle-icon">&#9660;</span>
+                        The 5 Control Planes
+                    </h2>
+                    <div class="section-body open">
+                        <p class="methodology-text" style="margin-bottom:1rem;">
+                            z/OS security is not enforced by a single kernel. It is distributed across 5 control planes, each with its own
+                            identity model, enforcement boundary, and failure modes. Click a plane to jump to its assessment step.
+                        </p>
+                        <div class="control-plane-cards">
+
+                            <div class="cp-card cp-tso" onclick="goToAssessStep(1)">
+                                <div class="cp-icon">TSO</div>
+                                <div class="cp-name">TSO / ISPF</div>
+                                <div class="cp-role">Human Interaction Plane</div>
+                                <div class="cp-desc">Interactive sessions, user identity, ISPF panels. Where humans enter the system and bind identity to a session.</div>
+                            </div>
+
+                            <div class="cp-card cp-jes" onclick="goToAssessStep(4)">
+                                <div class="cp-icon">JES</div>
+                                <div class="cp-name">JES2 / JES3</div>
+                                <div class="cp-role">Deferred Execution Plane</div>
+                                <div class="cp-desc">Job submission, scheduling, spool management. Work is declared before executed. Authority decisions precede execution.</div>
+                            </div>
+
+                            <div class="cp-card cp-racf" onclick="goToAssessStep(3)">
+                                <div class="cp-icon">RACF</div>
+                                <div class="cp-name">RACF</div>
+                                <div class="cp-role">Authorization Plane</div>
+                                <div class="cp-desc">Profiles, access control lists, identity management. The continuous authorization engine that every subsystem queries.</div>
+                            </div>
+
+                            <div class="cp-card cp-cics" onclick="goToAssessStep(2)">
+                                <div class="cp-icon">CICS</div>
+                                <div class="cp-name">CICS</div>
+                                <div class="cp-role">Transaction Execution Plane</div>
+                                <div class="cp-desc">Online transactions, regions, programs. Transactions are the real security boundary -- CICS mediates execution, not the OS.</div>
+                            </div>
+
+                            <div class="cp-card cp-vtam" onclick="goToAssessStep(0)">
+                                <div class="cp-icon">VTAM</div>
+                                <div class="cp-name">VTAM</div>
+                                <div class="cp-role">Session Fabric Plane</div>
+                                <div class="cp-desc">LU sessions, APPLIDs, network layer. The session fabric that exists independently of TCP/IP. Sessions outlive connections.</div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- The Checklist -->
+                <div class="methodology-section">
+                    <h2 class="section-toggle" onclick="toggleSection(this)">
+                        <span class="toggle-icon">&#9660;</span>
+                        The Assessment Checklist
+                    </h2>
+                    <div class="section-body open">
+                        <p class="methodology-text" style="margin-bottom:1rem;">
+                            Every assessment must answer these 5 questions. Check them off as you work through the Assess tab.
+                        </p>
+                        <div class="checklist">
+                            <label class="checklist-item" data-question="1">
+                                <input type="checkbox" id="check1" onchange="updateChecklist()">
+                                <div class="checklist-content">
+                                    <span class="checklist-num">Q1</span>
+                                    <div>
+                                        <strong>Where is identity bound?</strong>
+                                        <p>How does the system associate a user identity with a session, job, or transaction?</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="checklist-item" data-question="2">
+                                <input type="checkbox" id="check2" onchange="updateChecklist()">
+                                <div class="checklist-content">
+                                    <span class="checklist-num">Q2</span>
+                                    <div>
+                                        <strong>When is authority evaluated?</strong>
+                                        <p>At what point does the system check whether an identity may perform an action?</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="checklist-item" data-question="3">
+                                <input type="checkbox" id="check3" onchange="updateChecklist()">
+                                <div class="checklist-content">
+                                    <span class="checklist-num">Q3</span>
+                                    <div>
+                                        <strong>What executes later than expected?</strong>
+                                        <p>Which operations are deferred, queued, or scheduled -- and under whose authority do they run?</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="checklist-item" data-question="4">
+                                <input type="checkbox" id="check4" onchange="updateChecklist()">
+                                <div class="checklist-content">
+                                    <span class="checklist-num">Q4</span>
+                                    <div>
+                                        <strong>Which subsystem enforces policy?</strong>
+                                        <p>Is it TSO, RACF, CICS, JES, or VTAM that actually says "no" to an unauthorized request?</p>
+                                    </div>
+                                </div>
+                            </label>
+                            <label class="checklist-item" data-question="5">
+                                <input type="checkbox" id="check5" onchange="updateChecklist()">
+                                <div class="checklist-content">
+                                    <span class="checklist-num">Q5</span>
+                                    <div>
+                                        <strong>What assumptions are you importing incorrectly?</strong>
+                                        <p>What do you "know" from Unix/cloud/Windows that simply does not apply here?</p>
+                                    </div>
+                                </div>
+                            </label>
+                        </div>
+                        <div class="checklist-progress" id="checklistProgress">0 / 5 questions addressed</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============ ASSESS TAB ============ -->
+        <div class="tab-panel" id="tab-assess">
+            <div class="panel-section">
+                <h2>Control-Plane Assessment</h2>
+                <p class="assess-intro">
+                    Guided assessment following the 5 control planes. Each step explains <em>why</em> before running enumeration.
+                </p>
+
+                <!-- Assessment step navigation -->
+                <div class="assess-steps-nav">
+                    <button class="step-nav-btn active" data-step="0" onclick="showAssessStep(0)">
+                        <span class="step-num">1</span> VTAM
+                    </button>
+                    <button class="step-nav-btn" data-step="1" onclick="showAssessStep(1)">
+                        <span class="step-num">2</span> TSO/RACF
+                    </button>
+                    <button class="step-nav-btn" data-step="2" onclick="showAssessStep(2)">
+                        <span class="step-num">3</span> CICS
+                    </button>
+                    <button class="step-nav-btn" data-step="3" onclick="showAssessStep(3)">
+                        <span class="step-num">4</span> Screen Analysis
+                    </button>
+                    <button class="step-nav-btn" data-step="4" onclick="showAssessStep(4)">
+                        <span class="step-num">5</span> App Mapper
+                    </button>
+                </div>
+
+                <!-- Step 1: VTAM -->
+                <div class="assess-step active" id="step-0">
+                    <div class="step-header">
+                        <div class="step-badge cp-vtam">VTAM</div>
+                        <h3>Step 1: Identify Active Control Planes</h3>
+                    </div>
+                    <div class="step-rationale">
+                        <div class="rationale-label">WHY</div>
+                        <p>Sessions outlive TCP connections. Network exposure does not equal authority.
+                           VTAM APPLIDs reveal which control planes are active on this LPAR -- before you
+                           interact with any of them, you need to know what's there.</p>
+                        <div class="rationale-question">Answers: Q1 (Where is identity bound?) and Q5 (What assumptions are you importing?)</div>
+                    </div>
+                    <div class="step-controls">
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;min-width:200px;">
+                                <label>Custom APPLID Wordlist (optional)</label>
+                                <textarea id="vtamWordlist" placeholder="Leave blank for built-in defaults (TSO, CICS, IMS, NETVIEW, ...)"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <button class="btn btn-primary" id="vtamStart" onclick="runAssessStep('vtam')">
+                                Run VTAM Enumeration
+                            </button>
+                            <button class="btn btn-stop" id="vtamStop" onclick="stopEnumeration()" style="display:none;">Stop</button>
+                        </div>
+                    </div>
+                    <div class="progress-label" id="vtamProgressLabel"></div>
+                    <div class="progress-bar" id="vtamProgress"><div class="fill" id="vtamProgressFill"></div></div>
+                    <div class="step-results" id="vtamResults" style="display:none;">
+                        <div class="results-scroll">
+                            <table class="results-table">
+                                <thead><tr><th>APPLID</th><th>Status</th><th>Message</th><th>Screen</th></tr></thead>
+                                <tbody id="vtamResultsBody"></tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-secondary" style="margin-top:0.75rem;" onclick="runStepAI('vtam')">AI Interpret Results</button>
+                        <div class="ai-analysis-panel step-ai" id="vtamAI" style="display:none;margin-top:0.75rem;">
+                            <div class="ai-loading" id="vtamAILoading" style="display:none;"><span class="ai-spinner"></span> Analyzing...</div>
+                            <div id="vtamAIText" class="ai-markdown"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="vtamEmpty">
+                        <p>Enumerate VTAM APPLIDs to discover which control planes are active on this system.</p>
+                    </div>
+                </div>
+
+                <!-- Step 2: TSO/RACF -->
+                <div class="assess-step" id="step-1">
+                    <div class="step-header">
+                        <div class="step-badge cp-tso">TSO</div>
+                        <div class="step-badge cp-racf">RACF</div>
+                        <h3>Step 2: Map Identity Inheritance</h3>
+                    </div>
+                    <div class="step-rationale">
+                        <div class="rationale-label">WHY</div>
+                        <p>Identity persists across time and execution modes. TSO userids are the primary
+                           interactive identity. RACF messages on screen reveal the authorization model in action --
+                           users, groups, profiles, classes.</p>
+                        <div class="rationale-question">Answers: Q1 (Where is identity bound?) and Q2 (When is authority evaluated?)</div>
+                    </div>
+                    <div class="step-controls">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Navigation Command</label>
+                                <input type="text" id="tsoNavCmd" placeholder="TSO" value="TSO" style="width:200px;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;min-width:200px;">
+                                <label>Custom Userid Wordlist (optional)</label>
+                                <textarea id="tsoWordlist" placeholder="Leave blank for built-in defaults (IBMUSER, HERC01, HERC02, ...)"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <button class="btn btn-primary" id="tsoStart" onclick="runAssessStep('tso')">
+                                Run TSO Enumeration
+                            </button>
+                            <button class="btn btn-stop" id="tsoStop" onclick="stopEnumeration()" style="display:none;">Stop</button>
+                        </div>
+                    </div>
+                    <div class="progress-label" id="tsoProgressLabel"></div>
+                    <div class="progress-bar" id="tsoProgress"><div class="fill" id="tsoProgressFill"></div></div>
+                    <div class="step-results" id="tsoResults" style="display:none;">
+                        <div class="results-scroll">
+                            <table class="results-table">
+                                <thead><tr><th>Userid</th><th>Status</th><th>Message</th><th>Screen</th></tr></thead>
+                                <tbody id="tsoResultsBody"></tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-secondary" style="margin-top:0.75rem;" onclick="runStepAI('tso')">AI Interpret Results</button>
+                        <div class="ai-analysis-panel step-ai" id="tsoAI" style="display:none;margin-top:0.75rem;">
+                            <div class="ai-loading" id="tsoAILoading" style="display:none;"><span class="ai-spinner"></span> Analyzing...</div>
+                            <div id="tsoAIText" class="ai-markdown"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="tsoEmpty">
+                        <p>Enumerate TSO userids to map the identity plane. RACF patterns in responses reveal authorization behavior.</p>
+                    </div>
+                </div>
+
+                <!-- Step 3: CICS -->
+                <div class="assess-step" id="step-2">
+                    <div class="step-header">
+                        <div class="step-badge cp-cics">CICS</div>
+                        <h3>Step 3: Test Transaction Authority</h3>
+                    </div>
+                    <div class="step-rationale">
+                        <div class="rationale-label">WHY</div>
+                        <p>Transactions are the real security boundary. CICS mediates execution, not the OS.
+                           Enumerating which transactions are accessible vs restricted reveals the actual enforcement surface --
+                           not the perceived one.</p>
+                        <div class="rationale-question">Answers: Q2 (When is authority evaluated?) and Q4 (Which subsystem enforces policy?)</div>
+                    </div>
+                    <div class="step-controls">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>CICS Navigation</label>
+                                <input type="text" id="cicsNavCmd" placeholder="CICS applid" value="" style="width:200px;">
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group" style="flex:1;min-width:200px;">
+                                <label>Custom Transaction Wordlist (optional)</label>
+                                <textarea id="cicsWordlist" placeholder="Leave blank for built-in defaults (CEDA, CEMT, CESF, ...)"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <button class="btn btn-primary" id="cicsStart" onclick="runAssessStep('cics')">
+                                Run CICS Enumeration
+                            </button>
+                            <button class="btn btn-stop" id="cicsStop" onclick="stopEnumeration()" style="display:none;">Stop</button>
+                        </div>
+                    </div>
+                    <div class="progress-label" id="cicsProgressLabel"></div>
+                    <div class="progress-bar" id="cicsProgress"><div class="fill" id="cicsProgressFill"></div></div>
+                    <div class="step-results" id="cicsResults" style="display:none;">
+                        <div class="results-scroll">
+                            <table class="results-table">
+                                <thead><tr><th>Transaction</th><th>Status</th><th>Message</th><th>Screen</th></tr></thead>
+                                <tbody id="cicsResultsBody"></tbody>
+                            </table>
+                        </div>
+                        <button class="btn btn-secondary" style="margin-top:0.75rem;" onclick="runStepAI('cics')">AI Interpret Results</button>
+                        <div class="ai-analysis-panel step-ai" id="cicsAI" style="display:none;margin-top:0.75rem;">
+                            <div class="ai-loading" id="cicsAILoading" style="display:none;"><span class="ai-spinner"></span> Analyzing...</div>
+                            <div id="cicsAIText" class="ai-markdown"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="cicsEmpty">
+                        <p>Enumerate CICS transactions to test which transaction boundaries are enforced and which are open.</p>
+                    </div>
+                </div>
+
+                <!-- Step 4: Screen Analysis -->
+                <div class="assess-step" id="step-3">
+                    <div class="step-header">
+                        <div class="step-badge cp-racf">RACF</div>
+                        <h3>Step 4: Validate Enforcement Points</h3>
+                    </div>
+                    <div class="step-rationale">
+                        <div class="rationale-label">WHY</div>
+                        <p>Test enforcement points, not ports. Hidden fields may contain identity tokens or authority
+                           indicators. Screen patterns reveal RACF messages, credential prompts, and access control
+                           indicators that expose the authorization model in action.</p>
+                        <div class="rationale-question">Answers: Q2 (When is authority evaluated?) and Q4 (Which subsystem enforces policy?)</div>
+                    </div>
+                    <div class="step-controls">
+                        <div class="form-row">
+                            <button class="btn btn-primary" onclick="runScreenAnalysis()">
+                                Scan Current Screen
+                            </button>
+                        </div>
+                    </div>
+                    <div class="step-results" id="screenResults" style="display:none;">
+                        <!-- Hidden Fields -->
+                        <div id="hiddenFieldsSection" style="margin-bottom:1.5rem;">
+                            <h4>Hidden Fields</h4>
+                            <div class="results-scroll">
+                                <table class="results-table">
+                                    <thead><tr><th>Row</th><th>Col</th><th>Type</th><th>Content</th><th>Attr</th></tr></thead>
+                                    <tbody id="hiddenFieldsBody"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!-- Screen Findings -->
+                        <div id="findingsSection">
+                            <h4>Security Patterns</h4>
+                            <div id="findingsContainer"></div>
+                        </div>
+                        <button class="btn btn-secondary" style="margin-top:0.75rem;" onclick="runStepAI('screen')">AI Interpret Results</button>
+                        <div class="ai-analysis-panel step-ai" id="screenAI" style="display:none;margin-top:0.75rem;">
+                            <div class="ai-loading" id="screenAILoading" style="display:none;"><span class="ai-spinner"></span> Analyzing...</div>
+                            <div id="screenAIText" class="ai-markdown"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="screenEmpty">
+                        <p>Scan the current screen for hidden fields, credential patterns, and access control indicators.</p>
+                    </div>
+                </div>
+
+                <!-- Step 5: Application Mapper -->
+                <div class="assess-step" id="step-4">
+                    <div class="step-header">
+                        <div class="step-badge cp-jes">JES</div>
+                        <h3>Step 5: Map Deferred Execution</h3>
+                    </div>
+                    <div class="step-rationale">
+                        <div class="rationale-label">WHY</div>
+                        <p>Work is declared before executed. Authority decisions precede execution.
+                           Crawling the application structure reveals execution paths, menu hierarchies, and
+                           deferred operations that may run under different identity contexts than the one that
+                           submitted them.</p>
+                        <div class="rationale-question">Answers: Q3 (What executes later than expected?) and Q5 (What assumptions are you importing?)</div>
+                    </div>
+                    <div class="step-controls">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Max Depth</label>
+                                <div class="slider-group">
+                                    <input type="range" id="mapDepth" min="1" max="5" value="3"
+                                           oninput="document.getElementById('mapDepthVal').textContent=this.value">
+                                    <span class="slider-val" id="mapDepthVal">3</span>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="mapStart" onclick="startMapping()">
+                                Start Mapping
+                            </button>
+                            <button class="btn btn-stop" id="mapStop" onclick="stopMapping()" style="display:none;">Stop</button>
+                        </div>
+                    </div>
+                    <div class="stats-bar" id="mapStats" style="display:none;">
+                        <div class="stat">
+                            <span class="stat-num" id="statScreens">0</span>
+                            <span class="stat-label">Screens Found</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-num" id="statUnique">0</span>
+                            <span class="stat-label">Unique Screens</span>
+                        </div>
+                        <div class="stat">
+                            <span class="stat-num" id="statDepth">0</span>
+                            <span class="stat-label">Max Depth</span>
+                        </div>
+                    </div>
+                    <div id="mapTreeContainer" style="display:none;">
+                        <h4>Discovered Screens</h4>
+                        <ul class="map-tree" id="mapTree"></ul>
+                    </div>
+                    <div class="screen-preview" id="mapScreenPreview" style="display:none;margin-top:1rem;"></div>
+                    <div class="empty-state" id="mapEmpty">
+                        <p>Set a max depth and click Start to crawl the application from the current screen.</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- ============ FINDINGS TAB ============ -->
+        <div class="tab-panel" id="tab-findings">
+            <div class="panel-section">
+                <h2>Assessment Findings</h2>
+                <p class="assess-intro">
+                    All results from the Assess tab, grouped by control plane. Run assessment steps first to populate findings.
+                </p>
+
+                <!-- Severity summary bar -->
+                <div class="severity-bar" id="severityBar" style="display:none;">
+                    <div class="sev-count critical" id="sevCritical">0 Critical</div>
+                    <div class="sev-count high" id="sevHigh">0 High</div>
+                    <div class="sev-count medium" id="sevMedium">0 Medium</div>
+                    <div class="sev-count low" id="sevLow">0 Low</div>
+                    <div class="sev-count info" id="sevInfo">0 Info</div>
+                </div>
+
+                <!-- Findings by control plane -->
+                <div class="findings-by-plane" id="findingsByPlane">
+                    <div class="plane-findings-group" id="findings-vtam">
+                        <h3><span class="cp-tag cp-vtam">VTAM</span> Session Fabric Findings</h3>
+                        <div class="plane-findings-list" id="findingsList-vtam">
+                            <div class="no-findings">No VTAM findings yet. Run Step 1 in the Assess tab.</div>
+                        </div>
+                    </div>
+                    <div class="plane-findings-group" id="findings-tso">
+                        <h3><span class="cp-tag cp-tso">TSO</span> <span class="cp-tag cp-racf">RACF</span> Identity &amp; Authorization Findings</h3>
+                        <div class="plane-findings-list" id="findingsList-tso">
+                            <div class="no-findings">No TSO/RACF findings yet. Run Step 2 in the Assess tab.</div>
+                        </div>
+                    </div>
+                    <div class="plane-findings-group" id="findings-cics">
+                        <h3><span class="cp-tag cp-cics">CICS</span> Transaction Findings</h3>
+                        <div class="plane-findings-list" id="findingsList-cics">
+                            <div class="no-findings">No CICS findings yet. Run Step 3 in the Assess tab.</div>
+                        </div>
+                    </div>
+                    <div class="plane-findings-group" id="findings-screen">
+                        <h3><span class="cp-tag cp-racf">RACF</span> Enforcement Point Findings</h3>
+                        <div class="plane-findings-list" id="findingsList-screen">
+                            <div class="no-findings">No screen analysis findings yet. Run Step 4 in the Assess tab.</div>
+                        </div>
+                    </div>
+                    <div class="plane-findings-group" id="findings-map">
+                        <h3><span class="cp-tag cp-jes">JES</span> Execution Path Findings</h3>
+                        <div class="plane-findings-list" id="findingsList-map">
+                            <div class="no-findings">No mapping findings yet. Run Step 5 in the Assess tab.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="empty-state" id="findingsEmpty">
+                    <p>Run assessment steps in the Assess tab to populate findings here.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ REPORT TAB ============ -->
+        <div class="tab-panel" id="tab-report">
+            <div class="panel-section">
+                <h2>Assessment Report</h2>
+                <p class="assess-intro">
+                    Generate a report organized by the 5 assessment questions and control planes.
+                </p>
+
+                <div class="report-methodology-summary" id="reportMethodSummary">
+                    <h3>Assessment Coverage</h3>
+                    <div class="report-steps-status">
+                        <div class="report-step-badge" id="reportStep0">Step 1: VTAM <span class="step-status">--</span></div>
+                        <div class="report-step-badge" id="reportStep1">Step 2: TSO/RACF <span class="step-status">--</span></div>
+                        <div class="report-step-badge" id="reportStep2">Step 3: CICS <span class="step-status">--</span></div>
+                        <div class="report-step-badge" id="reportStep3">Step 4: Screen Analysis <span class="step-status">--</span></div>
+                        <div class="report-step-badge" id="reportStep4">Step 5: App Mapper <span class="step-status">--</span></div>
+                    </div>
+                </div>
+
+                <div class="report-controls">
+                    <button class="btn btn-primary" onclick="generateReport('html')">Generate HTML</button>
+                    <button class="btn btn-secondary" onclick="generateReport('json')">Generate JSON</button>
+                    <button class="btn btn-secondary" onclick="generateReport('markdown')">Generate Markdown</button>
+                    <button class="btn btn-secondary" onclick="generateAIReport()">AI Summary Report</button>
+                </div>
+
+                <div id="reportPreviewWrap" style="display:none;">
+                    <div class="form-row" style="margin-bottom:0.5rem;">
+                        <button class="btn btn-secondary" id="reportDownload" onclick="downloadReport()">Download Report</button>
+                    </div>
+                    <div class="report-preview" id="reportPreview"></div>
+                </div>
+
+                <div class="empty-state" id="reportEmpty">
+                    <p>Run assessment steps and generate a report to see methodology-grounded results here.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+// ==========================================================================
+// State
+// ==========================================================================
+let assessResults = { vtam: [], tso: [], cics: [], screen: { hidden: [], findings: [] }, map: [] };
+let enumRunning = false;
+let mapRunning = false;
+let lastReportContent = '';
+let lastReportFormat = '';
+// Backward compat aliases used by report generation
+function getEnumResults() {
+    return [...assessResults.vtam, ...assessResults.tso, ...assessResults.cics];
+}
+
+// ==========================================================================
+// Tabs
+// ==========================================================================
+document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+        btn.classList.add('active');
+        document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+});
+
+// ==========================================================================
+// Connection management
+// ==========================================================================
+let isConnected = false;
+
+async function checkStatus() {
+    try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        const connEl = document.getElementById('connStatus');
+        const hostEl = document.getElementById('connHost');
+        const birpEl = document.getElementById('birpStatus');
+
+        isConnected = data.connected;
+        connEl.textContent = data.connected ? 'Connected' : 'Disconnected';
+        connEl.className = 'value ' + (data.connected ? 'ok' : 'err');
+        hostEl.textContent = data.connected ? data.host : '-';
+        birpEl.textContent = data.birp_available ? 'Available' : 'Not Found';
+        birpEl.className = 'value ' + (data.birp_available ? 'ok' : 'err');
+
+        document.getElementById('connBtn').style.display = data.connected ? 'none' : 'inline-block';
+        document.getElementById('disconnBtn').style.display = data.connected ? 'inline-block' : 'none';
+        document.getElementById('connTarget').disabled = data.connected;
+
+        if (data.connected && data.host) {
+            document.getElementById('connTarget').value = data.host;
+        }
+    } catch (e) {
+        document.getElementById('connStatus').textContent = 'Error';
+        document.getElementById('connStatus').className = 'value err';
+    }
+}
+checkStatus();
+setInterval(checkStatus, 5000);
+
+async function toggleConnection() {
+    const target = document.getElementById('connTarget').value.trim();
+    if (isConnected) {
+        try {
+            await fetch('/api/terminal/disconnect', {method: 'POST'});
+            showToast('Disconnected', 'info');
+        } catch (e) {
+            showToast('Disconnect failed', 'error');
+        }
+    } else {
+        if (!target) { showToast('Enter a target', 'error'); return; }
+        document.getElementById('connBtn').textContent = 'Connecting...';
+        document.getElementById('connBtn').disabled = true;
+        try {
+            const res = await fetch('/api/terminal/connect', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target})
+            });
+            const data = await res.json();
+            if (data.success) {
+                isConnected = true;
+                showToast('Connected to ' + target, 'info');
+            } else {
+                showToast(data.message || 'Connection failed', 'error');
+            }
+        } catch (e) {
+            showToast('Connection failed: ' + e.message, 'error');
+        }
+        document.getElementById('connBtn').textContent = 'Connect';
+        document.getElementById('connBtn').disabled = false;
+    }
+    await checkStatus();
+}
+
+// ==========================================================================
+// Methodology tab helpers
+// ==========================================================================
+function toggleSection(el) {
+    const body = el.nextElementSibling;
+    const icon = el.querySelector('.toggle-icon');
+    body.classList.toggle('open');
+    icon.innerHTML = body.classList.contains('open') ? '&#9660;' : '&#9654;';
+}
+
+function flipCard(card) {
+    card.classList.toggle('flipped');
+}
+
+function updateChecklist() {
+    let count = 0;
+    for (let i = 1; i <= 5; i++) {
+        if (document.getElementById('check' + i).checked) count++;
+    }
+    document.getElementById('checklistProgress').textContent = count + ' / 5 questions addressed';
+}
+
+function goToAssessStep(step) {
+    // Switch to assess tab
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    document.querySelector('[data-tab="assess"]').classList.add('active');
+    document.getElementById('tab-assess').classList.add('active');
+    showAssessStep(step);
+}
+
+// ==========================================================================
+// Assess tab
+// ==========================================================================
+function showAssessStep(step) {
+    document.querySelectorAll('.step-nav-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.assess-step').forEach(s => s.classList.remove('active'));
+    document.querySelector(`[data-step="${step}"]`).classList.add('active');
+    document.getElementById('step-' + step).classList.add('active');
+}
+
+async function runAssessStep(module) {
+    if (!isConnected) {
+        showToast('Connect to a mainframe first', 'error');
+        return;
+    }
+
+    let wordlistEl, wordlist, cmdSeq;
+
+    if (module === 'vtam') {
+        wordlistEl = document.getElementById('vtamWordlist');
+    } else if (module === 'tso') {
+        wordlistEl = document.getElementById('tsoWordlist');
+        cmdSeq = document.getElementById('tsoNavCmd').value.trim() || null;
+    } else if (module === 'cics') {
+        wordlistEl = document.getElementById('cicsWordlist');
+        cmdSeq = document.getElementById('cicsNavCmd').value.trim() || null;
+    }
+
+    const wordlistText = wordlistEl ? wordlistEl.value.trim() : '';
+    wordlist = wordlistText ? wordlistText.split('\n').map(w => w.trim()).filter(Boolean) : null;
+
+    // Show progress
+    const startBtn = document.getElementById(module + 'Start');
+    const stopBtn = document.getElementById(module + 'Stop');
+    const emptyEl = document.getElementById(module + 'Empty');
+    const resultsEl = document.getElementById(module + 'Results');
+    const progressBar = document.getElementById(module + 'Progress');
+    const progressFill = document.getElementById(module + 'ProgressFill');
+    const progressLabel = document.getElementById(module + 'ProgressLabel');
+
+    if (startBtn) startBtn.style.display = 'none';
+    if (stopBtn) stopBtn.style.display = 'inline-flex';
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (progressBar) { progressBar.classList.add('active'); }
+    if (progressFill) progressFill.style.width = '0%';
+    if (progressLabel) { progressLabel.classList.add('active'); progressLabel.textContent = 'Running enumeration...'; }
+    enumRunning = true;
+
+    try {
+        const body = { module };
+        if (wordlist) body.wordlist = wordlist;
+        if (cmdSeq) body.command_sequence = cmdSeq.split(',').map(s => s.trim());
+
+        const res = await fetch('/api/recon/enumerate', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body)
+        });
+        const data = await res.json();
+
+        if (data.results) {
+            assessResults[module] = data.results;
+            renderStepResults(module, data.results);
+            updateFindingsTab(module, data.results);
+            updateReportStepStatus(module, data.results.length);
+        }
+        if (data.error) showToast(data.error, 'error');
+    } catch (e) {
+        showToast('Enumeration failed: ' + e.message, 'error');
+    }
+
+    enumRunning = false;
+    if (startBtn) startBtn.style.display = 'inline-flex';
+    if (stopBtn) stopBtn.style.display = 'none';
+    if (progressBar) progressBar.classList.remove('active');
+    if (progressLabel) progressLabel.classList.remove('active');
+}
+
+function stopEnumeration() {
+    fetch('/api/recon/enumerate/stop', {method: 'POST'}).catch(() => {});
+    enumRunning = false;
+    ['vtam','tso','cics'].forEach(m => {
+        const startBtn = document.getElementById(m + 'Start');
+        const stopBtn = document.getElementById(m + 'Stop');
+        if (startBtn) startBtn.style.display = 'inline-flex';
+        if (stopBtn) stopBtn.style.display = 'none';
+    });
+}
+
+function renderStepResults(module, results) {
+    const tbody = document.getElementById(module + 'ResultsBody');
+    const resultsWrap = document.getElementById(module + 'Results');
+    const progressFill = document.getElementById(module + 'ProgressFill');
+    const progressLabel = document.getElementById(module + 'ProgressLabel');
+
+    if (!tbody) return;
+    tbody.innerHTML = '';
+
+    results.forEach(r => {
+        const name = r.userid || r.transaction_id || r.applid || '?';
+        const badgeClass = 'badge badge-' + r.status;
+        const screenSnippet = (r.screen_text || '').substring(0, 80).replace(/</g, '&lt;');
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td><strong>${name}</strong></td>
+            <td><span class="${badgeClass}">${r.status}</span></td>
+            <td>${r.message}</td>
+            <td style="font-size:0.7rem;color:var(--ibm-gray-50);max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" title="${screenSnippet}">${screenSnippet}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+
+    if (resultsWrap) resultsWrap.style.display = 'block';
+    if (progressFill) progressFill.style.width = '100%';
+    if (progressLabel) progressLabel.textContent = `Completed: ${results.length} items tested`;
+}
+
+// ==========================================================================
+// Screen Analysis (Step 4)
+// ==========================================================================
+let hiddenFields = [];
+let screenFindings = [];
+
+async function runScreenAnalysis() {
+    document.getElementById('screenEmpty').style.display = 'none';
+
+    const [hiddenRes, analyzeRes] = await Promise.all([
+        fetch('/api/recon/hidden-fields', {method: 'POST'}).then(r => r.json()).catch(() => ({fields: []})),
+        fetch('/api/recon/analyze-screen', {method: 'POST'}).then(r => r.json()).catch(() => ({findings: []})),
+    ]);
+
+    hiddenFields = hiddenRes.fields || [];
+    screenFindings = analyzeRes.findings || [];
+    assessResults.screen = { hidden: hiddenFields, findings: screenFindings };
+
+    const resultsEl = document.getElementById('screenResults');
+    resultsEl.style.display = 'block';
+
+    // Hidden fields
+    const hfBody = document.getElementById('hiddenFieldsBody');
+    hfBody.innerHTML = '';
+    if (hiddenFields.length > 0) {
+        hiddenFields.forEach(f => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${f.row}</td>
+                <td>${f.col}</td>
+                <td>${f.field_type}</td>
+                <td><code>${(f.content || '').substring(0, 60)}</code></td>
+                <td style="color:var(--ibm-gray-50);">${f.attr_hex || '-'}</td>
+            `;
+            hfBody.appendChild(tr);
+        });
+    } else {
+        hfBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ibm-gray-50);">No hidden fields detected</td></tr>';
+    }
+
+    // Findings
+    const fContainer = document.getElementById('findingsContainer');
+    fContainer.innerHTML = '';
+    if (screenFindings.length > 0) {
+        screenFindings.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'finding-card ' + f.severity;
+            card.innerHTML = `
+                <div class="finding-header">
+                    <span class="badge sev-${f.severity}">${f.severity}</span>
+                    <span class="finding-desc">${f.description}</span>
+                </div>
+                <code class="finding-match">${(f.match || '').replace(/</g, '&lt;')}</code>
+                <div class="finding-location">${f.location}</div>
+            `;
+            fContainer.appendChild(card);
+        });
+    } else {
+        fContainer.innerHTML = '<div style="color:var(--ibm-gray-50);font-size:0.8rem;">No patterns detected.</div>';
+    }
+
+    updateFindingsTab('screen', screenFindings);
+    updateReportStepStatus('screen', hiddenFields.length + screenFindings.length);
+}
+
+// ==========================================================================
+// Application Mapper (Step 5)
+// ==========================================================================
+let mapTree = [];
+
+async function startMapping() {
+    const maxDepth = parseInt(document.getElementById('mapDepth').value);
+
+    document.getElementById('mapStart').style.display = 'none';
+    document.getElementById('mapStop').style.display = 'inline-flex';
+    document.getElementById('mapEmpty').style.display = 'none';
+    document.getElementById('mapStats').style.display = 'flex';
+    document.getElementById('mapTreeContainer').style.display = 'block';
+    document.getElementById('mapTree').innerHTML = '';
+    document.getElementById('mapScreenPreview').style.display = 'none';
+    mapRunning = true;
+    mapTree = [];
+
+    try {
+        const res = await fetch('/api/recon/map', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ max_depth: maxDepth })
+        });
+        const data = await res.json();
+
+        if (data.tree) {
+            mapTree = data.tree;
+            assessResults.map = data.tree;
+            renderMapTree(data.tree, document.getElementById('mapTree'));
+        }
+        if (data.stats) {
+            document.getElementById('statScreens').textContent = data.stats.screens_found || 0;
+            document.getElementById('statUnique').textContent = data.stats.unique_screens || 0;
+            document.getElementById('statDepth').textContent = data.stats.max_depth_reached || 0;
+            updateReportStepStatus('map', data.stats.screens_found || 0);
+        }
+        if (data.error) showToast(data.error, 'error');
+    } catch (e) {
+        showToast('Mapping failed: ' + e.message, 'error');
+    }
+
+    mapRunning = false;
+    document.getElementById('mapStart').style.display = 'inline-flex';
+    document.getElementById('mapStop').style.display = 'none';
+}
+
+function stopMapping() {
+    fetch('/api/recon/map/stop', {method: 'POST'}).catch(() => {});
+    mapRunning = false;
+    document.getElementById('mapStart').style.display = 'inline-flex';
+    document.getElementById('mapStop').style.display = 'none';
+}
+
+function renderMapTree(nodes, container) {
+    nodes.forEach(node => {
+        const li = document.createElement('li');
+        const hasChildren = node.children && node.children.length > 0;
+        const toggle = hasChildren ? '&#9654;' : '&middot;';
+        const option = node.option ? `<span style="color:var(--recon-accent);font-size:0.7rem;">[${node.option}]</span>` : '';
+        li.innerHTML = `
+            <div class="tree-node" onclick="toggleTreeNode(this)" data-screen="${encodeURIComponent(node.screen_text || '')}">
+                <span class="toggle">${toggle}</span>
+                <span class="icon">&#9632;</span>
+                ${option}
+                <span>${node.title || '(untitled)'}</span>
+                <span class="hash">${node.screen_hash || ''}</span>
+            </div>
+        `;
+        if (hasChildren) {
+            const ul = document.createElement('ul');
+            ul.className = 'tree-children map-tree';
+            renderMapTree(node.children, ul);
+            li.appendChild(ul);
+        }
+        container.appendChild(li);
+    });
+}
+
+function toggleTreeNode(el) {
+    const childUl = el.parentElement.querySelector('.tree-children');
+    if (childUl) {
+        childUl.classList.toggle('open');
+        const toggleEl = el.querySelector('.toggle');
+        toggleEl.innerHTML = childUl.classList.contains('open') ? '&#9660;' : '&#9654;';
+    }
+    const screenText = decodeURIComponent(el.dataset.screen || '');
+    if (screenText) {
+        const preview = document.getElementById('mapScreenPreview');
+        preview.textContent = screenText;
+        preview.style.display = 'block';
+    }
+}
+
+// ==========================================================================
+// AI Analysis per step
+// ==========================================================================
+async function runStepAI(module) {
+    const payload = {};
+
+    if (module === 'vtam' || module === 'tso' || module === 'cics') {
+        payload.enumerate_results = assessResults[module];
+    } else if (module === 'screen') {
+        payload.hidden_fields = assessResults.screen.hidden;
+        payload.screen_findings = assessResults.screen.findings;
+    }
+
+    // Get current screen if connected
+    if (isConnected) {
+        try {
+            const screenRes = await fetch('/api/screen');
+            const screenData = await screenRes.json();
+            if (screenData.screen) payload.current_screen = screenData.screen;
+        } catch (e) {}
+    }
+
+    const aiPanel = document.getElementById(module + 'AI');
+    const loadingEl = document.getElementById(module + 'AILoading');
+    const textEl = document.getElementById(module + 'AIText');
+
+    if (aiPanel) aiPanel.style.display = 'block';
+    if (loadingEl) loadingEl.style.display = 'flex';
+    if (textEl) textEl.innerHTML = '';
+
+    try {
+        const res = await fetch('/api/recon/ai-analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (loadingEl) loadingEl.style.display = 'none';
+
+        if (data.analysis) {
+            textEl.innerHTML = (typeof marked !== 'undefined') ? marked.parse(data.analysis) : data.analysis;
+        } else if (data.error) {
+            textEl.innerHTML = '<div style="color:var(--recon-locked);">' + data.error + '</div>';
+        }
+    } catch (e) {
+        if (loadingEl) loadingEl.style.display = 'none';
+        if (textEl) textEl.innerHTML = '<div style="color:var(--recon-locked);">AI analysis failed: ' + e.message + '</div>';
+    }
+}
+
+// ==========================================================================
+// Findings tab updates
+// ==========================================================================
+function updateFindingsTab(module, results) {
+    const listEl = document.getElementById('findingsList-' + module);
+    if (!listEl) return;
+
+    document.getElementById('findingsEmpty').style.display = 'none';
+
+    if (module === 'screen') {
+        // Screen analysis findings
+        listEl.innerHTML = '';
+        const allFindings = [...(assessResults.screen.findings || [])];
+        if (allFindings.length === 0 && (assessResults.screen.hidden || []).length === 0) {
+            listEl.innerHTML = '<div class="no-findings">No enforcement point findings detected.</div>';
+            return;
+        }
+        if ((assessResults.screen.hidden || []).length > 0) {
+            const card = document.createElement('div');
+            card.className = 'finding-card medium';
+            card.innerHTML = `
+                <div class="finding-header">
+                    <span class="badge sev-medium">medium</span>
+                    <span class="finding-desc">${assessResults.screen.hidden.length} hidden field(s) detected on screen</span>
+                </div>
+                <div class="finding-location">Answers Q4: Which subsystem enforces policy?</div>
+            `;
+            listEl.appendChild(card);
+        }
+        allFindings.forEach(f => {
+            const card = document.createElement('div');
+            card.className = 'finding-card ' + f.severity;
+            card.innerHTML = `
+                <div class="finding-header">
+                    <span class="badge sev-${f.severity}">${f.severity}</span>
+                    <span class="finding-desc">${f.description}</span>
+                </div>
+                <code class="finding-match">${(f.match || '').replace(/</g, '&lt;')}</code>
+                <div class="finding-location">${f.location} | Answers Q2: When is authority evaluated?</div>
+            `;
+            listEl.appendChild(card);
+        });
+        updateSeverityBar();
+        return;
+    }
+
+    // Enumeration results
+    listEl.innerHTML = '';
+    const valid = results.filter(r => ['valid', 'auth_required', 'locked', 'valid_blank'].includes(r.status));
+    if (valid.length === 0) {
+        listEl.innerHTML = '<div class="no-findings">No significant findings from this step.</div>';
+        updateSeverityBar();
+        return;
+    }
+
+    const questionMap = {
+        vtam: 'Answers Q1: Where is identity bound?',
+        tso: 'Answers Q1 & Q2: Identity binding and authority evaluation',
+        cics: 'Answers Q2 & Q4: Authority evaluation and subsystem enforcement',
+    };
+
+    valid.forEach(r => {
+        const name = r.userid || r.transaction_id || r.applid || '?';
+        const sev = r.status === 'valid' || r.status === 'valid_blank' ? 'high' : r.status === 'auth_required' ? 'medium' : 'low';
+        const card = document.createElement('div');
+        card.className = 'finding-card ' + sev;
+        card.innerHTML = `
+            <div class="finding-header">
+                <span class="badge sev-${sev}">${r.status}</span>
+                <span class="finding-desc"><strong>${name}</strong>: ${r.message}</span>
+            </div>
+            <div class="finding-location">${questionMap[module] || ''}</div>
+        `;
+        listEl.appendChild(card);
+    });
+    updateSeverityBar();
+}
+
+function updateSeverityBar() {
+    const bar = document.getElementById('severityBar');
+    // Count all findings across planes
+    let counts = { critical: 0, high: 0, medium: 0, low: 0, info: 0 };
+
+    // Count from screen findings
+    (assessResults.screen.findings || []).forEach(f => {
+        if (counts[f.severity] !== undefined) counts[f.severity]++;
+    });
+
+    // Count from enum results
+    ['vtam', 'tso', 'cics'].forEach(m => {
+        (assessResults[m] || []).forEach(r => {
+            if (r.status === 'valid' || r.status === 'valid_blank') counts.high++;
+            else if (r.status === 'auth_required') counts.medium++;
+            else if (r.status === 'locked') counts.low++;
+        });
+    });
+
+    const total = Object.values(counts).reduce((a, b) => a + b, 0);
+    if (total > 0) {
+        bar.style.display = 'flex';
+        document.getElementById('sevCritical').textContent = counts.critical + ' Critical';
+        document.getElementById('sevHigh').textContent = counts.high + ' High';
+        document.getElementById('sevMedium').textContent = counts.medium + ' Medium';
+        document.getElementById('sevLow').textContent = counts.low + ' Low';
+        document.getElementById('sevInfo').textContent = counts.info + ' Info';
+    }
+}
+
+// ==========================================================================
+// Report tab
+// ==========================================================================
+function updateReportStepStatus(module, count) {
+    const stepMap = { vtam: 0, tso: 1, cics: 2, screen: 3, map: 4 };
+    const idx = stepMap[module];
+    if (idx === undefined) return;
+    const el = document.getElementById('reportStep' + idx);
+    if (el) {
+        const statusEl = el.querySelector('.step-status');
+        if (statusEl) {
+            statusEl.textContent = count + ' results';
+            statusEl.className = 'step-status completed';
+        }
+    }
+}
+
+async function generateReport(format) {
+    document.getElementById('reportEmpty').style.display = 'none';
+    try {
+        const res = await fetch('/api/recon/report', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                format: format,
+                enumerate_results: getEnumResults(),
+                hidden_fields: assessResults.screen.hidden || [],
+                screen_findings: assessResults.screen.findings || [],
+                map_tree: assessResults.map || [],
+            })
+        });
+        const data = await res.json();
+        if (data.report) {
+            lastReportContent = data.report;
+            lastReportFormat = format;
+            const previewWrap = document.getElementById('reportPreviewWrap');
+            const preview = document.getElementById('reportPreview');
+            previewWrap.style.display = 'block';
+            if (format === 'html') {
+                preview.innerHTML = data.report;
+            } else {
+                preview.textContent = data.report;
+            }
+        }
+        if (data.error) showToast(data.error, 'error');
+    } catch (e) {
+        showToast('Report generation failed: ' + e.message, 'error');
+    }
+}
+
+async function generateAIReport() {
+    document.getElementById('reportEmpty').style.display = 'none';
+    const payload = {
+        enumerate_results: getEnumResults(),
+        hidden_fields: assessResults.screen.hidden || [],
+        screen_findings: assessResults.screen.findings || [],
+    };
+
+    if (isConnected) {
+        try {
+            const screenRes = await fetch('/api/screen');
+            const screenData = await screenRes.json();
+            if (screenData.screen) payload.current_screen = screenData.screen;
+        } catch (e) {}
+    }
+
+    const previewWrap = document.getElementById('reportPreviewWrap');
+    const preview = document.getElementById('reportPreview');
+    previewWrap.style.display = 'block';
+    preview.innerHTML = '<div class="ai-loading"><span class="ai-spinner"></span> Generating AI report...</div>';
+
+    try {
+        const res = await fetch('/api/recon/ai-analyze', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        if (data.analysis) {
+            const rendered = (typeof marked !== 'undefined') ? marked.parse(data.analysis) : data.analysis;
+            lastReportContent = rendered;
+            lastReportFormat = 'html';
+            preview.innerHTML = '<div class="ai-markdown">' + rendered + '</div>';
+        } else if (data.error) {
+            preview.innerHTML = '<div style="color:var(--recon-locked);">' + data.error + '</div>';
+        }
+    } catch (e) {
+        preview.innerHTML = '<div style="color:var(--recon-locked);">AI report failed: ' + e.message + '</div>';
+    }
+}
+
+function downloadReport() {
+    if (!lastReportContent) return;
+    const ext = {html: 'html', json: 'json', markdown: 'md'}[lastReportFormat] || 'txt';
+    const mime = {html: 'text/html', json: 'application/json', markdown: 'text/markdown'}[lastReportFormat] || 'text/plain';
+    const blob = new Blob([lastReportContent], {type: mime});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `recon_report_${new Date().toISOString().slice(0,10)}.${ext}`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+// ==========================================================================
+// Toast helper
+// ==========================================================================
+function showToast(msg, type) {
+    if (typeof window.showToastMessage === 'function') {
+        window.showToastMessage(msg, type);
+    } else {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + (type || 'info');
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+}
+</script>
+{% endblock %}

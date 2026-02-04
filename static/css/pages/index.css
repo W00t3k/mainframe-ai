@@ -106,21 +106,20 @@ main {
     background: var(--ibm-green);
 }
 
+/* Card grid — flexbox with centered rows */
 .options {
     display: flex;
     flex-wrap: wrap;
     gap: 1.5rem;
-    max-width: 1200px;
+    max-width: 1060px;
     width: 100%;
     margin: 0 auto;
     justify-content: center;
 }
 
+/* Base card */
 .option-card {
     flex: 0 1 320px;
-}
-
-.option-card {
     background: var(--ibm-gray-90);
     border: 1px solid var(--ibm-gray-80);
     padding: 2rem;
@@ -151,19 +150,14 @@ main {
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
 }
 
+.option-card:hover::before {
+    transform: scaleY(1);
+}
+
 .option-card:focus,
 .option-card:focus-visible {
     outline: 2px solid var(--ibm-blue-light);
     outline-offset: 2px;
-}
-
-.option-card.abstract:focus,
-.option-card.abstract:focus-visible {
-    outline: 2px solid var(--ibm-green);
-}
-
-.option-card:hover::before {
-    transform: scaleY(1);
 }
 
 .option-icon {
@@ -194,76 +188,29 @@ main {
     gap: 0.5rem;
 }
 
+/* Per-card icon colors */
 .option-card.terminal .option-icon { color: #33ff33; }
 .option-card.abstract .option-icon { color: var(--ibm-green); }
-.option-card.chat .option-icon { color: var(--ibm-blue-light); }
-.option-card.scan .option-icon { color: var(--ibm-purple); }
-.option-card.labs .option-icon { color: #ffb020; }
+.option-card.chat .option-icon    { color: var(--ibm-blue-light); }
+.option-card.scan .option-icon    { color: var(--ibm-purple); }
+.option-card.labs .option-icon    { color: #ffb020; }
 .option-card.screens .option-icon { color: var(--ibm-cyan); }
-.option-card.rag .option-icon { color: var(--ibm-green); }
-.option-card.arch .option-icon { color: var(--ibm-teal); }
-.option-card.tutor .option-icon { color: #ff6b6b; }
-.option-card.graph .option-icon { color: #00ff88; }
+.option-card.rag .option-icon     { color: var(--ibm-green); }
+.option-card.arch .option-icon    { color: var(--ibm-teal); }
+.option-card.tutor .option-icon   { color: #ff6b6b; }
+.option-card.graph .option-icon   { color: #00ff88; }
+.option-card.recon .option-icon       { color: #ff6b6b; }
+.option-card.walkthrough .option-icon { color: #63a7ff; }
+.option-card.slides .option-icon     { color: #0f62fe; }
 
-.option-card.abstract {
-    border-color: rgba(66, 190, 101, 0.5) !important;
-    background: linear-gradient(135deg, rgba(66, 190, 101, 0.12) 0%, rgba(0, 0, 0, 0) 55%) !important;
-}
-
-.option-card.abstract::before {
-    background: var(--ibm-green) !important;
-}
-
-.option-card.abstract.featured {
-    border-color: rgba(66, 190, 101, 0.6) !important;
-}
-
-.option-card.tutor.featured {
-    border-color: rgba(255, 107, 107, 0.3);
-}
-
-/* Featured card styling */
+/* Featured cards — span full row */
 .option-card.featured {
     flex: 1 1 100%;
-    max-width: 1200px;
+    max-width: 1060px;
     background: linear-gradient(135deg, rgba(255, 107, 107, 0.1) 0%, rgba(0, 0, 0, 0) 50%);
     border-color: rgba(255, 107, 107, 0.3);
 }
 
-.option-card.arch {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.option-card.abstract.featured {
-    background: linear-gradient(135deg, rgba(66, 190, 101, 0.16) 0%, rgba(0, 0, 0, 0) 55%) !important;
-    border-color: rgba(66, 190, 101, 0.6) !important;
-}
-
-.option-card.abstract.featured::before {
-    background: var(--ibm-green) !important;
-}
-
-.option-card.abstract:hover {
-    border-color: var(--ibm-green) !important;
-    box-shadow: 0 8px 32px rgba(66, 190, 101, 0.25) !important;
-}
-
-.option-card.abstract:hover::before {
-    background: var(--ibm-green) !important;
-}
-
-.option-card.abstract:active {
-    border-color: var(--ibm-green) !important;
-}
-
-.option-card.abstract.featured::before {
-    background: var(--ibm-green) !important;
-}
-
-.option-card.abstract:hover {
-    border-color: var(--ibm-green);
-}
 .option-card.featured::before {
     background: #ff6b6b;
 }
@@ -272,12 +219,120 @@ main {
     border-color: #ff6b6b;
 }
 
+/* Tutor featured */
+.option-card.tutor.featured {
+    border-color: rgba(255, 107, 107, 0.3);
+}
+
+/* Walkthrough card overrides (blue theme) */
+.option-card.walkthrough {
+    border-color: rgba(99, 167, 255, 0.5);
+    background: linear-gradient(135deg, rgba(99, 167, 255, 0.12) 0%, rgba(0, 0, 0, 0) 55%);
+}
+
+.option-card.walkthrough::before {
+    background: #63a7ff;
+}
+
+.option-card.walkthrough:hover {
+    border-color: #63a7ff;
+    box-shadow: 0 8px 32px rgba(99, 167, 255, 0.25);
+}
+
+.option-card.walkthrough:hover::before {
+    background: #63a7ff;
+}
+
+.option-card.walkthrough:focus,
+.option-card.walkthrough:focus-visible {
+    outline: 2px solid #63a7ff;
+}
+
+.option-card.walkthrough.featured {
+    background: linear-gradient(135deg, rgba(99, 167, 255, 0.16) 0%, rgba(0, 0, 0, 0) 55%);
+    border-color: rgba(99, 167, 255, 0.6);
+}
+
+.option-card.walkthrough.featured::before {
+    background: #63a7ff;
+}
+
+.option-card.walkthrough.featured:hover {
+    border-color: #63a7ff;
+}
+
+/* Abstract card overrides (green theme) */
+.option-card.abstract {
+    border-color: rgba(66, 190, 101, 0.5);
+    background: linear-gradient(135deg, rgba(66, 190, 101, 0.12) 0%, rgba(0, 0, 0, 0) 55%);
+}
+
+.option-card.abstract::before {
+    background: var(--ibm-green);
+}
+
+.option-card.abstract:hover {
+    border-color: var(--ibm-green);
+    box-shadow: 0 8px 32px rgba(66, 190, 101, 0.25);
+}
+
+.option-card.abstract:hover::before {
+    background: var(--ibm-green);
+}
+
+.option-card.abstract:focus,
+.option-card.abstract:focus-visible {
+    outline: 2px solid var(--ibm-green);
+}
+
+.option-card.abstract.featured {
+    background: linear-gradient(135deg, rgba(66, 190, 101, 0.16) 0%, rgba(0, 0, 0, 0) 55%);
+    border-color: rgba(66, 190, 101, 0.6);
+}
+
 .option-card.abstract.featured::before {
-    background: var(--ibm-green) !important;
+    background: var(--ibm-green);
 }
 
 .option-card.abstract.featured:hover {
-    border-color: var(--ibm-green) !important;
+    border-color: var(--ibm-green);
+}
+
+/* Slides card overrides (ibm-blue theme) */
+.option-card.slides {
+    border-color: rgba(15, 98, 254, 0.5);
+    background: linear-gradient(135deg, rgba(15, 98, 254, 0.12) 0%, rgba(0, 0, 0, 0) 55%);
+}
+
+.option-card.slides::before {
+    background: #0f62fe;
+}
+
+.option-card.slides:hover {
+    border-color: #0f62fe;
+    box-shadow: 0 8px 32px rgba(15, 98, 254, 0.25);
+}
+
+.option-card.slides:hover::before {
+    background: #0f62fe;
+}
+
+.option-card.slides:focus,
+.option-card.slides:focus-visible {
+    outline: 2px solid #4589ff;
+}
+
+.option-card.slides.featured {
+    background: linear-gradient(135deg, rgba(15, 98, 254, 0.16) 0%, rgba(0, 0, 0, 0) 55%);
+    border-color: rgba(15, 98, 254, 0.6);
+}
+
+.option-card.slides.featured::before {
+    background: #0f62fe;
+}
+
+.option-card.slides.featured:hover {
+    border-color: #0f62fe;
 }
 
 .featured-badge {
@@ -311,5 +366,6 @@ footer a {
 
 @media (max-width: 768px) {
     .hero h2 { font-size: 2rem; }
-    .options { grid-template-columns: 1fr; }
+    .options { max-width: 100%; }
+    .option-card { flex: 1 1 100%; }
 }

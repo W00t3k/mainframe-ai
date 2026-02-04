@@ -1,0 +1,550 @@
+{% extends "base.html" %}
+
+{% block title %}Walkthrough - IBM z/OS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/walkthrough.css">
+{% endblock %}
+
+{% block head_extra %}
+<script src="/static/js/vendor/marked.min.js"></script>
+{% endblock %}
+
+{% block body %}
+    <!-- Header -->
+    <header class="wt-page-header">
+        <div class="brand">
+            <img src="/static/logo.svg" alt="IBM z/OS">
+            <h1><span>Walkthrough</span> &mdash; Autonomous Mainframe Demonstration</h1>
+        </div>
+        <a href="/" class="back-link">&larr; Back to Dashboard</a>
+    </header>
+
+    <!-- Connection bar -->
+    <div class="wt-status-bar">
+        <div class="conn-controls">
+            <span class="label">Target:</span>
+            <input type="text" id="connTarget" placeholder="localhost:3270" value="localhost:3270"
+                   style="background:var(--ibm-gray-80);border:1px solid var(--ibm-gray-70);color:var(--ibm-gray-10);
+                          padding:3px 8px;font-family:'IBM Plex Mono',monospace;font-size:0.75rem;width:180px;outline:none;">
+            <button class="btn-inline" id="connBtn" onclick="toggleConnection()">Connect</button>
+            <button class="btn-inline disconnect" id="disconnBtn" onclick="toggleConnection()" style="display:none;">Disconnect</button>
+        </div>
+        <div>
+            <span class="label">Status:</span>
+            <span class="value" id="connStatus">Disconnected</span>
+        </div>
+        <div>
+            <span class="label">Host:</span>
+            <span class="value" id="connHost">-</span>
+        </div>
+        <div>
+            <span class="label">BIRP:</span>
+            <span class="value" id="birpStatus">-</span>
+        </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="wt-page-main">
+
+        <!-- Walkthrough controls -->
+        <div class="wt-controls-bar">
+            <div class="wt-controls-left">
+                <select id="walkthroughSelect">
+                    <option value="session-stack">Session Stack (VTAM &rarr; TSO &rarr; ISPF)</option>
+                    <option value="deferred-exec">Deferred Execution (JCL &rarr; JES)</option>
+                    <option value="system-inspection">System Inspection (Procedures &amp; Config)</option>
+                    <option value="auth-model">Authorization Model (RACF)</option>
+                    <option value="dataset-model">Dataset Model (PDS, Members &amp; Catalogs)</option>
+                    <option value="address-spaces">Address Space Anatomy (What's Running)</option>
+                </select>
+                <button class="btn btn-primary btn-sm" id="wtStartBtn" onclick="startAutonomousWalkthrough()">Start</button>
+                <button class="btn btn-secondary btn-sm" id="wtPauseBtn" onclick="pauseWalkthrough()" style="display:none;">Pause</button>
+                <button class="btn btn-stop btn-sm" id="wtStopBtn" onclick="stopWalkthrough()" style="display:none;">Stop</button>
+            </div>
+            <div class="wt-controls-right">
+                <label class="wt-speed-label">Speed:</label>
+                <select id="wtSpeedSelect">
+                    <option value="6">Slow</option>
+                    <option value="4" selected>Normal</option>
+                    <option value="2">Fast</option>
+                </select>
+                <button class="btn btn-secondary btn-sm" onclick="explainCurrentScreen()">Explain Screen</button>
+            </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="wt-progress-bar" id="wtProgressBar">
+            <div class="wt-progress-fill" id="wtProgressFill"></div>
+        </div>
+        <div class="wt-progress-label" id="wtProgressLabel"></div>
+
+        <!-- Assessment question tracker -->
+        <div class="wt-question-tracker" id="wtQuestionTracker" style="display:none;">
+            <span class="wt-qt-label">Assessment:</span>
+            <span class="wt-qt-badge" id="wtQ1" title="Where is identity bound?">Q1</span>
+            <span class="wt-qt-badge" id="wtQ2" title="When is authority evaluated?">Q2</span>
+            <span class="wt-qt-badge" id="wtQ3" title="What executes later than expected?">Q3</span>
+            <span class="wt-qt-badge" id="wtQ4" title="Which subsystem enforces policy?">Q4</span>
+            <span class="wt-qt-badge" id="wtQ5" title="What assumptions are you importing?">Q5</span>
+        </div>
+
+        <div class="walkthrough-layout">
+            <!-- Left: Terminal -->
+            <div class="wt-terminal-panel">
+                <div class="wt-terminal-header">
+                    <span>Live TN3270 Terminal</span>
+                    <span class="wt-status-tag" id="wtStatusTag"></span>
+                </div>
+                <div class="wt-screen-wrap">
+                    <pre class="wt-screen" id="wtScreen">Select a walkthrough and click Start to begin the autonomous demonstration.</pre>
+                </div>
+            </div>
+
+            <!-- Right: Narration -->
+            <div class="wt-narration-panel">
+                <div class="wt-narration-header">
+                    <span>Methodology Narration</span>
+                    <div class="wt-planes-legend">
+                        <span class="cp-tag cp-vtam">VTAM</span>
+                        <span class="cp-tag cp-tso">TSO</span>
+                        <span class="cp-tag cp-racf">RACF</span>
+                        <span class="cp-tag cp-cics">CICS</span>
+                        <span class="cp-tag cp-jes">JES</span>
+                    </div>
+                </div>
+                <div class="wt-narration-body" id="wtNarration">
+                    <div class="wt-narration-welcome" id="wtWelcome">
+                        <h3>Autonomous Walkthrough</h3>
+                        <p>Select a walkthrough from the dropdown above and click <strong>Start</strong>.
+                           The tool will auto-connect, auto-login, and navigate through the mainframe
+                           while narrating each screen through the methodology lens.</p>
+                        <p>You watch the live demonstration &mdash; no keyboard needed.</p>
+                        <p style="margin-top:1rem;">
+                            <strong>Session Stack</strong> &mdash; Connect, traverse VTAM &rarr; TSO &rarr; ISPF, browse datasets, inspect identity context<br>
+                            <strong>Deferred Execution</strong> &mdash; JES queues, active jobs, output history<br>
+                            <strong>System Inspection</strong> &mdash; TSO sessions, system procedures, configuration model<br>
+                            <strong>Authorization Model</strong> &mdash; RACF profiles, dataset protection, profile discovery
+                        </p>
+                        <p style="margin-top:1rem; color:var(--ibm-gray-50); font-size:0.8rem;">
+                            Each walkthrough addresses the <strong>5 assessment questions</strong>. Watch the Q1&ndash;Q5 tracker
+                            above to see which questions are covered as the demonstration progresses.
+                        </p>
+                    </div>
+                    <!-- Narration log entries inserted here -->
+                    <div id="wtNarrationLog"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+// ==========================================================================
+// Connection management
+// ==========================================================================
+let isConnected = false;
+
+async function checkStatus() {
+    try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        const connEl = document.getElementById('connStatus');
+        const hostEl = document.getElementById('connHost');
+        const birpEl = document.getElementById('birpStatus');
+
+        isConnected = data.connected;
+        connEl.textContent = data.connected ? 'Connected' : 'Disconnected';
+        connEl.className = 'value ' + (data.connected ? 'ok' : 'err');
+        hostEl.textContent = data.connected ? data.host : '-';
+        birpEl.textContent = data.birp_available ? 'Available' : 'Not Found';
+        birpEl.className = 'value ' + (data.birp_available ? 'ok' : 'err');
+
+        document.getElementById('connBtn').style.display = data.connected ? 'none' : 'inline-block';
+        document.getElementById('disconnBtn').style.display = data.connected ? 'inline-block' : 'none';
+        document.getElementById('connTarget').disabled = data.connected;
+
+        if (data.connected && data.host) {
+            document.getElementById('connTarget').value = data.host;
+        }
+    } catch (e) {
+        document.getElementById('connStatus').textContent = 'Error';
+        document.getElementById('connStatus').className = 'value err';
+    }
+}
+checkStatus();
+setInterval(checkStatus, 5000);
+
+async function toggleConnection() {
+    const target = document.getElementById('connTarget').value.trim();
+    if (isConnected) {
+        try {
+            await fetch('/api/terminal/disconnect', {method: 'POST'});
+            showToast('Disconnected', 'info');
+        } catch (e) {
+            showToast('Disconnect failed', 'error');
+        }
+    } else {
+        if (!target) { showToast('Enter a target', 'error'); return; }
+        document.getElementById('connBtn').textContent = 'Connecting...';
+        document.getElementById('connBtn').disabled = true;
+        try {
+            const res = await fetch('/api/terminal/connect', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({target})
+            });
+            const data = await res.json();
+            if (data.success) {
+                isConnected = true;
+                showToast('Connected to ' + target, 'info');
+            } else {
+                showToast(data.message || 'Connection failed', 'error');
+            }
+        } catch (e) {
+            showToast('Connection failed: ' + e.message, 'error');
+        }
+        document.getElementById('connBtn').textContent = 'Connect';
+        document.getElementById('connBtn').disabled = false;
+    }
+    await checkStatus();
+}
+
+// ==========================================================================
+// Autonomous Walkthrough
+// ==========================================================================
+let wtPollingInterval = null;
+let wtLastLogLen = 0;
+let wtRenderedNarrations = new Set();
+
+const CP_COLORS = {
+    vtam: 'var(--cp-vtam)',
+    tso: 'var(--cp-tso)',
+    racf: 'var(--cp-racf)',
+    cics: 'var(--cp-cics)',
+    jes: 'var(--cp-jes)',
+};
+
+async function startAutonomousWalkthrough() {
+    const name = document.getElementById('walkthroughSelect').value;
+    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
+    const speed = parseFloat(document.getElementById('wtSpeedSelect').value);
+
+    document.getElementById('wtStartBtn').style.display = 'none';
+    document.getElementById('wtPauseBtn').style.display = 'inline-flex';
+    document.getElementById('wtPauseBtn').textContent = 'Pause';
+    document.getElementById('wtStopBtn').style.display = 'inline-flex';
+    document.getElementById('walkthroughSelect').disabled = true;
+    document.getElementById('wtSpeedSelect').disabled = true;
+    document.getElementById('wtWelcome').style.display = 'none';
+    document.getElementById('wtNarrationLog').innerHTML = '';
+    wtLastLogLen = 0;
+    wtRenderedNarrations = new Set();
+
+    // Show and reset Q tracker
+    document.getElementById('wtQuestionTracker').style.display = 'flex';
+    document.querySelectorAll('.wt-qt-badge').forEach(b => b.classList.remove('answered'));
+
+    try {
+        const res = await fetch('/api/walkthrough/start', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ name, target, speed })
+        });
+        const data = await res.json();
+        if (!data.success) {
+            showToast(data.error || 'Failed to start walkthrough', 'error');
+            resetWtControls();
+            return;
+        }
+    } catch (e) {
+        showToast('Failed to start walkthrough: ' + e.message, 'error');
+        resetWtControls();
+        return;
+    }
+
+    // Start polling
+    if (wtPollingInterval) clearInterval(wtPollingInterval);
+    wtPollingInterval = setInterval(pollWalkthroughStatus, 500);
+    pollWalkthroughStatus();
+}
+
+async function pollWalkthroughStatus() {
+    try {
+        const res = await fetch('/api/walkthrough/status');
+        const data = await res.json();
+
+        // Always update screen (shows live terminal changes during actions)
+        document.getElementById('wtScreen').textContent = data.screen || '';
+
+        // Update progress bar
+        const pct = data.total > 0 ? ((data.step + 1) / data.total * 100) : 0;
+        const fillEl = document.getElementById('wtProgressFill');
+        fillEl.style.width = pct + '%';
+        const cpColor = CP_COLORS[data.control_plane] || 'var(--wt-accent)';
+        fillEl.style.background = cpColor;
+
+        // Progress label
+        const labelEl = document.getElementById('wtProgressLabel');
+        if (data.running || data.finished) {
+            labelEl.style.display = 'block';
+            const statusText = data.paused ? ' (Paused)' : '';
+            labelEl.textContent = `Step ${data.step + 1} / ${data.total} \u2014 ${data.title}${statusText}`;
+        }
+
+        // Status tag
+        const tagEl = document.getElementById('wtStatusTag');
+        if (data.control_plane) {
+            tagEl.textContent = data.control_plane.toUpperCase();
+            tagEl.className = 'wt-status-tag cp-tag cp-' + data.control_plane;
+            tagEl.style.display = 'inline-block';
+        } else {
+            tagEl.style.display = 'none';
+        }
+
+        // --- Two-phase narration sync ---
+        // Phase 1: New log entries appear with executing=true, no narration
+        //          -> show header with "Executing..." indicator
+        // Phase 2: After actions complete, entry gets narration + executing=false
+        //          -> replace "Executing..." with full narration (aligned with screen)
+        if (data.log && data.log.length > 0) {
+            // Add new entries (header only while executing)
+            if (data.log.length > wtLastLogLen) {
+                for (let i = wtLastLogLen; i < data.log.length; i++) {
+                    addNarrationEntry(data.log[i]);
+                }
+                wtLastLogLen = data.log.length;
+            }
+
+            // Update entries whose narration has arrived (actions completed)
+            data.log.forEach((logEntry, i) => {
+                if (logEntry.narration && !logEntry.executing && !wtRenderedNarrations.has(i)) {
+                    updateNarrationEntry(logEntry);
+                    wtRenderedNarrations.add(i);
+                }
+            });
+        }
+
+        // Update Q1-Q5 tracker badges
+        if (data.questions_answered) {
+            data.questions_answered.forEach(q => {
+                const badge = document.getElementById('wt' + q);
+                if (badge) badge.classList.add('answered');
+            });
+        }
+
+        // Collapse past entries (header only), expand current (full narration)
+        let currentEl = null;
+        document.querySelectorAll('.wt-narration-entry').forEach(el => {
+            const idx = parseInt(el.dataset.step);
+            if (idx === data.step) {
+                el.classList.add('current');
+                el.classList.remove('past');
+                currentEl = el;
+            } else if (!isNaN(idx)) {
+                el.classList.remove('current');
+                el.classList.add('past');
+            }
+        });
+        // Scroll current step into view so it stays aligned with terminal
+        if (currentEl) {
+            currentEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        // Handle finish / stop
+        if (!data.running) {
+            clearInterval(wtPollingInterval);
+            wtPollingInterval = null;
+
+            if (data.finished) {
+                addCompletionEntry(data);
+            } else if (data.error) {
+                showToast('Walkthrough error: ' + data.error, 'error');
+            }
+            resetWtControls();
+        }
+    } catch (e) {
+        // Polling error - ignore transient failures
+    }
+}
+
+function addNarrationEntry(data) {
+    const log = document.getElementById('wtNarrationLog');
+    const entry = document.createElement('div');
+    entry.className = 'wt-narration-entry current';
+    entry.dataset.step = data.step;
+    entry.id = 'wt-entry-' + data.step;
+
+    const cpClass = data.control_plane ? 'cp-' + data.control_plane : '';
+
+    // If executing (no narration yet), show header + executing indicator
+    // Narration will be filled by updateNarrationEntry when actions complete
+    const bodyContent = (data.narration && !data.executing)
+        ? ((typeof marked !== 'undefined') ? marked.parse(data.narration) : data.narration)
+        : '<div class="wt-executing"><span class="wt-exec-dot"></span> Executing...</div>';
+
+    entry.innerHTML = `
+        <div class="wt-entry-header">
+            <span class="wt-entry-step">Step ${data.step + 1}</span>
+            <span class="cp-tag ${cpClass}">${(data.control_plane || '').toUpperCase()}</span>
+            <span class="wt-entry-title">${data.title}</span>
+        </div>
+        <div class="wt-entry-body ai-markdown">${bodyContent}</div>
+    `;
+    log.appendChild(entry);
+
+    const narrationBody = document.getElementById('wtNarration');
+    narrationBody.scrollTop = narrationBody.scrollHeight;
+}
+
+function updateNarrationEntry(data) {
+    const entry = document.getElementById('wt-entry-' + data.step);
+    if (!entry) return;
+
+    // Replace executing indicator with full narration
+    const body = entry.querySelector('.wt-entry-body');
+    if (body && data.narration) {
+        const rendered = (typeof marked !== 'undefined') ? marked.parse(data.narration) : data.narration;
+        body.innerHTML = rendered;
+    }
+
+    // Add question badges to entry header
+    if (data.questions && data.questions.length > 0) {
+        const header = entry.querySelector('.wt-entry-header');
+        if (header && !header.querySelector('.wt-entry-q-tags')) {
+            const qTags = document.createElement('span');
+            qTags.className = 'wt-entry-q-tags';
+            qTags.innerHTML = data.questions.map(q =>
+                '<span class="wt-q-tag">' + q + '</span>'
+            ).join('');
+            header.appendChild(qTags);
+        }
+    }
+
+    const narrationBody = document.getElementById('wtNarration');
+    narrationBody.scrollTop = narrationBody.scrollHeight;
+}
+
+function addCompletionEntry(data) {
+    const log = document.getElementById('wtNarrationLog');
+    const entry = document.createElement('div');
+    entry.className = 'wt-narration-entry wt-completion';
+
+    // Build Q summary
+    const allQs = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'];
+    const answered = data.questions_answered || [];
+    const qSummary = allQs.map(q => {
+        const done = answered.includes(q);
+        return '<span class="wt-q-tag ' + (done ? 'answered' : 'unanswered') + '">' + q + (done ? ' &#10003;' : '') + '</span>';
+    }).join(' ');
+
+    entry.innerHTML = `
+        <div class="wt-entry-header">
+            <span class="wt-entry-step">Done</span>
+            <span class="wt-entry-title">Walkthrough Complete</span>
+        </div>
+        <div class="wt-entry-body">
+            <p><strong>${data.walkthrough_name}</strong> completed successfully.</p>
+            <p>Control planes traversed: ${[...new Set(data.log.map(l => l.control_plane))].filter(Boolean).map(cp =>
+                '<span class="cp-tag cp-' + cp + '">' + cp.toUpperCase() + '</span>'
+            ).join(' ')}</p>
+            <p style="margin-top:0.75rem;"><strong>Assessment Questions:</strong></p>
+            <p>${qSummary}</p>
+            <p style="margin-top:0.5rem;color:var(--ibm-gray-50);">${answered.length < 5
+                ? 'Run additional walkthroughs to address remaining questions.'
+                : 'All 5 assessment questions addressed.'
+            }</p>
+        </div>
+    `;
+    log.appendChild(entry);
+
+    const narrationBody = document.getElementById('wtNarration');
+    narrationBody.scrollTop = narrationBody.scrollHeight;
+}
+
+async function pauseWalkthrough() {
+    try {
+        const res = await fetch('/api/walkthrough/pause', { method: 'POST' });
+        const data = await res.json();
+        const btn = document.getElementById('wtPauseBtn');
+        btn.textContent = data.paused ? 'Resume' : 'Pause';
+    } catch (e) {
+        showToast('Pause failed', 'error');
+    }
+}
+
+async function stopWalkthrough() {
+    try {
+        await fetch('/api/walkthrough/stop', { method: 'POST' });
+    } catch (e) {}
+    if (wtPollingInterval) {
+        clearInterval(wtPollingInterval);
+        wtPollingInterval = null;
+    }
+    resetWtControls();
+}
+
+function resetWtControls() {
+    document.getElementById('wtStartBtn').style.display = 'inline-flex';
+    document.getElementById('wtPauseBtn').style.display = 'none';
+    document.getElementById('wtStopBtn').style.display = 'none';
+    document.getElementById('walkthroughSelect').disabled = false;
+    document.getElementById('wtSpeedSelect').disabled = false;
+}
+
+async function explainCurrentScreen() {
+    if (!isConnected) { showToast('Connect to a mainframe first', 'error'); return; }
+
+    const log = document.getElementById('wtNarrationLog');
+    const loadingEntry = document.createElement('div');
+    loadingEntry.className = 'wt-narration-entry current';
+    loadingEntry.innerHTML = '<div class="ai-loading"><span class="ai-spinner"></span> Analyzing screen through methodology lens...</div>';
+    log.appendChild(loadingEntry);
+
+    const narrationBody = document.getElementById('wtNarration');
+    narrationBody.scrollTop = narrationBody.scrollHeight;
+
+    try {
+        const res = await fetch('/api/recon/explain-screen', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ walkthrough_context: '' })
+        });
+        const data = await res.json();
+
+        if (data.explanation) {
+            const rendered = (typeof marked !== 'undefined') ? marked.parse(data.explanation) : data.explanation;
+            loadingEntry.innerHTML = `
+                <div class="wt-entry-header">
+                    <span class="wt-entry-step">AI</span>
+                    <span class="wt-entry-title">Screen Analysis</span>
+                </div>
+                <div class="wt-entry-body ai-markdown">${rendered}</div>
+            `;
+        } else if (data.error) {
+            loadingEntry.innerHTML = `<div style="color:var(--wt-locked);padding:0.5rem;">${data.error}</div>`;
+        }
+    } catch (e) {
+        loadingEntry.innerHTML = `<div style="color:var(--wt-locked);padding:0.5rem;">Explain screen failed: ${e.message}</div>`;
+    }
+}
+
+// ==========================================================================
+// Toast helper
+// ==========================================================================
+function showToast(msg, type) {
+    if (typeof window.showToastMessage === 'function') {
+        window.showToastMessage(msg, type);
+    } else {
+        const container = document.getElementById('toastContainer');
+        if (!container) return;
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + (type || 'info');
+        toast.textContent = msg;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 4000);
+    }
+}
+</script>
+{% endblock %}

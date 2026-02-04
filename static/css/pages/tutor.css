@@ -319,9 +319,11 @@ body {
 .content-grid {
     flex: 1;
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 3fr 2fr;
+    grid-template-rows: 1fr;
     gap: 16px;
     padding: 16px;
+    min-height: 0;
     overflow: hidden;
 }
 
@@ -333,6 +335,7 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    min-height: 0;
 }
 
 .panel-header {
@@ -459,6 +462,7 @@ body {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    overflow: hidden;
 }
 
 /* Step Card */
@@ -467,6 +471,8 @@ body {
     background: var(--panel-2);
     border-bottom: 1px solid var(--border);
     flex-shrink: 0;
+    max-height: 40%;
+    overflow-y: auto;
 }
 
 .step-number {
@@ -540,6 +546,8 @@ body {
 .welcome-card {
     padding: 24px;
     text-align: center;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .welcome-card h2 {
@@ -830,6 +838,7 @@ body {
     .content-grid {
         grid-template-columns: 1fr;
         grid-template-rows: 1fr 1fr;
+        overflow-y: auto;
     }
 }
 

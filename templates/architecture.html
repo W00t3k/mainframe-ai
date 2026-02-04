@@ -15,6 +15,7 @@
     {'href': '/tutor', 'label': 'Red Team Tutor'},
     {'href': '/abstract-models', 'label': 'Abstract Models'},
     {'href': '/graph', 'label': 'Trust Graph'},
+    {'href': '/recon', 'label': 'Recon'},
     {'href': '/rag', 'label': 'RAG'},
     {'href': '/scanner', 'label': 'Scanner'}
 ] %}
@@ -32,8 +33,9 @@
             <div class="arch-pill">FastAPI</div>
             <div class="arch-pill">Ollama Local LLM</div>
             <div class="arch-pill">RAG File Store</div>
-            <div class="arch-pill">BIRP v2 Emulator</div>
+            <div class="arch-pill">TN3270 Emulator</div>
             <div class="arch-pill">TN3270</div>
+            <div class="arch-pill">Native Recon Engine</div>
         </div>
     </section>
 
@@ -44,7 +46,7 @@
         </div>
         <div class="arch-card">
             <h3>API Layer</h3>
-            <p>FastAPI endpoints for chat, terminal I/O, RAG ingestion, scanner operations, and screencaps.</p>
+            <p>FastAPI endpoints for chat, terminal I/O, RAG ingestion, scanner, recon, and screencaps.</p>
         </div>
         <div class="arch-card">
             <h3>Red Team Tutor</h3>
@@ -60,7 +62,11 @@
         </div>
         <div class="arch-card">
             <h3>TN3270 Stack</h3>
-            <p>BIRP v2 wraps a TN3270 emulator for screen capture, key events, and session state.</p>
+            <p>Wrapped TN3270 emulator for screen capture, key events, and session state management.</p>
+        </div>
+        <div class="arch-card arch-card--recon">
+            <h3>Recon Engine</h3>
+            <p>Native Python enumeration of TSO users, CICS transactions, VTAM APPLIDs, hidden fields, and screen patterns. AI-assisted analysis via Ollama interprets findings and recommends next steps. Zero external dependencies &mdash; all I/O through the TN3270 stack.</p>
         </div>
     </section>
 
@@ -70,12 +76,12 @@
             <div class="flow-step">
                 <div class="label">01 UI</div>
                 <div class="title">User Prompt</div>
-                <div class="detail">Chat or terminal action triggers API call.</div>
+                <div class="detail">Chat, terminal action, or recon task triggers API call.</div>
             </div>
             <div class="flow-step">
                 <div class="label">02 API</div>
                 <div class="title">FastAPI Router</div>
-                <div class="detail">Routes to chat, RAG, or terminal handlers.</div>
+                <div class="detail">Routes to chat, RAG, terminal, or recon handlers.</div>
             </div>
             <div class="flow-step">
                 <div class="label">03 Tutor</div>
@@ -90,17 +96,62 @@
             <div class="flow-step">
                 <div class="label">05 LLM</div>
                 <div class="title">Ollama Generation</div>
-                <div class="detail">Response composed with system + RAG context.</div>
+                <div class="detail">Response composed with system + RAG context. Also powers AI recon analysis.</div>
             </div>
             <div class="flow-step">
                 <div class="label">06 TN3270</div>
                 <div class="title">Screen + Keys</div>
-                <div class="detail">Optional terminal updates and screen refresh.</div>
+                <div class="detail">Terminal updates, screen refresh, and recon enumeration I/O.</div>
             </div>
             <div class="flow-step">
-                <div class="label">07 Graph</div>
+                <div class="label">07 Recon</div>
+                <div class="title">Recon Engine</div>
+                <div class="detail">TSO/CICS/VTAM enumeration, hidden fields, screen analysis, app mapping.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">08 Graph</div>
                 <div class="title">Trust Graph</div>
                 <div class="detail">Ingests artifacts and updates relationships.</div>
+            </div>
+        </div>
+    </section>
+
+    <section class="arch-diagram">
+        <h2>Recon Engine Pipeline</h2>
+        <p style="color:var(--ibm-gray-50);font-size:0.85rem;margin-bottom:1.5rem;">
+            The recon engine reimplements classic TN3270 enumeration scripts as native Python.
+            All I/O flows through <code>agent_tools.py</code> &mdash; no subprocess calls, no external scripts.
+        </p>
+        <div class="flow">
+            <div class="flow-step">
+                <div class="label">Connect</div>
+                <div class="title">TN3270 Session</div>
+                <div class="detail">Connect to target host:port via BIRP emulator wrapper.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">Navigate</div>
+                <div class="title">Command Sequence</div>
+                <div class="detail">Send configurable commands to reach the target screen (TSO logon, CICS region, VTAM).</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">Probe</div>
+                <div class="title">Enumerate</div>
+                <div class="detail">Send each candidate (userid, transaction, applid) and read the response screen.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">Classify</div>
+                <div class="title">Pattern Match</div>
+                <div class="detail">Match screen text against known response codes (IKJ, DFHAC, IST messages).</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">Analyze</div>
+                <div class="title">AI Interpretation</div>
+                <div class="detail">Ollama reviews findings, assesses risk, and recommends next steps.</div>
+            </div>
+            <div class="flow-step">
+                <div class="label">Report</div>
+                <div class="title">Export</div>
+                <div class="detail">Generate HTML, JSON, or Markdown reports with severity breakdowns.</div>
             </div>
         </div>
     </section>
@@ -143,6 +194,11 @@
                         <td>TN3270</td>
                         <td>Live mainframe terminal control.</td>
                         <td><code>/api/terminal/*</code>, <code>/ws/terminal</code></td>
+                    </tr>
+                    <tr>
+                        <td>Recon Engine</td>
+                        <td>Native TSO/CICS/VTAM enumeration, hidden field detection, screen analysis, app mapping, AI-assisted interpretation, and report generation.</td>
+                        <td><code>/api/recon/*</code></td>
                     </tr>
                     <tr>
                         <td>Scanner</td>

@@ -1,0 +1,45 @@
+@@@ @ IBMZ/OSAl Assistant + Gemini
+
+& G ® 127.0.0.1:8080/chat
+
+© Google Chrome isn't your default browser Set as default
+
+IBM z/OS AI Assistant @ Chat @ Terminal e@ Agents @ RAG v2.0 | Local LLM
+
+LLM: Connected MODEL: llama3.1:8b TN3270: localhost:3270 AGENT: General Assistant RAG: 3 sources
+
+Ollama ONLINE
+Model llama3.1:8b
+SYSTEM T™N3270 ONLINE
+
+Host localhost:3270
+IBM z/OS AI Assistant Ready
+
+> ACTIVE AGENT
+Ican help you with:
+- ABEND codes and error analysis
+4 A General
+- JCL generation and debugging
+- COBOL, REXX, and Assembler Conversational
+- TSO/ISPF and CICS navigation
+
+- Live 3270 terminal control > RAG SOURCES
+
+Connected RAG Sources: z/OS Documentation, ABEND Codes, JCL Templates z/OS Docs ACTIVE
+
+ABEND Codes ACTIVE
+
+sk about z/OS, JCL, ABEND codes... ESL AS ORE
+
+/connect /screen ABEND SOC7 JCL Copy /help & SAK ANAM
+
+Hercules Version : 4.9.1.0-SDL
+
+Host name : Adams-M1-Pro.local
+
+Host OS : Darwin-25.2.0 Darwin Kex
+Host Architecture : arm64
+
+Processors : LP=8, Cores=8, CPUs=1
+LPAR Name : HERCULES
+

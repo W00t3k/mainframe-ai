@@ -1,0 +1,84 @@
+@ @ @ @ Abstract Models - Mainframe x + Gemini
+
+€<€ > G @ 127.0.0.1:8080/abstract-models r )
+
+€ Back Abstract Models - Platform Thesis
+Abstract Models
+
+™N3270 TERMINAL Click a region to map mental models MENTAL MODELS YOU'LL LEARN Foundational concepts
+SECTIONS
+
+localhost:3270 | Connect | Refresh Mainframes reward people who build the right mental model: layered
+Abstract
+
+session state, control planes that enforce policy, and artifacts that
+Platform thesis and learning contract.
+
+persist long after commands run. This platform teaches those models
+through live TN3270 interaction, a step-gated tutor, and a trust graph
+
+Mental Models Terminal  CUUQCe Date 03.02.26 that explains what each action touches (panels, jobs, programs,
+
+Foundational concepts you'll use Time 16:27:02 datasets). An LLM tutor backed by retrieval answers questions in
+
+everywhere. context, using the current screen state and lab environment. The goal
+
+TTTTTTTTTTTT ~=KKKK KKKKK 555555555555
+TT TT KK KK 55
+
+Navigation Flow TT TT KK KK 55 Update 4 MVS/z/OS the way experienced operators, auditors, and red teamers
+KK KK 55) do.
+
+KK KK 55
+
+KKKK 55555555555
+KKKKK 55
+KK KK 55
+KK KK 55
+
+is not memorizing commands, but learning how to reason about
+
+Abstract > modules > personas > terminal.
+|l a le
+ZZZzz /,'.-'*' tn ta
+[1,4- ) )-y_s 1 008
+
+Behavior Rules ret poet Sot) )
+
+Session Stack — VTAM > TSO > ISPF as layered state, not a single
+
+Steps and questions grounded in screen login.
+
+state. The MVS 3.8j KK KK 55 Control Planes — RACF, JES, ISPF, CICS, DB2 determine access and
+Tur(n)key System KK KK 55 execution.
+
+DEFAULT CREDENTIALS TITTTT KKKK KKK 55555555555
+
+4445545554494
+
+Artifacts & Evidence — Spool, logs, datasets, and what survives
+TK3 created by Volker Bandke volker@bandke. org execution.
+
+TK5 Login TK4- update by Juergen Winkelmann juergen.winkelmann@pebble-beach. ch | ;
+HERCO1 / CUL8TR TK5 update by Rob Prins prindos6@gmait .com Trust Eormiseniss — Dataset profiles, program paths, APF, and
+see SYS2.JCLLIB(CREDITS) for complete credits authorization.
+
+MVS 3.8j Level 8505 . .
+N3270 Batch vs Interactive — Why JCL behaves differently than panels
+
+Logon ===> and commands.
+
+localhost:3270 RUNNING TK5
+
+Graph Thinking — Panels, jobs, programs, datasets as nodes with
+
+edges.
+Key Hints
+
+PF3 back, PF7/PF8 scroll Enter Clear Tab Reset PF1
+
+ASK + MAPPING
+PFO PF10. =~ PF11. = PF12
+
+@ Thesis Loaded
+

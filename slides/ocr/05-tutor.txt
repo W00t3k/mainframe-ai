@@ -1,0 +1,193 @@
+@ Red Team Tutor - Mainframe
+
+€ Cc
+
+x +
+
+@® 127.0.0.1:8080/tutor
+
+© Google Chrome isn't your default browser Set as default
+
+© Back
+
+Red Team Tutor
+
+MODULES
+
+Session Stack ~15m
+
+VTAM~>TSO-ISPF navigation and PF keys
+
+Beginner ) Not started
+
+Batch Execution
+ICL, job submission, JES output
+
+Intermediate ) Not started
+
+Dataset Trust
+RACF profiles and access patterns
+
+Intermediate ) Not started
+
+TUTOR PERSONA
+
+The Mentor
+
+= The Operator
+
+* Red Teamer
+
+@ Forensics
+
+@ localhost:3270
+
+No module selected -
+
+T™N3270 TERMINAL
+
+Hercules Version
+Host name
+
+Host 0S
+
+Host Architecture :
+Processors
+LPAR Name
+Device number
+
+4l
+ZZZzz /,'.-'*'
+4,4- ) )-,_.
+en ay eee
+
+The MVS 3.8]
+
+The Mentor
+
+: 4.9.1.0-SDL
+: Adams-M1-Pro.local
+: Darwin-25.2.0 Darwin Kernel Version 25.2.0: Tue Nov 18 21:0
+
+arm64
+
+: LP=8, Cores=8, CPUs=1
+: HERCULES
+: 0:00CO
+
+THTTTTTITTTT
+
+TT TT) OTT
+
+TT TT) OTT
+TT
+2999, TT
+-e Gta TT
+7 ns
+*-')_) TT
+TT
+TT
+
+Tur(n)key System TT
+
+TK3 created by
+TK4- update by
+TK5 update by
+
+THTTTT
+
+Volker Bandke
+Juergen Winkelmann
+Rob Prins
+
+KKKK KKKKK
+KK KK
+KK KK
+KK KK
+KK KK
+KKKK
+KKKKK
+KK KK
+KK KK
+KK KK
+KK KK
+
+KKKK
+
+KKK
+
+localhost:3270
+
+555555555555
+
+55
+
+55 Update 4
+
+55
+
+55
+
+55555555555
+55
+55
+55
+55
+55
+
+55555555555
+
+volker@bandke. org
+jjuergen.winkelmann@pebble-beach.ch
+prin0096@gmail.com
+
+see SYS2.JCLLIB(CREDITS) for complete credits
+
+Enter Clear Tab
+
+PFA
+
++ Gemini
+
+x
+
+Analyze
+
+Welcome to Red Team Tutor
+
+Learn mainframe security through guided exploration.
+
+RED TEAM FOCUS STARTER OBJECTIVES
+
+Connect to TK5 and
+reach the TSO logon
+
+« Map the session stack .
+(VTAM > TSO > ISPF)
+
+Spot access controls
+(RACF, dataset profiles)
+
+List jobs in JES spool
+and read output
+
+Find weak links
+(permissive datasets,
+defaults)
+
+Inspect dataset security
+metadata
+
+Ask the tutor to explain
+Capture evidence a screen or error
+(screens, JES output,
+
+logs)
+ENGAGEMENT COMMON DITEAIIC
+
+What am | looking at? What do | type? Explain error
+
+First 5 commands
+
+Engagement checklist Common pitfalls
+

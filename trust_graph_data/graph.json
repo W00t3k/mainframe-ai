@@ -1,0 +1,307 @@
+{
+  "nodes": [
+    {
+      "id": "857bcb560e1c",
+      "node_type": "Job",
+      "label": "DEMOJOB",
+      "properties": {
+        "class": "A",
+        "jobid": "JOB00012"
+      },
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
+      "first_seen": "2026-02-01T23:57:07.683774",
+      "last_seen": "2026-02-02T00:32:46.153610"
+    },
+    {
+      "id": "bbf07f4161e1",
+      "node_type": "Program",
+      "label": "IEBGENER",
+      "properties": {
+        "step": "STEP1"
+      },
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
+      "first_seen": "2026-02-01T23:57:07.683804",
+      "last_seen": "2026-02-02T00:32:46.153284"
+    },
+    {
+      "id": "2b592433223b",
+      "node_type": "Dataset",
+      "label": "PROD.DATA.FILE",
+      "properties": {
+        "ddname": "SYSUT1"
+      },
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
+      "first_seen": "2026-02-01T23:57:07.683832",
+      "last_seen": "2026-02-02T00:32:46.153304"
+    },
+    {
+      "id": "d0ba88e606a9",
+      "node_type": "Dataset",
+      "label": "TEST.DATA.FILE",
+      "properties": {
+        "ddname": "SYSUT2"
+      },
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
+      "first_seen": "2026-02-01T23:57:07.683849",
+      "last_seen": "2026-02-02T00:32:46.153319"
+    },
+    {
+      "id": "86f4beee0f81",
+      "node_type": "Panel",
+      "label": "ISPF_PRIMARY",
+      "properties": {
+        "panel_type": "ISPF_PRIMARY",
+        "title": "ISPF Primary Option Menu",
+        "environment": "TSO",
+        "applid": null,
+        "submits_jobs": true
+      },
+      "source_evidence": [
+        {
+          "type": "screen",
+          "timestamp": "2026-02-01T23:57:07.684745",
+          "screen_hash": "19c4d877"
+        },
+        {
+          "type": "screen",
+          "timestamp": "2026-02-02T00:32:09.711424",
+          "screen_hash": "19c4d877"
+        },
+        {
+          "type": "screen",
+          "timestamp": "2026-02-02T00:32:46.153931",
+          "screen_hash": "19c4d877"
+        }
+      ],
+      "first_seen": "2026-02-01T23:57:07.684758",
+      "last_seen": "2026-02-02T00:32:46.153939"
+    },
+    {
+      "id": "9f79e5ea01ed",
+      "node_type": "ReturnCode",
+      "label": "0000",
+      "properties": {
+        "type": "RC"
+      },
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
+      "first_seen": "2026-02-02T00:32:09.710894",
+      "last_seen": "2026-02-02T00:32:46.153622"
+    },
+    {
+      "id": "9ac566afae2d",
+      "node_type": "Dataset",
+      "label": "IEF285I",
+      "properties": {},
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
+      "first_seen": "2026-02-02T00:32:09.710916",
+      "last_seen": "2026-02-02T00:32:46.153635"
+    }
+  ],
+  "edges": [
+    {
+      "id": "c2cd36177576",
+      "edge_type": "EXECUTES",
+      "source_id": "857bcb560e1c",
+      "target_id": "bbf07f4161e1",
+      "properties": {
+        "step": "STEP1"
+      },
+      "evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
+      "confidence": 1.0,
+      "first_seen": "2026-02-01T23:57:07.683822",
+      "last_seen": "2026-02-02T00:32:46.153295"
+    },
+    {
+      "id": "6bbc12777dad",
+      "edge_type": "READS",
+      "source_id": "857bcb560e1c",
+      "target_id": "2b592433223b",
+      "properties": {
+        "ddname": "SYSUT1",
+        "disp": "SHR"
+      },
+      "evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
+      "confidence": 1.0,
+      "first_seen": "2026-02-01T23:57:07.683841",
+      "last_seen": "2026-02-02T00:32:46.153312"
+    },
+    {
+      "id": "7a132c2fb629",
+      "edge_type": "WRITES",
+      "source_id": "857bcb560e1c",
+      "target_id": "d0ba88e606a9",
+      "properties": {
+        "ddname": "SYSUT2",
+        "disp": "NEW,CATLG,DELETE"
+      },
+      "evidence": [
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
+      "confidence": 1.0,
+      "first_seen": "2026-02-01T23:57:07.683856",
+      "last_seen": "2026-02-02T00:32:46.153327"
+    },
+    {
+      "id": "84ee2fb82893",
+      "edge_type": "NAVIGATES_TO",
+      "source_id": "demo:3270",
+      "target_id": "86f4beee0f81",
+      "properties": {},
+      "evidence": [
+        {
+          "type": "screen",
+          "timestamp": "2026-02-01T23:57:07.684745",
+          "screen_hash": "19c4d877"
+        },
+        {
+          "type": "screen",
+          "timestamp": "2026-02-02T00:32:09.711424",
+          "screen_hash": "19c4d877"
+        },
+        {
+          "type": "screen",
+          "timestamp": "2026-02-02T00:32:46.153931",
+          "screen_hash": "19c4d877"
+        }
+      ],
+      "confidence": 1.0,
+      "first_seen": "2026-02-01T23:57:07.684772",
+      "last_seen": "2026-02-02T00:32:46.153952"
+    },
+    {
+      "id": "47dceb043679",
+      "edge_type": "RETURNED",
+      "source_id": "857bcb560e1c",
+      "target_id": "9f79e5ea01ed",
+      "properties": {},
+      "evidence": [
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
+      "confidence": 1.0,
+      "first_seen": "2026-02-02T00:32:09.710908",
+      "last_seen": "2026-02-02T00:32:46.153629"
+    }
+  ]
+}

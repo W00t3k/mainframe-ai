@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Broken Assumptions — Mainframe Security</title>
+<link rel="stylesheet" href="/static/css/fonts.css">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#161616;
+  --fg:#f4f4f4;
+  --muted:#8d8d8d;
+  --accent:#0f62fe;
+  --accent-light:#4589ff;
+  --gray-90:#262626;
+  --gray-80:#393939;
+  --gray-70:#525252;
+  --cp-vtam:#a78bfa;
+  --cp-tso:#63a7ff;
+  --cp-racf:#f59e0b;
+  --cp-jes:#fb7185;
+  --cp-cics:#34d399;
+}
+
+html,body{
+  height:100%;
+  background:var(--bg);
+  color:var(--fg);
+  font-family:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow:hidden;
+}
+
+/* ── Slide container ── */
+.deck{position:relative;width:100vw;height:100vh}
+
+.slide{
+  position:absolute;inset:0;
+  display:flex;flex-direction:column;
+  justify-content:center;align-items:center;
+  padding:4rem 6rem;
+  opacity:0;pointer-events:none;
+  transition:opacity .35s ease;
+}
+.slide.active{opacity:1;pointer-events:auto}
+
+/* ── Typography ── */
+h1{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;font-size:2.8rem;
+  line-height:1.15;letter-spacing:-0.02em;
+}
+h2{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;font-size:2rem;
+  line-height:1.25;letter-spacing:-0.01em;
+  margin-bottom:1.5rem;
+}
+h3{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:600;font-size:1.1rem;
+  margin-bottom:0.5rem;
+}
+p{font-size:1.15rem;line-height:1.6;max-width:52rem}
+.muted{color:var(--muted)}
+.mono{font-family:'IBM Plex Mono',monospace}
+
+/* ── Control plane tags ── */
+.tag{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.7rem;font-weight:600;
+  padding:2px 8px;border-radius:3px;
+  letter-spacing:0.04em;
+  vertical-align:middle;
+}
+.tag-vtam{background:rgba(167,139,250,.18);color:var(--cp-vtam);border:1px solid rgba(167,139,250,.35)}
+.tag-tso{background:rgba(99,167,255,.18);color:var(--cp-tso);border:1px solid rgba(99,167,255,.35)}
+.tag-racf{background:rgba(245,158,11,.18);color:var(--cp-racf);border:1px solid rgba(245,158,11,.35)}
+.tag-jes{background:rgba(251,113,133,.18);color:var(--cp-jes);border:1px solid rgba(251,113,133,.35)}
+.tag-cics{background:rgba(52,211,153,.18);color:var(--cp-cics);border:1px solid rgba(52,211,153,.35)}
+
+/* ── Quote / assumption ── */
+.assumption{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:2.2rem;font-weight:700;
+  color:var(--fg);
+  border-left:4px solid var(--accent);
+  padding:0.3em 0 0.3em 1.2em;
+  margin-bottom:2rem;
+  max-width:48rem;
+}
+.reality{
+  font-size:1.15rem;line-height:1.7;
+  color:var(--muted);
+  max-width:48rem;
+  margin-bottom:1rem;
+}
+.reality strong{color:var(--fg);font-weight:600}
+
+/* ── Title slide ── */
+.title-logo{width:72px;height:72px;margin-bottom:1.5rem}
+.title-stripe{
+  width:120px;height:4px;
+  background:linear-gradient(90deg,var(--accent),var(--accent-light));
+  border-radius:2px;
+  margin:1.5rem 0;
+}
+.title-sub{
+  font-size:1rem;color:var(--muted);
+  font-family:'IBM Plex Mono',monospace;
+  margin-top:0.25rem;
+}
+
+/* ── Problem slide bullets ── */
+.problem-list{
+  list-style:none;padding:0;
+  max-width:52rem;
+}
+.problem-list li{
+  font-size:1.15rem;line-height:1.6;
+  padding:0.6em 0;
+  border-bottom:1px solid var(--gray-80);
+  color:var(--muted);
+}
+.problem-list li:last-child{border-bottom:none}
+.problem-list li strong{color:var(--fg)}
+
+/* ── Control planes diagram (slide 8) ── */
+.cp-diagram{
+  display:flex;gap:1rem;
+  flex-wrap:wrap;
+  justify-content:center;
+  margin:2rem 0;
+  max-width:64rem;
+}
+.cp-card{
+  width:170px;
+  padding:1rem;
+  border-radius:6px;
+  background:var(--gray-90);
+  border:1px solid var(--gray-80);
+  text-align:center;
+  position:relative;
+}
+.cp-card .cp-label{
+  font-family:'IBM Plex Mono',monospace;
+  font-weight:700;font-size:0.85rem;
+  margin-bottom:0.35rem;
+}
+.cp-card .cp-desc{
+  font-size:0.75rem;color:var(--muted);
+  line-height:1.4;
+}
+.cp-arrow{
+  display:flex;align-items:center;
+  color:var(--gray-70);font-size:1.4rem;
+  font-family:'IBM Plex Mono',monospace;
+}
+
+/* ── Closing slide features ── */
+.feature-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:0.75rem 2rem;
+  max-width:48rem;
+  margin:1.5rem 0;
+}
+.feature{
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.85rem;
+  padding:0.5rem 0;
+  border-bottom:1px solid var(--gray-80);
+}
+.feature .feat-name{color:var(--fg);font-weight:600}
+.local-badge{
+  display:inline-block;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.75rem;font-weight:600;
+  padding:4px 12px;border-radius:3px;
+  background:rgba(52,211,153,.15);
+  color:var(--cp-cics);
+  border:1px solid rgba(52,211,153,.3);
+  margin-top:1rem;
+}
+
+/* ── Progress dots ── */
+.progress{
+  position:fixed;bottom:1.5rem;
+  left:50%;transform:translateX(-50%);
+  display:flex;gap:8px;
+  z-index:10;
+}
+.dot{
+  width:8px;height:8px;
+  border-radius:50%;
+  background:var(--gray-70);
+  transition:background .25s ease,transform .25s ease;
+  cursor:pointer;
+}
+.dot.active{background:var(--accent-light);transform:scale(1.3)}
+
+.slide-counter{
+  position:fixed;bottom:1.5rem;right:2rem;
+  font-family:'IBM Plex Mono',monospace;
+  font-size:0.7rem;color:var(--gray-70);
+  z-index:10;
+}
+
+/* ── Responsive for smaller screens ── */
+@media(max-width:900px){
+  .slide{padding:2rem 2.5rem}
+  h1{font-size:2rem}
+  h2{font-size:1.5rem}
+  .assumption{font-size:1.6rem}
+  .cp-diagram{gap:0.5rem}
+  .cp-card{width:140px;padding:0.75rem}
+  .feature-grid{grid-template-columns:repeat(2,1fr)}
+  .cp-arrow{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="deck" id="deck">
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 1 — TITLE
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide active" data-slide="0">
+    <img src="/static/logo.svg" alt="IBM z/OS AI" class="title-logo">
+    <h1 style="text-align:center">Broken Assumptions</h1>
+    <div class="title-stripe"></div>
+    <p style="text-align:center;color:var(--muted);font-size:1.1rem;max-width:36rem">
+      Why offensive methodologies fail on mainframes&mdash;and a tool that doesn't.
+    </p>
+    <div style="margin-top:2.5rem;text-align:center">
+      <p class="title-sub">[Speaker Name]</p>
+      <p class="title-sub" style="color:var(--gray-70)">[Conference Name] &middot; 2025</p>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 2 — THE PROBLEM
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="1">
+    <h2>The Problem</h2>
+    <ul class="problem-list">
+      <li><strong>Most offensive methodologies import assumptions</strong> from Unix, Windows, and cloud environments.</li>
+      <li><strong>These assumptions fail</strong> on mainframe operating systems&mdash;silently and completely.</li>
+      <li><strong>Assessments miss the real attack surface</strong> because testers look for things that don't exist here.</li>
+    </ul>
+    <p style="margin-top:2rem;color:var(--muted);font-size:0.95rem;font-family:'IBM Plex Mono',monospace">
+      Five assumptions. Five failures. Let's walk through them.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 3 — ASSUMPTION 1: PORTS
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="2">
+    <div style="margin-bottom:1rem"><span class="tag tag-vtam">VTAM</span></div>
+    <div class="assumption">&ldquo;Ports define exposure.&rdquo;</div>
+    <p class="reality">
+      <strong>VTAM's session fabric exists independently of TCP/IP.</strong>
+      Logical units bind applications to terminals through a network layer
+      that predates sockets. Sessions outlive connections. An nmap scan
+      tells you almost nothing about what's reachable.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 4 — ASSUMPTION 2: ROOT
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="3">
+    <div style="margin-bottom:1rem"><span class="tag tag-racf">RACF</span></div>
+    <div class="assumption">&ldquo;There is a root user.&rdquo;</div>
+    <p class="reality">
+      <strong>RACF distributes authority across profiles, not accounts.</strong>
+      There is no omnipotent superuser. Access is granted through resource
+      profiles, group connections, and program control. Privilege is
+      contextual, scoped, and auditable.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 5 — ASSUMPTION 3: PROCESSES
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="4">
+    <div style="margin-bottom:1rem"><span class="tag tag-tso">TSO</span></div>
+    <div class="assumption">&ldquo;Processes are short-lived.&rdquo;</div>
+    <p class="reality">
+      <strong>Address spaces persist for weeks or months.</strong>
+      Identity is bound at startup and does not change. A started task
+      runs under its assigned identity for the lifetime of the IPL.
+      There is no fork, no exec, no PID recycling.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 6 — ASSUMPTION 4: IMMEDIATE EXECUTION
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="5">
+    <div style="margin-bottom:1rem"><span class="tag tag-jes">JES</span></div>
+    <div class="assumption">&ldquo;Work executes immediately.&rdquo;</div>
+    <p class="reality">
+      <strong>JES queues, schedules, and defers execution.</strong>
+      A submitted job enters a spool, waits for an initiator, and runs
+      when resources allow. The submitter's identity is preserved from
+      submission through execution&mdash;even hours later.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 7 — ASSUMPTION 5: FILESYSTEM
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="6">
+    <div style="margin-bottom:1rem"><span class="tag tag-tso">TSO</span></div>
+    <div class="assumption">&ldquo;There is a filesystem.&rdquo;</div>
+    <p class="reality">
+      <strong>Datasets, catalogs, PDS members.</strong>
+      No <span class="mono">/etc</span>, no hierarchy, no inodes.
+      Data is organized by 44-character qualified names, managed through
+      catalogs, and allocated in tracks and cylinders. The model is
+      closer to a database than a filesystem.
+    </p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 8 — FIVE CONTROL PLANES
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="7">
+    <h2 style="margin-bottom:0.75rem">Five Control Planes</h2>
+    <p class="muted" style="font-size:0.9rem;margin-bottom:1.5rem;max-width:48rem;text-align:center">
+      z/OS is not one system&mdash;it is five interlocking control planes,
+      each with its own identity model, trust boundaries, and attack surface.
+    </p>
+    <div class="cp-diagram">
+      <div class="cp-card" style="border-color:var(--cp-vtam)">
+        <div class="cp-label" style="color:var(--cp-vtam)">VTAM</div>
+        <div class="cp-desc">Session Fabric</div>
+        <div class="cp-desc" style="margin-top:4px">Binds terminals to applications through logical units</div>
+      </div>
+      <div class="cp-arrow">&rarr;</div>
+      <div class="cp-card" style="border-color:var(--cp-tso)">
+        <div class="cp-label" style="color:var(--cp-tso)">TSO</div>
+        <div class="cp-desc">Human Interaction</div>
+        <div class="cp-desc" style="margin-top:4px">Interactive command environment and ISPF panel navigation</div>
+      </div>
+      <div class="cp-arrow">&rarr;</div>
+      <div class="cp-card" style="border-color:var(--cp-racf)">
+        <div class="cp-label" style="color:var(--cp-racf)">RACF</div>
+        <div class="cp-desc">Authorization</div>
+        <div class="cp-desc" style="margin-top:4px">Profile-based access control across all resources</div>
+      </div>
+      <div class="cp-arrow">&rarr;</div>
+      <div class="cp-card" style="border-color:var(--cp-jes)">
+        <div class="cp-label" style="color:var(--cp-jes)">JES</div>
+        <div class="cp-desc">Deferred Execution</div>
+        <div class="cp-desc" style="margin-top:4px">Batch scheduling with identity preserved from submission</div>
+      </div>
+      <div class="cp-arrow">&rarr;</div>
+      <div class="cp-card" style="border-color:var(--cp-cics)">
+        <div class="cp-label" style="color:var(--cp-cics)">CICS</div>
+        <div class="cp-desc">Transaction Processing</div>
+        <div class="cp-desc" style="margin-top:4px">Shared address space running thousands of concurrent transactions</div>
+      </div>
+    </div>
+    <p class="mono muted" style="font-size:0.85rem;margin-top:1.5rem">Now let's see this live.</p>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════════════
+       SLIDE 9 — CLOSING / TOOL RELEASE
+       ═══════════════════════════════════════════════════════ -->
+  <div class="slide" data-slide="8">
+    <h2>Mainframe AI Assistant</h2>
+    <p style="color:var(--muted);font-size:1rem;margin-bottom:1.5rem;max-width:44rem;text-align:center">
+      An open-source reconnaissance and learning platform for IBM z/OS security assessment.
+    </p>
+    <div class="feature-grid">
+      <div class="feature"><span class="feat-name">Autonomous Walkthroughs</span></div>
+      <div class="feature"><span class="feat-name">Trust Graph</span></div>
+      <div class="feature"><span class="feat-name">Recon Engine</span></div>
+      <div class="feature"><span class="feat-name">AI Tutor</span></div>
+      <div class="feature"><span class="feat-name">Security Labs</span></div>
+      <div class="feature"><span class="feat-name">TN3270 Integration</span></div>
+    </div>
+    <div class="local-badge">100% local &mdash; no API keys, no cloud dependencies</div>
+    <p class="mono muted" style="font-size:0.8rem;margin-top:1.5rem">[repo-url]</p>
+  </div>
+
+</div><!-- .deck -->
+
+<!-- Progress dots -->
+<div class="progress" id="progress"></div>
+<div class="slide-counter" id="counter"></div>
+
+<script>
+(function(){
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  let current = 0;
+
+  /* Build progress dots */
+  const prog = document.getElementById('progress');
+  for(let i=0;i<total;i++){
+    const d = document.createElement('div');
+    d.className = 'dot' + (i===0?' active':'');
+    d.addEventListener('click',()=>go(i));
+    prog.appendChild(d);
+  }
+
+  function updateCounter(){
+    document.getElementById('counter').textContent = (current+1)+' / '+total;
+  }
+
+  function go(n){
+    if(n<0||n>=total) return;
+    slides[current].classList.remove('active');
+    prog.children[current].classList.remove('active');
+    current = n;
+    slides[current].classList.add('active');
+    prog.children[current].classList.add('active');
+    updateCounter();
+  }
+
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' ') go(current+1);
+    else if(e.key==='ArrowLeft') go(current-1);
+    else if(e.key==='Home') go(0);
+    else if(e.key==='End') go(total-1);
+  });
+
+  /* Touch / swipe support */
+  let touchX = 0;
+  document.addEventListener('touchstart',function(e){touchX=e.changedTouches[0].screenX});
+  document.addEventListener('touchend',function(e){
+    const dx = e.changedTouches[0].screenX - touchX;
+    if(dx < -50) go(current+1);
+    else if(dx > 50) go(current-1);
+  });
+
+  updateCounter();
+})();
+</script>
+</body>
+</html>

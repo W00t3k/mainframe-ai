@@ -1,0 +1,17 @@
+@ @ @ @ Scanner - IBM z/OS Al Assisi: x + Gemini
+@® 127.0.0.1:8080/scanner r )
+
+© Google Chrome isn't your default browser Set as default
+
+IBM z/OS Scanner Home Terminal AIChat Architecture
+
+Mainframe Scanner
+
+Scan networks for TN3270 services and IBM mainframes
+
+TARGET (IP, HOSTNAME, OR CIDR) PORTS
+
+localhost 23,3270, 2323
+
+Enter a target and click Start Scan
+

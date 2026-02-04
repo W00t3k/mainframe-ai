@@ -1,0 +1,58 @@
+@ @ @ @ TrustGraph-MainframeAlA xX +
+
+€ CG @® 127.0.0.1:8080/graph
+
+© Google Chrome isn't your default browser Set as default
+
+Mainframe Trust Graph
+
+NODE TYPES @
+
+@ EntryPoint
+@ Panel
+@ CICSRegion
+@ Transaction
+Job
+Proc
+Program
+Dataset
+Loadlib
+
+ReturnCode
+
+QUERIES
+
+Paths to Job Submit
+Library Load Chain
+
+Shared Datasets Refresh Reset View
+
+Export DOT
+
+Ingest Screen
+
++ Gemini
+
+xo ef 4 @
+
+Nodes: @ Edges: @ @ Disconnected
+
+SELECTED NODE
+
+Select a node to view details
+
+INGEST DATA
+
+SYSOUT
+
+“4
+
+FINDING DRAFT
+
+No finding generated yet.
+
+QUERY RESULTS
+
+"query": "“shared_datasets",
+"results": [],
+

@@ -1,0 +1,613 @@
+/* Walkthrough page — standalone, blue accent */
+:root {
+    --wt-accent: #63a7ff;
+    --wt-accent-hover: #82bbff;
+    --wt-accent-dim: rgba(99, 167, 255, 0.15);
+    --wt-valid: #39d98a;
+    --wt-locked: #f85149;
+    --cp-vtam: #a78bfa;
+    --cp-tso: #63a7ff;
+    --cp-racf: #f59e0b;
+    --cp-cics: #34d399;
+    --cp-jes: #fb7185;
+}
+
+body {
+    background: var(--ibm-gray-100);
+    color: var(--ibm-gray-10);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.wt-page-header {
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    padding: 0 2rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.wt-page-header .brand {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.wt-page-header .brand img {
+    width: 24px;
+    height: 24px;
+}
+
+.wt-page-header .brand h1 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ibm-gray-10);
+}
+
+.wt-page-header .brand h1 span {
+    color: var(--wt-accent);
+}
+
+.wt-page-header .back-link {
+    font-size: 0.75rem;
+    color: var(--ibm-gray-50);
+    text-decoration: none;
+}
+
+.wt-page-header .back-link:hover {
+    color: var(--wt-accent);
+}
+
+/* ============================================================
+   CONNECTION BAR
+   ============================================================ */
+.wt-status-bar {
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    padding: 0.5rem 2rem;
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+    font-size: 0.75rem;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+.wt-status-bar .label {
+    color: var(--ibm-gray-50);
+}
+
+.wt-status-bar .value {
+    color: var(--ibm-gray-30);
+}
+
+.wt-status-bar .value.ok {
+    color: var(--wt-valid);
+}
+
+.wt-status-bar .value.err {
+    color: var(--wt-locked);
+}
+
+.conn-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.conn-controls input:focus {
+    border-color: var(--wt-accent);
+}
+
+.btn-inline {
+    padding: 3px 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    border: 1px solid var(--wt-valid);
+    background: transparent;
+    color: var(--wt-valid);
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.btn-inline:hover {
+    background: var(--wt-valid);
+    color: #000;
+}
+
+.btn-inline.disconnect {
+    border-color: var(--wt-locked);
+    color: var(--wt-locked);
+}
+
+.btn-inline.disconnect:hover {
+    background: var(--wt-locked);
+    color: #000;
+}
+
+/* ============================================================
+   MAIN CONTENT
+   ============================================================ */
+.wt-page-main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn {
+    padding: 0.5rem 1.25rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.15s;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: var(--wt-accent);
+    color: #000;
+}
+
+.btn-primary:hover {
+    background: var(--wt-accent-hover);
+}
+
+.btn-primary:disabled {
+    background: var(--ibm-gray-70);
+    color: var(--ibm-gray-50);
+    cursor: not-allowed;
+}
+
+.btn-secondary {
+    background: var(--ibm-gray-80);
+    color: var(--ibm-gray-10);
+}
+
+.btn-secondary:hover {
+    background: var(--ibm-gray-70);
+}
+
+.btn-stop {
+    background: var(--wt-locked);
+    color: #000;
+}
+
+.btn-stop:hover {
+    background: #ff7a73;
+}
+
+.btn-sm {
+    padding: 0.3rem 0.75rem;
+    font-size: 0.7rem;
+}
+
+/* ============================================================
+   CONTROL PLANE TAGS
+   ============================================================ */
+.cp-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    font-size: 0.6rem;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.cp-tag.cp-vtam { background: var(--cp-vtam); color: #000; }
+.cp-tag.cp-tso  { background: var(--cp-tso); color: #000; }
+.cp-tag.cp-racf { background: var(--cp-racf); color: #000; }
+.cp-tag.cp-cics { background: var(--cp-cics); color: #000; }
+.cp-tag.cp-jes  { background: var(--cp-jes); color: #000; }
+
+/* ============================================================
+   WALKTHROUGH CONTROLS BAR
+   ============================================================ */
+.wt-controls-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+.wt-controls-left,
+.wt-controls-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.wt-controls-bar select {
+    background: var(--ibm-gray-80);
+    border: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-10);
+    padding: 4px 8px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    outline: none;
+}
+
+.wt-controls-bar select:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.wt-speed-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--ibm-gray-50);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* ============================================================
+   PROGRESS BAR
+   ============================================================ */
+.wt-progress-bar {
+    width: 100%;
+    height: 4px;
+    background: var(--ibm-gray-80);
+}
+
+.wt-progress-fill {
+    height: 100%;
+    background: var(--wt-accent);
+    transition: width 0.3s ease, background 0.3s ease;
+    width: 0%;
+}
+
+.wt-progress-label {
+    display: none;
+    padding: 0.25rem 1rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    color: var(--ibm-gray-40);
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+}
+
+/* ============================================================
+   ASSESSMENT QUESTION TRACKER
+   ============================================================ */
+.wt-question-tracker {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 1rem;
+    margin-bottom: 0;
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+}
+
+.wt-qt-label {
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--ibm-gray-50);
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.wt-qt-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 0.15rem 0.5rem;
+    border: 1px solid var(--ibm-gray-70);
+    color: var(--ibm-gray-50);
+    cursor: default;
+    transition: all 0.3s ease;
+}
+
+.wt-qt-badge.answered {
+    border-color: var(--wt-valid);
+    color: var(--wt-valid);
+    background: rgba(57, 217, 138, 0.08);
+}
+
+/* ============================================================
+   WALKTHROUGH LAYOUT (Terminal + Narration)
+   ============================================================ */
+.walkthrough-layout {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 190px);
+}
+
+/* Terminal panel (left) */
+.wt-terminal-panel {
+    flex: 0 0 55%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid var(--ibm-gray-80);
+}
+
+.wt-terminal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ibm-gray-30);
+}
+
+.wt-status-tag {
+    display: none;
+}
+
+.wt-screen-wrap {
+    flex: 1;
+    overflow: auto;
+    background: #000;
+}
+
+.wt-screen {
+    color: #33ff33;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    padding: 0.75rem 1rem;
+    margin: 0;
+    line-height: 1.3;
+    min-height: 100%;
+    white-space: pre;
+}
+
+/* Narration panel (right) */
+.wt-narration-panel {
+    flex: 0 0 45%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.wt-narration-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 1rem;
+    background: var(--ibm-gray-90);
+    border-bottom: 1px solid var(--ibm-gray-80);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ibm-gray-30);
+}
+
+.wt-narration-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+}
+
+.wt-narration-welcome {
+    color: var(--ibm-gray-40);
+    font-size: 0.85rem;
+    line-height: 1.6;
+}
+
+.wt-narration-welcome h3 {
+    color: var(--ibm-gray-10);
+    margin-bottom: 0.75rem;
+}
+
+.wt-narration-welcome p {
+    margin-bottom: 0.75rem;
+}
+
+.wt-planes-legend {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0;
+}
+
+/* ============================================================
+   NARRATION LOG ENTRIES
+   ============================================================ */
+.wt-narration-entry {
+    border: 1px solid var(--ibm-gray-80);
+    border-left: 3px solid var(--ibm-gray-70);
+    margin-bottom: 0.75rem;
+    padding: 0.75rem 1rem;
+    transition: opacity 0.3s ease, border-color 0.3s ease;
+}
+
+.wt-narration-entry.current {
+    border-left-color: var(--wt-accent);
+    background: rgba(99, 167, 255, 0.04);
+}
+
+.wt-narration-entry.past {
+    opacity: 0.55;
+    padding: 0.35rem 1rem;
+    margin-bottom: 0.25rem;
+}
+
+/* Collapse past entry bodies — show only the header line */
+.wt-narration-entry.past .wt-entry-body {
+    display: none;
+}
+
+.wt-narration-entry.past .wt-entry-header {
+    margin-bottom: 0;
+}
+
+.wt-narration-entry.wt-completion {
+    border-left-color: var(--wt-valid);
+    background: rgba(57, 217, 138, 0.06);
+}
+
+.wt-entry-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.wt-entry-step {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    color: var(--wt-accent);
+    min-width: 40px;
+}
+
+.wt-entry-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--ibm-gray-10);
+}
+
+.wt-entry-body {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    color: var(--ibm-gray-30);
+}
+
+.wt-entry-body p {
+    margin-bottom: 0.4rem;
+}
+
+.wt-completion .wt-entry-step {
+    color: var(--wt-valid);
+}
+
+/* ============================================================
+   EXECUTING INDICATOR
+   ============================================================ */
+.wt-executing {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--wt-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.wt-exec-dot {
+    width: 6px;
+    height: 6px;
+    background: var(--wt-accent);
+    border-radius: 50%;
+    animation: wt-pulse 1s infinite;
+}
+
+@keyframes wt-pulse {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 1; }
+}
+
+/* ============================================================
+   QUESTION TAGS IN NARRATION ENTRIES
+   ============================================================ */
+.wt-entry-q-tags {
+    display: flex;
+    gap: 0.25rem;
+    margin-left: auto;
+}
+
+.wt-q-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.55rem;
+    font-weight: 700;
+    padding: 0.1rem 0.35rem;
+    border: 1px solid var(--wt-accent);
+    color: var(--wt-accent);
+    opacity: 0.8;
+}
+
+.wt-q-tag.answered {
+    border-color: var(--wt-valid);
+    color: var(--wt-valid);
+}
+
+.wt-q-tag.unanswered {
+    border-color: var(--ibm-gray-60);
+    color: var(--ibm-gray-60);
+}
+
+/* ============================================================
+   AI LOADING / MARKDOWN
+   ============================================================ */
+.ai-loading {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+    color: var(--ibm-gray-40);
+    padding: 0.5rem 0;
+}
+
+.ai-spinner {
+    width: 14px;
+    height: 14px;
+    border: 2px solid var(--ibm-gray-70);
+    border-top-color: var(--wt-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.ai-markdown strong {
+    color: var(--ibm-gray-10);
+    font-weight: 600;
+}
+
+.ai-markdown ul, .ai-markdown ol {
+    padding-left: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.ai-markdown li {
+    margin-bottom: 0.25rem;
+}
+
+.ai-markdown code {
+    background: var(--ibm-gray-80);
+    padding: 1px 5px;
+    font-size: 0.85em;
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 900px) {
+    .walkthrough-layout {
+        flex-direction: column;
+        height: auto;
+    }
+    .wt-terminal-panel,
+    .wt-narration-panel {
+        flex: 1 1 auto;
+        min-height: 300px;
+    }
+    .wt-terminal-panel {
+        border-right: none;
+        border-bottom: 1px solid var(--ibm-gray-80);
+    }
+}
