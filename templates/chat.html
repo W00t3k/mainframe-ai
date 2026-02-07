@@ -225,37 +225,37 @@ or use /connect command.
                     </div>
                     <div class="agents-grid">
                         <div class="agent-card active" onclick="selectAgent(this, 'general')">
-                            <div class="agent-icon">🤖</div>
+                            <div class="agent-icon">[AI]</div>
                             <h3>General Assistant</h3>
                             <p>All-purpose z/OS assistant. Answers questions about JCL, COBOL, ABEND codes, TSO/ISPF, and more.</p>
                             <div class="agent-status"><span class="dot"></span> Active</div>
                         </div>
                         <div class="agent-card" onclick="selectAgent(this, 'jcl')">
-                            <div class="agent-icon">📝</div>
+                            <div class="agent-icon">[JCL]</div>
                             <h3>JCL Generator</h3>
                             <p>Specialized in generating and debugging JCL. Describe your task and get production-ready JCL with explanations.</p>
                             <div class="agent-status"><span class="dot"></span> Available</div>
                         </div>
                         <div class="agent-card" onclick="selectAgent(this, 'abend')">
-                            <div class="agent-icon">🔍</div>
+                            <div class="agent-icon">[!]</div>
                             <h3>ABEND Analyzer</h3>
                             <p>Expert at diagnosing system and user ABEND codes. Provides root cause analysis and resolution steps.</p>
                             <div class="agent-status"><span class="dot"></span> Available</div>
                         </div>
                         <div class="agent-card" onclick="selectAgent(this, 'cobol')">
-                            <div class="agent-icon">💻</div>
+                            <div class="agent-icon">[COB]</div>
                             <h3>COBOL Expert</h3>
                             <p>Explains and helps debug COBOL programs. Understands CICS, DB2, and batch processing patterns.</p>
                             <div class="agent-status"><span class="dot"></span> Available</div>
                         </div>
                         <div class="agent-card" onclick="selectAgent(this, 'navigator')">
-                            <div class="agent-icon">🖥️</div>
+                            <div class="agent-icon">[>_]</div>
                             <h3>Screen Navigator</h3>
                             <p>Helps navigate 3270 screens. Reads the current screen and suggests what to type or which PF key to press.</p>
                             <div class="agent-status"><span class="dot"></span> Available</div>
                         </div>
                         <div class="agent-card" onclick="selectAgent(this, 'security')">
-                            <div class="agent-icon">🔐</div>
+                            <div class="agent-icon">[SEC]</div>
                             <h3>RACF Security</h3>
                             <p>Specializes in RACF commands, permissions, and security best practices for z/OS environments.</p>
                             <div class="agent-status"><span class="dot"></span> Available</div>
@@ -273,7 +273,7 @@ or use /connect command.
                     </div>
                     <div class="rag-sources">
                         <div class="rag-source connected">
-                            <div class="rag-icon">📚</div>
+                            <div class="rag-icon">[DOC]</div>
                             <div class="rag-info">
                                 <h3>z/OS Documentation</h3>
                                 <p class="rag-desc">IBM z/OS documentation including MVS, JES2/JES3, DFSMS, and system programming guides.</p>
@@ -282,7 +282,7 @@ or use /connect command.
                             <button class="rag-toggle">Connected</button>
                         </div>
                         <div class="rag-source connected">
-                            <div class="rag-icon">⚠️</div>
+                            <div class="rag-icon">[!]</div>
                             <div class="rag-info">
                                 <h3>ABEND Code Database</h3>
                                 <p class="rag-desc">Complete database of system and user ABEND codes with explanations, causes, and resolutions.</p>
@@ -291,7 +291,7 @@ or use /connect command.
                             <button class="rag-toggle">Connected</button>
                         </div>
                         <div class="rag-source connected">
-                            <div class="rag-icon">📋</div>
+                            <div class="rag-icon">[JCL]</div>
                             <div class="rag-info">
                                 <h3>JCL Templates</h3>
                                 <p class="rag-desc">Production-ready JCL templates for common tasks: IEBCOPY, IEBGENER, IDCAMS, SORT, and more.</p>
@@ -300,7 +300,7 @@ or use /connect command.
                             <button class="rag-toggle">Connected</button>
                         </div>
                         <div class="rag-source disconnected">
-                            <div class="rag-icon">🔧</div>
+                            <div class="rag-icon">[COB]</div>
                             <div class="rag-info">
                                 <h3>COBOL Patterns</h3>
                                 <p class="rag-desc">Common COBOL programming patterns, CICS/DB2 integration, and debugging techniques.</p>
@@ -309,7 +309,7 @@ or use /connect command.
                             <button class="rag-toggle">Connect</button>
                         </div>
                         <div class="rag-source disconnected">
-                            <div class="rag-icon">🔐</div>
+                            <div class="rag-icon">[SEC]</div>
                             <div class="rag-info">
                                 <h3>RACF Commands</h3>
                                 <p class="rag-desc">RACF security commands, profiles, and best practices for z/OS security administration.</p>
@@ -318,7 +318,7 @@ or use /connect command.
                             <button class="rag-toggle">Connect</button>
                         </div>
                         <div class="rag-source disconnected">
-                            <div class="rag-icon">📖</div>
+                            <div class="rag-icon">[KB]</div>
                             <div class="rag-info">
                                 <h3>Custom Knowledge Base</h3>
                                 <p class="rag-desc">Upload your own documentation, runbooks, and internal procedures.</p>

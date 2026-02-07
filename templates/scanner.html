@@ -22,11 +22,11 @@
 
     <!-- ── Tabs ── -->
     <div class="sc-tabs">
-        <button class="sc-tab active" data-tab="scan">&#128269; Scan</button>
-        <button class="sc-tab" data-tab="banner">&#128225; Banner Grab</button>
-        <button class="sc-tab" data-tab="fingerprint">&#128270; Fingerprint</button>
-        <button class="sc-tab" data-tab="ebcdic">&#128290; EBCDIC</button>
-        <button class="sc-tab" data-tab="captures">&#128190; Captures</button>
+        <button class="sc-tab active" data-tab="scan">[?] SCAN</button>
+        <button class="sc-tab" data-tab="banner">[B] BANNER</button>
+        <button class="sc-tab" data-tab="fingerprint">[F] FINGERPRINT</button>
+        <button class="sc-tab" data-tab="ebcdic">[E] EBCDIC</button>
+        <button class="sc-tab" data-tab="captures">[S] CAPTURES</button>
     </div>
 
     <!-- ══════ SCAN TAB ══════ -->
@@ -168,7 +168,7 @@ async function startScan() {
 
         out.innerHTML = hosts.map(h => `
             <div class="result-card">
-                <div class="rc-icon">&#128421;</div>
+                <div class="rc-icon">[>_]</div>
                 <div class="rc-body">
                     <div class="rc-host">${h.host}:${h.port}</div>
                     <div class="rc-detail">${h.type} &mdash; ${h.details}</div>
@@ -352,7 +352,7 @@ function loadCaptures() {
     if (!captures.length) { out.innerHTML = '<div class="empty">No captures yet. Use Banner Grab, Fingerprint, or Capture Live Screen.</div>'; return; }
 
     out.innerHTML = captures.map((c, i) => {
-        const icon = c.type === 'banner' ? '&#128225;' : c.type === 'fingerprint' ? '&#128270;' : '&#128421;';
+        const icon = c.type === 'banner' ? '[B]' : c.type === 'fingerprint' ? '[F]' : '[>_]';
         const label = c.type === 'banner' ? 'Banner' : c.type === 'fingerprint' ? 'Fingerprint' : 'Screen';
         const host = c.data.host || (c.data.host + ':' + c.data.port) || '?';
         const time = new Date(c.time).toLocaleString();

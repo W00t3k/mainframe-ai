@@ -63,7 +63,7 @@
                 </div>
                 <div class="terminal-screen" id="terminalScreen" tabindex="0">
                     <div class="terminal-placeholder">
-                        <div class="placeholder-icon">🖥️</div>
+                        <div class="placeholder-icon">[>_]</div>
                         <h3>Terminal Not Connected</h3>
                         <p>Connect to TK5 (localhost:3270)</p>
                     </div>
@@ -201,9 +201,9 @@ const state = {
 let labsIndex = [];
 
 const catMeta = {
-    fundamentals: { color: '#4589ff', icon: '📚', label: 'Fundamentals' },
-    security:     { color: '#ff6b6b', icon: '🔒', label: 'Security' },
-    recon:        { color: '#ffb020', icon: '🔍', label: 'Recon' }
+    fundamentals: { color: '#55FFFF', icon: '[DOC]', label: 'Fundamentals' },
+    security:     { color: '#FF5555', icon: '[SEC]', label: 'Security' },
+    recon:        { color: '#FFFF55', icon: '[RCN]', label: 'Recon' }
 };
 
 const diffMeta = {
@@ -396,7 +396,7 @@ async function disconnectTerminal() {
     state.host = '';
     $('#terminalScreen').innerHTML = `
         <div class="terminal-placeholder">
-            <div class="placeholder-icon">🖥️</div>
+            <div class="placeholder-icon">[>_]</div>
             <h3>Disconnected</h3>
             <p>Connect to continue</p>
         </div>

@@ -3372,4 +3372,610 @@ IEF285I   VOL SER NOS= TSO001.
 ****Z   END   TSU   16  HERC01                          ROOM        4.27.41 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   16   END   Z****
 ****Z   END   TSU   16  HERC01                          ROOM        4.27.41 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   16   END   Z****
 ****Z   END   TSU   16  HERC01                          ROOM        4.27.41 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   16   END   Z****
+                               HH        HH  EEEEEEEEEEEE  RRRRRRRRRRR    CCCCCCCCCC     00000000         11
+                              HH        HH  EEEEEEEEEEEE  RRRRRRRRRRRR  CCCCCCCCCCCC   0000000000       111
+                             HH        HH  EE            RR        RR  CC        CC  00      0000     1111
+                            HH        HH  EE            RR        RR  CC            00     00 00       11
+                           HH        HH  EE            RR        RR  CC            00    00  00       11
+                          HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRRR  CC            00   00   00       11
+                         HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRR   CC            00  00    00       11
+                        HH        HH  EE            RR    RR      CC            00 00     00       11
+                       HH        HH  EE            RR     RR     CC            0000      00       11
+                      HH        HH  EE            RR      RR    CC        CC  000       00       11
+                     HH        HH  EEEEEEEEEEEE  RR       RR   CCCCCCCCCCCC   0000000000    1111111111
+                    HH        HH  EEEEEEEEEEEE  RR        RR   CCCCCCCCCC     00000000     1111111111
+
+
+
+                  TTTTTTTTTTTT       11       777777777777                                            ZZZZZZZZZZZZ
+                  TTTTTTTTTTTT      111       77777777777                                             ZZZZZZZZZZZZ
+                       TT          1111       77      77                                                       ZZ
+                       TT            11              77                                                       ZZ
+                       TT            11             77                                                       ZZ
+                       TT            11            77                                                    ZZZZZZZ
+                       TT            11            77                                                    ZZZZZZZ
+                       TT            11            77                                                     ZZ
+                       TT            11            77                                                    ZZ
+                       TT            11            77                                                   ZZ
+                       TT        1111111111        77                                                  ZZZZZZZZZZZ
+                       TT        1111111111        77                                                 ZZZZZZZZZZZZ
+
+
+****Z  START  TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17  START  Z****
+****Z  START  TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17  START  Z****
+****Z  START  TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17  START  Z****
+****Z  START  TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.30.04 TSU   17  $HASP373 HERC01   STARTED
+ 4.30.04 TSU   17  IEF125I HERC01 - LOGGED ON - TIME=04.30.04
+ 4.30.51 TSU   17  IEFACTRT - Stepname  Procstep  Program   Retcode
+ 4.30.51 TSU   17  IEF126I HERC01 - LOGGED OFF - TIME=04.30.51
+ 4.30.51 TSU   17  $HASP395 HERC01   ENDED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 07 FEB 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+       218 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+      0.77 MINUTES EXECUTION TIME
+    1     //HERC01  JOB  REGION=08192K                                            TSU   17
+    2     //ISPLOGON EXEC ISPLOGON
+    3     XXISPLOGON PROC
+    4     XXISPFTSO  EXEC PGM=IKJEFT01,PARM=ISPLOGON,DYNAMNBR=64
+    5     XXSTEPLIB  DD  DISP=SHR,DSN=ISP.V2R2M0.LLIB
+    6     XXSYSEXEC  DD  DISP=SHR,DSN=SYS2.EXEC
+    7     XXSYSHELP  DD  DISP=SHR,DSN=SYS1.HELP
+    8     XX         DD  DISP=SHR,DSN=SYS2.HELP
+    9     XXSYSPROC  DD  DISP=SHR,DSN=SYS1.CMDPROC
+   10     XX         DD  DISP=SHR,DSN=SYS2.CMDPROC
+   11     XX         DD  DISP=SHR,DSN=SYS2.REVIEW.CLIB
+   12     XXISPCLIB  DD  DSN=SYS2.ISP.CLIB,DISP=SHR
+   13     XX         DD  DSN=ISP.V2R2M0.CLIB,DISP=SHR
+   14     XXISPLLIB  DD  DSN=SYS2.ISP.LLIB,DISP=SHR
+   15     XXISPMLIB  DD  DSN=SYS2.ISP.MLIB,DISP=SHR
+   16     XX         DD  DSN=ISP.V2R2M0.MLIB,DISP=SHR
+   17     XXISPPLIB  DD  DSN=SYS2.ISP.PLIB,DISP=SHR
+   18     XX         DD  DSN=ISP.V2R2M0.PLIB,DISP=SHR
+   19     XX         DD  DSN=SYS2.REVIEW.PLIB,DISP=SHR
+   20     XXISPSLIB  DD  DSN=SYS2.ISP.SLIB,DISP=SHR
+   21     XX         DD  DSN=ISP.V2R2M0.SLIB,DISP=SHR
+   22     XXISPTLIB  DD  DSN=SYS2.ISP.TLIB,DISP=SHR
+   23     XX         DD  DSN=ISP.V2R2M0.TLIB,DISP=SHR
+   24     XXISPTABL  DD  DSN=SYS2.ISP.TLIB,DISP=SHR
+   25     XXISPTRACE DD  TERM=TS
+IEF236I ALLOC. FOR HERC01 ISPFTSO ISPLOGON
+IEF237I 298  ALLOCATED TO STEPLIB
+IEF237I 390  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYSHELP
+IEF237I 390  ALLOCATED TO
+IEF237I 390  ALLOCATED TO SYSPROC
+IEF237I 390  ALLOCATED TO
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPCLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPLLIB
+IEF237I 298  ALLOCATED TO ISPMLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPPLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPSLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPTLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPTABL
+IEF237I TRM  ALLOCATED TO ISPTRACE
+IEF237I 298  ALLOCATED TO SYS00002
+IEF237I 299  ALLOCATED TO SYS00001
+IEF285I   BREXX.V2R5M3.RXLIB                           KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF237I 299  ALLOCATED TO RXLIB
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO SYS00003
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.ISP.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.ISP.PLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.REVIEW.PLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 190  ALLOCATED TO ISPPLIB
+IEF237I 298  ALLOCATED TO SYS00004
+IEF237I 298  ALLOCATED TO SYS00005
+IEF237I 298  ALLOCATED TO SYS00006
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.EXEC                                  KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *-------21
+IEF285I   VOL SER NOS= TK5RES.
+IEF237I 190  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYS00007
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 299  ALLOCATED TO JCC00003
+IEF285I   BREXX.V2R5M3.SAMPLES                         KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *--------3
+IEF285I   VOL SER NOS= TK5RES.
+IEF237I 190  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYS00008
+IEF237I 299  ALLOCATED TO SYS00009
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.CMDPROC                               KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS1.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.REVIEW.CLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 190  ALLOCATED TO SYSPROC
+IEF237I 390  ALLOCATED TO SYS00010
+IEF237I 390  ALLOCATED TO SYS00011
+IEF237I 298  ALLOCATED TO SYS00012
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.EXEC                                  KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO SYSUEXEC
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO SYS00013
+IEF285I   HERC01.CMDPROC                               KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO SYS00014
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO ISPPROF
+IEF237I 298  ALLOCATED TO SYS00015
+IEF285I   SYS2.ISP.CLIB                                KEPT          *--------7
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 298  ALLOCATED TO SYS00016
+IEF285I   SYS2.ISP.CLIB                                KEPT          *-------19
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 298  ALLOCATED TO SYS00017
+IEF285I   SYS2.ISP.CLIB                                KEPT          *-------19
+IEF285I   VOL SER NOS= TK5001.
+IEF142I HERC01 ISPFTSO ISPLOGON - STEP WAS EXECUTED - COND CODE 0000
+IEF285I   ISP.V2R2M0.LLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS1.HELP                                    KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.HELP                                    KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.ISP.CLIB                                KEPT          *--------3
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.CLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.LLIB                                KEPT          *-------15
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.MLIB                                KEPT          *--------8
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.MLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.SLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.SLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.TLIB                                KEPT          *--------4
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.TLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.TLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS1.UCAT.TK5                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   BREXX.V2R5M3.RXLIB                           KEPT          *--------6
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   SYS1.UCAT.TSO                                KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   HERC01.ISP.PLIB                              KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.ISP.PLIB                                KEPT          *--------4
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.REVIEW.PLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   HERC01.EXEC                                  KEPT          *--------2
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *--------6
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   BREXX.V2R5M3.SAMPLES                         KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   HERC01.CMDPROC                               KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS1.CMDPROC                                 KEPT          *--------2
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.REVIEW.CLIB                             KEPT          *--------1
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   HERC01.ISP.PROF                              KEPT          *-------16
+IEF285I   VOL SER NOS= TSO001.
+                               HH        HH  EEEEEEEEEEEE  RRRRRRRRRRR    CCCCCCCCCC     00000000         11
+                              HH        HH  EEEEEEEEEEEE  RRRRRRRRRRRR  CCCCCCCCCCCC   0000000000       111
+                             HH        HH  EE            RR        RR  CC        CC  00      0000     1111
+                            HH        HH  EE            RR        RR  CC            00     00 00       11
+                           HH        HH  EE            RR        RR  CC            00    00  00       11
+                          HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRRR  CC            00   00   00       11
+                         HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRR   CC            00  00    00       11
+                        HH        HH  EE            RR    RR      CC            00 00     00       11
+                       HH        HH  EE            RR     RR     CC            0000      00       11
+                      HH        HH  EE            RR      RR    CC        CC  000       00       11
+                     HH        HH  EEEEEEEEEEEE  RR       RR   CCCCCCCCCCCC   0000000000    1111111111
+                    HH        HH  EEEEEEEEEEEE  RR        RR   CCCCCCCCCC     00000000     1111111111
+
+
+
+                  TTTTTTTTTTTT       11       777777777777                                            ZZZZZZZZZZZZ
+                  TTTTTTTTTTTT      111       77777777777                                             ZZZZZZZZZZZZ
+                       TT          1111       77      77                                                       ZZ
+                       TT            11              77                                                       ZZ
+                       TT            11             77                                                       ZZ
+                       TT            11            77                                                    ZZZZZZZ
+                       TT            11            77                                                    ZZZZZZZ
+                       TT            11            77                                                     ZZ
+                       TT            11            77                                                    ZZ
+                       TT            11            77                                                   ZZ
+                       TT        1111111111        77                                                  ZZZZZZZZZZZ
+                       TT        1111111111        77                                                 ZZZZZZZZZZZZ
+
+
+****Z   END   TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17   END   Z****
+****Z   END   TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17   END   Z****
+****Z   END   TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17   END   Z****
+****Z   END   TSU   17  HERC01                          ROOM        4.30.51 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   17   END   Z****
+                               HH        HH  EEEEEEEEEEEE  RRRRRRRRRRR    CCCCCCCCCC     00000000         11
+                              HH        HH  EEEEEEEEEEEE  RRRRRRRRRRRR  CCCCCCCCCCCC   0000000000       111
+                             HH        HH  EE            RR        RR  CC        CC  00      0000     1111
+                            HH        HH  EE            RR        RR  CC            00     00 00       11
+                           HH        HH  EE            RR        RR  CC            00    00  00       11
+                          HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRRR  CC            00   00   00       11
+                         HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRR   CC            00  00    00       11
+                        HH        HH  EE            RR    RR      CC            00 00     00       11
+                       HH        HH  EE            RR     RR     CC            0000      00       11
+                      HH        HH  EE            RR      RR    CC        CC  000       00       11
+                     HH        HH  EEEEEEEEEEEE  RR       RR   CCCCCCCCCCCC   0000000000    1111111111
+                    HH        HH  EEEEEEEEEEEE  RR        RR   CCCCCCCCCC     00000000     1111111111
+
+
+
+                  TTTTTTTTTTTT       11        8888888888                                             ZZZZZZZZZZZZ
+                  TTTTTTTTTTTT      111       888888888888                                            ZZZZZZZZZZZZ
+                       TT          1111       88        88                                                     ZZ
+                       TT            11       88        88                                                    ZZ
+                       TT            11        88      88                                                    ZZ
+                       TT            11         88888888                                                 ZZZZZZZ
+                       TT            11         88888888                                                 ZZZZZZZ
+                       TT            11        88      88                                                 ZZ
+                       TT            11       88        88                                               ZZ
+                       TT            11       88        88                                              ZZ
+                       TT        1111111111   888888888888                                             ZZZZZZZZZZZ
+                       TT        1111111111    8888888888                                             ZZZZZZZZZZZZ
+
+
+****Z  START  TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18  START  Z****
+****Z  START  TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18  START  Z****
+****Z  START  TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18  START  Z****
+****Z  START  TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18  START  Z****
+                                                J E S 2   J O B   L O G
+
+
+ 4.32.24 TSU   18  $HASP373 HERC01   STARTED
+ 4.32.24 TSU   18  IEF125I HERC01 - LOGGED ON - TIME=04.32.24
+ 4.33.15 TSU   18  IEFACTRT - Stepname  Procstep  Program   Retcode
+ 4.33.15 TSU   18  IEF126I HERC01 - LOGGED OFF - TIME=04.33.15
+ 4.33.15 TSU   18  $HASP395 HERC01   ENDED
+
+
+------ JES2 JOB STATISTICS ------
+
+
+ 07 FEB 26 JOB EXECUTION DATE
+
+
+         2 CARDS READ
+
+
+       218 SYSOUT PRINT RECORDS
+
+
+         0 SYSOUT PUNCH RECORDS
+
+
+      0.85 MINUTES EXECUTION TIME
+    1     //HERC01  JOB  REGION=08192K                                            TSU   18
+    2     //ISPLOGON EXEC ISPLOGON
+    3     XXISPLOGON PROC
+    4     XXISPFTSO  EXEC PGM=IKJEFT01,PARM=ISPLOGON,DYNAMNBR=64
+    5     XXSTEPLIB  DD  DISP=SHR,DSN=ISP.V2R2M0.LLIB
+    6     XXSYSEXEC  DD  DISP=SHR,DSN=SYS2.EXEC
+    7     XXSYSHELP  DD  DISP=SHR,DSN=SYS1.HELP
+    8     XX         DD  DISP=SHR,DSN=SYS2.HELP
+    9     XXSYSPROC  DD  DISP=SHR,DSN=SYS1.CMDPROC
+   10     XX         DD  DISP=SHR,DSN=SYS2.CMDPROC
+   11     XX         DD  DISP=SHR,DSN=SYS2.REVIEW.CLIB
+   12     XXISPCLIB  DD  DSN=SYS2.ISP.CLIB,DISP=SHR
+   13     XX         DD  DSN=ISP.V2R2M0.CLIB,DISP=SHR
+   14     XXISPLLIB  DD  DSN=SYS2.ISP.LLIB,DISP=SHR
+   15     XXISPMLIB  DD  DSN=SYS2.ISP.MLIB,DISP=SHR
+   16     XX         DD  DSN=ISP.V2R2M0.MLIB,DISP=SHR
+   17     XXISPPLIB  DD  DSN=SYS2.ISP.PLIB,DISP=SHR
+   18     XX         DD  DSN=ISP.V2R2M0.PLIB,DISP=SHR
+   19     XX         DD  DSN=SYS2.REVIEW.PLIB,DISP=SHR
+   20     XXISPSLIB  DD  DSN=SYS2.ISP.SLIB,DISP=SHR
+   21     XX         DD  DSN=ISP.V2R2M0.SLIB,DISP=SHR
+   22     XXISPTLIB  DD  DSN=SYS2.ISP.TLIB,DISP=SHR
+   23     XX         DD  DSN=ISP.V2R2M0.TLIB,DISP=SHR
+   24     XXISPTABL  DD  DSN=SYS2.ISP.TLIB,DISP=SHR
+   25     XXISPTRACE DD  TERM=TS
+IEF236I ALLOC. FOR HERC01 ISPFTSO ISPLOGON
+IEF237I 298  ALLOCATED TO STEPLIB
+IEF237I 390  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYSHELP
+IEF237I 390  ALLOCATED TO
+IEF237I 390  ALLOCATED TO SYSPROC
+IEF237I 390  ALLOCATED TO
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPCLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPLLIB
+IEF237I 298  ALLOCATED TO ISPMLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPPLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPSLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPTLIB
+IEF237I 298  ALLOCATED TO
+IEF237I 298  ALLOCATED TO ISPTABL
+IEF237I TRM  ALLOCATED TO ISPTRACE
+IEF237I 298  ALLOCATED TO SYS00002
+IEF237I 299  ALLOCATED TO SYS00001
+IEF285I   BREXX.V2R5M3.RXLIB                           KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF237I 299  ALLOCATED TO RXLIB
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO SYS00003
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.ISP.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.ISP.PLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.REVIEW.PLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 190  ALLOCATED TO ISPPLIB
+IEF237I 298  ALLOCATED TO SYS00004
+IEF237I 298  ALLOCATED TO SYS00005
+IEF237I 298  ALLOCATED TO SYS00006
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.EXEC                                  KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *-------21
+IEF285I   VOL SER NOS= TK5RES.
+IEF237I 190  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYS00007
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 299  ALLOCATED TO JCC00003
+IEF285I   BREXX.V2R5M3.SAMPLES                         KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *--------3
+IEF285I   VOL SER NOS= TK5RES.
+IEF237I 190  ALLOCATED TO SYSEXEC
+IEF237I 390  ALLOCATED TO SYS00008
+IEF237I 299  ALLOCATED TO SYS00009
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.CMDPROC                               KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS1.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.REVIEW.CLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 190  ALLOCATED TO SYSPROC
+IEF237I 390  ALLOCATED TO SYS00010
+IEF237I 390  ALLOCATED TO SYS00011
+IEF237I 298  ALLOCATED TO SYS00012
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO JCC00003
+IEF285I   HERC01.EXEC                                  KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO SYSUEXEC
+IEF237I TRM  ALLOCATED TO STDIN
+IEF237I TRM  ALLOCATED TO STDOUT
+IEF237I TRM  ALLOCATED TO STDERR
+IEF237I 190  ALLOCATED TO SYS00013
+IEF285I   HERC01.CMDPROC                               KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO SYS00014
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF237I 190  ALLOCATED TO ISPPROF
+IEF237I 298  ALLOCATED TO SYS00015
+IEF285I   SYS2.ISP.CLIB                                KEPT          *--------7
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 298  ALLOCATED TO SYS00016
+IEF285I   SYS2.ISP.CLIB                                KEPT          *-------19
+IEF285I   VOL SER NOS= TK5001.
+IEF237I 298  ALLOCATED TO SYS00017
+IEF285I   SYS2.ISP.CLIB                                KEPT          *-------19
+IEF285I   VOL SER NOS= TK5001.
+IEF142I HERC01 ISPFTSO ISPLOGON - STEP WAS EXECUTED - COND CODE 0000
+IEF285I   ISP.V2R2M0.LLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS1.HELP                                    KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.HELP                                    KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.ISP.CLIB                                KEPT          *--------3
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.CLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.LLIB                                KEPT          *-------15
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.MLIB                                KEPT          *-------12
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.MLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.SLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.SLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.TLIB                                KEPT          *--------6
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.TLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.ISP.TLIB                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS1.UCAT.TK5                                KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   BREXX.V2R5M3.RXLIB                           KEPT          *--------6
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   SYS1.UCAT.TSO                                KEPT          *--------0
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   HERC01.ISP.PLIB                              KEPT          *--------2
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.ISP.PLIB                                KEPT          *--------9
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   ISP.V2R2M0.PLIB                              KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   SYS2.REVIEW.PLIB                             KEPT          *--------0
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   HERC01.EXEC                                  KEPT          *--------2
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS2.EXEC                                    KEPT          *--------6
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   BREXX.V2R5M3.SAMPLES                         KEPT          *--------0
+IEF285I   VOL SER NOS= TK5002.
+IEF285I   HERC01.CMDPROC                               KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   SYS1.CMDPROC                                 KEPT          *--------2
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.CMDPROC                                 KEPT          *--------0
+IEF285I   VOL SER NOS= TK5RES.
+IEF285I   SYS2.REVIEW.CLIB                             KEPT          *--------1
+IEF285I   VOL SER NOS= TK5001.
+IEF285I   HERC01.EXEC                                  KEPT          *--------1
+IEF285I   VOL SER NOS= TSO001.
+IEF285I   HERC01.ISP.PROF                              KEPT          *-------19
+IEF285I   VOL SER NOS= TSO001.
+                               HH        HH  EEEEEEEEEEEE  RRRRRRRRRRR    CCCCCCCCCC     00000000         11
+                              HH        HH  EEEEEEEEEEEE  RRRRRRRRRRRR  CCCCCCCCCCCC   0000000000       111
+                             HH        HH  EE            RR        RR  CC        CC  00      0000     1111
+                            HH        HH  EE            RR        RR  CC            00     00 00       11
+                           HH        HH  EE            RR        RR  CC            00    00  00       11
+                          HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRRR  CC            00   00   00       11
+                         HHHHHHHHHHHH  EEEEEEEE      RRRRRRRRRRR   CC            00  00    00       11
+                        HH        HH  EE            RR    RR      CC            00 00     00       11
+                       HH        HH  EE            RR     RR     CC            0000      00       11
+                      HH        HH  EE            RR      RR    CC        CC  000       00       11
+                     HH        HH  EEEEEEEEEEEE  RR       RR   CCCCCCCCCCCC   0000000000    1111111111
+                    HH        HH  EEEEEEEEEEEE  RR        RR   CCCCCCCCCC     00000000     1111111111
+
+
+
+                  TTTTTTTTTTTT       11        8888888888                                             ZZZZZZZZZZZZ
+                  TTTTTTTTTTTT      111       888888888888                                            ZZZZZZZZZZZZ
+                       TT          1111       88        88                                                     ZZ
+                       TT            11       88        88                                                    ZZ
+                       TT            11        88      88                                                    ZZ
+                       TT            11         88888888                                                 ZZZZZZZ
+                       TT            11         88888888                                                 ZZZZZZZ
+                       TT            11        88      88                                                 ZZ
+                       TT            11       88        88                                               ZZ
+                       TT            11       88        88                                              ZZ
+                       TT        1111111111   888888888888                                             ZZZZZZZZZZZ
+                       TT        1111111111    8888888888                                             ZZZZZZZZZZZZ
+
+
+****Z   END   TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18   END   Z****
+****Z   END   TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18   END   Z****
+****Z   END   TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18   END   Z****
+****Z   END   TSU   18  HERC01                          ROOM        4.33.15 AM 07 FEB 26  PRINTER2  SYS TK5R  TSU   18   END   Z****
 
