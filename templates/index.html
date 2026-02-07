@@ -18,10 +18,10 @@
     <div class="idx-toolbar">
         <div class="idx-toolbar-center">
        
-            <a href="/tutor" class="idx-pill idx-pill-accent">🎓 Learn</a>
-            <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()">Connect</button>
-            <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()">▶ Demo</button>
-            <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()">Restart</button>
+            <a href="/tutor" class="idx-pill idx-pill-accent">[F1] LEARN</a>
+            <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()">[C] CONNECT</button>
+            <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()">[D] DEMO</button>
+            <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()">[R] RESTART</button>
         </div>
         <button class="idx-hamburger" onclick="togglePanel()" title="Menu">☰</button>
     </div>
@@ -48,7 +48,7 @@
     <!-- ── Live Terminal ── -->
     <div class="idx-terminal-section" id="terminalSection">
         <div class="idx-term-header">
-            <span class="idx-term-title"><span style="font-size:0.9rem;">&#128421;</span> Live Terminal</span>
+            <span class="idx-term-title">[>_] LIVE TERMINAL</span>
             <span class="idx-demo-badge" id="demoBadge" style="display:none;">DEMO</span>
             <div class="idx-term-controls">
                 <button class="idx-term-btn" id="wtPauseBtn" onclick="pauseWalkthrough()" title="Pause" style="display:none;">&#9646;&#9646;</button>
@@ -94,18 +94,18 @@
         <!-- ── More Tools (collapsible, collapsed by default) ── -->
         <div class="cp-heading cp-toggle" onclick="toggleSection('toolsGrid', this)" style="margin-top:1.5rem;"><span class="cp-arrow">&#9654;</span> MORE TOOLS</div>
         <nav class="idx-nav collapsed" id="toolsGrid">
-            <a href="/terminal" class="idx-nav-item"><span class="idx-nav-icon">&#128421;</span><span class="idx-nav-label">Terminal</span></a>
-            <a href="/chat" class="idx-nav-item"><span class="idx-nav-icon">&#129302;</span><span class="idx-nav-label">AI Chat</span></a>
-            <a href="/walkthrough" class="idx-nav-item"><span class="idx-nav-icon">&#127916;</span><span class="idx-nav-label">Walkthrough</span></a>
-            <a href="/scanner" class="idx-nav-item"><span class="idx-nav-icon">&#128269;</span><span class="idx-nav-label">Scanner</span></a>
-            <a href="/tutor" class="idx-nav-item"><span class="idx-nav-icon">&#127891;</span><span class="idx-nav-label">Tutor</span></a>
-            <a href="/labs" class="idx-nav-item"><span class="idx-nav-icon">&#129514;</span><span class="idx-nav-label">Labs</span></a>
-            <a href="/recon" class="idx-nav-item"><span class="idx-nav-icon">&#128737;</span><span class="idx-nav-label">Recon</span></a>
-            <a href="/graph" class="idx-nav-item"><span class="idx-nav-icon">&#128376;</span><span class="idx-nav-label">Graph</span></a>
-            <a href="/abstract-models" class="idx-nav-item"><span class="idx-nav-icon">&#129504;</span><span class="idx-nav-label">Models</span></a>
-            <a href="/rag" class="idx-nav-item"><span class="idx-nav-icon">&#128218;</span><span class="idx-nav-label">Knowledge</span></a>
-            <a href="/architecture" class="idx-nav-item"><span class="idx-nav-icon">&#129517;</span><span class="idx-nav-label">Architecture</span></a>
-            <a href="/docs" class="idx-nav-item"><span class="idx-nav-icon">&#128196;</span><span class="idx-nav-label">API Docs</span></a>
+            <a href="/terminal" class="idx-nav-item"><span class="idx-nav-icon">[>_]</span><span class="idx-nav-label">Terminal</span></a>
+            <a href="/chat" class="idx-nav-item"><span class="idx-nav-icon">[AI]</span><span class="idx-nav-label">AI Chat</span></a>
+            <a href="/walkthrough" class="idx-nav-item"><span class="idx-nav-icon">[>>]</span><span class="idx-nav-label">Walkthrough</span></a>
+            <a href="/scanner" class="idx-nav-item"><span class="idx-nav-icon">[?]</span><span class="idx-nav-label">Scanner</span></a>
+            <a href="/tutor" class="idx-nav-item"><span class="idx-nav-icon">[F1]</span><span class="idx-nav-label">Tutor</span></a>
+            <a href="/labs" class="idx-nav-item"><span class="idx-nav-icon">[LAB]</span><span class="idx-nav-label">Labs</span></a>
+            <a href="/recon" class="idx-nav-item"><span class="idx-nav-icon">[*]</span><span class="idx-nav-label">Recon</span></a>
+            <a href="/graph" class="idx-nav-item"><span class="idx-nav-icon">[#]</span><span class="idx-nav-label">Graph</span></a>
+            <a href="/abstract-models" class="idx-nav-item"><span class="idx-nav-icon">[M]</span><span class="idx-nav-label">Models</span></a>
+            <a href="/rag" class="idx-nav-item"><span class="idx-nav-icon">[KB]</span><span class="idx-nav-label">Knowledge</span></a>
+            <a href="/architecture" class="idx-nav-item"><span class="idx-nav-icon">[A]</span><span class="idx-nav-label">Architecture</span></a>
+            <a href="/docs" class="idx-nav-item"><span class="idx-nav-icon">[DOC]</span><span class="idx-nav-label">API Docs</span></a>
         </nav>
     </main>
 
@@ -119,54 +119,54 @@
 
 <!-- ── Right Control Panel ── -->
 <aside class="idx-control-panel collapsed" id="controlPanel">
-    <div class="idx-cp-title">Control Panel</div>
+    <div class="idx-cp-title">═══ MENU ═══</div>
     <a href="/walkthrough" class="idx-cp-item cp-walkthrough">
-        <span class="idx-cp-icon">&#127916;</span>
+        <span class="idx-cp-icon">[>>]</span>
         <span>Walkthrough</span>
     </a>
     <a href="/abstract-models" class="idx-cp-item cp-models">
-        <span class="idx-cp-icon">&#129504;</span>
+        <span class="idx-cp-icon">[M]</span>
         <span>Abstract Models</span>
     </a>
     <a href="/tutor" class="idx-cp-item cp-tutor">
-        <span class="idx-cp-icon">&#127891;</span>
+        <span class="idx-cp-icon">[F1]</span>
         <span>Red Team Tutor</span>
     </a>
     <a href="/labs" class="idx-cp-item cp-labs">
-        <span class="idx-cp-icon">&#129514;</span>
+        <span class="idx-cp-icon">[LAB]</span>
         <span>Security Labs</span>
     </a>
     <a href="/terminal" class="idx-cp-item cp-terminal">
-        <span class="idx-cp-icon">&#128421;</span>
+        <span class="idx-cp-icon">[>_]</span>
         <span>Terminal</span>
     </a>
     <a href="/chat" class="idx-cp-item cp-chat">
-        <span class="idx-cp-icon">&#129302;</span>
+        <span class="idx-cp-icon">[AI]</span>
         <span>AI Chat</span>
     </a>
     <a href="/graph" class="idx-cp-item cp-graph">
-        <span class="idx-cp-icon">&#128376;</span>
+        <span class="idx-cp-icon">[#]</span>
         <span>Trust Graph</span>
     </a>
     <a href="/scanner" class="idx-cp-item cp-scanner">
-        <span class="idx-cp-icon">&#128269;</span>
+        <span class="idx-cp-icon">[?]</span>
         <span>Scanner</span>
     </a>
     <a href="/recon" class="idx-cp-item cp-recon">
-        <span class="idx-cp-icon">&#128737;</span>
+        <span class="idx-cp-icon">[*]</span>
         <span>Recon & Captures</span>
     </a>
     <a href="/rag" class="idx-cp-item cp-rag">
-        <span class="idx-cp-icon">&#128218;</span>
+        <span class="idx-cp-icon">[KB]</span>
         <span>Knowledge Base</span>
     </a>
     <a href="/architecture" class="idx-cp-item cp-arch">
-        <span class="idx-cp-icon">&#129517;</span>
+        <span class="idx-cp-icon">[A]</span>
         <span>Architecture</span>
     </a>
     <div class="idx-cp-divider"></div>
     <button class="idx-cp-item cp-demo-prep" id="demoPrepBtn" onclick="prepareDemo()">
-        <span class="idx-cp-icon">&#9889;</span>
+        <span class="idx-cp-icon">[!]</span>
         <span>Prepare for Demo</span>
     </button>
 </aside>
