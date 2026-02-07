@@ -1,7 +1,7 @@
+/* Terminal Page — IBM PC Retro Theme */
 body {
-    font-family: 'IBM Plex Mono', monospace;
-    background: #0a0c14;
-    color: #66e88a;
+    background: var(--ibm-blue);
+    color: var(--ibm-green);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -9,22 +9,25 @@ body {
 }
 
 .toolbar {
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    padding: 0.75rem 1rem;
+    background: var(--ibm-gray-70);
+    border-bottom: 2px solid var(--ibm-white);
+    padding: 0 0.5rem;
+    height: 28px;
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
     flex-shrink: 0;
 }
 
 .toolbar a {
-    color: var(--ibm-gray-30);
+    color: var(--ibm-gray-100);
     text-decoration: none;
-    font-size: 0.875rem;
+    font-size: 14px;
+    padding: 0 0.5rem;
 }
 
 .toolbar a:hover {
+    background: var(--ibm-blue);
     color: var(--ibm-white);
 }
 
@@ -32,69 +35,77 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-right: 2rem;
+    margin-right: 1rem;
+    background: var(--ibm-cyan);
+    padding: 0 0.5rem;
+    height: 100%;
 }
 
 .toolbar .brand img {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
 }
 
 .toolbar input {
     background: var(--ibm-gray-100);
-    border: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-10);
-    padding: 0.5rem 0.75rem;
-    font-family: inherit;
-    font-size: 0.8rem;
-    width: 200px;
+    border: 2px inset var(--ibm-white);
+    color: var(--ibm-cyan);
+    padding: 0.15rem 0.5rem;
+    font-size: 14px;
+    width: 180px;
 }
 
 .toolbar input:focus {
     outline: none;
-    border-color: var(--ibm-blue);
+    background: var(--ibm-blue-dark);
+    color: var(--ibm-yellow);
 }
 
 .toolbar button {
-    background: var(--ibm-blue);
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 0.8rem;
+    background: var(--ibm-green-dark);
+    color: var(--ibm-white);
+    border: 2px outset var(--ibm-white);
+    padding: 0.15rem 0.75rem;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
+    text-transform: uppercase;
 }
 
 .toolbar button:hover {
-    background: var(--ibm-blue-light);
+    background: var(--ibm-green);
+    color: var(--ibm-gray-100);
+}
+
+.toolbar button:active {
+    border-style: inset;
 }
 
 .toolbar button.secondary {
-    background: var(--ibm-gray-80);
-    color: var(--ibm-gray-30);
-    border: 1px solid var(--ibm-gray-70);
+    background: var(--ibm-gray-70);
+    color: var(--ibm-gray-100);
 }
 
 .toolbar button.secondary:hover {
-    background: var(--ibm-gray-70);
-    color: var(--ibm-gray-10);
+    background: var(--ibm-white-dim);
 }
 
 .toolbar button.danger {
-    background: var(--ibm-red);
+    background: var(--ibm-red-dark);
+    color: var(--ibm-white);
 }
 
 .toolbar .status {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.75rem;
-    color: var(--ibm-gray-50);
+    font-size: 14px;
+    color: var(--ibm-gray-100);
 }
 
 .toolbar .status .dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
+    width: 10px;
+    height: 10px;
     background: var(--ibm-red);
 }
 
@@ -104,31 +115,29 @@ body {
 
 .terminal-container {
     position: fixed;
-    left: 24px;
-    top: 96px;
+    left: 16px;
+    top: 60px;
     width: min(80vw, 760px);
-    height: min(70vh, 560px);
+    height: min(75vh, 580px);
     padding: 0;
     background: transparent;
     z-index: 2;
 }
 
 .terminal {
-    background: #0c0e18;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 0;
-    padding: 12px;
-    font-family: 'IBM Plex Mono', Consolas, monospace;
-    font-size: 13px;
-    line-height: 1.35;
+    background: var(--ibm-gray-100);
+    border: 2px solid var(--ibm-cyan);
+    padding: 8px;
+    font-size: 14px;
+    line-height: 1.3;
     white-space: pre;
     width: 80ch;
-    min-height: calc(24 * 1.35 * 13px);
-    box-shadow: 0 0 40px rgba(60, 200, 120, 0.06);
+    min-height: calc(24 * 1.3 * 14px);
     position: relative;
     outline: none;
-    color: #66e88a;
+    color: var(--ibm-green);
     overflow: hidden;
+    text-shadow: 0 0 2px currentColor;
 }
 
 .terminal::before {
@@ -138,14 +147,18 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(transparent 50%, rgba(0, 0, 0, 0.1) 50%);
-    background-size: 100% 4px;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.1) 0px,
+        rgba(0, 0, 0, 0.1) 1px,
+        transparent 1px,
+        transparent 2px
+    );
     pointer-events: none;
-    opacity: 0.2;
 }
 
 .terminal.disconnected {
-    color: var(--ibm-gray-50);
+    color: var(--ibm-white-dim);
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -154,46 +167,49 @@ body {
 }
 
 .terminal.disconnected h2 {
-    font-size: 1.5rem;
-    color: var(--ibm-blue-light);
-    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    color: var(--ibm-cyan);
+    margin-bottom: 0.75rem;
 }
 
 .pf-bar {
     position: fixed;
-    left: 24px;
-    top: calc(96px + min(70vh, 560px) + 12px);
+    left: 16px;
+    top: calc(60px + min(75vh, 580px) + 8px);
     width: min(80vw, 760px);
-    background: var(--ibm-gray-90);
-    border-top: 1px solid var(--ibm-gray-80);
-    padding: 0.75rem 1rem;
+    background: var(--ibm-gray-70);
+    border: 2px solid var(--ibm-cyan);
+    padding: 0.35rem 0.5rem;
     display: flex;
-    gap: 0.5rem;
+    gap: 0.25rem;
     flex-wrap: wrap;
     justify-content: center;
     z-index: 2;
 }
 
 .pf-key {
-    background: var(--ibm-gray-80);
-    border: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-30);
-    padding: 0.5rem 0.75rem;
-    font-size: 0.7rem;
+    background: var(--ibm-gray-70);
+    border: 2px outset var(--ibm-white);
+    color: var(--ibm-gray-100);
+    padding: 0.2rem 0.5rem;
+    font-size: 12px;
+    font-weight: 700;
     cursor: pointer;
-    min-width: 50px;
+    min-width: 44px;
     text-align: center;
 }
 
 .pf-key:hover {
-    background: var(--ibm-gray-70);
-    border-color: var(--ibm-blue);
+    background: var(--ibm-cyan);
+}
+
+.pf-key:active {
+    border-style: inset;
 }
 
 .pf-key.special {
-    background: var(--ibm-blue);
-    border-color: var(--ibm-blue);
-    color: white;
+    background: var(--ibm-cyan-dark);
+    color: var(--ibm-white);
 }
 
 .chat-float {
@@ -289,19 +305,19 @@ body {
     pointer-events: auto;
 }
 
-/* TN3270 color classes */
-.terminal pre { font-family: 'IBM Plex Mono', Consolas, monospace; margin: 0; }
+/* TN3270 color classes - CGA Palette */
+.terminal pre { margin: 0; }
 .terminal pre span { color: inherit; }
-.terminal pre .c3270-green       { color: #66e88a; }
-.terminal pre .c3270-red         { color: #f07070; }
-.terminal pre .c3270-blue        { color: #6ea8ff; }
-.terminal pre .c3270-turquoise   { color: #4dd8b0; }
-.terminal pre .c3270-yellow      { color: #e8c84a; }
-.terminal pre .c3270-white       { color: #d8d8e0; }
-.terminal pre .c3270-pink        { color: #e888bb; }
-.terminal pre .c3270-intensified { font-weight: bold; }
-.terminal pre .c3270-protected   { color: #6ea8ff; }
-.terminal pre .c3270-field       { color: #66e88a; }
+.terminal pre .c3270-green       { color: #55FF55; }
+.terminal pre .c3270-red         { color: #FF5555; }
+.terminal pre .c3270-blue        { color: #5555FF; }
+.terminal pre .c3270-turquoise   { color: #55FFFF; }
+.terminal pre .c3270-yellow      { color: #FFFF55; }
+.terminal pre .c3270-white       { color: #FFFFFF; }
+.terminal pre .c3270-pink        { color: #FF55FF; }
+.terminal pre .c3270-intensified { font-weight: bold; text-shadow: 0 0 4px currentColor; }
+.terminal pre .c3270-protected   { color: #5555FF; }
+.terminal pre .c3270-field       { color: #55FF55; }
 
 @media (max-width: 900px) {
     .terminal {

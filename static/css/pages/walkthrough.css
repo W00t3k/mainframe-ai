@@ -1,33 +1,36 @@
-/* Walkthrough page — standalone, blue accent */
+/* ══════════════════════════════════════════════════════════════════════════
+   WALKTHROUGH PAGE — IBM PC RETRO THEME
+   ══════════════════════════════════════════════════════════════════════════ */
 :root {
-    --wt-accent: #63a7ff;
-    --wt-accent-hover: #82bbff;
-    --wt-accent-dim: rgba(99, 167, 255, 0.15);
-    --wt-valid: #39d98a;
-    --wt-locked: #f85149;
-    --cp-vtam: #a78bfa;
-    --cp-tso: #63a7ff;
-    --cp-racf: #f59e0b;
-    --cp-cics: #34d399;
-    --cp-jes: #fb7185;
+    --wt-accent: var(--ibm-cyan);
+    --wt-accent-hover: var(--ibm-yellow);
+    --wt-accent-dim: rgba(85, 255, 255, 0.15);
+    --wt-valid: var(--ibm-green);
+    --wt-locked: var(--ibm-red);
+    /* Control plane colors - CGA style */
+    --cp-vtam: #FF55FF;
+    --cp-tso: #55FFFF;
+    --cp-racf: #FFFF55;
+    --cp-cics: #55FF55;
+    --cp-jes: #FF5555;
 }
 
 body {
-    background: var(--ibm-gray-100);
-    color: var(--ibm-gray-10);
+    background: var(--ibm-blue);
+    color: var(--ibm-white);
     min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
 
 /* ============================================================
-   HEADER
+   HEADER — DOS Title Bar
    ============================================================ */
 .wt-page-header {
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    padding: 0 2rem;
-    height: 48px;
+    background: var(--ibm-gray-70);
+    border-bottom: 2px solid var(--ibm-white);
+    padding: 0 1rem;
+    height: 28px;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -36,63 +39,70 @@ body {
 .wt-page-header .brand {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    gap: 0.5rem;
+    background: var(--ibm-cyan);
+    padding: 0 0.75rem;
+    height: 100%;
 }
 
 .wt-page-header .brand img {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
 }
 
 .wt-page-header .brand h1 {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ibm-gray-10);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ibm-gray-100);
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .wt-page-header .brand h1 span {
-    color: var(--wt-accent);
+    color: var(--ibm-gray-100);
 }
 
 .wt-page-header .back-link {
-    font-size: 0.75rem;
-    color: var(--ibm-gray-50);
+    font-size: 14px;
+    color: var(--ibm-gray-100);
     text-decoration: none;
+    padding: 0 0.5rem;
 }
 
 .wt-page-header .back-link:hover {
-    color: var(--wt-accent);
+    background: var(--ibm-blue);
+    color: var(--ibm-white);
 }
 
 /* ============================================================
-   CONNECTION BAR
+   CONNECTION BAR — DOS Status Line
    ============================================================ */
 .wt-status-bar {
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    padding: 0.5rem 2rem;
+    background: var(--ibm-blue-dark);
+    border-bottom: 2px solid var(--ibm-cyan);
+    padding: 0.25rem 1rem;
     display: flex;
     align-items: center;
     gap: 2rem;
-    font-size: 0.75rem;
-    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
 }
 
 .wt-status-bar .label {
-    color: var(--ibm-gray-50);
+    color: var(--ibm-white-dim);
+    text-transform: uppercase;
 }
 
 .wt-status-bar .value {
-    color: var(--ibm-gray-30);
+    color: var(--ibm-white);
+    font-weight: 700;
 }
 
 .wt-status-bar .value.ok {
-    color: var(--wt-valid);
+    color: var(--ibm-green);
 }
 
 .wt-status-bar .value.err {
-    color: var(--wt-locked);
+    color: var(--ibm-red);
 }
 
 .conn-controls {
@@ -102,34 +112,37 @@ body {
 }
 
 .conn-controls input:focus {
-    border-color: var(--wt-accent);
+    background: var(--ibm-blue-dark);
+    color: var(--ibm-yellow);
 }
 
 .btn-inline {
-    padding: 3px 12px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 600;
-    border: 1px solid var(--wt-valid);
-    background: transparent;
-    color: var(--wt-valid);
+    padding: 2px 10px;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px outset var(--ibm-white);
+    background: var(--ibm-green-dark);
+    color: var(--ibm-white);
     cursor: pointer;
-    transition: all 0.15s;
+    text-transform: uppercase;
 }
 
 .btn-inline:hover {
-    background: var(--wt-valid);
-    color: #000;
+    background: var(--ibm-green);
+    color: var(--ibm-gray-100);
+}
+
+.btn-inline:active {
+    border-style: inset;
 }
 
 .btn-inline.disconnect {
-    border-color: var(--wt-locked);
-    color: var(--wt-locked);
+    background: var(--ibm-red-dark);
+    color: var(--ibm-white);
 }
 
 .btn-inline.disconnect:hover {
-    background: var(--wt-locked);
-    color: #000;
+    background: var(--ibm-red);
 }
 
 /* ============================================================
@@ -143,89 +156,94 @@ body {
 }
 
 /* ============================================================
-   BUTTONS
+   BUTTONS — DOS Style
    ============================================================ */
 .btn {
-    padding: 0.5rem 1.25rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.8rem;
-    font-weight: 600;
-    border: none;
+    padding: 0.25rem 1rem;
+    font-size: 14px;
+    font-weight: 700;
+    border: 2px outset var(--ibm-white);
     cursor: pointer;
-    transition: all 0.15s;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    text-transform: uppercase;
 }
 
 .btn-primary {
-    background: var(--wt-accent);
-    color: #000;
+    background: var(--ibm-cyan-dark);
+    color: var(--ibm-white);
 }
 
 .btn-primary:hover {
-    background: var(--wt-accent-hover);
+    background: var(--ibm-cyan);
+    color: var(--ibm-gray-100);
+}
+
+.btn-primary:active {
+    border-style: inset;
 }
 
 .btn-primary:disabled {
     background: var(--ibm-gray-70);
     color: var(--ibm-gray-50);
     cursor: not-allowed;
+    border-style: solid;
 }
 
 .btn-secondary {
-    background: var(--ibm-gray-80);
-    color: var(--ibm-gray-10);
+    background: var(--ibm-gray-70);
+    color: var(--ibm-gray-100);
 }
 
 .btn-secondary:hover {
-    background: var(--ibm-gray-70);
+    background: var(--ibm-white-dim);
 }
 
 .btn-stop {
-    background: var(--wt-locked);
-    color: #000;
+    background: var(--ibm-red-dark);
+    color: var(--ibm-white);
 }
 
 .btn-stop:hover {
-    background: #ff7a73;
+    background: var(--ibm-red);
 }
 
 .btn-sm {
-    padding: 0.3rem 0.75rem;
-    font-size: 0.7rem;
+    padding: 0.15rem 0.5rem;
+    font-size: 12px;
 }
 
 /* ============================================================
-   CONTROL PLANE TAGS
+   CONTROL PLANE TAGS — CGA Color Badges
    ============================================================ */
 .cp-tag {
     display: inline-block;
-    padding: 2px 8px;
-    font-size: 0.6rem;
+    padding: 1px 6px;
+    font-size: 12px;
     font-weight: 700;
-    font-family: 'IBM Plex Mono', monospace;
-    letter-spacing: 0.5px;
+    letter-spacing: 1px;
     text-transform: uppercase;
+    border: 1px solid currentColor;
 }
 
-.cp-tag.cp-vtam { background: var(--cp-vtam); color: #000; }
-.cp-tag.cp-tso  { background: var(--cp-tso); color: #000; }
-.cp-tag.cp-racf { background: var(--cp-racf); color: #000; }
-.cp-tag.cp-cics { background: var(--cp-cics); color: #000; }
-.cp-tag.cp-jes  { background: var(--cp-jes); color: #000; }
+.cp-tag.cp-vtam { background: var(--ibm-gray-100); color: var(--cp-vtam); border-color: var(--cp-vtam); }
+.cp-tag.cp-tso  { background: var(--ibm-gray-100); color: var(--cp-tso); border-color: var(--cp-tso); }
+.cp-tag.cp-racf { background: var(--ibm-gray-100); color: var(--cp-racf); border-color: var(--cp-racf); }
+.cp-tag.cp-cics { background: var(--ibm-gray-100); color: var(--cp-cics); border-color: var(--cp-cics); }
+.cp-tag.cp-jes  { background: var(--ibm-gray-100); color: var(--cp-jes); border-color: var(--cp-jes); }
 
 /* ============================================================
-   WALKTHROUGH CONTROLS BAR
+   WALKTHROUGH CONTROLS BAR — DOS Toolbar
    ============================================================ */
 .wt-controls-bar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    gap: 1rem;
+    padding: 0.25rem 0.5rem;
+    background: var(--ibm-gray-70);
+    border-bottom: 2px solid var(--ibm-white);
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
@@ -237,12 +255,11 @@ body {
 }
 
 .wt-controls-bar select {
-    background: var(--ibm-gray-80);
-    border: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-10);
-    padding: 4px 8px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
+    background: var(--ibm-gray-70);
+    border: 2px outset var(--ibm-white);
+    color: var(--ibm-gray-100);
+    padding: 2px 6px;
+    font-size: 14px;
     outline: none;
 }
 
@@ -252,37 +269,43 @@ body {
 }
 
 .wt-speed-label {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--ibm-gray-50);
+    font-size: 14px;
+    color: var(--ibm-gray-100);
     text-transform: uppercase;
-    letter-spacing: 0.5px;
 }
 
 /* ============================================================
-   PROGRESS BAR
+   PROGRESS BAR — DOS Block Style
    ============================================================ */
 .wt-progress-bar {
     width: 100%;
-    height: 4px;
-    background: var(--ibm-gray-80);
+    height: 16px;
+    background: var(--ibm-gray-100);
+    border: 2px inset var(--ibm-white);
 }
 
 .wt-progress-fill {
     height: 100%;
-    background: var(--wt-accent);
-    transition: width 0.3s ease, background 0.3s ease;
+    background: var(--ibm-cyan);
+    transition: width 0.2s linear;
     width: 0%;
+    /* Block character effect */
+    background-image: repeating-linear-gradient(
+        90deg,
+        var(--ibm-cyan) 0px,
+        var(--ibm-cyan) 12px,
+        var(--ibm-cyan-dark) 12px,
+        var(--ibm-cyan-dark) 14px
+    );
 }
 
 .wt-progress-label {
     display: none;
-    padding: 0.25rem 1rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    color: var(--ibm-gray-40);
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
+    padding: 0.15rem 0.5rem;
+    font-size: 14px;
+    color: var(--ibm-white-dim);
+    background: var(--ibm-blue-dark);
+    border-bottom: 1px solid var(--ibm-cyan);
 }
 
 /* ============================================================
@@ -292,35 +315,31 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 1rem;
+    padding: 0.25rem 0.5rem;
     margin-bottom: 0;
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
+    background: var(--ibm-blue-dark);
+    border-bottom: 1px solid var(--ibm-cyan);
 }
 
 .wt-qt-label {
-    font-family: 'IBM Plex Mono', monospace;
-    color: var(--ibm-gray-50);
-    font-size: 0.65rem;
+    color: var(--ibm-white-dim);
+    font-size: 12px;
     text-transform: uppercase;
-    letter-spacing: 0.05em;
 }
 
 .wt-qt-badge {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 12px;
     font-weight: 700;
-    padding: 0.15rem 0.5rem;
+    padding: 0px 4px;
     border: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-50);
+    color: var(--ibm-gray-70);
     cursor: default;
-    transition: all 0.3s ease;
 }
 
 .wt-qt-badge.answered {
-    border-color: var(--wt-valid);
-    color: var(--wt-valid);
-    background: rgba(57, 217, 138, 0.08);
+    border-color: var(--ibm-green);
+    color: var(--ibm-green);
+    background: transparent;
 }
 
 /* ============================================================
@@ -330,7 +349,7 @@ body {
     display: flex;
     flex: 1;
     overflow: hidden;
-    height: calc(100vh - 190px);
+    height: calc(100vh - 140px);
 }
 
 /* Terminal panel (left) */
@@ -338,19 +357,19 @@ body {
     flex: 0 0 55%;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--ibm-gray-80);
+    border-right: 2px solid var(--ibm-cyan);
 }
 
 .wt-terminal-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--ibm-gray-30);
+    padding: 0.15rem 0.5rem;
+    background: var(--ibm-cyan);
+    color: var(--ibm-gray-100);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .wt-status-tag {
@@ -360,34 +379,36 @@ body {
 .wt-screen-wrap {
     flex: 1;
     overflow: auto;
-    background: #000;
+    background: var(--ibm-gray-100);
+    border: 2px inset var(--ibm-gray-70);
 }
 
 .wt-screen {
-    color: #33ff33;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 12px;
-    padding: 8px 12px;
+    color: var(--ibm-green);
+    font-size: 14px;
+    padding: 4px 8px;
     margin: 0;
-    line-height: 1.35;
-    min-height: calc(24 * 1.35 * 12px);
+    line-height: 1.3;
+    min-height: calc(24 * 1.3 * 14px);
     white-space: pre;
     width: 80ch;
     overflow: hidden;
+    /* CRT phosphor glow effect */
+    text-shadow: 0 0 2px currentColor;
 }
 
-/* TN3270 color classes */
+/* TN3270 color classes - CGA palette */
 .wt-screen span { color: inherit; }
-.wt-screen .c3270-green       { color: #66e88a; }
-.wt-screen .c3270-red         { color: #f07070; }
-.wt-screen .c3270-blue        { color: #6ea8ff; }
-.wt-screen .c3270-turquoise   { color: #4dd8b0; }
-.wt-screen .c3270-yellow      { color: #e8c84a; }
-.wt-screen .c3270-white       { color: #d8d8e0; }
-.wt-screen .c3270-pink        { color: #e888bb; }
-.wt-screen .c3270-intensified { font-weight: bold; }
-.wt-screen .c3270-protected   { color: #6ea8ff; }
-.wt-screen .c3270-field       { color: #66e88a; }
+.wt-screen .c3270-green       { color: #55FF55; }
+.wt-screen .c3270-red         { color: #FF5555; }
+.wt-screen .c3270-blue        { color: #5555FF; }
+.wt-screen .c3270-turquoise   { color: #55FFFF; }
+.wt-screen .c3270-yellow      { color: #FFFF55; }
+.wt-screen .c3270-white       { color: #FFFFFF; }
+.wt-screen .c3270-pink        { color: #FF55FF; }
+.wt-screen .c3270-intensified { font-weight: bold; text-shadow: 0 0 4px currentColor; }
+.wt-screen .c3270-protected   { color: #5555FF; }
+.wt-screen .c3270-field       { color: #55FF55; }
 
 /* Narration panel (right) */
 .wt-narration-panel {
@@ -395,67 +416,71 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    background: var(--ibm-blue);
 }
 
 .wt-narration-header {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: var(--ibm-gray-30);
+    padding: 0.15rem 0.5rem;
+    background: var(--ibm-yellow);
+    color: var(--ibm-gray-100);
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .wt-narration-body {
     flex: 1;
     overflow-y: auto;
-    padding: 1rem;
+    padding: 0.5rem;
+    background: var(--ibm-blue);
 }
 
 .wt-narration-welcome {
-    color: var(--ibm-gray-40);
-    font-size: 0.85rem;
-    line-height: 1.6;
+    color: var(--ibm-white);
+    font-size: 14px;
+    line-height: 1.5;
 }
 
 .wt-narration-welcome h3 {
-    color: var(--ibm-gray-10);
-    margin-bottom: 0.75rem;
+    color: var(--ibm-yellow);
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
 }
 
 .wt-narration-welcome p {
-    margin-bottom: 0.75rem;
+    margin-bottom: 0.5rem;
 }
 
 .wt-planes-legend {
     display: flex;
-    gap: 0.5rem;
+    gap: 0.35rem;
     flex-wrap: wrap;
     margin-top: 0;
 }
 
 /* ============================================================
-   NARRATION LOG ENTRIES
+   NARRATION LOG ENTRIES — DOS List Style
    ============================================================ */
 .wt-narration-entry {
-    border: 1px solid var(--ibm-gray-80);
-    border-left: 3px solid var(--ibm-gray-70);
-    margin-bottom: 0.75rem;
-    padding: 0.75rem 1rem;
-    transition: opacity 0.3s ease, border-color 0.3s ease;
+    border: 1px solid var(--ibm-cyan);
+    border-left: 3px solid var(--ibm-white-dim);
+    margin-bottom: 0.5rem;
+    padding: 0.5rem;
+    background: var(--ibm-blue-dark);
 }
 
 .wt-narration-entry.current {
-    border-left-color: var(--wt-accent);
-    background: rgba(99, 167, 255, 0.04);
+    border-left-color: var(--ibm-cyan);
+    background: var(--ibm-blue-dark);
+    border: 2px solid var(--ibm-cyan);
 }
 
 .wt-narration-entry.past {
-    opacity: 0.55;
-    padding: 0.35rem 1rem;
+    opacity: 0.6;
+    padding: 0.25rem 0.5rem;
     margin-bottom: 0.25rem;
 }
 
@@ -469,52 +494,51 @@ body {
 }
 
 .wt-narration-entry.wt-completion {
-    border-left-color: var(--wt-valid);
-    background: rgba(57, 217, 138, 0.06);
+    border-left-color: var(--ibm-green);
+    border-color: var(--ibm-green);
+    background: var(--ibm-blue-dark);
 }
 
 .wt-entry-header {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    margin-bottom: 0.5rem;
+    margin-bottom: 0.35rem;
 }
 
 .wt-entry-step {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
+    font-size: 12px;
     font-weight: 700;
-    color: var(--wt-accent);
+    color: var(--ibm-cyan);
     min-width: 40px;
 }
 
 .wt-entry-title {
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--ibm-gray-10);
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--ibm-yellow);
 }
 
 .wt-entry-body {
-    font-size: 0.8rem;
-    line-height: 1.6;
-    color: var(--ibm-gray-30);
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ibm-white);
 }
 
 .wt-entry-body p {
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.35rem;
 }
 
 .wt-completion .wt-entry-step {
-    color: var(--wt-valid);
+    color: var(--ibm-green);
 }
 
 /* ============================================================
-   EXECUTING INDICATOR
+   EXECUTING INDICATOR — Blinking Cursor Style
    ============================================================ */
 .wt-executing {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.75rem;
-    color: var(--wt-accent);
+    font-size: 14px;
+    color: var(--ibm-cyan);
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -522,16 +546,15 @@ body {
 }
 
 .wt-exec-dot {
-    width: 6px;
-    height: 6px;
-    background: var(--wt-accent);
-    border-radius: 50%;
-    animation: wt-pulse 1s infinite;
+    width: 8px;
+    height: 14px;
+    background: var(--ibm-cyan);
+    animation: wt-blink 0.5s step-end infinite;
 }
 
-@keyframes wt-pulse {
-    0%, 100% { opacity: 0.3; }
-    50% { opacity: 1; }
+@keyframes wt-blink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
 }
 
 /* ============================================================
@@ -544,23 +567,21 @@ body {
 }
 
 .wt-q-tag {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.55rem;
+    font-size: 10px;
     font-weight: 700;
-    padding: 0.1rem 0.35rem;
-    border: 1px solid var(--wt-accent);
-    color: var(--wt-accent);
-    opacity: 0.8;
+    padding: 0px 3px;
+    border: 1px solid var(--ibm-cyan);
+    color: var(--ibm-cyan);
 }
 
 .wt-q-tag.answered {
-    border-color: var(--wt-valid);
-    color: var(--wt-valid);
+    border-color: var(--ibm-green);
+    color: var(--ibm-green);
 }
 
 .wt-q-tag.unanswered {
-    border-color: var(--ibm-gray-60);
-    color: var(--ibm-gray-60);
+    border-color: var(--ibm-gray-70);
+    color: var(--ibm-gray-70);
 }
 
 /* ============================================================
@@ -570,42 +591,38 @@ body {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    font-size: 0.8rem;
-    color: var(--ibm-gray-40);
-    padding: 0.5rem 0;
+    font-size: 14px;
+    color: var(--ibm-white-dim);
+    padding: 0.35rem 0;
 }
 
 .ai-spinner {
-    width: 14px;
+    width: 8px;
     height: 14px;
-    border: 2px solid var(--ibm-gray-70);
-    border-top-color: var(--wt-accent);
-    border-radius: 50%;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    to { transform: rotate(360deg); }
+    background: var(--ibm-yellow);
+    animation: wt-blink 0.5s step-end infinite;
 }
 
 .ai-markdown strong {
-    color: var(--ibm-gray-10);
-    font-weight: 600;
+    color: var(--ibm-yellow);
+    font-weight: 700;
 }
 
 .ai-markdown ul, .ai-markdown ol {
-    padding-left: 1.2rem;
-    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    margin-bottom: 0.35rem;
 }
 
 .ai-markdown li {
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.2rem;
 }
 
 .ai-markdown code {
-    background: var(--ibm-gray-80);
-    padding: 1px 5px;
-    font-size: 0.85em;
+    background: var(--ibm-blue-dark);
+    border: 1px solid var(--ibm-cyan);
+    color: var(--ibm-cyan);
+    padding: 0px 4px;
+    font-size: 1em;
 }
 
 /* ============================================================
@@ -619,10 +636,10 @@ body {
     .wt-terminal-panel,
     .wt-narration-panel {
         flex: 1 1 auto;
-        min-height: 300px;
+        min-height: 280px;
     }
     .wt-terminal-panel {
         border-right: none;
-        border-bottom: 1px solid var(--ibm-gray-80);
+        border-bottom: 2px solid var(--ibm-cyan);
     }
 }

@@ -1,38 +1,59 @@
+/* ══════════════════════════════════════════════════════════════════════════
+   IBM PC RETRO THEME — 1980s DOS/BIOS AESTHETIC
+   ══════════════════════════════════════════════════════════════════════════ */
 :root {
-    --ibm-blue: #0f62fe;
-    --ibm-blue-dark: #0043ce;
-    --ibm-blue-light: #4589ff;
-    --ibm-cyan: #08bdba;
-    --ibm-teal: #009d9a;
-    --ibm-green: #42be65;
-    --ibm-red: #da1e28;
-    --ibm-yellow: #f1c21b;
-    --ibm-purple: #8a3ffc;
-    --ibm-magenta: #ee5396;
-    --ibm-gray-100: #161616;
-    --ibm-gray-90: #262626;
-    --ibm-gray-80: #393939;
-    --ibm-gray-70: #525252;
-    --ibm-gray-50: #8d8d8d;
-    --ibm-gray-30: #c6c6c6;
-    --ibm-gray-10: #f4f4f4;
-    --ibm-white: #ffffff;
-    --terminal-green: #66e88a;
-    --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.25);
-    --shadow-strong: 0 14px 40px rgba(0, 0, 0, 0.35);
+    /* Primary blues - DOS/BIOS style */
+    --ibm-blue: #0000AA;
+    --ibm-blue-dark: #000080;
+    --ibm-blue-light: #5555FF;
+    --ibm-blue-bright: #0055AA;
+    
+    /* CGA palette */
+    --ibm-cyan: #55FFFF;
+    --ibm-cyan-dark: #00AAAA;
+    --ibm-green: #55FF55;
+    --ibm-green-dark: #00AA00;
+    --ibm-red: #FF5555;
+    --ibm-red-dark: #AA0000;
+    --ibm-yellow: #FFFF55;
+    --ibm-yellow-dark: #AA5500;
+    --ibm-magenta: #FF55FF;
+    --ibm-magenta-dark: #AA00AA;
+    --ibm-white: #FFFFFF;
+    --ibm-white-dim: #AAAAAA;
+    
+    /* Grayscale - PC style */
+    --ibm-gray-100: #000000;
+    --ibm-gray-90: #0000AA;
+    --ibm-gray-80: #000080;
+    --ibm-gray-70: #555555;
+    --ibm-gray-50: #AAAAAA;
+    --ibm-gray-30: #DDDDDD;
+    --ibm-gray-10: #FFFFFF;
+    
+    /* Terminal green (for 3270) */
+    --terminal-green: #55FF55;
+    
+    /* Box drawing border */
+    --border-color: #5555FF;
+    --border-highlight: #55FFFF;
+    
+    /* No shadows in retro - flat design */
+    --shadow-soft: none;
+    --shadow-strong: none;
 }
 
-/* ── TN3270 Terminal Colors ── */
-.c3270-green       { color: #66e88a; }
-.c3270-red         { color: #f07070; }
-.c3270-blue        { color: #6ea8ff; }
-.c3270-turquoise   { color: #4dd8b0; }
-.c3270-yellow      { color: #e8c84a; }
-.c3270-white       { color: #d8d8e0; }
-.c3270-pink        { color: #e888bb; }
-.c3270-intensified { font-weight: 700; }
+/* ── TN3270 Terminal Colors (CGA style) ── */
+.c3270-green       { color: #55FF55; }
+.c3270-red         { color: #FF5555; }
+.c3270-blue        { color: #5555FF; }
+.c3270-turquoise   { color: #55FFFF; }
+.c3270-yellow      { color: #FFFF55; }
+.c3270-white       { color: #FFFFFF; }
+.c3270-pink        { color: #FF55FF; }
+.c3270-intensified { font-weight: 700; text-shadow: 0 0 2px currentColor; }
 .c3270-underline   { text-decoration: underline; }
-.c3270-reverse     { filter: invert(1); }
+.c3270-reverse     { background: #AAAAAA; color: #000000; }
 
 * {
     margin: 0;
@@ -40,17 +61,42 @@
     box-sizing: border-box;
 }
 
+/* CRT Scanline overlay - optional class */
+.crt-effect::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        rgba(0, 0, 0, 0.15) 0px,
+        rgba(0, 0, 0, 0.15) 1px,
+        transparent 1px,
+        transparent 2px
+    );
+    pointer-events: none;
+    z-index: 9999;
+}
+
 body {
-    font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-    background: var(--ibm-gray-100);
-    color: var(--ibm-gray-10);
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--ibm-blue);
+    color: var(--ibm-white);
     min-height: 100vh;
-    line-height: 1.6;
+    line-height: 1.4;
+    font-size: 14px;
 }
 
 a {
-    color: inherit;
+    color: var(--ibm-cyan);
     text-decoration: none;
+}
+
+a:hover {
+    color: var(--ibm-yellow);
+    text-decoration: underline;
 }
 
 img {
@@ -60,116 +106,151 @@ img {
 
 code {
     font-family: 'IBM Plex Mono', monospace;
-    background: var(--ibm-gray-80);
-    padding: 0.15rem 0.35rem;
-    border-radius: 3px;
-    font-size: 0.85em;
+    background: var(--ibm-blue-dark);
+    color: var(--ibm-cyan);
+    padding: 0.1rem 0.3rem;
+    border: 1px solid var(--border-color);
+    font-size: 1em;
 }
 
 .page {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 2.5rem 2rem;
+    padding: 1.5rem 1rem;
 }
 
 .page-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    gap: 2rem;
-    margin-bottom: 2rem;
+    gap: 1rem;
+    margin-bottom: 1rem;
+    border-bottom: 2px double var(--ibm-cyan);
+    padding-bottom: 0.5rem;
 }
 
 .page-title {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.25rem;
+    color: var(--ibm-yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .page-subtitle {
-    color: var(--ibm-gray-50);
+    color: var(--ibm-white-dim);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   APP HEADER — DOS Menu Bar Style
+   ══════════════════════════════════════════════════════════════════════════ */
 .app-header {
-    background: var(--ibm-gray-90);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    padding: 0 2rem;
-    height: 52px;
+    background: var(--ibm-gray-70);
+    border-bottom: 2px solid var(--ibm-white);
+    padding: 0 1rem;
+    height: 28px;
     display: flex;
     align-items: center;
-    gap: 2rem;
+    gap: 0;
 }
 
 .app-header .brand {
     display: flex;
     align-items: center;
-    gap: 0.6rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-weight: 600;
-    font-size: 0.9rem;
+    gap: 0.5rem;
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--ibm-gray-100);
+    background: var(--ibm-cyan);
+    padding: 0 0.75rem;
+    height: 100%;
 }
 
 .app-header .brand img {
-    width: 24px;
-    height: 24px;
+    width: 16px;
+    height: 16px;
 }
 
 .app-header .brand span {
-    color: var(--ibm-blue-light);
+    color: var(--ibm-gray-100);
 }
 
 .nav-links {
     display: flex;
     align-items: center;
-    gap: 1.25rem;
-    font-size: 0.85rem;
+    gap: 0;
+    font-size: 14px;
+    height: 100%;
 }
 
 .nav-links a {
-    color: var(--ibm-gray-30);
-    transition: color 0.15s ease;
+    color: var(--ibm-gray-100);
+    padding: 0 1rem;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    border: none;
 }
 
 .nav-links a:hover,
 .nav-links a.active {
-    color: var(--ibm-white);
-}
-
-.btn {
     background: var(--ibm-blue);
     color: var(--ibm-white);
-    border: none;
-    padding: 0.75rem 1.5rem;
-    font-size: 0.875rem;
+    text-decoration: none;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   BUTTONS — Chunky DOS Style
+   ══════════════════════════════════════════════════════════════════════════ */
+.btn {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--ibm-gray-70);
+    color: var(--ibm-gray-100);
+    border: 2px outset var(--ibm-white);
+    padding: 0.35rem 1rem;
+    font-size: 14px;
+    font-weight: 700;
     cursor: pointer;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    transition: all 0.15s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
 .btn:hover {
-    background: var(--ibm-blue-light);
-    transform: translateY(-1px);
+    background: var(--ibm-cyan);
+    color: var(--ibm-gray-100);
+}
+
+.btn:active {
+    border-style: inset;
 }
 
 .btn.secondary {
-    background: var(--ibm-gray-70);
+    background: var(--ibm-white-dim);
+    color: var(--ibm-gray-100);
 }
 
 .btn.danger {
     background: var(--ibm-red);
+    color: var(--ibm-white);
 }
 
 .btn.success {
-    background: var(--ibm-green);
+    background: var(--ibm-green-dark);
+    color: var(--ibm-white);
 }
 
 .btn:disabled {
     background: var(--ibm-gray-70);
+    color: var(--ibm-gray-50);
     cursor: not-allowed;
-    transform: none;
+    border-style: solid;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   INPUTS — DOS Text Field Style
+   ══════════════════════════════════════════════════════════════════════════ */
 .input,
 .select,
 textarea,
@@ -178,11 +259,12 @@ input[type="search"],
 input[type="number"],
 input[type="password"],
 input[type="email"] {
+    font-family: 'IBM Plex Mono', monospace;
     background: var(--ibm-gray-100);
-    border: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-10);
-    padding: 0.7rem 0.9rem;
-    font-family: inherit;
+    border: 2px inset var(--ibm-white);
+    color: var(--ibm-cyan);
+    padding: 0.35rem 0.5rem;
+    font-size: 14px;
 }
 
 .input:focus,
@@ -194,17 +276,34 @@ input[type="number"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus {
     outline: none;
-    border-color: var(--ibm-blue);
+    background: var(--ibm-blue-dark);
+    color: var(--ibm-yellow);
 }
 
+select {
+    font-family: 'IBM Plex Mono', monospace;
+    background: var(--ibm-gray-70);
+    border: 2px outset var(--ibm-white);
+    color: var(--ibm-gray-100);
+    padding: 0.25rem 0.5rem;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   SECTIONS & CARDS — DOS Window Style
+   ══════════════════════════════════════════════════════════════════════════ */
 .section {
-    background: var(--ibm-gray-90);
-    border: 1px solid var(--ibm-gray-80);
+    background: var(--ibm-blue);
+    border: 2px solid var(--ibm-cyan);
 }
 
 .section-header {
-    padding: 1rem 1.5rem;
-    border-bottom: 1px solid var(--ibm-gray-80);
+    padding: 0.25rem 0.5rem;
+    background: var(--ibm-cyan);
+    color: var(--ibm-gray-100);
+    font-weight: 700;
+    text-transform: uppercase;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -212,23 +311,26 @@ input[type="email"]:focus {
 }
 
 .section-body {
-    padding: 1.5rem;
+    padding: 1rem;
 }
 
 .card {
-    background: var(--ibm-gray-90);
-    border: 1px solid var(--ibm-gray-80);
-    box-shadow: var(--shadow-soft);
+    background: var(--ibm-blue);
+    border: 2px solid var(--ibm-white);
+    box-shadow: 4px 4px 0 var(--ibm-gray-100);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   STATUS BAR — DOS Bottom Bar
+   ══════════════════════════════════════════════════════════════════════════ */
 .status-bar {
-    background: var(--ibm-gray-100);
-    border-bottom: 1px solid var(--ibm-gray-80);
-    padding: 0.6rem 1.5rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
+    background: var(--ibm-gray-70);
+    border-top: 2px solid var(--ibm-white);
+    padding: 0.25rem 1rem;
+    font-size: 14px;
     display: flex;
     gap: 2rem;
+    color: var(--ibm-gray-100);
 }
 
 .status-item {
@@ -238,62 +340,66 @@ input[type="email"]:focus {
 }
 
 .status-item .label {
-    color: var(--ibm-gray-50);
+    color: var(--ibm-gray-100);
     text-transform: uppercase;
 }
 
 .status-item .value {
-    color: var(--ibm-gray-30);
+    color: var(--ibm-gray-100);
+    font-weight: 700;
 }
 
 .status-item .value.ok {
-    color: var(--ibm-green);
+    color: var(--ibm-green-dark);
 }
 
 .status-item .value.err {
-    color: var(--ibm-red);
+    color: var(--ibm-red-dark);
 }
 
 .status-item .value.warn {
-    color: var(--ibm-yellow);
+    color: var(--ibm-yellow-dark);
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   TOASTS — DOS Dialog Box Style
+   ══════════════════════════════════════════════════════════════════════════ */
 .toast-container {
     position: fixed;
     top: 1rem;
     right: 1rem;
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.5rem;
     z-index: 2000;
     pointer-events: none;
 }
 
 .toast {
-    background: var(--ibm-gray-90);
-    border: 1px solid var(--ibm-gray-80);
-    color: var(--ibm-gray-10);
-    padding: 0.85rem 1rem;
-    min-width: 240px;
-    max-width: 360px;
-    box-shadow: var(--shadow-strong);
+    background: var(--ibm-gray-70);
+    border: 2px outset var(--ibm-white);
+    color: var(--ibm-gray-100);
+    padding: 0.5rem 1rem;
+    min-width: 280px;
+    max-width: 400px;
     display: flex;
     align-items: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     pointer-events: auto;
-    animation: toastSlideIn 0.2s ease;
+    animation: toastSlideIn 0.15s ease;
+    box-shadow: 4px 4px 0 var(--ibm-gray-100);
 }
 
 .toast--success {
-    border-left: 4px solid var(--ibm-green);
+    border-left: 4px solid var(--ibm-green-dark);
 }
 
 .toast--error {
-    border-left: 4px solid var(--ibm-red);
+    border-left: 4px solid var(--ibm-red-dark);
 }
 
 .toast--warning {
-    border-left: 4px solid var(--ibm-yellow);
+    border-left: 4px solid var(--ibm-yellow-dark);
 }
 
 .toast--info {
@@ -301,30 +407,58 @@ input[type="email"]:focus {
 }
 
 .toast-message {
-    font-size: 0.8rem;
-    color: var(--ibm-gray-30);
+    font-size: 14px;
+    color: var(--ibm-gray-100);
 }
 
 .toast-title {
-    font-size: 0.85rem;
-    color: var(--ibm-gray-10);
-    font-weight: 600;
+    font-size: 14px;
+    color: var(--ibm-gray-100);
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 @keyframes toastSlideIn {
     from {
         opacity: 0;
-        transform: translateY(-8px);
+        transform: translateX(20px);
     }
     to {
         opacity: 1;
-        transform: translateY(0);
+        transform: translateX(0);
     }
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   ══════════════════════════════════════════════════════════════════════════ */
+.text-yellow { color: var(--ibm-yellow); }
+.text-cyan { color: var(--ibm-cyan); }
+.text-green { color: var(--ibm-green); }
+.text-red { color: var(--ibm-red); }
+.text-white { color: var(--ibm-white); }
+.text-dim { color: var(--ibm-white-dim); }
+
+.bg-blue { background: var(--ibm-blue); }
+.bg-blue-dark { background: var(--ibm-blue-dark); }
+.bg-cyan { background: var(--ibm-cyan); color: var(--ibm-gray-100); }
+
+.border-box {
+    border: 2px solid var(--ibm-cyan);
+    padding: 0.5rem;
+}
+
+.double-border {
+    border: 4px double var(--ibm-cyan);
+    padding: 0.5rem;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
     .page {
-        padding: 2rem 1.5rem;
+        padding: 1rem 0.5rem;
     }
 
     .page-header {
@@ -334,23 +468,23 @@ input[type="email"]:focus {
 
     .status-bar {
         flex-wrap: wrap;
-        gap: 1rem;
+        gap: 0.5rem;
     }
 
     .app-header {
         flex-wrap: wrap;
         height: auto;
-        padding: 0.75rem 1.5rem;
+        padding: 0;
     }
 }
 
 @media (max-width: 600px) {
     .toast {
-        width: calc(100vw - 2rem);
+        width: calc(100vw - 1rem);
         max-width: none;
     }
 
     .page {
-        padding: 1.5rem 1rem;
+        padding: 0.5rem;
     }
 }

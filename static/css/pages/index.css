@@ -1,10 +1,10 @@
 /* ══════════════════════════════════════════════════════════════════════
-   IBM z/OS AI Assistant — Index Page
+   IBM z/OS AI Assistant — Index Page (IBM PC RETRO THEME)
    ══════════════════════════════════════════════════════════════════════ */
 
 body {
-    background: linear-gradient(160deg, #1a1035 0%, #0d0d1a 40%, #0a0a14 100%);
-    color: var(--ibm-gray-10);
+    background: var(--ibm-blue);
+    color: var(--ibm-white);
     min-height: 100vh;
     margin: 0;
 }
@@ -22,15 +22,16 @@ body {
     flex-direction: column;
 }
 
-/* ── Unified Toolbar ── */
+/* ── Unified Toolbar — DOS Menu Style ── */
 .idx-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0.5rem 1rem;
-    background: rgba(10,8,20,0.9);
-    border-bottom: 1px solid rgba(255,255,255,0.08);
+    padding: 0 0.5rem;
+    background: var(--ibm-gray-70);
+    border-bottom: 2px solid var(--ibm-white);
     gap: 0.5rem;
+    height: 28px;
 }
 
 .idx-toolbar-center {
@@ -48,75 +49,69 @@ body {
 }
 
 .idx-dot {
-    width: 8px;
-    height: 8px;
-    border-radius: 50%;
-    background: #6f6f6f;
+    width: 10px;
+    height: 10px;
+    background: var(--ibm-gray-70);
     flex-shrink: 0;
 }
-.idx-dot.on { background: #42be65; box-shadow: 0 0 6px rgba(66,190,101,0.5); }
-.idx-dot.off { background: #6f6f6f; }
+.idx-dot.on { background: var(--ibm-green); }
+.idx-dot.off { background: var(--ibm-red); }
 
 .idx-host-input {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.1);
-    color: var(--ibm-gray-10);
-    padding: 0.35rem 0.6rem;
-    border-radius: 6px;
-    width: 130px;
+    font-size: 14px;
+    background: var(--ibm-gray-100);
+    border: 2px inset var(--ibm-white);
+    color: var(--ibm-cyan);
+    padding: 0.15rem 0.5rem;
+    width: 140px;
 }
-.idx-host-input:focus { border-color: var(--ibm-blue); outline: none; background: rgba(255,255,255,0.06); }
+.idx-host-input:focus { background: var(--ibm-blue-dark); outline: none; color: var(--ibm-yellow); }
 
-/* ── Pill Buttons ── */
+/* ── Pill Buttons — DOS Style ── */
 .idx-pill {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.68rem;
-    font-weight: 600;
-    padding: 0.4rem 0.9rem;
-    border: none;
-    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 0.2rem 0.75rem;
+    border: 2px outset var(--ibm-white);
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    transition: all 0.15s;
-    color: #fff;
-    background: #198038;
+    color: var(--ibm-white);
+    background: var(--ibm-green-dark);
+    text-transform: uppercase;
 }
-.idx-pill:hover { filter: brightness(1.15); transform: translateY(-1px); }
-.idx-pill:active { transform: translateY(0); }
-.idx-pill:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+.idx-pill:hover { background: var(--ibm-green); color: var(--ibm-gray-100); }
+.idx-pill:active { border-style: inset; }
+.idx-pill:disabled { opacity: 0.5; cursor: not-allowed; }
 
 .idx-pill-outline {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.2);
-    color: var(--ibm-gray-30);
+    background: var(--ibm-gray-70);
+    border: 2px outset var(--ibm-white);
+    color: var(--ibm-gray-100);
 }
-.idx-pill-outline:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.05); }
+.idx-pill-outline:hover { background: var(--ibm-white-dim); }
 
-.idx-pill-primary { background: #0f62fe; }
-.idx-pill-accent { background: #6929c4; }
-.idx-pill-danger { background: #da1e28; }
-.idx-pill-success { background: #198038; }
+.idx-pill-primary { background: var(--ibm-cyan-dark); }
+.idx-pill-accent { background: var(--ibm-magenta-dark); }
+.idx-pill-danger { background: var(--ibm-red-dark); }
+.idx-pill-success { background: var(--ibm-green-dark); }
 
 .idx-hamburger {
-    background: transparent;
-    border: 1px solid rgba(255,255,255,0.15);
-    color: var(--ibm-gray-30);
-    font-size: 1.1rem;
-    width: 32px;
-    height: 32px;
-    border-radius: 6px;
+    background: var(--ibm-gray-70);
+    border: 2px outset var(--ibm-white);
+    color: var(--ibm-gray-100);
+    font-size: 14px;
+    width: 24px;
+    height: 20px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: all 0.15s;
 }
-.idx-hamburger:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.25); }
+.idx-hamburger:hover { background: var(--ibm-cyan); }
+.idx-hamburger:active { border-style: inset; }
 
 /* ── Main Content ── */
 main {
@@ -125,27 +120,28 @@ main {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: 1.5rem 2rem;
+    padding: 1rem;
     overflow-y: auto;
+    background: var(--ibm-blue);
 }
 
-/* ── Hero ── */
+/* ── Hero — DOS Title Box ── */
 .hero {
     display: flex;
     flex-direction: column;
     align-items: center;
     text-align: center;
-    gap: 0.4rem;
-    padding: 0.6rem 1rem;
-    background: rgba(255,255,255,0.015);
-    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 0.35rem;
+    padding: 0.5rem 1rem;
+    background: var(--ibm-blue-dark);
+    border: 2px solid var(--ibm-cyan);
+    margin-bottom: 0.5rem;
 }
 
 .hero-logo {
-    height: 48px;
+    height: 40px;
     width: auto;
     flex-shrink: 0;
-    filter: drop-shadow(0 0 20px rgba(69, 137, 255, 0.3));
 }
 
 .hero-text {
@@ -153,78 +149,76 @@ main {
 }
 
 .hero h2 {
-    font-size: 1.1rem;
-    font-weight: 300;
+    font-size: 1rem;
+    font-weight: 700;
     line-height: 1.3;
-    margin-bottom: 0.3rem;
+    margin-bottom: 0.25rem;
+    color: var(--ibm-yellow);
+    text-transform: uppercase;
+    letter-spacing: 2px;
 }
 
 .hero h2 strong {
-    font-weight: 600;
-    color: var(--ibm-blue-light);
+    font-weight: 700;
+    color: var(--ibm-cyan);
 }
 
 .hero p {
-    font-size: 0.68rem;
-    color: var(--ibm-gray-40);
-    line-height: 1.5;
+    font-size: 14px;
+    color: var(--ibm-white);
+    line-height: 1.4;
     margin-bottom: 0;
 }
 
 .hero-badges {
     display: flex;
     justify-content: center;
-    gap: 0.6rem;
+    gap: 0.5rem;
     flex-wrap: wrap;
 }
 
 .badge {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.08);
-    padding: 0.35rem 0.8rem;
-    border-radius: 20px;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--ibm-gray-30);
+    gap: 0.35rem;
+    background: var(--ibm-gray-100);
+    border: 1px solid var(--ibm-cyan);
+    padding: 0.2rem 0.5rem;
+    font-size: 12px;
+    color: var(--ibm-cyan);
 }
 
 .badge .dot {
-    width: 6px;
-    height: 6px;
-    border-radius: 50%;
+    width: 8px;
+    height: 8px;
     background: var(--ibm-green);
 }
 
 .badge .dot-red {
-    background: #ef4444;
+    background: var(--ibm-red);
 }
 
 .badge-btn {
     cursor: pointer;
-    transition: all 0.18s ease;
 }
 
 .badge-btn:hover {
-    background: rgba(239,68,68,0.15);
-    border-color: rgba(239,68,68,0.4);
-    color: #ff6b6b;
+    background: var(--ibm-red-dark);
+    border-color: var(--ibm-red);
+    color: var(--ibm-white);
 }
 
-/* ── Navigation Grid ── */
+/* ── Navigation Grid — DOS Menu Grid ── */
 .idx-nav {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
+    gap: 2px;
     max-width: 560px;
     width: 100%;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 10px;
+    background: var(--ibm-cyan);
+    border: 2px solid var(--ibm-cyan);
     overflow: hidden;
-    margin: 1rem auto 1.5rem;
+    margin: 0.75rem auto 1rem;
 }
 
 .idx-nav-item {
@@ -232,43 +226,40 @@ main {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
-    padding: 1rem 0.5rem;
-    background: rgba(10,8,20,0.6);
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
+    background: var(--ibm-blue);
     text-decoration: none;
-    color: var(--ibm-gray-30);
-    transition: all 0.15s;
+    color: var(--ibm-white);
     border: none;
     cursor: pointer;
-    font-family: 'IBM Plex Mono', monospace;
 }
 
 .idx-nav-item:hover {
-    background: rgba(69,137,255,0.08);
-    color: #fff;
+    background: var(--ibm-cyan);
+    color: var(--ibm-gray-100);
 }
 
 .idx-nav-icon {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
     line-height: 1;
 }
 
 .idx-nav-label {
-    font-size: 0.6rem;
-    font-weight: 500;
-    letter-spacing: 0.5px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
     text-transform: uppercase;
-    opacity: 0.7;
 }
 
 .idx-nav-item:hover .idx-nav-label { opacity: 1; }
 
 .idx-nav-restart {
-    color: #ff6b6b;
+    color: var(--ibm-red);
 }
 .idx-nav-restart:hover {
-    background: rgba(239,68,68,0.1);
-    color: #ff8a8a;
+    background: var(--ibm-red);
+    color: var(--ibm-white);
 }
 
 /* ── Legacy quick nav (hidden) ── */
@@ -310,17 +301,17 @@ main {
     box-shadow: 0 4px 16px rgba(239,68,68,0.2);
 }
 
-/* ── Control Planes ── */
+/* ── Control Planes — DOS Section ── */
 .cp-heading {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.7rem;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
     letter-spacing: 2px;
-    color: #6070a0;
-    margin-bottom: 0.6rem;
+    color: var(--ibm-yellow);
+    margin-bottom: 0.5rem;
     text-align: center;
     width: 100%;
     max-width: 720px;
+    text-transform: uppercase;
 }
 
 .cp-toggle {
@@ -358,7 +349,7 @@ main {
 .cp-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
-    gap: 0.7rem;
+    gap: 0.5rem;
     max-width: 720px;
     width: 100%;
     margin: 0 auto;
@@ -369,42 +360,41 @@ main {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 0.3rem;
-    padding: 1rem 0.5rem;
-    border-radius: 8px;
+    gap: 0.25rem;
+    padding: 0.75rem 0.5rem;
     text-decoration: none;
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-    border: 1px solid rgba(255,255,255,0.08);
-    background: rgba(255,255,255,0.03);
-    border-top: 3px solid currentColor;
+    border: 2px solid currentColor;
+    background: var(--ibm-blue-dark);
 }
 
 .cp-card:hover {
-    transform: translateY(-3px);
-    background: rgba(255,255,255,0.06);
-    box-shadow: 0 6px 24px rgba(0,0,0,0.3);
+    background: currentColor;
+    color: var(--ibm-gray-100) !important;
+}
+
+.cp-card:hover .cp-name,
+.cp-card:hover .cp-desc {
+    color: var(--ibm-gray-100);
 }
 
 .cp-name {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.85rem;
+    font-size: 14px;
     font-weight: 700;
     letter-spacing: 1px;
     color: currentColor;
 }
 
 .cp-desc {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.58rem;
-    color: #8090b0;
+    font-size: 11px;
+    color: var(--ibm-white-dim);
     text-align: center;
 }
 
-.cp-vtam { color: #a56eff; }
-.cp-tso  { color: #4589ff; }
-.cp-racf { color: #ff6b6b; }
-.cp-jes  { color: #ffb020; }
-.cp-cics { color: #08bdba; }
+.cp-vtam { color: #FF55FF; }
+.cp-tso  { color: #55FFFF; }
+.cp-racf { color: #FFFF55; }
+.cp-jes  { color: #FF5555; }
+.cp-cics { color: #55FF55; }
 
 @media (max-width: 600px) {
     .cp-grid { grid-template-columns: repeat(3, 1fr); }
@@ -476,21 +466,20 @@ main {
 .idx-act-dot.dot-wait { background: #ffb020; animation: pulse-dot 1s ease infinite; }
 @keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
 
-/* ── Footer ── */
+/* ── Footer — DOS Status Bar ── */
 footer {
-    background: rgba(10,8,20,0.5);
-    border-top: 1px solid rgba(255,255,255,0.06);
-    padding: 1rem 2rem;
+    background: var(--ibm-gray-70);
+    border-top: 2px solid var(--ibm-white);
+    padding: 0.25rem 1rem;
     text-align: center;
 }
 
 footer p {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.65rem;
-    color: var(--ibm-gray-50);
+    font-size: 14px;
+    color: var(--ibm-gray-100);
 }
 
-footer a { color: var(--ibm-blue-light); }
+footer a { color: var(--ibm-blue); font-weight: 700; }
 
 /* ══════════════════════════════════════════════════════════════════════
    Action Bar, Connection Bar, Collapsible Terminal
@@ -584,7 +573,7 @@ footer a { color: var(--ibm-blue-light); }
 .idx-dot.on  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
 .idx-dot.off { background: #ef4444; }
 
-/* ── Collapsible Terminal ── */
+/* ── Collapsible Terminal — DOS Window ── */
 .idx-terminal-section {
     max-width: 700px;
     width: 700px;
@@ -592,12 +581,9 @@ footer a { color: var(--ibm-blue-light); }
     min-height: 440px;
     max-height: 440px;
     margin: 0 auto;
-    border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 12px;
+    border: 2px solid var(--ibm-cyan);
     overflow: hidden;
-    background: rgba(0,0,0,0.6);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    background: var(--ibm-gray-100);
     flex-shrink: 0;
     flex-grow: 0;
     box-sizing: border-box;
@@ -607,16 +593,15 @@ footer a { color: var(--ibm-blue-light); }
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.4rem 0.8rem;
-    background: rgba(255,255,255,0.03);
-    border-bottom: 1px solid rgba(255,255,255,0.05);
+    padding: 0.15rem 0.5rem;
+    background: var(--ibm-cyan);
 }
 
 .idx-term-title {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
-    color: #a0a0c0;
-    font-weight: 600;
+    font-size: 14px;
+    color: var(--ibm-gray-100);
+    font-weight: 700;
+    text-transform: uppercase;
 }
 
 .idx-demo-badge {
@@ -667,7 +652,7 @@ footer a { color: var(--ibm-blue-light); }
 .idx-fullscreen-link:hover { color: #80b0f0; }
 
 .idx-term-screen {
-    background: #050508;
+    background: var(--ibm-gray-100);
     height: 400px;
     min-height: 400px;
     max-height: 400px;
@@ -676,36 +661,37 @@ footer a { color: var(--ibm-blue-light); }
     outline: none;
     box-sizing: border-box;
     display: block !important;
+    border: 2px inset var(--ibm-gray-70);
 }
 
 .idx-term-screen:focus {
-    box-shadow: inset 0 0 0 1px rgba(99,167,255,0.25);
+    border-color: var(--ibm-cyan);
 }
 
 .idx-term-screen pre {
-    font-family: 'IBM Plex Mono', Consolas, monospace;
-    font-size: 12px;
-    line-height: 1.35;
-    color: #66e88a;
+    font-size: 14px;
+    line-height: 1.3;
+    color: var(--ibm-green);
     background: transparent;
-    padding: 8px;
+    padding: 4px 8px;
     margin: 0;
     white-space: pre;
     overflow: hidden;
     text-align: left;
     width: 80ch;
-    min-height: calc(24 * 1.35 * 12px);
+    min-height: calc(24 * 1.3 * 14px);
+    text-shadow: 0 0 2px currentColor;
 }
 
 .idx-term-screen pre span { color: inherit; }
-.idx-term-screen pre .c3270-green       { color: #66e88a; }
-.idx-term-screen pre .c3270-red         { color: #f07070; }
-.idx-term-screen pre .c3270-blue        { color: #6ea8ff; }
-.idx-term-screen pre .c3270-turquoise   { color: #4dd8b0; }
-.idx-term-screen pre .c3270-yellow      { color: #e8c84a; }
-.idx-term-screen pre .c3270-white       { color: #d8d8e0; }
-.idx-term-screen pre .c3270-pink        { color: #e888bb; }
-.idx-term-screen pre .c3270-intensified { font-weight: 700; }
+.idx-term-screen pre .c3270-green       { color: #55FF55; }
+.idx-term-screen pre .c3270-red         { color: #FF5555; }
+.idx-term-screen pre .c3270-blue        { color: #5555FF; }
+.idx-term-screen pre .c3270-turquoise   { color: #55FFFF; }
+.idx-term-screen pre .c3270-yellow      { color: #FFFF55; }
+.idx-term-screen pre .c3270-white       { color: #FFFFFF; }
+.idx-term-screen pre .c3270-pink        { color: #FF55FF; }
+.idx-term-screen pre .c3270-intensified { font-weight: 700; text-shadow: 0 0 4px currentColor; }
 
 .idx-term-explain {
     font-family: 'IBM Plex Sans', sans-serif;
@@ -728,17 +714,14 @@ footer a { color: var(--ibm-blue-light); }
    ══════════════════════════════════════════════════════════════════════ */
 
 .idx-control-panel {
-    width: 190px;
+    width: 180px;
     flex-shrink: 0;
-    background: rgba(10, 8, 20, 0.85);
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
-    border-left: 1px solid rgba(255,255,255,0.06);
+    background: var(--ibm-blue-dark);
+    border-left: 2px solid var(--ibm-cyan);
     display: flex;
     flex-direction: column;
-    padding-top: 2.5rem;
+    padding-top: 0.5rem;
     overflow-y: auto;
-    transition: width 0.25s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
 }
 
 .idx-control-panel.collapsed {
@@ -785,29 +768,30 @@ footer a { color: var(--ibm-blue-light); }
 }
 
 .idx-cp-title {
-    padding: 0.8rem 0.8rem 0.5rem;
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.6rem;
+    padding: 0.25rem 0.5rem;
+    font-size: 12px;
     font-weight: 700;
-    color: #5060a0;
+    color: var(--ibm-yellow);
     text-transform: uppercase;
-    letter-spacing: 1.5px;
+    letter-spacing: 1px;
+    background: var(--ibm-blue);
+    border-bottom: 1px solid var(--ibm-cyan);
 }
 
 .idx-cp-item {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.5rem 0.8rem;
+    padding: 0.35rem 0.5rem;
     text-decoration: none;
-    font-size: 0.72rem;
-    font-weight: 500;
+    font-size: 14px;
+    font-weight: 700;
     border-left: 3px solid transparent;
-    transition: all 0.18s ease;
 }
 
 .idx-cp-item:hover {
-    filter: brightness(1.3);
+    background: var(--ibm-cyan);
+    color: var(--ibm-gray-100) !important;
 }
 
 .idx-cp-icon {
