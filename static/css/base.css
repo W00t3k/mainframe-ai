@@ -17,10 +17,22 @@
     --ibm-gray-30: #c6c6c6;
     --ibm-gray-10: #f4f4f4;
     --ibm-white: #ffffff;
-    --terminal-green: #33ff33;
+    --terminal-green: #66e88a;
     --shadow-soft: 0 8px 24px rgba(0, 0, 0, 0.25);
     --shadow-strong: 0 14px 40px rgba(0, 0, 0, 0.35);
 }
+
+/* ── TN3270 Terminal Colors ── */
+.c3270-green       { color: #66e88a; }
+.c3270-red         { color: #f07070; }
+.c3270-blue        { color: #6ea8ff; }
+.c3270-turquoise   { color: #4dd8b0; }
+.c3270-yellow      { color: #e8c84a; }
+.c3270-white       { color: #d8d8e0; }
+.c3270-pink        { color: #e888bb; }
+.c3270-intensified { font-weight: 700; }
+.c3270-underline   { text-decoration: underline; }
+.c3270-reverse     { filter: invert(1); }
 
 * {
     margin: 0;

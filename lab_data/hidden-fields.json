@@ -1,0 +1,38 @@
+{
+  "id": "hidden-fields",
+  "title": "Hidden Field Detection",
+  "description": "Identify non-display fields that may contain sensitive data or bypass controls.",
+  "category": "recon",
+  "difficulty": "advanced",
+  "questions": ["Q5"],
+  "steps": [
+    {
+      "title": "Understanding 3270 Attributes",
+      "screen": "3270 Field Attributes:\n\n  Protected/Unprotected - Can user modify?\n  Intensity (Normal/Bright/Non-display)\n  Modified Data Tag (MDT)\n  Numeric/Alpha\n\nNon-display fields are INVISIBLE to user but sent to host.",
+      "expected": "Understand that 3270 screens can have hidden input fields.",
+      "hint": "Non-display attribute hides field contents but they still exist and can be modified.",
+      "assessment": "Q5: 3270 ≠ HTML. Hidden fields work differently than web forms."
+    },
+    {
+      "title": "Password Field Analysis",
+      "screen": "TSO LOGON SCREEN (Field Map):\n\nRow 5:  'Userid ===>' [unprotected, normal]\nRow 6:  'Password ===>' [unprotected, non-display]\nRow 7:  'Account ===>' [unprotected, normal]\nRow 10: [protected, non-display] <-- Hidden field!",
+      "expected": "Identify a hidden field that users cannot see but exists.",
+      "hint": "Row 10 has a protected non-display field. What data might be stored there?",
+      "assessment": "Q5: Screen layout can hide data from users but not from inspection."
+    },
+    {
+      "title": "Session Token Hidden Field",
+      "screen": "Application Menu (Field Analysis):\n\nVisible: Menu options 1-9\nHidden:  Position (5,60) contains 'SESSID=A7B3C9D2'\n         Position (24,1) contains 'PREVMENU=MAIN'\n\nThese hidden fields maintain application state.",
+      "expected": "Recognize that hidden fields often contain session/state data.",
+      "hint": "Applications use hidden fields for state management. These can be manipulated.",
+      "assessment": "Q5: Application state in hidden fields - not server-side sessions like web apps."
+    },
+    {
+      "title": "Hidden Field Manipulation",
+      "screen": "Original hidden field: AUTHCODE=READER\n\nModified to: AUTHCODE=ADMIN\n\n[Submit]\n\nApplication response: 'Welcome, Administrator'\n\nAuthorization bypass via hidden field tampering.",
+      "expected": "Understand that hidden field manipulation can bypass client-side controls.",
+      "hint": "If the application trusts hidden field values, tampering can escalate privileges.",
+      "assessment": "Q5: Trust assumptions - applications may trust 3270 hidden fields."
+    }
+  ]
+}

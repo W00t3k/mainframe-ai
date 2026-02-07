@@ -1,0 +1,416 @@
+{
+  "source": "https://www.jaymoseley.com/hercules/installMVS/iCUSTv8.htm",
+  "title": "Jay Moseley — IPL and Customize MVS 3.8j (March 2025)",
+  "crawled": "2026-02-06",
+  "sections": [
+    {
+      "id": "prerequisites",
+      "title": "Prerequisites & File Structure",
+      "dasd_volumes_required": {
+        "from_prior_steps": [
+          {"file": "mvsres.3350", "addr": "150", "purpose": "MVS System Residence — IPL target"},
+          {"file": "mvs000.3350", "addr": "151", "purpose": "MVS system datasets"},
+          {"file": "page00.3350", "addr": "152", "purpose": "Paging datasets / Link Pack Area"},
+          {"file": "spool1.3350", "addr": "153", "purpose": "JES2 spool"},
+          {"file": "smp000.3350", "addr": "250", "purpose": "SMP distribution libraries"},
+          {"file": "work00.3350", "addr": "251", "purpose": "Work volume"},
+          {"file": "work01.3350", "addr": "252", "purpose": "Work volume"}
+        ],
+        "added_this_step": [
+          {"file": "syscpk.3350", "addr": "253", "purpose": "Language compilers and tools (ALGOL, COBOL, FORTRAN, RPG, etc.)"},
+          {"file": "pub000.3380", "addr": "180", "purpose": "TSO user datasets"},
+          {"file": "pub001.3390", "addr": "190", "purpose": "Miscellaneous user datasets and VSAM clusters"}
+        ]
+      },
+      "host_files": [
+        {"file": "condcode.rexx", "dir": "mvs", "purpose": "REXX script to extract/display condition codes for jobs"},
+        {"file": "create.dasd.sh", "dir": "mvs", "purpose": "Bash script using dasdinit to create empty DASD volumes"},
+        {"file": "submit.sh", "dir": "mvs", "purpose": "Bash script passing jobstream to socket reader via ncat"},
+        {"file": "mvs.cnf", "dir": "conf", "purpose": "Hercules configuration file for the generated MVS system"},
+        {"file": "mvs.script", "dir": "conf", "purpose": "Hercules command script to attach new DASD"},
+        {"file": "mvs00-03.jcl", "dir": "jcl", "purpose": "Jobstreams for DASD init, catalogs, TSO users, TSO apps"},
+        {"file": "tsoaps.het", "dir": "tape", "purpose": "Tape with RPF, QUEUE, REVIEW, DATE install datasets"}
+      ],
+      "macos_notes": [
+        "brew install x3270 — installs c3270 terminal emulator",
+        "brew install nmap — installs ncat for job submission",
+        "Add 'shcmdopt enable' to Hercules config for host shell commands",
+        "Use 127.0.0.1 instead of localhost if connection fails"
+      ]
+    },
+    {
+      "id": "syscpk-volume",
+      "title": "SYSCPK — Language Compilers & Tools Volume",
+      "description": "A pre-built 3350 DASD volume containing language compilers and batch utilities. Required for IPL — SYSC.PROCLIB and SYSC.LINKLIB are integrated into the generated system.",
+      "download": "https://www.jaymoseley.com/hercules/downloads/archives/SYSCPK.tar.gz",
+      "compilers_included": ["XF Assembler", "ALGOL", "COBOL", "FORTRAN", "RPG", "PL/I", "GCC (C)"],
+      "key_datasets": ["SYSC.PROCLIB", "SYSC.LINKLIB"],
+      "warning": "MVS will NOT IPL without this volume present and ready"
+    },
+    {
+      "id": "create-dasd",
+      "title": "Creating Additional DASD Volumes",
+      "command_linux": "./create.dasd.sh user",
+      "command_macos": "/bin/sh ./create.dasd.sh user",
+      "command_windows": "create.dasd.bat user",
+      "volumes_created": [
+        {"name": "PUB000", "type": "3380", "volser": "111111", "cyls": 886, "trks_per_cyl": 15, "bytes_per_trk": 47616},
+        {"name": "PUB001", "type": "3390", "volser": "222222", "cyls": 1114, "trks_per_cyl": 15, "bytes_per_trk": 56832}
+      ],
+      "notes": [
+        "Volumes are raw — no VTOC or control structures until initialized by MVS",
+        "Compressed vs uncompressed: minimal difference on modern hardware",
+        "After creation, volumes must be attached to Hercules and initialized by ICKDSF"
+      ]
+    },
+    {
+      "id": "ipl-first-time",
+      "title": "IPL the MVS System (First Time)",
+      "steps": [
+        "Start Hercules from the mvs directory",
+        "Start a TN3270 client and connect to localhost:3270 (must be TN3270, not telnet)",
+        "Console should connect to device 010 with LU name 'console'",
+        "In Hercules console: ipl 150 (loads from MVSRES volume)",
+        "MVS console shows IEA101A — system parameters prompt",
+        "First IPL: reply r 0,clpa (rebuilds Link Pack Area in paging files)",
+        "Subsequent IPLs: just press ENTER to accept defaults",
+        "Reply r 0,u to IFB010D (IPL reason code — not important for emulator)",
+        "Reply r 1,format,noreq to $HASP426 (format JES2 spool queues — first time only)",
+        "Reply r 2,y to $HASP479 (checkpoint dataset never formatted — first time only)",
+        "Reply r 3,y to $HASP436 (confirm checkpoint record change — first time only)",
+        "IPL complete when console settles — SETPFKEY and ZTIMER programs run from COMMND00"
+      ],
+      "subsequent_ipl": [
+        "Just press ENTER at IEA101A (no CLPA needed)",
+        "Reply r 0,u to IFB010D",
+        "Press ENTER at $HASP426 (no format needed)"
+      ],
+      "key_files": {
+        "SYS1.PARMLIB(IEASYS00)": "System initialization parameters",
+        "SYS1.PARMLIB(IEAPAK00)": "Link Pack Area module list",
+        "SYS1.PARMLIB(COMMND00)": "Console commands executed at IPL (starts SETPFKEY, ZTIMER)",
+        "SYS1.PARMLIB(SETPFK00)": "PF key definitions for MVS console",
+        "SYS1.PARMLIB(JES2PM00)": "JES2 initialization parameters",
+        "mvslog.txt": "Hardcopy console output (all console messages captured here)"
+      },
+      "pfkey_commands": {
+        "PF1": "Display active jobs",
+        "PF2": "Display system status",
+        "PF3": "Display enqueue conflicts",
+        "note": "Use D PFK command to display current PF key settings"
+      },
+      "ztimer": "Runs hourly, purges JES2 output older than 5 days. Config in SYS2.CONTROL(ZTIMER)."
+    },
+    {
+      "id": "submit-jobs",
+      "title": "Submitting Jobs via Socket Reader",
+      "socket_reader": {
+        "device": "2540R at address 00c",
+        "port": 3505,
+        "protocol": "Socket reader monitoring port 3505 for ASCII JCL input"
+      },
+      "commands": {
+        "from_host_terminal": "./submit.sh <directory>/<filename>",
+        "from_hercules_console": "sh ./submit.sh <directory>/<filename>",
+        "windows": "submit.bat <directory>\\<filename>",
+        "macos": "/bin/sh ./submit.sh <directory>/<filename>"
+      },
+      "internals": "cat $1 | ncat --send-only -w1 127.0.0.1 3505",
+      "ebcdic_reader": {
+        "device": "2540R at address 01c",
+        "purpose": "Reading card image files in EBCDIC format — for binary file transfer into MVS, NOT for job submission"
+      }
+    },
+    {
+      "id": "initialize-dasd",
+      "title": "Initialize & Mount New DASD Volumes",
+      "job": "MVS00 (jcl/mvs00.jcl)",
+      "steps": [
+        "Attach volumes to Hercules: script conf/mvs.script",
+        "Submit job: sh ./submit.sh jcl/mvs00.jcl",
+        "ICKDSF prompts for confirmation — reply r <id>,U for each volume",
+        "Job submits a second MVS00 to vary volumes online and set mount attributes",
+        "Also imports SYSCPK User Catalog and defines SYSC aliases in Master Catalog"
+      ],
+      "post_step": "Edit mvs.cnf — uncomment addresses 180 and 190 before next IPL",
+      "expected_codes": "All steps COND CODE 0000"
+    },
+    {
+      "id": "jes2-classes",
+      "title": "JES2 Job Classes & Initiators",
+      "description": "JES2 controls job entry (readers), execution (initiators/classes), and output (printers/punches).",
+      "initiators": [
+        {"id": 1, "classes": ["A"], "started_at_ipl": true},
+        {"id": 2, "classes": ["B", "A"], "started_at_ipl": true},
+        {"id": 3, "classes": ["S"], "started_at_ipl": true},
+        {"id": 4, "classes": ["D", "C", "B", "A"], "started_at_ipl": false},
+        {"id": 5, "classes": ["E", "C", "B", "A"], "started_at_ipl": false},
+        {"id": 6, "classes": ["F", "E", "C", "B", "A"], "started_at_ipl": false}
+      ],
+      "class_s_note": "System Programming class — embedded console commands execute without operator approval. Do NOT use for regular jobs.",
+      "printers": [
+        {"addr": "00e", "type": "1403", "output_class": "A", "file": "prt00e.txt"},
+        {"addr": "00f", "type": "3211", "output_class": "M", "file": "prt00f.txt"},
+        {"addr": "015", "type": "1403", "purpose": "Hardcopy console log (not JES2 controlled)", "file": "mvslog.txt"}
+      ],
+      "punches": [
+        {"addr": "00d", "type": "2540P", "output_class": "B", "file": "pch00d.txt", "purpose": "JES2 punch output"},
+        {"addr": "01d", "type": "2540P", "file": "pch01d.txt", "purpose": "Binary file transfer from MVS to host (not JES2)"}
+      ],
+      "config_file": "SYS1.PARMLIB(JES2PM00)",
+      "spool_warning": "Regularly purge held output to prevent spool filling up. ZTIMER auto-purges output older than 5 days."
+    },
+    {
+      "id": "vsam-catalogs",
+      "title": "VSAM Catalogs & Dataset Organization",
+      "master_catalog": {
+        "name": "SYS1.VSAM.MASTER.CATALOG",
+        "volume": "MVSRES",
+        "password": "SYSPROG",
+        "warning": "Finite capacity — avoid cataloging non-system datasets here"
+      },
+      "user_catalogs": [
+        {"name": "UCPUB000", "volume": "PUB000", "alias_hlq": "PUB000", "purpose": "TSO user datasets"},
+        {"name": "UCPUB001", "volume": "PUB001", "alias_hlq": "PUB001", "purpose": "User datasets and VSAM clusters"},
+        {"name": "UCMVS000", "volume": "MVS000", "alias_hlq": "SYSO", "purpose": "System operations datasets (SMF data)"},
+        {"name": "UCSYSCP", "volume": "SYSCPK", "alias_hlq": "SYSC", "purpose": "Compiler and tools datasets"}
+      ],
+      "job": "MVS01 (jcl/mvs01.jcl)",
+      "password_prompt": "After MVS01 sets Master Catalog password, all catalog updates require operator reply with password 'sysprog'"
+    },
+    {
+      "id": "tso-user-ids",
+      "title": "Adding TSO User IDs",
+      "job": "MVS02 (jcl/mvs02.jcl)",
+      "default_ids": ["HMVS01", "HMVS02"],
+      "emergency_id": "IBMUSER (very limited — emergencies only)",
+      "datasets_per_user": [
+        {"name": "USERID.CLIST", "type": "PDS", "purpose": "Command Lists (CLISTs)"},
+        {"name": "USERID.CNTL", "type": "PDS", "purpose": "JCL jobstreams"},
+        {"name": "USERID.LOAD", "type": "PDS", "purpose": "Load modules"},
+        {"name": "USERID.SOURCE", "type": "PDS", "purpose": "Source code"}
+      ],
+      "steps_per_user": 15,
+      "catalog_password_replies": "Reply r <id>,sysprog for each Master Catalog password prompt (Alias creation)"
+    },
+    {
+      "id": "tso-applications",
+      "title": "TSO Applications — RPF, QUEUE, REVIEW, DATE",
+      "job": "MVS03 (jcl/mvs03.jcl)",
+      "tape_required": "devinit 100 tape/tsoaps.het",
+      "applications": [
+        {
+          "name": "RPF",
+          "version": "V2R0M0",
+          "command": "RPF",
+          "description": "Rob Prins' Programming Facility — ISPF-like editor with dataset management, utilities, and foreground compile. The primary interactive editor.",
+          "author": "Rob Prins",
+          "guide": "rpf200guid.pdf",
+          "tape_datasets": ["RPF200MV.XMI", "RPF200HE.XMI", "RPF200JC.XMI", "RPF200AS.XMI", "RPF200PN.XMI", "RPF200S1.XMI"],
+          "menu_options": {
+            "0": "PARMS — Set RPF parameters",
+            "1": "BROWSE — Browse a dataset",
+            "2": "EDIT — Edit a dataset",
+            "3": "UTILITY — Utility functions",
+            "4": "COMPILE — Foreground compile",
+            "5": "HELP — Display help",
+            "X": "EXIT — Exit RPF"
+          }
+        },
+        {
+          "name": "QUEUE",
+          "command": "Q",
+          "description": "View and control JES2 queues — held output, job status, purge jobs. The essential spool browser.",
+          "author": "Greg Price",
+          "source": "https://www.prycroft6.com.au/vs2sw/index.html#queue",
+          "commands": {
+            "HO": "Display held output queue",
+            "S": "Select/view job output",
+            "D": "Display SYSOUT DDs for a job",
+            "P": "Purge job output",
+            "N": "Next output dataset",
+            "F": "Find text in current output",
+            "DD": "List output datasets",
+            "ST <jobname>": "Show status of specific job",
+            "PF1": "Help",
+            "PF3": "Exit QUEUE"
+          }
+        },
+        {
+          "name": "REVIEW",
+          "version": "51.6",
+          "command": "REVIEW or RFE",
+          "description": "Full screen browser and editor by Greg Price. Companion to QUEUE. Some tasks are easier in REVIEW than RPF.",
+          "author": "Greg Price",
+          "source": "https://www.prycroft6.com.au/vs2sw/index.html#review",
+          "help": "At TSO READY: HELP REVIEW or HELP RFE"
+        },
+        {
+          "name": "DATE",
+          "command": "DATE",
+          "description": "Displays system date (text and Julian format) and system time in multiple formats.",
+          "author": "Jay Moseley (rewrite)"
+        }
+      ]
+    },
+    {
+      "id": "start-vtam-tso",
+      "title": "Starting VTAM & TSO",
+      "steps": [
+        "Start a second TN3270 session — connects to device 400 with LU name 'tso'",
+        "On MVS console: s net (starts VTAM via NET cataloged procedure)",
+        "TSO starts automatically after VTAM initializes (via user modification)",
+        "IST025I messages about TCAM can be safely ignored",
+        "IKT007I indicates TSO is ready for logons",
+        "TSO terminal shows Network Solicitor screen",
+        "Type: logon hmvs01 (or your userid)",
+        "Enter password when prompted",
+        "Welcome message and TSO READY prompt appear"
+      ],
+      "max_concurrent_sessions": 8,
+      "note": "More than 8 sessions requires editing VTAM and TSO parameters — advanced topic"
+    },
+    {
+      "id": "cobol-workflow",
+      "title": "COBOL Compile, Link & Execute Workflow",
+      "steps": [
+        {
+          "step": "Launch RPF",
+          "command": "RPF",
+          "detail": "At TSO READY prompt, type RPF and press Enter"
+        },
+        {
+          "step": "Create COBOL source",
+          "detail": "Option 2 (EDIT) → Data set name: SOURCE → Cmd: s hello",
+          "dataset": "HMVS01.SOURCE(HELLO)",
+          "source": "IDENTIFICATION DIVISION.\nPROGRAM-ID. HELLO.\nENVIRONMENT DIVISION.\nDATA DIVISION.\nPROCEDURE DIVISION.\n    DISPLAY 'HELLO FROM MVS 3.8J'\n    STOP RUN.",
+          "save": "Type 'save' in Cmd field, then F3 twice"
+        },
+        {
+          "step": "Create JCL",
+          "detail": "Option 2 (EDIT) → Member: cobucg, Data set: cntl → Use COLS command for ruler",
+          "dataset": "HMVS01.CNTL(COBUCG)",
+          "jcl": "//HELLO  JOB (ACCT),'COBOL DEMO',CLASS=A,\n//       MSGCLASS=X,MSGLEVEL=(1,1)\n//COB   EXEC COBUCG\n//COB.SYSIN DD DSN=HMVS01.SOURCE(HELLO),DISP=SHR\n//GO.SYSOUT DD SYSOUT=*"
+        },
+        {
+          "step": "Submit",
+          "detail": "Type 'submit' in Cmd field → IKJ56250I JOB HELLO(JOBnnnnn) SUBMITTED",
+          "post": "Type 'save', then F3 four times to exit RPF"
+        },
+        {
+          "step": "View output",
+          "command": "q st hello",
+          "detail": "In QUEUE, type 'd' in front of HELLO to see SYSOUT DDs. Type 's' in front of GO SYSOUT to see program output.",
+          "expected_output": "HELLO FROM MVS 3.8J",
+          "sysout_dds": ["COB SYSPRINT (compiler listing)", "LKED SYSPRINT (linkage editor)", "GO SYSOUT (program output)"],
+          "troubleshooting": "If no output: use 's' instead of 'd' to see JES2 JOB LOG, JCL listing, and messages. Use 'n' and 'p' to navigate output groups."
+        }
+      ],
+      "cobucg_procedure": "COBUCG = COBOL compile (COB), link edit (UC), and execute (G) in one cataloged procedure",
+      "expected_messages": "IEC130I for missing SYSPUNCH and SYSLIB DDs are informational — do not affect compilation"
+    },
+    {
+      "id": "shutdown",
+      "title": "Orderly Shutdown Procedure",
+      "steps": [
+        {"command": "F3 (repeatedly)", "target": "TSO application", "detail": "Exit any running application back to TSO READY prompt"},
+        {"command": "LOGOFF", "target": "TSO session", "detail": "Log off all TSO sessions — terminal returns to Network Solicitor screen"},
+        {"command": "P TSO", "target": "MVS console", "detail": "Stop TSO — quick if all users logged off"},
+        {"command": "Z NET,QUICK", "target": "MVS console", "detail": "Shut down VTAM terminal network"},
+        {"command": "$P JES2", "target": "MVS console", "detail": "Stop JES2 — may take a few seconds for managed processes to complete"},
+        {"command": "Z EOD", "target": "MVS console", "detail": "End of day — writes final SMF records, switches SMF dataset"},
+        {"command": "QUIESCE", "target": "MVS console", "detail": "Flush all memory buffers to DASD — system enters wait state"},
+        {"command": "quit", "target": "Hercules console", "detail": "Exit Hercules emulator"}
+      ],
+      "warnings": [
+        "Always shut down in this exact order to prevent DASD corruption",
+        "Never kill Hercules without QUIESCE — data loss risk",
+        "After shutdown, back up the dasd directory"
+      ]
+    },
+    {
+      "id": "iefactrt",
+      "title": "IEFACTRT Step Completion Messages",
+      "format": "IEFACTRT SSSSSSSS/PPPPPPPP/CP:UT:IM.EX/WA:LL:TI.ME/CCCCC/JJJJJJJJ",
+      "fields": {
+        "SSSSSSSS": "Step name (or JS#999 if omitted)",
+        "PPPPPPPP": "Program name executed",
+        "CP:UT:IM.EX": "CPU time elapsed (HH:MM:SS.hh)",
+        "WA:LL:TI.ME": "Wall clock time elapsed (HH:MM:SS.hh)",
+        "CCCCC": "Completion code (Ucccc=user abend, S-ccc=system abend)",
+        "JJJJJJJJ": "Job name"
+      }
+    },
+    {
+      "id": "hardware-config",
+      "title": "Hercules Hardware Configuration (mvs.cnf)",
+      "devices": {
+        "console": [
+          {"addr": "009", "type": "3277", "purpose": "Alternate console (commented out — not needed for emulator)"},
+          {"addr": "010", "type": "3277", "group": "console", "purpose": "Master console"}
+        ],
+        "tso_terminals": [
+          {"addr": "400-407", "type": "3277", "group": "tso", "purpose": "TSO user sessions (up to 8 concurrent)"}
+        ],
+        "card_readers": [
+          {"addr": "00c", "type": "2540R", "purpose": "Socket reader on port 3505 — JES2 job submission"},
+          {"addr": "01c", "type": "2540R", "purpose": "EBCDIC card reader — binary file transfer into MVS"}
+        ],
+        "card_punches": [
+          {"addr": "00d", "type": "2540P", "purpose": "JES2 punch output (class B)", "file": "pch00d.txt"},
+          {"addr": "01d", "type": "2540P", "purpose": "Binary file transfer from MVS to host", "file": "pch01d.txt"}
+        ],
+        "printers": [
+          {"addr": "00e", "type": "1403", "purpose": "JES2 printer (class A)", "file": "prt00e.txt"},
+          {"addr": "00f", "type": "3211", "purpose": "JES2 printer (class M)", "file": "prt00f.txt"},
+          {"addr": "015", "type": "1403", "purpose": "Hardcopy console log (dedicated, not JES2)", "file": "mvslog.txt"}
+        ],
+        "tape_drives": [
+          {"addr": "100-103", "type": "3420", "purpose": "Tape drives"},
+          {"addr": "310-313", "type": "3420", "purpose": "Additional tape drives"}
+        ],
+        "dasd": [
+          {"addr": "150", "type": "3350", "volser": "MVSRES", "file": "mvsres.3350", "purpose": "System Residence — IPL target"},
+          {"addr": "151", "type": "3350", "volser": "MVS000", "file": "mvs000.3350", "purpose": "System datasets"},
+          {"addr": "152", "type": "3350", "volser": "PAGE00", "file": "page00.3350", "purpose": "Paging / LPA"},
+          {"addr": "153", "type": "3350", "volser": "SPOOL1", "file": "spool1.3350", "purpose": "JES2 spool"},
+          {"addr": "250", "type": "3350", "volser": "SMP000", "file": "smp000.3350", "purpose": "SMP distribution libraries"},
+          {"addr": "251", "type": "3350", "volser": "WORK00", "file": "work00.3350", "purpose": "Work volume"},
+          {"addr": "252", "type": "3350", "volser": "WORK01", "file": "work01.3350", "purpose": "Work volume"},
+          {"addr": "253", "type": "3350", "volser": "SYSCPK", "file": "syscpk.3350", "purpose": "Compilers and tools"},
+          {"addr": "180", "type": "3380", "volser": "PUB000", "file": "pub000.3380", "purpose": "TSO user datasets"},
+          {"addr": "190", "type": "3390", "volser": "PUB001", "file": "pub001.3390", "purpose": "User datasets / VSAM"}
+        ]
+      },
+      "notes": [
+        "Many more device addresses are generated into MVS than are attached in Hercules — this avoids needing a SYSGEN to add devices later",
+        "Do NOT comment out the hardcopy console at 015 — MVS will complain at IPL",
+        "Full hardware reference: mvs 3.8j generated hardware list.pdf"
+      ]
+    },
+    {
+      "id": "references",
+      "title": "Reference Materials",
+      "command_references": [
+        {"title": "Volker Bandke Command Summaries", "url": "https://www.jaymoseley.com/hercules/downloads/pdf/Volker%20Bandke%20Command%20Summaries.pdf"},
+        {"title": "Tommy Sprinkle JES2 Commands", "url": "https://www.tommysprinkle.com/mvs/jes2cmds/index.htm"},
+        {"title": "Jay Moseley JES2 Command Subset", "url": "https://www.jaymoseley.com/hercules/downloads/pdf/JES2%20Command%20Subset.pdf"}
+      ],
+      "ibm_manuals": [
+        {"id": "GC26-3792-8", "title": "OS/VS2 System Generation Reference Release 3.8"},
+        {"id": "GC26-3902-1", "title": "OS/VS2 MVS Utilities Release 3.8"},
+        {"id": "GC28-0645-4", "title": "OS/VS2 Release 3.8 TSO Terminal Users Guide"},
+        {"id": "GC28-0692-5", "title": "OS/VS2 MVS JCL Release 3.8"},
+        {"id": "GC23-0007-1", "title": "Operators Library OS/VS2 MVS JES2 Commands"}
+      ],
+      "tutorials": [
+        {"title": "Jay Moseley TSO Tutorial", "url": "https://www.jaymoseley.com/hercules/tso_tutor/tsotutor.htm"},
+        {"title": "Jay Moseley VSAM Tutorial", "url": "https://www.jaymoseley.com/hercules/vsam_io/vscobol.htm"},
+        {"title": "Customizing MVS", "url": "https://www.jaymoseley.com/hercules/installMVS/changeMgmt.htm"},
+        {"title": "Normal Startup of MVS 3.8", "url": "https://www.jaymoseley.com/hercules/installMVS/iNORMv8.htm"},
+        {"title": "Adding DASD Volumes", "url": "https://www.jaymoseley.com/hercules/installMVS/addingDasdV8.htm"},
+        {"title": "Assembling/Compiling", "url": "https://www.jaymoseley.com/hercules/compiling/how_to.htm"}
+      ]
+    }
+  ]
+}

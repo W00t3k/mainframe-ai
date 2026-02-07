@@ -8,12 +8,12 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
 
 | Feature | Description |
 |---------|-------------|
-| **TN3270 Terminal** | Full 3270 terminal emulation via BIRP v2 |
+| **TN3270 Terminal** | Full 3270 terminal emulation via TN3270 v2 |
 | **AI Chat** | Local LLM (Ollama default, pluggable backend) for mainframe Q&A |
 | **Red Team Tutor** | Guided learning paths for security professionals |
 | **Trust Graph** | BloodHound-inspired relationship visualization |
 | **RAG Knowledge Base** | Retrieval-augmented generation with mainframe docs |
-| **MCP Server** | Model Context Protocol for Claude Desktop (optional) |
+| **MCP Server** | Model Context Protocol for Ollama Desktop (optional) |
 | **Network Scanner** | Discover TN3270 services on networks |
 
 ### What Makes This Different
@@ -37,7 +37,7 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
         │            │            │            │            │
         ▼            ▼            ▼            ▼            ▼
 ┌───────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────────────┐
-│  BIRP v2      │ │  LLM       │ │ Trust      │ │  RAG Engine        │
+│  TN3270 v2      │ │  LLM       │ │ Trust      │ │  RAG Engine        │
 │  (TN3270)     │ │  (Ollama)  │ │ Graph      │ │  (Embeddings)      │
 │               │ │            │ │            │ │                    │
 │ WrappedEmulator │ llama3.1:8b │ │ Nodes/Edges│ │ File-based vectors │
@@ -74,7 +74,7 @@ source venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Optional: Install MCP for Claude Desktop integration
+# Optional: Install MCP for Ollama Desktop integration
 pip install mcp
 
 # Start Ollama (in another terminal)
@@ -230,11 +230,11 @@ File-based retrieval-augmented generation.
 
 ### 6. MCP Server (`mcp_server.py`)
 
-Model Context Protocol server for Claude Desktop integration.
+Model Context Protocol server for Ollama Desktop integration.
 
-**Setup (Claude Desktop):**
+**Setup (Ollama Desktop):**
 
-Add to `~/.config/claude/claude_desktop_config.json`:
+Add to `~/.config/ollama/ollama_desktop_config.json`:
 ```json
 {
   "mcpServers": {
@@ -270,10 +270,10 @@ mainframe_ai_assistant/
 ├── trust_graph.py          # Graph data model + queries
 ├── graph_tools.py          # Parsers + agent loops
 ├── rag_engine.py           # RAG with file-based embeddings
-├── mcp_server.py           # MCP server for Claude Desktop
+├── mcp_server.py           # MCP server for Ollama Desktop
 ├── mainframe_assistant.py  # CLI interface (alternative)
 │
-├── birpv2_modules/         # BIRP v2 TN3270 toolkit
+├── tn3270v2_modules/         # TN3270 v2 TN3270 toolkit
 │   ├── emulator/           # WrappedEmulator
 │   ├── core/               # Screen, Field models
 │   └── zos/                # TSO, CICS, JES helpers
@@ -471,7 +471,7 @@ Educational use. See LICENSE file.
 
 ## Acknowledgments
 
-- **BIRP v2** - TN3270 terminal emulation framework
+- **TN3270 v2** - TN3270 terminal emulation framework
 - **TK5/Hercules** - MVS 3.8J emulation
 - **Ollama** - Local LLM inference
 - **D3.js** - Graph visualization

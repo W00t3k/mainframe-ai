@@ -1,0 +1,116 @@
+{
+  "id": "cobol-compile-run",
+  "title": "COBOL Compile & Run on MVS",
+  "description": "Create a COBOL program using RPF, write JCL to compile and link it, submit the job, and view the output. Every command and JCL parameter is documented with mental models.",
+  "source": "https://www.jaymoseley.com/hercules/installMVS/iCUSTv8.htm",
+  "steps": [
+    {
+      "title": "Launch RPF Editor",
+      "screen": "TSO READY:\n> rpf\n\nRPF MAIN MENU:\n 0  PARMS    - Set RPF parameters\n 1  BROWSE   - Browse a dataset\n 2  EDIT     - Edit a dataset\n 3  UTILITY  - Utility functions\n 4  COMPILE  - Foreground compile\n 5  HELP     - Display help\n X  EXIT     - Exit RPF\n\nPrefix: HERC01\n\nSelect option 2 (EDIT) to create source.",
+      "expected": "RPF (Rob Prins' Programming Facility) is an ISPF-like editor for MVS 3.8j. Your prefix (TSO userid) is prepended to dataset names automatically. Option 2 opens the editor.",
+      "hint": "RPF is similar to ISPF. Each TSO userid has pre-created datasets: userid.SOURCE, userid.CNTL, userid.LOAD, userid.CLIST.",
+      "commands_learned": [
+        {
+          "command": "rpf",
+          "where": "TSO READY prompt",
+          "what": "Launch RPF — the primary interactive editor for MVS 3.8j. Provides ISPF-like menus for editing, browsing, utilities, and compiling. Your TSO prefix is shown on the main menu."
+        },
+        {
+          "command": "PF3",
+          "where": "Any RPF screen",
+          "what": "Exit current panel / go back. The universal 'back' key. Press repeatedly to return to TSO READY."
+        }
+      ],
+      "mental_model": "RPF is your IDE on MVS. Just like VS Code has an explorer, editor, and terminal — RPF has Browse (read-only viewer), Edit (full editor), Utility (file management), and Compile (build tool). Everything revolves around PDS (Partitioned Data Set) members."
+    },
+    {
+      "title": "Create COBOL Source",
+      "screen": "RPF EDIT:\n Data set name: SOURCE\n Member name:   (leave blank)\n\nMember List (empty for new PDS):\nCmd ==> s hello\n\nEditor opens with blank lines:\nCmd ==> cols\n----+----1----+----2----+----3----+----4\n 000001        IDENTIFICATION DIVISION.\n 000002        PROGRAM-ID. HELLO.\n 000003        ENVIRONMENT DIVISION.\n 000004        DATA DIVISION.\n 000005        PROCEDURE DIVISION.\n 000006            DISPLAY 'HELLO FROM MVS 3.8J'\n 000007            STOP RUN.\n\nCmd ==> save\nData saved.",
+      "expected": "Enter SOURCE as the dataset name (becomes HERC01.SOURCE). Type 's hello' in the Cmd field to create member HELLO. Use COLS for a column ruler. Type the COBOL program, then 'save'. Press F3 twice to return to the EDIT panel.",
+      "hint": "COBOL source starts in column 8 (Area A for divisions/sections) and column 12 (Area B for statements). Columns 1-6 are sequence numbers, column 7 is the indicator area.",
+      "commands_learned": [
+        {
+          "command": "s <member>",
+          "where": "RPF Cmd field",
+          "what": "Select (open) a PDS member. If the member doesn't exist, RPF creates it as a new empty member. This is how you create new source files."
+        },
+        {
+          "command": "cols",
+          "where": "RPF Cmd field",
+          "what": "Display a column ruler at the top of the editor. Essential for COBOL (column-sensitive) and JCL (field positions matter)."
+        },
+        {
+          "command": "save",
+          "where": "RPF Cmd field",
+          "what": "Save the current member to the PDS. Always save before exiting or submitting."
+        }
+      ],
+      "mental_model": "A PDS (Partitioned Data Set) is like a directory — it contains named members, each like a file. HERC01.SOURCE is the PDS, HELLO is the member. When you type 'SOURCE' without quotes, RPF prepends your prefix: HERC01.SOURCE."
+    },
+    {
+      "title": "Create JCL & Submit",
+      "screen": "RPF EDIT:\n Data set name: CNTL\n Member name:   COBUCG\n\nCmd ==> cols\n----+----1----+----2----+----3----+----4----+----5\n 000001  //HELLO  JOB (ACCT),'COBOL DEMO',CLASS=A,\n 000002  //       MSGCLASS=X,MSGLEVEL=(1,1)\n 000003  //COB   EXEC COBUCG\n 000004  //COB.SYSIN DD DSN=HERC01.SOURCE(HELLO),DISP=SHR\n 000005  //GO.SYSOUT DD SYSOUT=*\n\nCmd ==> submit\nIKJ56250I JOB HELLO(JOB00015) SUBMITTED\n\nCmd ==> save\nData saved.",
+      "expected": "Create JCL in HERC01.CNTL(COBUCG). The COBUCG cataloged procedure compiles, links, and executes COBOL in one step. Type 'submit' to send to JES2, then 'save'. Press F3 four times to exit RPF.",
+      "hint": "JCL statements start with // in columns 1-2. The JOB statement must be first. Continuation lines have // in columns 1-2 and the continued parameter starts in column 16.",
+      "commands_learned": [
+        {
+          "command": "submit",
+          "where": "RPF Cmd field",
+          "what": "Submit the current JCL member to JES2's internal reader. You'll see a confirmation with the job name and number. The job enters the input queue and waits for an initiator."
+        }
+      ],
+      "jcl_explained": {
+        "//HELLO JOB (ACCT),'COBOL DEMO',CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1)": {
+          "HELLO": "Job name — appears in QUEUE and on console messages",
+          "CLASS=A": "Job class A — picked up by Initiator 1 or 2 (general purpose)",
+          "MSGCLASS=X": "Message class X — output goes to the held queue (viewable in QUEUE)",
+          "MSGLEVEL=(1,1)": "Show all JCL statements (1) and all allocation messages (1) in output"
+        },
+        "//COB EXEC COBUCG": {
+          "COB": "Step name — identifies this step in output and messages",
+          "COBUCG": "Cataloged procedure from SYS1.PROCLIB — chains 3 steps: COB (compile), LKED (link), GO (execute)"
+        },
+        "//COB.SYSIN DD DSN=HERC01.SOURCE(HELLO),DISP=SHR": {
+          "COB.SYSIN": "Override the SYSIN DD in the COB step of the COBUCG procedure",
+          "DSN=HERC01.SOURCE(HELLO)": "Point to your COBOL source member",
+          "DISP=SHR": "Shared read access — doesn't lock the dataset"
+        },
+        "//GO.SYSOUT DD SYSOUT=*": {
+          "GO.SYSOUT": "Override the SYSOUT DD in the GO step",
+          "SYSOUT=*": "Send output to JES2 spool in the same class as MSGCLASS (X = held)"
+        }
+      },
+      "mental_model": "COBUCG is a 3-step assembly line: Step 1 (COB) reads your COBOL source and produces machine code. Step 2 (LKED) links that code into an executable. Step 3 (GO) runs the executable. Each step's output is available separately in QUEUE."
+    },
+    {
+      "title": "View Job Output",
+      "screen": "TSO READY:\n> q st hello\n\nQUEUE - Status of HELLO:\n JOBNAME  JOBID     STATUS\n HELLO    JOB00015  OUTPUT HELD\n\n> d (in front of HELLO)\n\nDD Output:\n STEPNAME  DDNAME       LINES  CLASS\n COB       SYSPRINT       45     X     ← compiler listing\n LKED      SYSPRINT       12     X     ← linkage editor map\n GO        SYSOUT          3     X     ← your program output\n\n> s (in front of GO SYSOUT)\n\nOutput:\n HELLO FROM MVS 3.8J",
+      "expected": "Use QUEUE with 'st hello' to check job status. Use 'd' to display SYSOUT DDs, then 's' to select and view output. The GO step SYSOUT shows your program's DISPLAY output.",
+      "hint": "If no output appears under GO, the compile or link step failed. Use 's' instead of 'd' to see all output including JES2 JOB LOG and JCL listing for debugging.",
+      "commands_learned": [
+        {
+          "command": "q st <jobname>",
+          "where": "TSO READY prompt",
+          "what": "Launch QUEUE and immediately show the status of a specific job. Combines starting QUEUE with the ST (status) command."
+        },
+        {
+          "command": "d",
+          "where": "QUEUE — in front of a job",
+          "what": "Display the SYSOUT DD list for a job. Shows each step's output datasets with line counts. If LINES is blank, that step didn't produce output (possibly failed)."
+        },
+        {
+          "command": "s",
+          "where": "QUEUE — in front of a DD or job",
+          "what": "Select and view output. In front of a job: shows ALL output. In front of a specific DD: shows just that output dataset."
+        }
+      ],
+      "output_explained": {
+        "COB SYSPRINT": "COBOL compiler listing — shows your source code with line numbers, any syntax errors, and compiler diagnostics. Check here first if the job fails.",
+        "LKED SYSPRINT": "Linkage editor output — shows the link map and any unresolved external references. Errors here mean the compile succeeded but linking failed.",
+        "GO SYSOUT": "Your program's runtime output — DISPLAY statements write here. This is what you want to see.",
+        "IEC130I messages": "Informational — SYSPUNCH DD missing (no object deck needed) and SYSLIB DD missing (no COPY statements). Safe to ignore."
+      },
+      "mental_model": "Think of the three output datasets as a build log: COB SYSPRINT = compiler output (like gcc output), LKED SYSPRINT = linker output (like ld output), GO SYSOUT = program stdout. Debug from top to bottom — if compile fails, link and go won't run."
+    }
+  ]
+}

@@ -8,7 +8,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 - Python 3.10+
 - x3270 (for TN3270 emulation)
-- Anthropic API key (for AI features)
+- Ollama API key (for AI features)
 - Access to a mainframe for integration testing (optional)
 
 ### Development Setup
@@ -39,7 +39,7 @@ export ANTHROPIC_API_KEY="your-key-here"
 We follow PEP 8 with some modifications:
 
 - Line length: 100 characters
-- Use tabs for indentation in BIRP modules (legacy)
+- Use tabs for indentation in TN3270 modules (legacy)
 - Use spaces (4) for new code
 - Use type hints for public APIs
 
@@ -72,7 +72,7 @@ mainframe_ai_assistant/
 ├── mainframe_assistant.py   # CLI entry point
 ├── web_app.py               # Web interface
 ├── rag_engine.py            # RAG implementation
-├── birpv2_modules/          # BIRP v2 toolkit
+├── tn3270v2_modules/          # TN3270 v2 toolkit
 │   ├── core/                # Data models
 │   ├── emulator/            # TN3270 wrapper
 │   ├── security/            # Security tools
@@ -133,7 +133,7 @@ pytest
 pytest tests/test_models.py
 
 # Run with coverage
-pytest --cov=birpv2_modules
+pytest --cov=tn3270v2_modules
 
 # Run only unit tests (no mainframe required)
 pytest -m "not integration"
@@ -144,7 +144,7 @@ pytest -m "not integration"
 ```python
 # tests/test_models.py
 import pytest
-from birpv2_modules.core.models import Screen, Field
+from tn3270v2_modules.core.models import Screen, Field
 
 def test_field_creation():
     field = Field("TEST", 0, 0, "SF(c0=c8)")
@@ -161,7 +161,7 @@ def test_screen_fields():
 @pytest.mark.integration
 def test_emulator_connect():
     """Requires running mainframe"""
-    from birpv2_modules.emulator.wrapper import WrappedEmulator
+    from tn3270v2_modules.emulator.wrapper import WrappedEmulator
     em = WrappedEmulator(visible=False)
     em.connect('localhost:3270')
     assert em.is_connected()
@@ -213,7 +213,7 @@ Each module should have a README.md with:
 
 ### New z/OS Parser
 
-1. Create `birpv2_modules/zos/new_helper.py`:
+1. Create `tn3270v2_modules/zos/new_helper.py`:
 
 ```python
 #!/usr/bin/env python3
@@ -237,14 +237,14 @@ class NewHelper:
         return result
 ```
 
-2. Update `birpv2_modules/zos/__init__.py`:
+2. Update `tn3270v2_modules/zos/__init__.py`:
 
 ```python
 from .new_helper import NewHelper
 ```
 
 3. Add tests in `tests/test_new_helper.py`
-4. Document in `birpv2_modules/zos/README.md`
+4. Document in `tn3270v2_modules/zos/README.md`
 
 ### New Security Check
 
@@ -263,7 +263,7 @@ self.patterns['new_pattern'] = [
 
 ### New Export Format
 
-1. Add function to `birpv2_modules/io/exporters.py`:
+1. Add function to `tn3270v2_modules/io/exporters.py`:
 
 ```python
 def export_to_new_format(history, filename):

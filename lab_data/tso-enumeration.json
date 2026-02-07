@@ -1,0 +1,38 @@
+{
+  "id": "tso-enumeration",
+  "title": "TSO User Enumeration",
+  "description": "Discover valid TSO userids through logon response analysis.",
+  "category": "recon",
+  "difficulty": "intermediate",
+  "questions": ["Q1", "Q2"],
+  "steps": [
+    {
+      "title": "Valid User Response",
+      "screen": "TSO/E LOGON\nUserid ===> HERC01\nPassword ===>\n\nIKJ56425I INVALID PASSWORD\nEnter password again.",
+      "expected": "Recognize that 'INVALID PASSWORD' confirms the userid exists.",
+      "hint": "Different error messages reveal valid vs invalid userids. This is user enumeration.",
+      "assessment": "Q1: Identity enumeration is possible before authentication."
+    },
+    {
+      "title": "Invalid User Response",
+      "screen": "TSO/E LOGON\nUserid ===> NOTAUSER\nPassword ===>\n\nIKJ56421I LOGON REJECTED - USERID NOTAUSER NOT DEFINED TO RACF",
+      "expected": "Note the different error message for non-existent users.",
+      "hint": "The system reveals whether a userid exists. This enables enumeration attacks.",
+      "assessment": "Q1: RACF tells you when a user doesn't exist - information disclosure."
+    },
+    {
+      "title": "Locked Account",
+      "screen": "TSO/E LOGON\nUserid ===> LOCKED01\nPassword ===>\n\nIKJ56428I USERID LOCKED01 HAS BEEN REVOKED",
+      "expected": "Identify a revoked/locked account status.",
+      "hint": "Revoked accounts still exist - they're just disabled. Different from non-existent.",
+      "assessment": "Q2: Authority is evaluated at logon time, not before."
+    },
+    {
+      "title": "Enumeration Script Logic",
+      "screen": "# Pseudo-logic for TSO enumeration:\n\nfor userid in wordlist:\n    response = attempt_logon(userid, 'dummy')\n    if 'INVALID PASSWORD' in response:\n        print(f'VALID: {userid}')\n    elif 'NOT DEFINED' in response:\n        continue  # invalid\n    elif 'REVOKED' in response:\n        print(f'LOCKED: {userid}')",
+      "expected": "Understand how response-based enumeration works.",
+      "hint": "Automated enumeration uses response patterns to classify userids.",
+      "assessment": "Q1: Identity enumeration through authentication interface."
+    }
+  ]
+}

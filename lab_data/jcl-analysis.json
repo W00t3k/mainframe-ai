@@ -1,0 +1,38 @@
+{
+  "id": "jcl-analysis",
+  "title": "JCL Security Analysis",
+  "description": "Analyze JCL for security implications and privilege escalation paths.",
+  "category": "security",
+  "difficulty": "intermediate",
+  "questions": ["Q2", "Q3"],
+  "steps": [
+    {
+      "title": "Job Identity",
+      "screen": "//MYJOB JOB (ACCT),'MY JOB',CLASS=A,\n//             MSGCLASS=X,USER=HERC01\n//STEP1 EXEC PGM=IEBGENER",
+      "expected": "Identify who the job runs as and when that identity is established.",
+      "hint": "USER= on JOB card specifies the submitter. Job runs under this identity.",
+      "assessment": "Q2: Authority is evaluated at job execution, using submitter's identity."
+    },
+    {
+      "title": "Deferred Execution",
+      "screen": "//NIGHTJOB JOB (ACCT),'BATCH',CLASS=B,\n//             TYPRUN=HOLD\n//STEP1 EXEC PROC=BACKUP\n\nJob submitted at 09:00.\nJob released at 23:00 (14 hours later).\nJob runs under submitter's identity.",
+      "expected": "Understand the time gap between submission and execution.",
+      "hint": "TYPRUN=HOLD delays execution. The submitter's authority is checked later.",
+      "assessment": "Q3: Deferred execution - submit now, run later under original identity."
+    },
+    {
+      "title": "Sensitive Dataset Access",
+      "screen": "//EXTRACT JOB (ACCT),'DATA COPY'\n//STEP1 EXEC PGM=IEBGENER\n//SYSUT1 DD DSN=PROD.CUSTOMER.DATA,DISP=SHR\n//SYSUT2 DD DSN=HERC01.STOLEN.DATA,\n//          DISP=(NEW,CATLG),UNIT=SYSDA,\n//          SPACE=(TRK,(100,50))",
+      "expected": "Identify data exfiltration via batch job.",
+      "hint": "JCL can copy any dataset the submitter has READ access to.",
+      "assessment": "Q3: Batch jobs can access data under submitter's authority silently."
+    },
+    {
+      "title": "RACF Surrogate",
+      "screen": "//ADMINJOB JOB (ACCT),'ADMIN TASK',\n//             USER=IBMUSER\n//STEP1 EXEC PGM=IKJEFT01\n//SYSTSIN DD *\n  LISTUSER *\n/*\n\nICH408I USER(HERC01) NOT AUTHORIZED TO USE\n        SUBMIT SURROGATE IBMUSER.*",
+      "expected": "Recognize surrogate submission and its authorization.",
+      "hint": "Submitting as another user requires SURROGAT class permission in RACF.",
+      "assessment": "Q2: RACF controls who can submit jobs as other users."
+    }
+  ]
+}

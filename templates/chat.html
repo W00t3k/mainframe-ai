@@ -470,10 +470,14 @@ or use /connect command.
             const screen = document.getElementById('terminalScreen');
             const mini = document.getElementById('terminalMini');
 
-            if (screenData.connected && screenData.screen) {
+            if (screenData.connected && (screenData.screen || screenData.screen_html)) {
                 screen.classList.remove('disconnected');
-                screen.textContent = screenData.screen;
-                mini.textContent = screenData.screen;
+                if (screenData.screen_html) {
+                    screen.innerHTML = '<pre>' + screenData.screen_html + '</pre>';
+                } else {
+                    screen.innerHTML = '<pre>' + screenData.screen + '</pre>';
+                }
+                mini.textContent = screenData.screen || '';
                 terminalConnected = true;
 
                 document.getElementById('termDot').classList.add('active');

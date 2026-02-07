@@ -1,0 +1,336 @@
+{
+  "source": "http://featherriver.net/loggingInAndOutMvs.html",
+  "title": "MVS 3.8j From a Business Programmer Perspective",
+  "crawled": "2026-02-06",
+  "sections": [
+    {
+      "id": "logging-in",
+      "title": "Logging In to MVS",
+      "url": "http://featherriver.net/loggingInAndOutMvs.html",
+      "steps": [
+        "Open terminal emulator and connect to host:3270",
+        "First connection may show logon screen WITHOUT 'Logon ===>' prompt — press Enter to get the prompt",
+        "Subsequent connections show logon screen WITH 'Logon ===>' prompt",
+        "Enter username at the logon prompt and press Enter",
+        "System displays password prompt — enter password and press Enter",
+        "System logs you in and displays broadcast screen — press Enter",
+        "Fortune screen appears — press Enter to get past it",
+        "TSO Applications Menu is displayed"
+      ],
+      "tso_applications_menu": {
+        "1": "RFE — 'SPF like' productivity tool (most used, similar to ISPF)",
+        "2": "RPF — 'SPF like' productivity tool (older, can be confusing)",
+        "3": "IMON/370 — system monitor",
+        "4": "QUEUE — spool browser",
+        "5": "HELP — general TSO help",
+        "6": "UTILS — information on utilities and commands available",
+        "7": "TERMTEST — verify 3270 terminal capabilities"
+      }
+    },
+    {
+      "id": "logging-off",
+      "title": "Logging Off MVS",
+      "url": "http://featherriver.net/loggingInAndOutMvs.html",
+      "steps": [
+        "If in RFE menu system, press F3 repeatedly to back out to main menu",
+        "Enter X or press F3 to exit menu system and return to TSO command processor",
+        "At TSO READY prompt, type LOGOFF and press Enter",
+        "Logon screen will be displayed — safe to close terminal"
+      ],
+      "warnings": [
+        "NEVER close terminal emulator while still logged on — it makes the userid unusable",
+        "Recovery option 1: Log on as admin and shutdown the system",
+        "Recovery option 2: At Hercules console enter /c u=<userid> to cancel the stuck user"
+      ]
+    },
+    {
+      "id": "starting-mvs",
+      "title": "Starting MVS 3.8j (TK4-)",
+      "url": "http://featherriver.net/installandrunMVS.html",
+      "steps": [
+        "Change into the TK4- installation directory",
+        "Two run modes: daemon mode (no console) or console mode (recommended)",
+        "Run set_console_mode batch file to enable console, or set_daemon_mode for unattended",
+        "Windows: type mvs.bat | Linux/Mac: ./mvs",
+        "Boot takes a couple of minutes — watch for scrolling output",
+        "When the large 'TK4-' banner appears, MVS 3.8J is ready for connections"
+      ]
+    },
+    {
+      "id": "shutting-down",
+      "title": "Shutting Down MVS",
+      "url": "http://featherriver.net/shuttingdownMVS.html",
+      "methods": {
+        "from_terminal": "Log in as admin, get to TSO menu, enter SHUTDOWN, then logoff",
+        "from_console": "Logoff of the system, then at console enter '/s shutdown' and press Enter"
+      },
+      "notes": [
+        "Always shutdown gracefully — improper shutdown can cause boot problems",
+        "Shutdown can take up to 5 minutes to complete"
+      ]
+    },
+    {
+      "id": "using-rfe",
+      "title": "Using TSO RFE Application",
+      "url": "http://featherriver.net/usingRFE.html",
+      "overview": "RFE is the primary productivity tool, similar to IBM ISPF. Most administration and programming tasks use RFE.",
+      "main_menu": {
+        "1": "Browse — view dataset contents (rarely used directly)",
+        "2": "Edit — look at and edit members of datasets",
+        "3": "Utilities — Data Set Utilities menu",
+        "4": "Command — execute TSO or CLIST commands without exiting RFE",
+        "5": "Exit — return to TSO Application menu"
+      },
+      "utilities_menu": {
+        "1": "Library — perform actions on PDS members (display, rename, delete)",
+        "2": "DataSet — info, allocate, delete, rename, catalog, uncatalog datasets",
+        "3": "Move/Copy — move or copy datasets/members between datasets",
+        "4": "DSList — search for datasets by name prefix",
+        "5": "SPFStats — member statistics",
+        "6": "Outlist — view spooled output (MSGCLASS=H jobs)"
+      },
+      "edit_commands": {
+        "s_or_e": "Select/edit a member from the member list",
+        "d": "Delete a member (use 'R' to restore before leaving screen)",
+        "i": "Insert blank line (i10 inserts 10 lines)",
+        "c": "Copy a line",
+        "m": "Move a line",
+        "save": "Save the member (enter in command line)",
+        "sub": "Submit the member as a JCL job (enter in command line)",
+        "help": "Show all available edit commands"
+      },
+      "dataset_allocation": {
+        "record_formats": {
+          "F": "Fixed length",
+          "FB": "Fixed length, blocked",
+          "V": "Variable length",
+          "VB": "Variable length, blocked"
+        },
+        "fields": [
+          "Logical Record Length (80 for source PDS)",
+          "Physical Block Size (must be multiple of LRECL for blocked)",
+          "Volume (which disk volume)",
+          "Unit (drive type, e.g. 3350)",
+          "Allocation Space Unit: T=track, C=cylinder",
+          "Primary Space Quantity",
+          "Secondary Space Quantity (up to 15 extensions)",
+          "Number of Directory Blocks (>0 makes it a PDS)"
+        ]
+      },
+      "outlist": {
+        "commands": {
+          "ST *": "Show all spooled files (not just current user)",
+          "s": "Select/display a job's output",
+          "p": "Purge a job",
+          "o": "Release for output (put queue letter in Q column, usually 'A')"
+        },
+        "navigation": "Use F8/F7 to page through output"
+      }
+    },
+    {
+      "id": "adding-user",
+      "title": "Adding a User to the System",
+      "url": "http://featherriver.net/addinguser.html",
+      "overview": "TK4- uses RAKF (simplified RACF). Adding a user requires editing the security file AND running the ADDUSER JCL job.",
+      "steps": [
+        "Log on as HERC01",
+        "Start RFE → Utilities → DSLIST",
+        "Open SYS1.SECURE.CNTL dataset",
+        "Edit the 'users' member",
+        "Add new line in alphabetical order with format: cols 1-8 USERID, 10-17 Group, 19-26 Password, 28 'N' for ops authority",
+        "Save the file",
+        "At Hercules console: /stop rakf",
+        "Then: /start rakf",
+        "Back in RFE: Utilities → DSLIST → SYS2.JCLLIB",
+        "Edit ADDUSER member",
+        "Change HLQ= to the new username, ensure UTYPE=USER",
+        "Save and submit (enter 'sub' in command line)",
+        "Log off HERC01, log in as new user"
+      ],
+      "user_groups": {
+        "ADMIN": "Full administrative access",
+        "RAKFADM": "RAKF administration",
+        "USER": "Standard user — can work with own files only"
+      },
+      "rakf_file_format": "Fixed format, lines in ascending order. Col 1-8: USERID, Col 10-17: Group, Col 18: * for multi-group, Col 19-26: Password, Col 28: Ops authority (Y/N)",
+      "warnings": [
+        "Do NOT use HERC01 or HERC02 as your regular userid — those are admin accounts",
+        "HERC03 and HERC04 are standard USER group accounts"
+      ]
+    },
+    {
+      "id": "creating-datasets",
+      "title": "Creating Datasets",
+      "url": "http://featherriver.net/creatingdataset.html",
+      "steps": [
+        "Log in, select RFE → Utilities (option 3)",
+        "Select DATASET (option 2)",
+        "Enter 'a' in command field to allocate",
+        "Enter dataset name via Project/Library/Type fields OR in DATA SET NAME field",
+        "If no quotes around name, userid is prepended automatically",
+        "Press Enter to get allocation parameters screen",
+        "Fill in: Record Format, Record Length, Block Size, Volume, Unit, Space, Directory Blocks",
+        "Press Enter to create"
+      ],
+      "naming": "Convention is USERID.TYPE.SUBTYPE (e.g., MICHELLE.COBOL.SRC)",
+      "pds_vs_sequential": "If Directory Blocks > 0, creates a PDS (like a folder). If 0 or empty, creates a sequential dataset (like a file)."
+    },
+    {
+      "id": "jcl-overview",
+      "title": "JCL Overview",
+      "url": "http://featherriver.net/jcl_overview.html",
+      "card_format": {
+        "identifier": "// (two slashes)",
+        "name": "1-8 characters after //",
+        "operation": "JOB, EXEC, or DD",
+        "parameters": "Positional and keyword parameters after operation"
+      },
+      "statements": {
+        "JOB": {
+          "description": "Defines the job — first card in job stream",
+          "positional_params": ["Accounting info (optional)", "Programmer name (optional)"],
+          "keyword_params": {
+            "USER": "Userid to run under",
+            "PASSWORD": "Userid's password",
+            "NOTIFY": "TSO user to notify on completion",
+            "CLASS": "Single char scheduling class (A is common)",
+            "MSGCLASS": "Output destination (A=Printer1, X=Printer3, Z=Printer2, H=hold)",
+            "MSGLEVEL": "(stmt,msg) — controls JCL and message listing",
+            "REGION": "Memory allocation (e.g., 9000K)",
+            "TIME": "(min,sec) — max execution time"
+          }
+        },
+        "EXEC": {
+          "description": "Defines a step — PGM=program to execute. Multiple EXEC statements = multiple steps.",
+          "format": "//stepname EXEC PGM=program"
+        },
+        "DD": {
+          "description": "Data Definition — describes datasets, printers, devices for the EXEC program",
+          "format": "//ddname DD parameters"
+        }
+      },
+      "continuation": "End parameter line with comma, next line starts with // followed by space",
+      "end_of_job": "// (two slashes alone) marks end of job stream",
+      "instream_data": "DD * means instream data follows, terminated by /* line"
+    },
+    {
+      "id": "cobol-program",
+      "title": "Your First COBOL Program",
+      "url": "http://featherriver.net/firstcobolpgm.html",
+      "overview": "COBOL 65 on MVS 3.8J. Business-oriented language, one of the oldest (after FORTRAN, LISP, ALGOL).",
+      "divisions": {
+        "IDENTIFICATION DIVISION": "Required. Contains PROGRAM-ID (required) and optional paragraphs: AUTHOR, INSTALLATION, DATE-WRITTEN, DATE-COMPILED, SECURITY, REMARKS",
+        "ENVIRONMENT DIVISION": "Describes hardware communication. CONFIGURATION SECTION (SOURCE-COMPUTER, OBJECT-COMPUTER, SPECIAL-NAMES) and INPUT-OUTPUT SECTION (FILE-CONTROL, I-O-CONTROL)",
+        "DATA DIVISION": "FILE SECTION (FD entries for files), WORKING-STORAGE SECTION (variables), LINKAGE SECTION (for subprograms)",
+        "PROCEDURE DIVISION": "Program logic. Paragraphs start in cols 8-11, sentences in cols 12-72"
+      },
+      "file_control_select": "SELECT filename ASSIGN TO device-class-ddname",
+      "device_classes": {
+        "UR": "Card reader, card punch, or printer",
+        "UT": "Tape drive, disk drive (printer also works)",
+        "DA": "Direct access (ISAM, VSAM)"
+      },
+      "level_numbers": {
+        "01": "Group item (record level)",
+        "02-49": "Sub-items",
+        "66": "Redefines",
+        "77": "Independent items (not sub-grouped)",
+        "88": "Condition names"
+      },
+      "compile_link_go": {
+        "embedded_source": "//COB.SYSIN DD * followed by source, terminated by /*",
+        "external_source": "//COB.SYSIN DD DSN=dataset(member)",
+        "output": "//GO.SYSPRINT DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=80,BLKSIZE=80)"
+      },
+      "termination": "GOBACK returns to caller, STOP RUN terminates entire program"
+    },
+    {
+      "id": "assembler-program",
+      "title": "Your First 370 Assembler Program",
+      "url": "http://featherriver.net/firstassemblerpgm.html",
+      "overview": "Closest to hardware, fastest execution. Unique requirement: must establish linkage with calling/called programs.",
+      "hello_world": [
+        "WRMSG    START",
+        "         STM   14,12,12(13)    STORE REGISTERS IN CALLERS AREA",
+        "         BALR  12,0            SETUP REGISTER 12 AS BASE",
+        "         USING *,12",
+        "         ST    13,SAVEAREA+4   STORE ADDRESS OF CALLERS AREA",
+        "         LA    13,SAVEAREA     ESTABLISH OUR SAVEAREA",
+        "         OPEN  (SYSPRINT,OUTPUT)",
+        "         PUT   SYSPRINT,HELLOMSG",
+        "         CLOSE SYSPRINT",
+        "         L     13,SAVEAREA+4   RESTORE CALLERS R 13",
+        "         LM    14,12,12(13)    RESTORE CALLERS REGISTERS",
+        "         LA    15,0            RETURN CODE",
+        "         BR    14              RETURN",
+        "SAVEAREA DS    18F",
+        "HELLOMSG DC    C' HELLO WORLD '",
+        "SYSPRINT DCB   DSORG=PS,MACRF=PM,DDNAME=SYSPRINT,RECFM=FBA,LRECL=166,BLKSIZE=16600",
+        "         END   WRMSG"
+      ],
+      "compile_link_go": {
+        "proc": "ASMFCG",
+        "parms": "PARM.ASM=(OBJ,NODECK),MAC1='SYS2.MACLIB'",
+        "embedded": "//ASM.SYSIN DD * ... /*",
+        "external": "//ASM.SYSIN DD DSN=LEARN.ASEMBLR.SRC(FIRSTPGM),DISP=OLD"
+      },
+      "linkage_boilerplate": "Lines 1-13 (save registers, establish base), 14-20 (restore registers, return), and END statement can be reused as a copy member"
+    },
+    {
+      "id": "fortran-program",
+      "title": "Your First Fortran Program",
+      "url": "http://featherriver.net/firstfortranpgm.html",
+      "overview": "First compiler (1957, IBM). FORTRAN IV on MVS 3.8J with Fortran G and Fortran H compilers. Heavily used in science/engineering/math.",
+      "line_format": "Cols 1-6: line ID, Col 7: continuation if non-blank, Cols 8-72: code",
+      "hello_world": [
+        "      110 FORMAT( ' NAME IS ' 20A1)",
+        "      120 FORMAT(20A1)",
+        "          LOGICAL*1 NAME(20)",
+        "          READ(5,120) (NAME(I),I=1,20)",
+        "          WRITE(6,110) NAME",
+        "          STOP",
+        "          END"
+      ],
+      "compile_link_go": {
+        "proc": "FORTHCLD",
+        "parms": "REGION.FORT=384K,PARM.FORT='LIST'",
+        "input_dd": "//FORT.SYSIN DD *",
+        "output_dd": "//GO.FT06F001 DD SYSOUT=*,DCB=(RECFM=FBA,LRECL=132,BLKSIZE=13200)",
+        "note": "FT06F001 — the '6' corresponds to device 6 (WRITE(6,...)) in the program"
+      }
+    },
+    {
+      "id": "pl1-program",
+      "title": "Your First PL/I Program",
+      "url": "http://featherriver.net/firstpl1pgm.html",
+      "overview": "PL/I (mid-1960s IBM). Designed for math, science, business, and systems programming. Still in use today.",
+      "hello_world": [
+        "AVRG: PROC OPTIONS(MAIN);",
+        "  DECLARE LOANNAME CHAR(20);",
+        "  GET LIST(A,B,C,D,E,LOANNAME);",
+        "  SUM = A + B + C + D + E;",
+        "  MEAN = SUM /5;",
+        "  PUT LIST((10)' ' !! 'NAME IS: ' !! LOANNAME);",
+        "  PUT SKIP LIST('AVERAGE IS', MEAN);",
+        "  RETURN;",
+        "END AVRG;"
+      ],
+      "compile_link_go": {
+        "proc": "PL1LFCLG",
+        "input_dd": "//PL1L.SYSIN DD *",
+        "link_lib": "//LKED.SYSLIB DD DSN=SYS1.PL1LIB,DISP=SHR",
+        "step_lib": "//GO.STEPLIB DD DSN=SYS1.PL1LIB,DISP=SHR"
+      },
+      "notes": "Every statement ends with semicolon. !! is string concatenation."
+    },
+    {
+      "id": "getting-mvs",
+      "title": "Getting TK4- MVS Software",
+      "url": "http://featherriver.net/gettingMVS.html",
+      "overview": "IBM did not copyright MVS in the 1960s-70s. Volker Bandke made MVS 3.8j available for Hercules emulator (by Jay Maynard). Jürgen Winkelmann created TK4- with improvements.",
+      "download": "https://wotho.ethz.ch/tk4-/tk4-_v1.00_current.zip",
+      "install": "Unzip to a directory like 'mainframe' or 'tk4-mvs'",
+      "platforms": "Windows, Linux, Mac (even Raspberry Pi 3)"
+    }
+  ]
+}

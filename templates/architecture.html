@@ -126,7 +126,7 @@
             <div class="flow-step">
                 <div class="label">Connect</div>
                 <div class="title">TN3270 Session</div>
-                <div class="detail">Connect to target host:port via BIRP emulator wrapper.</div>
+                <div class="detail">Connect to target host:port via py3270 emulator.</div>
             </div>
             <div class="flow-step">
                 <div class="label">Navigate</div>
@@ -153,6 +153,246 @@
                 <div class="title">Export</div>
                 <div class="detail">Generate HTML, JSON, or Markdown reports with severity breakdowns.</div>
             </div>
+        </div>
+    </section>
+
+    <!-- ── MVS Hardware Configuration ── -->
+    <section class="arch-diagram mvs-hw">
+        <h2>MVS 3.8j Hardware Configuration</h2>
+        <p class="mvs-hw-sub">Hercules-emulated System/370 device map — addresses, volumes, and I/O paths</p>
+
+        <div class="mvs-hw-layout">
+            <!-- Central CPU -->
+            <div class="mvs-cpu">
+                <div class="mvs-cpu-label">MVS 3.8j</div>
+                <div class="mvs-cpu-detail">conf/tk5.cnf</div>
+            </div>
+
+            <!-- Left column: Terminals -->
+            <div class="mvs-col mvs-col-left">
+                <div class="mvs-group">
+                    <div class="mvs-group-title">Console</div>
+                    <div class="mvs-device mvs-dev-term">
+                        <span class="mvs-addr">010</span>
+                        <span class="mvs-name">3270 Console</span>
+                        <span class="mvs-info">console@localhost:3270</span>
+                    </div>
+                </div>
+                <div class="mvs-group">
+                    <div class="mvs-group-title">TSO Terminals</div>
+                    <div class="mvs-device mvs-dev-term">
+                        <span class="mvs-addr">400</span>
+                        <span class="mvs-name">3270 TSO</span>
+                        <span class="mvs-info">tso@localhost:3270</span>
+                    </div>
+                    <div class="mvs-dev-range">401 &ndash; 407</div>
+                </div>
+                <div class="mvs-group">
+                    <div class="mvs-group-title">Tape Drives</div>
+                    <div class="mvs-device mvs-dev-tape">
+                        <span class="mvs-addr">100</span>
+                        <span class="mvs-name">3420 Tape</span>
+                    </div>
+                    <div class="mvs-dev-range">101 &ndash; 103, 310 &ndash; 313</div>
+                </div>
+            </div>
+
+            <!-- Right column: I/O Devices -->
+            <div class="mvs-col mvs-col-right">
+                <div class="mvs-group">
+                    <div class="mvs-group-title">Card Readers</div>
+                    <div class="mvs-device mvs-dev-io">
+                        <span class="mvs-addr">00c</span>
+                        <span class="mvs-name">2540R Socket</span>
+                        <span class="mvs-info">localhost:3505</span>
+                    </div>
+                    <div class="mvs-device mvs-dev-io">
+                        <span class="mvs-addr">01c</span>
+                        <span class="mvs-name">2540R EBCDIC</span>
+                        <span class="mvs-info">jcl/null.jcl</span>
+                    </div>
+                </div>
+                <div class="mvs-group">
+                    <div class="mvs-group-title">Card Punches</div>
+                    <div class="mvs-device mvs-dev-io">
+                        <span class="mvs-addr">00d</span>
+                        <span class="mvs-name">2540P Punch</span>
+                        <span class="mvs-info">pch00d.txt</span>
+                    </div>
+                    <div class="mvs-device mvs-dev-io">
+                        <span class="mvs-addr">01d</span>
+                        <span class="mvs-name">2540 Punch</span>
+                        <span class="mvs-info">pch01d.txt</span>
+                    </div>
+                </div>
+                <div class="mvs-group">
+                    <div class="mvs-group-title">Printers</div>
+                    <div class="mvs-device mvs-dev-print">
+                        <span class="mvs-addr">00e</span>
+                        <span class="mvs-name">1403 Printer</span>
+                        <span class="mvs-info">prt00e.txt</span>
+                    </div>
+                    <div class="mvs-device mvs-dev-print">
+                        <span class="mvs-addr">00f</span>
+                        <span class="mvs-name">3211 Printer</span>
+                        <span class="mvs-info">prt00f.txt</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- DASD Volumes -->
+        <div class="mvs-dasd-section">
+            <div class="mvs-group-title">DASD Volumes</div>
+            <div class="mvs-dasd-grid">
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">mvsres</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">150</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">mvs000</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">151</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">page00</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">152</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">spool1</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">153</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">smp000</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">250</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">work00</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">251</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">work01</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">252</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">syscpk</div>
+                    <div class="mvs-dasd-type">3350</div>
+                    <div class="mvs-addr">253</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">pub000</div>
+                    <div class="mvs-dasd-type">3380</div>
+                    <div class="mvs-addr">180</div>
+                </div>
+                <div class="mvs-dasd">
+                    <div class="mvs-dasd-icon"></div>
+                    <div class="mvs-dasd-label">pub001</div>
+                    <div class="mvs-dasd-type">3390</div>
+                    <div class="mvs-addr">190</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ── JES2 Job Classes & Initiators ── -->
+    <section class="arch-diagram mvs-jes2">
+        <h2>JES2 Job Classes &amp; Initiators</h2>
+        <p class="mvs-hw-sub">Job execution scheduling — which initiator runs which job class</p>
+
+        <div class="mvs-jes2-grid">
+            <div class="mvs-init mvs-init-active">
+                <div class="mvs-init-id">INIT 1</div>
+                <div class="mvs-init-classes"><span class="mvs-class">A</span></div>
+                <div class="mvs-init-status">Auto-start</div>
+            </div>
+            <div class="mvs-init mvs-init-active">
+                <div class="mvs-init-id">INIT 2</div>
+                <div class="mvs-init-classes"><span class="mvs-class">B</span> <span class="mvs-class">A</span></div>
+                <div class="mvs-init-status">Auto-start</div>
+            </div>
+            <div class="mvs-init mvs-init-active mvs-init-sysprog">
+                <div class="mvs-init-id">INIT 3</div>
+                <div class="mvs-init-classes"><span class="mvs-class mvs-class-s">S</span></div>
+                <div class="mvs-init-status">Auto-start</div>
+            </div>
+            <div class="mvs-init">
+                <div class="mvs-init-id">INIT 4</div>
+                <div class="mvs-init-classes"><span class="mvs-class">D</span> <span class="mvs-class">C</span> <span class="mvs-class">B</span> <span class="mvs-class">A</span></div>
+                <div class="mvs-init-status">Not started</div>
+            </div>
+            <div class="mvs-init">
+                <div class="mvs-init-id">INIT 5</div>
+                <div class="mvs-init-classes"><span class="mvs-class">E</span> <span class="mvs-class">C</span> <span class="mvs-class">B</span> <span class="mvs-class">A</span></div>
+                <div class="mvs-init-status">Not started</div>
+            </div>
+            <div class="mvs-init">
+                <div class="mvs-init-id">INIT 6</div>
+                <div class="mvs-init-classes"><span class="mvs-class">F</span> <span class="mvs-class">E</span> <span class="mvs-class">C</span> <span class="mvs-class">B</span> <span class="mvs-class">A</span></div>
+                <div class="mvs-init-status">Not started</div>
+            </div>
+        </div>
+
+        <div class="mvs-jes2-note">
+            <strong>Class S</strong> = System Programming — console commands execute without operator approval. Config: <code>SYS1.PARMLIB(JES2PM00)</code>
+        </div>
+    </section>
+
+    <!-- ── VSAM Catalog Structure ── -->
+    <section class="arch-diagram mvs-catalogs">
+        <h2>VSAM Catalog Structure</h2>
+        <p class="mvs-hw-sub">Master catalog and user catalog organization — dataset routing by high-level qualifier</p>
+
+        <div class="mvs-cat-tree">
+            <div class="mvs-cat mvs-cat-master">
+                <div class="mvs-cat-name">SYS1.VSAM.MASTER.CATALOG</div>
+                <div class="mvs-cat-vol">MVSRES</div>
+                <div class="mvs-cat-pw">Password: SYSPROG</div>
+            </div>
+            <div class="mvs-cat-children">
+                <div class="mvs-cat mvs-cat-user">
+                    <div class="mvs-cat-name">UCPUB000</div>
+                    <div class="mvs-cat-vol">PUB000 (3380)</div>
+                    <div class="mvs-cat-alias">Alias: PUB000.*</div>
+                    <div class="mvs-cat-purpose">TSO user datasets</div>
+                </div>
+                <div class="mvs-cat mvs-cat-user">
+                    <div class="mvs-cat-name">UCPUB001</div>
+                    <div class="mvs-cat-vol">PUB001 (3390)</div>
+                    <div class="mvs-cat-alias">Alias: PUB001.*</div>
+                    <div class="mvs-cat-purpose">User data &amp; VSAM</div>
+                </div>
+                <div class="mvs-cat mvs-cat-user">
+                    <div class="mvs-cat-name">UCMVS000</div>
+                    <div class="mvs-cat-vol">MVS000 (3350)</div>
+                    <div class="mvs-cat-alias">Alias: SYSO.*</div>
+                    <div class="mvs-cat-purpose">System operations (SMF)</div>
+                </div>
+                <div class="mvs-cat mvs-cat-user">
+                    <div class="mvs-cat-name">UCSYSCP</div>
+                    <div class="mvs-cat-vol">SYSCPK (3350)</div>
+                    <div class="mvs-cat-alias">Alias: SYSC.*</div>
+                    <div class="mvs-cat-purpose">Compilers &amp; tools</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="mvs-jes2-note">
+            Datasets are routed to user catalogs by <strong>high-level qualifier</strong>. Avoid cataloging non-system datasets in the Master Catalog — it has finite capacity.
         </div>
     </section>
 

@@ -127,9 +127,12 @@
         }
 
         function updateScreen(data) {
-            if (data && data.connected && data.screen) {
-                terminal.classList.remove('disconnected');
-                terminal.textContent = data.screen;
+            if (!data) return;
+            terminal.classList.remove('disconnected');
+            if (data.screen_html) {
+                terminal.innerHTML = '<pre>' + data.screen_html + '</pre>';
+            } else if (data.screen) {
+                terminal.innerHTML = '<pre>' + data.screen + '</pre>';
             }
         }
 
@@ -194,14 +197,14 @@
             if (data.connected) {
                 connected = true;
                 updateStatus(true, data.host);
-                fetch('/api/screen').then(r => r.json()).then(s => updateScreen(s));
+                fetch('/api/terminal/screen').then(r => r.json()).then(s => updateScreen(s));
             }
         });
 
         async function pollScreen() {
             if (!connected) return;
             try {
-                const response = await fetch('/api/screen');
+                const response = await fetch('/api/terminal/screen');
                 const data = await response.json();
                 updateScreen(data);
             } catch (e) {

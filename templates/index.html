@@ -6,161 +6,624 @@
 <link rel="stylesheet" href="/static/css/pages/index.css">
 {% endblock %}
 
-{% block body %}
-    <header>
-        <div class="brand">
-            <img src="/static/logo.svg" alt="IBM z/OS">
-            <h1><span>IBM</span> z/OS AI Assistant</h1>
-        </div>
-    </header>
+{% block head_extra %}
+<script src="/static/js/vendor/marked.min.js"></script>
+{% endblock %}
 
-    <div class="status-bar">
-        <div class="status-item">
-            <span class="label">LLM:</span>
-            <span class="value" id="llmStatus">Checking...</span>
+{% block body %}
+<div class="idx-layout">
+<div class="idx-main-col">
+
+    <!-- ── Unified Toolbar ── -->
+    <div class="idx-toolbar">
+        <div class="idx-toolbar-center">
+       
+            <a href="/tutor" class="idx-pill idx-pill-accent">🎓 Learn</a>
+            <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()">Connect</button>
+            <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()">▶ Demo</button>
+            <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()">Restart</button>
         </div>
-        <div class="status-item">
-            <span class="label">BIRP:</span>
-            <span class="value" id="birpStatus">Checking...</span>
-        </div>
-        <div class="status-item">
-            <span class="label">Model:</span>
-            <span class="value" id="modelName">-</span>
+        <button class="idx-hamburger" onclick="togglePanel()" title="Menu">☰</button>
+    </div>
+    <!-- Hidden connection target for JS -->
+    <input type="hidden" id="connTarget" value="localhost:3270">
+
+    <!-- Hidden elements for JS compatibility -->
+    <span id="wtRunLabel" style="display:none;"></span>
+    <button id="wtStartBtn" style="display:none;"></button>
+    <button id="connBtn" style="display:none;"></button>
+    <button id="disconnBtn" style="display:none;"></button>
+    <span id="llmStatus" style="display:none;"></span>
+    <span id="modelName" style="display:none;"></span>
+
+    <!-- ── Hero Section ── -->
+    <div class="hero">
+        <img src="/static/img/ibm-old.png" alt="IBM" class="hero-logo">
+        <div class="hero-text">
+            <h2>AI-Powered <strong>z/OS</strong> Operations</h2>
+            <p>Natural language interface for mainframe operations, powered by <strong>Hercules Hyperion</strong> &mdash; an open-source System/370, ESA/390 &amp; z/Architecture emulator running <strong>MVS 3.8j TK5</strong> locally. No mainframe hardware required.</p>
         </div>
     </div>
 
-    <main>
-        <div class="hero">
-            <img src="/static/logo.svg" alt="IBM z/OS AI" class="hero-logo">
-            <h2>AI-Powered <strong>z/OS</strong> Operations</h2>
-            <p>
-                Natural language interface for mainframe operations. Connect to TN3270 terminals,
-                ask questions about JCL and ABEND codes, and get AI-powered assistance -
-                all running locally with no API keys required.
-            </p>
-            <div class="hero-badges">
-                <div class="badge"><span class="dot"></span> 100% Local LLM</div>
-                <div class="badge"><span class="dot"></span> TN3270 Terminal</div>
-                <div class="badge"><span class="dot"></span> BIRP v2 Integration</div>
+    <!-- ── Live Terminal ── -->
+    <div class="idx-terminal-section" id="terminalSection">
+        <div class="idx-term-header">
+            <span class="idx-term-title"><span style="font-size:0.9rem;">&#128421;</span> Live Terminal</span>
+            <span class="idx-demo-badge" id="demoBadge" style="display:none;">DEMO</span>
+            <div class="idx-term-controls">
+                <button class="idx-term-btn" id="wtPauseBtn" onclick="pauseWalkthrough()" title="Pause" style="display:none;">&#9646;&#9646;</button>
+                <button class="idx-term-btn" id="wtStopBtn" onclick="stopWalkthrough()" title="Stop" style="display:none;">&#9632;</button>
+                <button class="idx-term-btn idx-term-btn-x" id="wtCloseBtn" onclick="closeTerminal()" title="Close">&#10005;</button>
+                <a href="/terminal" class="idx-fullscreen-link">Full Screen &rarr;</a>
             </div>
         </div>
+        <div class="idx-term-screen" id="terminalScreen" tabindex="0">
+            <pre id="terminalText">Connecting...</pre>
+        </div>
+    </div>
 
-        <div class="options">
-            <!-- Featured: Walkthrough -->
-            <a href="/walkthrough" class="option-card walkthrough featured">
-                <div class="option-icon">🎬</div>
-                <h3>Walkthrough</h3>
-                <p>Autonomous live demonstration. Watch the tool connect, navigate, and narrate VTAM, TSO, ISPF, JES, and RACF through the methodology lens &mdash; no keyboard needed.</p>
-                <div class="arrow">Start Walkthrough →</div>
+    <!-- ── AI Explanation (separate from terminal) ── -->
+    <div class="idx-term-explain" id="termExplain"></div>
+
+    <main>
+        <!-- ── Control Planes (collapsible) ── -->
+        <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9660;</span> CONTROL PLANES</div>
+        <div class="cp-grid" id="cpGrid">
+            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam">
+                <span class="cp-name">VTAM</span>
+                <span class="cp-desc">Session Fabric</span>
             </a>
-
-            <a href="/abstract-models" class="option-card abstract featured">
-                <div class="option-icon">🧠</div>
-                <h3>Abstract Models</h3>
-                <p>Platform thesis and mental models. Understand the session stack, control planes, and trust boundaries that shape every action.</p>
-                <div class="arrow">View Abstract →</div>
+            <a href="/walkthrough?plane=tso" class="cp-card cp-tso">
+                <span class="cp-name">TSO</span>
+                <span class="cp-desc">Interactive</span>
             </a>
-
-            <!-- Featured: Red Team Tutor -->
-            <a href="/tutor" class="option-card tutor featured">
-                <div class="option-icon">🎓</div>
-                <h3>Red Team Tutor</h3>
-                <p>Guided mainframe learning for security professionals. Understand trust boundaries, execution models, and mental models through hands-on exploration.</p>
-                <div class="arrow">Start Learning →</div>
+            <a href="/walkthrough?plane=racf" class="cp-card cp-racf">
+                <span class="cp-name">RACF</span>
+                <span class="cp-desc">Authorization</span>
             </a>
-
-            <a href="/labs" class="option-card labs">
-                <div class="option-icon">🧪</div>
-                <h3>Security Labs</h3>
-                <p>Deterministic walkthroughs you can run offline. Replay VTAM → TSO → ISPF flows and batch execution patterns.</p>
-                <div class="arrow">Run Labs →</div>
+            <a href="/walkthrough?plane=jes" class="cp-card cp-jes">
+                <span class="cp-name">JES</span>
+                <span class="cp-desc">Batch Execution</span>
             </a>
-
-            <a href="/terminal" class="option-card terminal">
-                <div class="option-icon">🖥️</div>
-                <h3>Terminal Console</h3>
-                <p>Connect to IBM mainframes via TN3270. Full keyboard support, PF keys, and screen capture capabilities.</p>
-                <div class="arrow">Open Terminal →</div>
-            </a>
-
-            <a href="/chat" class="option-card chat">
-                <div class="option-icon">🤖</div>
-                <h3>AI Chat Assistant</h3>
-                <p>Ask questions about z/OS, JCL, COBOL, ABEND codes. Get AI-powered help with terminal navigation and debugging.</p>
-                <div class="arrow">Start Chat →</div>
-            </a>
-
-            <a href="/graph" class="option-card graph">
-                <div class="option-icon">🕸️</div>
-                <h3>Trust Graph</h3>
-                <p>Visualize mainframe relationships - jobs, programs, datasets, and trust boundaries. BloodHound-inspired exploration.</p>
-                <div class="arrow">Explore Graph →</div>
-            </a>
-
-            <a href="/scanner" class="option-card scan">
-                <div class="option-icon">🔍</div>
-                <h3>Mainframe Scanner</h3>
-                <p>Scan networks for TN3270 services. Discover mainframes and identify system types automatically.</p>
-                <div class="arrow">Scan Network →</div>
-            </a>
-
-            <a href="/recon" class="option-card recon">
-                <div class="option-icon">&#x1f6e1;</div>
-                <h3>Recon & Assessment</h3>
-                <p>Native TN3270 enumeration &mdash; TSO users, CICS transactions, VTAM applications, hidden fields, and automated reporting.</p>
-                <div class="arrow">Run Assessment →</div>
-            </a>
-
-            <a href="/screencaps" class="option-card screens">
-                <div class="option-icon">📷</div>
-                <h3>Screen Captures</h3>
-                <p>View and manage captured terminal screens. Save sessions for documentation or later analysis.</p>
-                <div class="arrow">View Captures →</div>
-            </a>
-
-            <a href="/rag" class="option-card rag">
-                <div class="option-icon">📚</div>
-                <h3>Knowledge Base</h3>
-                <p>Manage RAG documents - add IBM Redbooks, JCL guides, ABEND references to enhance AI responses.</p>
-                <div class="arrow">Manage Knowledge →</div>
-            </a>
-
-            <a href="/architecture" class="option-card arch">
-                <div class="option-icon">🧭</div>
-                <h3>Architecture</h3>
-                <p>See how the UI, RAG engine, scanner, and TN3270 pipeline fit together for local mainframe ops.</p>
-                <div class="arrow">View Architecture →</div>
+            <a href="/walkthrough?plane=cics" class="cp-card cp-cics">
+                <span class="cp-name">CICS/KICKS</span>
+                <span class="cp-desc">Transactions</span>
             </a>
         </div>
+
+        <!-- ── More Tools (collapsible, collapsed by default) ── -->
+        <div class="cp-heading cp-toggle" onclick="toggleSection('toolsGrid', this)" style="margin-top:1.5rem;"><span class="cp-arrow">&#9654;</span> MORE TOOLS</div>
+        <nav class="idx-nav collapsed" id="toolsGrid">
+            <a href="/terminal" class="idx-nav-item"><span class="idx-nav-icon">&#128421;</span><span class="idx-nav-label">Terminal</span></a>
+            <a href="/chat" class="idx-nav-item"><span class="idx-nav-icon">&#129302;</span><span class="idx-nav-label">AI Chat</span></a>
+            <a href="/walkthrough" class="idx-nav-item"><span class="idx-nav-icon">&#127916;</span><span class="idx-nav-label">Walkthrough</span></a>
+            <a href="/scanner" class="idx-nav-item"><span class="idx-nav-icon">&#128269;</span><span class="idx-nav-label">Scanner</span></a>
+            <a href="/tutor" class="idx-nav-item"><span class="idx-nav-icon">&#127891;</span><span class="idx-nav-label">Tutor</span></a>
+            <a href="/labs" class="idx-nav-item"><span class="idx-nav-icon">&#129514;</span><span class="idx-nav-label">Labs</span></a>
+            <a href="/recon" class="idx-nav-item"><span class="idx-nav-icon">&#128737;</span><span class="idx-nav-label">Recon</span></a>
+            <a href="/graph" class="idx-nav-item"><span class="idx-nav-icon">&#128376;</span><span class="idx-nav-label">Graph</span></a>
+            <a href="/abstract-models" class="idx-nav-item"><span class="idx-nav-icon">&#129504;</span><span class="idx-nav-label">Models</span></a>
+            <a href="/rag" class="idx-nav-item"><span class="idx-nav-icon">&#128218;</span><span class="idx-nav-label">Knowledge</span></a>
+            <a href="/architecture" class="idx-nav-item"><span class="idx-nav-icon">&#129517;</span><span class="idx-nav-label">Architecture</span></a>
+            <a href="/docs" class="idx-nav-item"><span class="idx-nav-icon">&#128196;</span><span class="idx-nav-label">API Docs</span></a>
+        </nav>
     </main>
 
     <footer>
-        <p>Built with BIRP v2 + Ollama | <a href="https://github.com">Documentation</a> | Local LLM - No API Key Required</p>
+        <p>Ollama + TK5 | <a href="https://github.com">Documentation</a> | <a href="/docs">API</a></p>
     </footer>
+</div><!-- /.idx-main-col -->
+
+<!-- ── Control Panel Toggle ── -->
+<button class="idx-cp-toggle panel-closed" id="cpToggle" onclick="togglePanel()" title="Toggle Control Panel">&#9654;</button>
+
+<!-- ── Right Control Panel ── -->
+<aside class="idx-control-panel collapsed" id="controlPanel">
+    <div class="idx-cp-title">Control Panel</div>
+    <a href="/walkthrough" class="idx-cp-item cp-walkthrough">
+        <span class="idx-cp-icon">&#127916;</span>
+        <span>Walkthrough</span>
+    </a>
+    <a href="/abstract-models" class="idx-cp-item cp-models">
+        <span class="idx-cp-icon">&#129504;</span>
+        <span>Abstract Models</span>
+    </a>
+    <a href="/tutor" class="idx-cp-item cp-tutor">
+        <span class="idx-cp-icon">&#127891;</span>
+        <span>Red Team Tutor</span>
+    </a>
+    <a href="/labs" class="idx-cp-item cp-labs">
+        <span class="idx-cp-icon">&#129514;</span>
+        <span>Security Labs</span>
+    </a>
+    <a href="/terminal" class="idx-cp-item cp-terminal">
+        <span class="idx-cp-icon">&#128421;</span>
+        <span>Terminal</span>
+    </a>
+    <a href="/chat" class="idx-cp-item cp-chat">
+        <span class="idx-cp-icon">&#129302;</span>
+        <span>AI Chat</span>
+    </a>
+    <a href="/graph" class="idx-cp-item cp-graph">
+        <span class="idx-cp-icon">&#128376;</span>
+        <span>Trust Graph</span>
+    </a>
+    <a href="/scanner" class="idx-cp-item cp-scanner">
+        <span class="idx-cp-icon">&#128269;</span>
+        <span>Scanner</span>
+    </a>
+    <a href="/recon" class="idx-cp-item cp-recon">
+        <span class="idx-cp-icon">&#128737;</span>
+        <span>Recon & Captures</span>
+    </a>
+    <a href="/rag" class="idx-cp-item cp-rag">
+        <span class="idx-cp-icon">&#128218;</span>
+        <span>Knowledge Base</span>
+    </a>
+    <a href="/architecture" class="idx-cp-item cp-arch">
+        <span class="idx-cp-icon">&#129517;</span>
+        <span>Architecture</span>
+    </a>
+    <div class="idx-cp-divider"></div>
+    <button class="idx-cp-item cp-demo-prep" id="demoPrepBtn" onclick="prepareDemo()">
+        <span class="idx-cp-icon">&#9889;</span>
+        <span>Prepare for Demo</span>
+    </button>
+</aside>
+</div><!-- /.idx-layout -->
 {% endblock %}
 
 {% block page_scripts %}
 <script>
-    async function checkStatus() {
-        try {
-            const response = await fetch('/api/status');
-            const data = await response.json();
+let isConnected = false;
+let wtRunning = false;
+let wtPollingInterval = null;
+let wtLastLogLen = 0;
 
-            document.getElementById('llmStatus').textContent = data.ollama_running ? 'Connected' : 'Offline';
-            document.getElementById('llmStatus').className = 'value ' + (data.ollama_running ? 'ok' : 'err');
+// ── UI helpers ──
+function updateMfStatus(state) {
+    const dot = document.getElementById('mfDot');
+    const label = document.getElementById('mfLabel');
+    if (!dot || !label) return;
+    if (state === 'online') {
+        dot.className = 'idx-dot on';
+        label.textContent = 'TK5 online';
+    } else if (state === 'offline') {
+        dot.className = 'idx-dot off';
+        label.textContent = 'TK5 offline';
+    } else {
+        dot.className = 'idx-dot off';
+        label.textContent = state === 'restarting' ? 'Restarting...' : 'Starting...';
+    }
+}
 
-            document.getElementById('birpStatus').textContent = data.birp_available ? 'Available' : 'Not Found';
-            document.getElementById('birpStatus').className = 'value ' + (data.birp_available ? 'ok' : 'err');
+function updateConnBtn() {
+    const btn = document.getElementById('connBtn2');
+    if (!btn) return;
+    if (isConnected) {
+        btn.innerHTML = 'Disconnect';
+        btn.className = 'idx-pill idx-pill-danger';
+    } else {
+        btn.innerHTML = 'Connect';
+        btn.className = 'idx-pill idx-pill-success';
+    }
+    btn.disabled = false;
+}
 
-            if (data.model) {
-                document.getElementById('modelName').textContent = data.model;
+function updateOllamaStatus(running) {
+    const dot = document.getElementById('ollamaDot2');
+    const label = document.getElementById('ollamaLabel2');
+    if (!dot || !label) return;
+    dot.className = 'idx-dot ' + (running ? 'on' : 'off');
+    label.textContent = running ? 'Ollama online' : 'Ollama offline';
+}
+
+// ── Status ──
+async function checkStatus() {
+    try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        isConnected = data.connected;
+
+        if (data.connected && !wtRunning) refreshScreen();
+
+        updateMfStatus(data.connected ? 'online' : 'offline');
+        updateOllamaStatus(data.ollama_running);
+        updateConnBtn();
+
+        if (data.connected && data.host) document.getElementById('connTarget').value = data.host;
+    } catch (e) {
+        updateMfStatus('offline');
+        updateOllamaStatus(false);
+    }
+}
+checkStatus();
+setInterval(checkStatus, 5000);
+
+// Auto-connect on page load
+(async function autoConnect() {
+    try {
+        const s = await fetch('/api/status');
+        const d = await s.json();
+        if (!d.connected) {
+            const res = await fetch('/api/terminal/connect', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({target: 'localhost:3270'})
+            });
+            const data = await res.json();
+            if (data.success) {
+                isConnected = true;
+                showTerminal();
+                if (data.screen_data) updateTerminal(data.screen_data);
+                updateConnBtn();
+                updateMfStatus('online');
+                setTimeout(triggerAiExplain, 500);
             }
-        } catch (e) {
-            document.getElementById('llmStatus').textContent = 'Error';
-            document.getElementById('llmStatus').className = 'value err';
+        } else {
+            isConnected = true;
+            showTerminal();
+            updateConnBtn();
+            updateMfStatus('online');
+            await refreshScreen();
+            setTimeout(triggerAiExplain, 500);
+        }
+    } catch(e) {}
+})();
+
+// ── Connection ──
+async function quickConnect() {
+    const btn = document.getElementById('connBtn2');
+    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
+    if (isConnected) {
+        try { await fetch('/api/terminal/disconnect', {method:'POST'}); } catch(e) {}
+        isConnected = false;
+        closeTerminal();
+    } else {
+        btn.disabled = true;
+        btn.innerHTML = '&#9203; Connecting...';
+        try {
+            const res = await fetch('/api/terminal/connect', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({target})
+            });
+            const data = await res.json();
+            if (data.success) {
+                isConnected = true;
+                showTerminal();
+                if (data.screen_data) updateTerminal(data.screen_data);
+                setTimeout(triggerAiExplain, 500);
+            } else {
+                showToast('Connection failed', {type:'error', title:'Terminal'});
+            }
+        } catch(e) {
+            showToast('Connection failed: ' + e.message, {type:'error', title:'Terminal'});
         }
     }
+    btn.disabled = false;
+    updateConnBtn();
+    await checkStatus();
+}
 
-    checkStatus();
+async function toggleConnection() {
+    await quickConnect();
+}
+
+// ── Terminal ──
+function showTerminal() {
+    // Terminal is always visible - just show close button during demo
+    document.getElementById('wtCloseBtn').style.display = 'inline-flex';
+}
+
+function triggerAiExplain() {
+    const pre = document.getElementById('terminalText');
+    const screenText = pre ? pre.textContent : '';
+    aiExplainScreen(screenText, 'connected');
+}
+
+function closeTerminal() {
+    // Don't hide terminal - just reset to default state
+    document.getElementById('terminalText').textContent = 'Disconnected. Click Connect to reconnect.';
+    document.getElementById('wtCloseBtn').style.display = 'none';
+    document.getElementById('demoBadge').style.display = 'none';
+    document.getElementById('wtPauseBtn').style.display = 'none';
+    document.getElementById('wtStopBtn').style.display = 'none';
+    const explain = document.getElementById('termExplain');
+    if (explain) explain.innerHTML = '';
+}
+
+function updateTerminal(data) {
+    if (!data) return;
+    const pre = document.getElementById('terminalText');
+    if (data.screen_html) {
+        pre.innerHTML = data.screen_html;
+    } else if (data.screen || data.connected) {
+        pre.textContent = data.screen || '';
+    }
+}
+
+async function refreshScreen() {
+    try {
+        const res = await fetch('/api/terminal/screen');
+        const data = await res.json();
+        if (data.screen || data.screen_html) {
+            showTerminal();
+            updateTerminal(data);
+        }
+    } catch(e) {}
+}
+
+// Poll screen every 2 seconds when connected
+setInterval(() => {
+    if (isConnected && !wtRunning) refreshScreen();
+}, 2000);
+
+async function sendKey(keyType, value) {
+    if (!isConnected && !wtRunning) return;
+    try {
+        const res = await fetch('/api/terminal/key', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({key_type: keyType, value: String(value || '')})
+        });
+        const data = await res.json();
+        if (data.success && data.screen_data) updateTerminal(data.screen_data);
+    } catch(e) {}
+}
+
+document.getElementById('terminalScreen').addEventListener('keydown', function(e) {
+    if (!isConnected) return;
+    e.preventDefault();
+    if (e.key === 'Enter') sendKey('enter');
+    else if (e.key === 'Escape') sendKey('clear');
+    else if (e.key === 'Tab') sendKey(e.shiftKey ? 'backtab' : 'tab');
+    else if (e.key === 'Backspace') sendKey('backspace');
+    else if (e.key === 'Home') sendKey('home');
+    else if (e.key.startsWith('F') && e.key.length <= 3) {
+        const n = parseInt(e.key.substring(1));
+        if (n >= 1 && n <= 24) sendKey('pf', e.shiftKey ? n + 12 : n);
+    }
+    else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) sendKey('string', e.key);
+});
+
+// ── Walkthrough ──
+async function startWalkthrough() {
+    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
+    const demoBtn = document.getElementById('wtStartBtn2');
+    demoBtn.disabled = true;
+    demoBtn.innerHTML = '&#9203; Starting...';
+    try {
+        const res = await fetch('/api/walkthrough/start', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({name: 'quick-demo', target, speed: 4.0})
+        });
+        const data = await res.json();
+        if (!data.success) { demoBtn.disabled = false; demoBtn.innerHTML = '&#9654; Demo'; return; }
+    } catch(e) { demoBtn.disabled = false; demoBtn.innerHTML = '&#9654; Demo'; return; }
+
+    wtRunning = true;
+    wtLastLogLen = 0;
+    showTerminal();
+    demoBtn.innerHTML = '&#9654; Running...';
+    document.getElementById('demoBadge').style.display = 'inline-block';
+    document.getElementById('wtPauseBtn').style.display = 'inline-flex';
+    document.getElementById('wtStopBtn').style.display = 'inline-flex';
+    try { document.getElementById('wtStartBtn').disabled = true; } catch(_) {}
+    try { document.getElementById('wtRunLabel').textContent = 'Running Demo...'; } catch(_) {}
+
+    if (wtPollingInterval) clearInterval(wtPollingInterval);
+    wtPollingInterval = setInterval(pollWalkthrough, 500);
+    pollWalkthrough();
+}
+
+let lastExplainScreen = '';
+async function pollWalkthrough() {
+    try {
+        const res = await fetch('/api/walkthrough/status');
+        const data = await res.json();
+        if (data.screen_html) {
+            updateTerminal({screen_html: data.screen_html});
+        } else if (data.screen) {
+            updateTerminal({screen: data.screen});
+        }
+        if (data.running) {
+            const demoBtn = document.getElementById('wtStartBtn2');
+            const p = data.paused ? ' (Paused)' : '';
+            const stepText = data.title ? data.title + p : 'Running...';
+            try { document.getElementById('wtRunLabel').textContent = stepText; } catch(_) {}
+            if (demoBtn) { demoBtn.innerHTML = '&#9654; ' + stepText; demoBtn.className = 'idx-pill idx-pill-primary'; demoBtn.disabled = true; }
+            // Update AI explanation on step changes
+            if (data.title && data.title !== lastExplainScreen) {
+                lastExplainScreen = data.title;
+                aiExplainScreen(data.screen || '', data.title);
+            }
+        }
+        if (!data.running) {
+            clearInterval(wtPollingInterval);
+            wtPollingInterval = null;
+            wtRunning = false;
+            resetWtControls();
+            aiExplainScreen(data.screen || '', 'Demo complete');
+        }
+    } catch(e) {}
+}
+
+async function pauseWalkthrough() {
+    try {
+        const res = await fetch('/api/walkthrough/pause', {method:'POST'});
+        const data = await res.json();
+        document.getElementById('wtPauseBtn').innerHTML = data.paused ? '&#9654;' : '&#9646;&#9646;';
+    } catch(e) {}
+}
+
+async function stopWalkthrough() {
+    try { await fetch('/api/walkthrough/stop', {method:'POST'}); } catch(e) {}
+    if (wtPollingInterval) { clearInterval(wtPollingInterval); wtPollingInterval = null; }
+    wtRunning = false;
+    resetWtControls();
+}
+
+async function restartMainframe() {
+    if (!confirm('Restart the TK5 mainframe? This will disconnect any active sessions.')) return;
+    const btn = document.getElementById('restartBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Restarting...';
+    try { await fetch('/api/terminal/disconnect', {method:'POST'}); } catch(e) {}
+    isConnected = false;
+    closeTerminal();
+    try {
+        const res = await fetch('/api/system/mainframe/restart', {method:'POST'});
+        const data = await res.json();
+        if (data.status === 'restarting' || data.status === 'starting') {
+            showToast(data.message || 'Mainframe restarting…', {type:'info', title:'Mainframe'});
+            updateMfStatus('restarting');
+            setTimeout(async () => { await checkStatus(); btn.disabled = false; btn.textContent = '⏻ Restart Mainframe'; }, 30000);
+        } else {
+            showToast(data.message || 'Restart issued', {type:'info', title:'Mainframe'});
+            btn.disabled = false; btn.textContent = '⏻ Restart Mainframe';
+        }
+    } catch(e) {
+        try {
+            const res2 = await fetch('/api/system/mainframe/start', {method:'POST'});
+            const data2 = await res2.json();
+            showToast(data2.message || 'Starting mainframe…', {type:'info', title:'Mainframe'});
+            updateMfStatus('starting');
+            setTimeout(async () => { await checkStatus(); btn.disabled = false; btn.textContent = '⏻ Restart Mainframe'; }, 30000);
+        } catch(e2) {
+            showToast('Failed to restart mainframe', {type:'error', title:'Mainframe'});
+            btn.disabled = false; btn.textContent = '⏻ Restart Mainframe';
+        }
+    }
+    await checkStatus();
+}
+
+let aiExplainPending = false;
+async function aiExplainScreen(screenText, context) {
+    const el = document.getElementById('termExplain');
+    if (!el || aiExplainPending) return;
+    aiExplainPending = true;
+    el.innerHTML = '<span class="idx-explain-thinking">Analyzing screen...</span>';
+
+    const fallback = 'This is the TK5 MVS 3.8j VTAM entry screen running on Hercules. At the "Logon ===>" prompt, type your userid (HERC01) and press Enter. Then enter password CUL8TR when prompted. This binds your identity to a TSO session.';
+
+    const first20 = (screenText || '').split('\n').slice(0, 20).join('\n');
+    const prompt = `You are an AI assistant explaining a mainframe terminal to a beginner. The user is looking at a TN3270 terminal connected to an MVS 3.8j (TK5) system via Hercules emulator. Context: "${context || 'viewing screen'}". Here is the current screen content:\n\n${first20}\n\nIn 1-2 concise sentences, explain what this screen shows and what the user should do next. Be specific about the mainframe concepts shown (VTAM, TSO, RACF, JES, etc). Do not use markdown.`;
+
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 8000);
+
+    try {
+        const res = await fetch('/api/chat', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({message: prompt, context: 'screen-explain'}),
+            signal: controller.signal
+        });
+        clearTimeout(timeout);
+        const data = await res.json();
+        el.textContent = data.response || data.message || fallback;
+    } catch(e) {
+        clearTimeout(timeout);
+        el.textContent = fallback;
+    }
+    aiExplainPending = false;
+}
+
+// ── Collapsible Sections ──
+function toggleSection(id, heading) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const arrow = heading.querySelector('.cp-arrow');
+    if (el.classList.toggle('collapsed')) {
+        if (arrow) arrow.innerHTML = '&#9654;';
+    } else {
+        if (arrow) arrow.innerHTML = '&#9660;';
+    }
+}
+
+// ── Control Panel Toggle ──
+function togglePanel() {
+    const panel = document.getElementById('controlPanel');
+    const btn = document.getElementById('cpToggle');
+    const isCollapsed = panel.classList.toggle('collapsed');
+    if (isCollapsed) {
+        btn.classList.remove('panel-open');
+        btn.classList.add('panel-closed');
+        btn.innerHTML = '&#9654;';
+    } else {
+        btn.classList.remove('panel-closed');
+        btn.classList.add('panel-open');
+        btn.innerHTML = '&#9664;';
+    }
+}
+
+function resetWtControls() {
+    document.getElementById('demoBadge').style.display = 'none';
+    document.getElementById('wtPauseBtn').style.display = 'none';
+    document.getElementById('wtStopBtn').style.display = 'none';
+    try { document.getElementById('wtStartBtn').disabled = false; } catch(_) {}
+    try { document.getElementById('wtRunLabel').textContent = 'Connect & Login'; } catch(_) {}
+    const demoBtn = document.getElementById('wtStartBtn2');
+    if (demoBtn) {
+        demoBtn.innerHTML = '&#10003; Done';
+        demoBtn.className = 'idx-pill idx-pill-success';
+        demoBtn.disabled = false;
+        setTimeout(() => {
+            demoBtn.innerHTML = '&#9654; Demo';
+            demoBtn.className = 'idx-pill idx-pill-primary';
+        }, 3000);
+    }
+}
+
+// ── Prepare for Demo ──
+async function prepareDemo() {
+    if (!confirm('This will restart the mainframe with a fresh IPL.\nAll active sessions and history will be cleared.\n\nContinue?')) return;
+
+    const btn = document.getElementById('demoPrepBtn');
+    const origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="idx-cp-icon">&#9203;</span><span>Restarting MVS...</span>';
+
+    try {
+        const res = await fetch('/api/system/mainframe/prepare-demo', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.error) {
+            showToast(data.error, { type: 'error', title: 'Demo Prep' });
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            return;
+        }
+
+        showToast('Mainframe restarting — fresh IPL in progress...', { type: 'info', title: 'Demo Prep' });
+
+        // Poll for readiness
+        let attempts = 0;
+        const poll = setInterval(async () => {
+            attempts++;
+            try {
+                const s = await fetch('/api/system/mainframe/status');
+                const sd = await s.json();
+                if (sd.running) {
+                    clearInterval(poll);
+                    btn.innerHTML = '<span class="idx-cp-icon">&#9989;</span><span>Ready!</span>';
+                    showToast('Mainframe is up — clean demo environment ready.', { type: 'success', title: 'Demo Prep' });
+                    setTimeout(() => {
+                        btn.innerHTML = origHTML;
+                        btn.disabled = false;
+                    }, 3000);
+                    checkStatus();
+                }
+            } catch (e) {}
+            if (attempts > 60) {
+                clearInterval(poll);
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+                showToast('Timeout waiting for mainframe. Check manually.', { type: 'warning', title: 'Demo Prep' });
+            }
+        }, 3000);
+    } catch (e) {
+        showToast('Failed to start demo prep: ' + e.message, { type: 'error', title: 'Demo Prep' });
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+}
 </script>
 {% endblock %}

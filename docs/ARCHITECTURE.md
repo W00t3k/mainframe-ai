@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the architecture of the Mainframe AI Assistant and BIRP v2 modules.
+This document describes the architecture of the Mainframe AI Assistant and TN3270 v2 modules.
 
 ## System Overview
 
@@ -8,7 +8,7 @@ This document describes the architecture of the Mainframe AI Assistant and BIRP 
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         User Interfaces                                  │
 ├─────────────────────┬─────────────────────┬─────────────────────────────┤
-│  mainframe_assistant│    web_app.py       │   BIRP GUI/CLI              │
+│  mainframe_assistant│    web_app.py       │   TN3270 GUI/CLI              │
 │      (CLI)          │    (FastAPI)        │   (tkinter/console)         │
 └──────────┬──────────┴──────────┬──────────┴──────────────┬──────────────┘
            │                     │                          │
@@ -25,7 +25,7 @@ This document describes the architecture of the Mainframe AI Assistant and BIRP 
                       │
                       ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
-│                     BIRP v2 Modules                                      │
+│                     TN3270 v2 Modules                                      │
 ├─────────────────────────────────────────────────────────────────────────┤
 │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐  │
 │  │  core    │  │ emulator │  │ security │  │    io    │  │   zos    │  │
@@ -66,7 +66,7 @@ FastAPI-based web application with HTMX frontend.
 - Template-based UI
 - RAG integration
 
-#### BIRP GUI/CLI
+#### TN3270 GUI/CLI
 
 Native Python interfaces for direct mainframe interaction.
 
@@ -94,9 +94,9 @@ Retrieval-Augmented Generation for enhanced responses:
 - Context augmentation for queries
 - Knowledge base management
 
-### BIRP v2 Modules
+### TN3270 v2 Modules
 
-#### Core (birpv2_modules/core/)
+#### Core (tn3270v2_modules/core/)
 
 Foundation data models:
 
@@ -107,7 +107,7 @@ Transaction # Request/response pair
 History    # Session history container
 ```
 
-#### Emulator (birpv2_modules/emulator/)
+#### Emulator (tn3270v2_modules/emulator/)
 
 TN3270 terminal wrapper:
 
@@ -121,7 +121,7 @@ WrappedEmulator
 └── safe_*()            # Timeout-protected variants
 ```
 
-#### Security (birpv2_modules/security/)
+#### Security (tn3270v2_modules/security/)
 
 Security testing tools:
 
@@ -138,7 +138,7 @@ SessionReplay      # Transaction replay
 SecurityReporter   # Report generation
 ```
 
-#### I/O (birpv2_modules/io/)
+#### I/O (tn3270v2_modules/io/)
 
 Data persistence and export:
 
@@ -155,7 +155,7 @@ File Operations
 └── load_history()
 ```
 
-#### z/OS (birpv2_modules/zos/)
+#### z/OS (tn3270v2_modules/zos/)
 
 Mainframe subsystem parsers:
 
@@ -275,14 +275,14 @@ Screen Object
 
 ### Adding New z/OS Parsers
 
-1. Create new helper in `birpv2_modules/zos/`
+1. Create new helper in `tn3270v2_modules/zos/`
 2. Implement detection method
 3. Add parsing methods
 4. Export in `__init__.py`
 
 ### Adding Export Formats
 
-1. Add function in `birpv2_modules/io/exporters.py`
+1. Add function in `tn3270v2_modules/io/exporters.py`
 2. Update `auto_export()` extension mapping
 3. Document in module README
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """
 Mainframe AI Assistant - MCP Server
-Model Context Protocol server for Claude Desktop integration.
+Model Context Protocol server for Ollama Desktop integration.
 
 Exposes mainframe tools and trust graph as MCP tools and resources.
 
 Usage:
     python mcp_server.py
 
-Claude Desktop config (~/.config/claude/claude_desktop_config.json):
+Ollama Desktop config (~/.config/ollama/ollama_desktop_config.json):
 {
     "mcpServers": {
         "mainframe-assistant": {
@@ -43,7 +43,7 @@ except ImportError:
 # Import our tools and graph
 try:
     from agent_tools import (
-        connection, BIRP_AVAILABLE,
+        connection, TN3270_AVAILABLE,
         connect_mainframe, disconnect_mainframe, read_screen,
         send_terminal_key, get_cached_screen_data, capture_screen,
         get_connection_status, execute_tool_async
@@ -323,8 +323,8 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
     # Connection tools
     if name == "connect_mainframe":
-        if not TOOLS_AVAILABLE or not BIRP_AVAILABLE:
-            result = {"success": False, "error": "BIRP modules not available"}
+        if not TOOLS_AVAILABLE or not TN3270_AVAILABLE:
+            result = {"success": False, "error": "TN3270 not available"}
         else:
             success, message = connect_mainframe(arguments.get("target", "localhost:3270"))
             result = {"success": success, "message": message}
@@ -390,7 +390,7 @@ async def call_tool(name: str, arguments: dict) -> list[TextContent]:
 
     elif name == "get_connection_status":
         if not TOOLS_AVAILABLE:
-            result = {"connected": False, "birp_available": False}
+            result = {"connected": False, "tn3270_available": False}
         else:
             result = get_connection_status()
 
@@ -598,7 +598,7 @@ async def main():
     """Run the MCP server."""
     print("Starting Mainframe AI Assistant MCP Server...", file=sys.stderr)
     print(f"  Tools available: {TOOLS_AVAILABLE}", file=sys.stderr)
-    print(f"  BIRP available: {BIRP_AVAILABLE if TOOLS_AVAILABLE else False}", file=sys.stderr)
+    print(f"  TN3270 available: {TN3270_AVAILABLE if TOOLS_AVAILABLE else False}", file=sys.stderr)
     print(f"  RAG available: {RAG_AVAILABLE}", file=sys.stderr)
     print(f"  Graph available: {GRAPH_AVAILABLE}", file=sys.stderr)
 

@@ -379,12 +379,11 @@ function mapSectionsFromText(text) {
 
 
 function updateTerminalDisplay(data) {
-    const screen =
-        data?.screen_data?.screen ??
-        data?.screen ??
-        data?.screen_data?.current_screen ??
-        '';
-    if (screen) {
+    const screenHtml = data?.screen_data?.screen_html ?? data?.screen_html ?? '';
+    const screen = data?.screen_data?.screen ?? data?.screen ?? data?.screen_data?.current_screen ?? '';
+    if (screenHtml) {
+        terminalText.innerHTML = screenHtml;
+    } else if (screen) {
         terminalText.textContent = screen;
     }
     if (data?.connected !== undefined) {

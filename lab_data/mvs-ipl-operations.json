@@ -1,0 +1,191 @@
+{
+  "id": "mvs-ipl-operations",
+  "title": "MVS IPL & System Operations",
+  "description": "IPL the MVS system, start VTAM/TSO, manage JES2 queues, and perform a clean shutdown. Every command is documented with mental models explaining what it does and why.",
+  "source": "https://www.jaymoseley.com/hercules/installMVS/iCUSTv8.htm",
+  "steps": [
+    {
+      "title": "IPL the System",
+      "screen": "Hercules Console:\n> ipl 150\n\nMVS Console (3270):\nIEA101A SPECIFY SYSTEM PARAMETERS FOR RELEASE 03.8 NIP\n\nReply:\n> r 0,clpa    (first IPL — rebuilds Link Pack Area)\n> r 0,        (subsequent IPLs — accept defaults)\n\nIFB010D SPECIFY IPL REASON\n> r 0,u       (unplanned — not important for emulator)\n\n$HASP426 SPECIFY OPTIONS\n> r 1,format,noreq   (first IPL — format JES2 spool)\n  or just press ENTER (subsequent IPLs)",
+      "expected": "Understand that IPL loads MVS from the MVSRES volume at device address 150. The CLPA option rebuilds the Link Pack Area in paging files. On subsequent IPLs you can just press ENTER to accept defaults.",
+      "hint": "IPL = Initial Program Load. Device 150 is a 3350 DASD containing the MVS System Residence volume (mvsres.3350).",
+      "commands_learned": [
+        {
+          "command": "ipl 150",
+          "where": "Hercules console",
+          "what": "Boot MVS from device address 150 (MVSRES volume). Like pressing the power button on a real mainframe — the CPU reads the boot record from track 0 of that DASD volume."
+        },
+        {
+          "command": "r <id>,<response>",
+          "where": "MVS console",
+          "what": "Reply to a system message. MVS assigns sequential reply IDs to messages needing a response. The ID tells MVS which question you're answering."
+        },
+        {
+          "command": "r 0,clpa",
+          "where": "MVS console",
+          "what": "Rebuild the Link Pack Area — a shared memory region containing frequently used system modules. Required on first IPL; optional after that."
+        },
+        {
+          "command": "r 1,format,noreq",
+          "where": "MVS console",
+          "what": "Tell JES2 to format its spool queues (first time only) and start without waiting for additional operator requests."
+        }
+      ],
+      "key_files": [
+        "SYS1.PARMLIB(IEASYS00) — system initialization parameters",
+        "SYS1.PARMLIB(IEAPAK00) — Link Pack Area module list",
+        "SYS1.PARMLIB(COMMND00) — commands auto-executed at IPL (starts SETPFKEY, ZTIMER)",
+        "mvslog.txt — hardcopy console log (all messages captured here)"
+      ]
+    },
+    {
+      "title": "Start VTAM & TSO",
+      "screen": "MVS Console:\n> s net\n\nMessages:\nIST020I VTAM INITIALIZATION COMPLETE\nIST025I ... (TCAM not set up — ignore)\nIKT007I VTSO IS READY FOR LOGON\n\nTSO Terminal (port 3270, LU name 'tso'):\n IKJ56700A ENTER USERID -\n> logon herc01\n IKJ56710I ENTER PASSWORD\n> CUL8TR\n\nWelcome message and TSO READY prompt appear.",
+      "expected": "VTAM manages the terminal network. The 's net' command starts the NET cataloged procedure which brings up VTAM. TSO starts automatically after VTAM initializes. Users connect via TN3270 on port 3270.",
+      "hint": "NET is a cataloged procedure in SYS1.PROCLIB. Up to 8 concurrent TSO sessions are supported (devices 400-407). IST025I messages about TCAM are safe to ignore.",
+      "commands_learned": [
+        {
+          "command": "s net",
+          "where": "MVS console",
+          "what": "Start VTAM via the NET cataloged procedure. 's' means 'start a cataloged procedure'. Cataloged procedures are pre-written JCL stored in SYS1.PROCLIB. VTAM manages all terminal connections."
+        },
+        {
+          "command": "logon <userid>",
+          "where": "TSO terminal (3270)",
+          "what": "Log on to a TSO session. TSO authenticates you and creates a personal address space. Your userid becomes your dataset name prefix."
+        }
+      ],
+      "mental_model": "Think of VTAM as the telephone switchboard — it routes terminal connections to the right application (TSO, CICS, etc.). TSO is the interactive shell — like a Unix login session. Each TSO user gets their own protected memory space."
+    },
+    {
+      "title": "Submit Jobs via Socket Reader",
+      "screen": "Hercules Console:\n> sh ./submit.sh jcl/mvs00.jcl\n\nMessages from Hercules:\nHHC01024I Sending jcl/mvs00.jcl to 127.0.0.1 port 3505\nHHC01090I Socket client 127.0.0.1 connected to 000C\nHHC01091I Socket client 127.0.0.1 disconnected from 000C\n\nMVS Console shows job messages:\n$HASP100 MVS00    ON READER1\nIEF403I MVS00 - STARTED\nIEFACTRT ...",
+      "expected": "The socket reader at device 00C listens on port 3505. The submit script uses ncat to send JCL file contents to that port. JES2 picks up the job and schedules it for execution based on the CLASS= parameter.",
+      "hint": "The 'sh' prefix on the Hercules console passes the command to the host OS shell. You can also submit from a separate terminal window: ./submit.sh jcl/mvs00.jcl",
+      "commands_learned": [
+        {
+          "command": "sh ./submit.sh <file>",
+          "where": "Hercules console",
+          "what": "'sh' tells Hercules to run a host OS command. The submit script uses ncat to send JCL to port 3505 where the MVS socket reader is listening. This is the virtual equivalent of feeding punch cards into a card reader."
+        },
+        {
+          "command": "devinit 100 tape/tsoaps.het",
+          "where": "Hercules console",
+          "what": "Mount a virtual tape. Device 100 is a 3420 tape drive. The .het file is a Hercules Emulated Tape image. This is like a computer operator physically mounting a tape reel."
+        }
+      ],
+      "mental_model": "In the real mainframe world, jobs were submitted on punch cards fed into a card reader. The socket reader emulates this — your JCL file is the 'card deck', ncat is the 'card reader', and port 3505 is where the reader is connected."
+    },
+    {
+      "title": "JES2 Queue Management",
+      "screen": "TSO READY:\n> q\n\nQUEUE COMMAND:\n> ho\n\nHeld Output Queue:\n JOBNAME  JOBID    CLASS  LINES\n HELLO    JOB00012   X      3\n MVS01    JOB00008   X     45\n MVS02    JOB00009   X    120\n\nPlace S in front of a job to view output.\nPlace D in front to see SYSOUT DD list.\nPlace P in front to purge.\n\nPF1 = Help   PF3 = Exit   PF7/PF8 = Scroll",
+      "expected": "QUEUE is a TSO application for viewing and managing JES2 output queues. The HO command shows held output. You can select, display, purge, and search through job output interactively.",
+      "hint": "Regularly purge old output to prevent the JES2 spool from filling up. ZTIMER auto-purges output older than 5 days. If the spool fills completely, the system will halt.",
+      "commands_learned": [
+        {
+          "command": "q",
+          "where": "TSO READY prompt",
+          "what": "Launch QUEUE — the JES2 spool browser. Think of it as a visual job output manager where you can browse, search, and purge job output."
+        },
+        {
+          "command": "ho",
+          "where": "QUEUE command prompt",
+          "what": "Display the Held Output queue — shows all jobs with output waiting to be viewed or printed."
+        },
+        {
+          "command": "st <jobname>",
+          "where": "QUEUE command prompt",
+          "what": "Show status of a specific job — whether it's queued, running, or has output."
+        },
+        {
+          "command": "s / d / p",
+          "where": "QUEUE — in front of a job line",
+          "what": "S=Select (view output), D=Display SYSOUT DDs, P=Purge (delete output). Position cursor in front of the job and type the letter."
+        },
+        {
+          "command": "n / f <text>",
+          "where": "QUEUE — while viewing output",
+          "what": "N=Next output dataset, F=Find text. Use these to navigate through multi-dataset job output."
+        }
+      ],
+      "mental_model": "JES2 is the traffic controller for batch jobs. It manages three phases: INPUT (reading JCL), EXECUTION (running the job via initiators), and OUTPUT (printing/holding results). QUEUE lets you inspect the OUTPUT phase."
+    },
+    {
+      "title": "Display System Status",
+      "screen": "MVS Console:\n> d a,l\n\nActive Address Spaces:\n JOBNAME  ASID  STATUS\n *MASTER*  001  ACTIVE\n JES2     002  ACTIVE\n NET      003  ACTIVE\n TSO      004  ACTIVE\n HMVS01   005  ACTIVE\n\n> d u,dasd\n\nDASD Status:\n UNIT ADDR  VOLSER  STATUS  DEVTYPE\n 0150       MVSRES  ONLINE  3350\n 0151       MVS000  ONLINE  3350\n 0152       PAGE00  ONLINE  3350\n 0153       SPOOL1  ONLINE  3350\n 0180       PUB000  ONLINE  3380\n 0190       PUB001  ONLINE  3390\n\n> d pfk\n\nPF Key Assignments:\n PF01 = D A,L       PF02 = D U,DASD\n PF03 = D R,L       ...",
+      "expected": "These display commands let you see what's running and what devices are available. D A,L shows all active address spaces (like 'ps' on Unix). D U,DASD shows all DASD volumes. D PFK shows PF key shortcuts.",
+      "hint": "Messages ending in 'A' require action (reply). Messages ending in 'D' are decision messages. Messages ending in 'I' are informational only.",
+      "commands_learned": [
+        {
+          "command": "d a,l",
+          "where": "MVS console",
+          "what": "Display all active address spaces — every running job, started task, and TSO user. Like 'ps aux' on Unix. ASID is the Address Space ID."
+        },
+        {
+          "command": "d u,dasd",
+          "where": "MVS console",
+          "what": "Display all DASD devices — address, volume serial, online/offline status, and device type. Essential for verifying volumes are mounted."
+        },
+        {
+          "command": "d pfk",
+          "where": "MVS console",
+          "what": "Display PF key assignments. PF keys are programmable shortcuts defined in SYS1.PARMLIB(SETPFK00)."
+        },
+        {
+          "command": "d r,l",
+          "where": "MVS console",
+          "what": "Display all outstanding reply messages — shows every message waiting for an operator response. Use this when the system seems hung."
+        },
+        {
+          "command": "d c",
+          "where": "MVS console",
+          "what": "Display pending console messages. If messages scrolled off screen, this shows what's still waiting."
+        }
+      ]
+    },
+    {
+      "title": "Orderly Shutdown",
+      "screen": "TSO Session:\nREADY\n> logoff\n\nMVS Console — shut down in this exact order:\n1. > p tso           Stop TSO\n2. > z net,quick     Stop VTAM\n3. > $p jes2         Stop JES2\n4. > z eod           End of day (SMF records)\n5. > quiesce         Flush memory to DASD\n\nHercules Console:\n6. > quit            Exit emulator",
+      "expected": "Always shut down in the correct order: logoff TSO sessions first, then stop TSO, VTAM, JES2, issue end-of-day, quiesce, and finally quit Hercules. This prevents data loss and corruption of system datasets.",
+      "hint": "NEVER kill Hercules without QUIESCE — data in memory buffers will be lost. After shutdown, back up the dasd directory.",
+      "commands_learned": [
+        {
+          "command": "logoff",
+          "where": "TSO READY prompt",
+          "what": "Cleanly end your TSO session. ALWAYS logoff before closing the terminal — closing without logoff leaves the userid stuck."
+        },
+        {
+          "command": "p tso",
+          "where": "MVS console",
+          "what": "'p' = stop a started task gracefully. TSO will terminate after all users are logged off."
+        },
+        {
+          "command": "z net,quick",
+          "where": "MVS console",
+          "what": "Halt VTAM immediately. The QUICK option skips waiting for sessions to end gracefully (they should already be ended)."
+        },
+        {
+          "command": "$p jes2",
+          "where": "MVS console",
+          "what": "Stop JES2. The $ prefix marks it as a JES2 command. JES2 waits for active jobs to finish before terminating."
+        },
+        {
+          "command": "z eod",
+          "where": "MVS console",
+          "what": "End of day — writes final SMF (System Management Facility) records and switches to the alternate SMF dataset."
+        },
+        {
+          "command": "quiesce",
+          "where": "MVS console",
+          "what": "Flush ALL memory buffers to DASD. System enters a hardware wait state. This is the critical step that prevents data loss."
+        },
+        {
+          "command": "quit",
+          "where": "Hercules console",
+          "what": "Exit the Hercules emulator. Only safe AFTER quiesce."
+        }
+      ],
+      "mental_model": "The shutdown order matters because each layer depends on the one below it. TSO needs VTAM. VTAM needs JES2. JES2 needs MVS. Shutting down in reverse order ensures each layer cleans up before its dependencies disappear."
+    }
+  ]
+}

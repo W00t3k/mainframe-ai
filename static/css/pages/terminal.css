@@ -1,7 +1,7 @@
 body {
     font-family: 'IBM Plex Mono', monospace;
-    background: #000;
-    color: var(--terminal-green);
+    background: #0a0c14;
+    color: #66e88a;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
@@ -114,17 +114,21 @@ body {
 }
 
 .terminal {
-    background: #0a0a0a;
-    border: 2px solid var(--ibm-gray-70);
-    padding: 1.5rem;
-    font-size: 14px;
-    line-height: 1.25;
+    background: #0c0e18;
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 0;
+    padding: 12px;
+    font-family: 'IBM Plex Mono', Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.35;
     white-space: pre;
-    width: 100%;
-    height: 100%;
-    box-shadow: 0 0 60px rgba(51, 255, 51, 0.15);
+    width: 80ch;
+    min-height: calc(24 * 1.35 * 13px);
+    box-shadow: 0 0 40px rgba(60, 200, 120, 0.06);
     position: relative;
     outline: none;
+    color: #66e88a;
+    overflow: hidden;
 }
 
 .terminal::before {
@@ -284,6 +288,20 @@ body {
     background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.25) 60%, transparent 65%, transparent 100%);
     pointer-events: auto;
 }
+
+/* TN3270 color classes */
+.terminal pre { font-family: 'IBM Plex Mono', Consolas, monospace; margin: 0; }
+.terminal pre span { color: inherit; }
+.terminal pre .c3270-green       { color: #66e88a; }
+.terminal pre .c3270-red         { color: #f07070; }
+.terminal pre .c3270-blue        { color: #6ea8ff; }
+.terminal pre .c3270-turquoise   { color: #4dd8b0; }
+.terminal pre .c3270-yellow      { color: #e8c84a; }
+.terminal pre .c3270-white       { color: #d8d8e0; }
+.terminal pre .c3270-pink        { color: #e888bb; }
+.terminal pre .c3270-intensified { font-weight: bold; }
+.terminal pre .c3270-protected   { color: #6ea8ff; }
+.terminal pre .c3270-field       { color: #66e88a; }
 
 @media (max-width: 900px) {
     .terminal {

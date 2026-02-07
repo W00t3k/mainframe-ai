@@ -754,3 +754,17 @@
                 height: calc(100vh - 180px);
             }
         }
+
+        /* TN3270 color classes */
+        #terminalScreen pre { margin: 0; font-family: 'IBM Plex Mono', monospace; }
+        #terminalScreen span { color: inherit; }
+        #terminalScreen .c3270-green       { color: #66e88a; }
+        #terminalScreen .c3270-red         { color: #f07070; }
+        #terminalScreen .c3270-blue        { color: #6ea8ff; }
+        #terminalScreen .c3270-turquoise   { color: #4dd8b0; }
+        #terminalScreen .c3270-yellow      { color: #e8c84a; }
+        #terminalScreen .c3270-white       { color: #d8d8e0; }
+        #terminalScreen .c3270-pink        { color: #e888bb; }
+        #terminalScreen .c3270-intensified { font-weight: bold; }
+        #terminalScreen .c3270-protected   { color: #6ea8ff; }
+        #terminalScreen .c3270-field       { color: #66e88a; }

@@ -1,0 +1,38 @@
+{
+  "id": "dataset-enumeration",
+  "title": "Dataset Enumeration",
+  "description": "Discover and catalog datasets to map the system's data landscape.",
+  "category": "recon",
+  "difficulty": "intermediate",
+  "questions": ["Q5"],
+  "steps": [
+    {
+      "title": "LISTCAT Catalog Query",
+      "screen": "LISTCAT ENTRIES('SYS1.**') NAME\n\nSYS1.BRODCAST\nSYS1.CMDLIB\nSYS1.COBLIB\nSYS1.HELP\nSYS1.LINKLIB\nSYS1.LPALIB\nSYS1.MACLIB\nSYS1.MANX\nSYS1.PARMLIB\nSYS1.PROCLIB\nSYS1.SAMPLIB",
+      "expected": "Identify system datasets and understand the HLQ naming convention.",
+      "hint": "SYS1.* datasets are system libraries. PARMLIB contains system parameters, PROCLIB contains JCL procedures.",
+      "assessment": "Q5: Datasets ≠ files. The catalog is a namespace, not a directory tree."
+    },
+    {
+      "title": "User Dataset Discovery",
+      "screen": "LISTCAT ENTRIES('HERC01.**') ALL\n\nHERC01.JCL.CNTL\n  VOLSER: PUB001\n  DEVTYPE: 3390\n  CREATION: 2024.035\n  EXPIRATION: 0000.000\n\nHERC01.COBOL.SRC\n  VOLSER: PUB001\n  DEVTYPE: 3390",
+      "expected": "Map user datasets and understand volume placement.",
+      "hint": "The HLQ (HERC01) ties datasets to user identity. Volume serial identifies physical location.",
+      "assessment": "Q5: HLQ = identity binding. No home directories, just catalog entries."
+    },
+    {
+      "title": "PDS Member List",
+      "screen": "LISTDS 'SYS1.PROCLIB' MEMBERS\n\n--MEMBERS--\nASMFCL\nCOBUCLG\nFORTGCL\nIEBCOPY\nIEBGENER\nIEFBR14\nJES2\nSMF\nVTAM",
+      "expected": "Enumerate PDS members to discover JCL procedures and programs.",
+      "hint": "SYS1.PROCLIB contains cataloged procedures. Each member is a reusable JCL template.",
+      "assessment": "Q5: PDS members ≠ files in a directory. Members are named records in a dataset."
+    },
+    {
+      "title": "VTAM Config Discovery",
+      "screen": "LISTDS 'SYS1.VTAMLST' MEMBERS\n\n--MEMBERS--\nATCCON00\nATCSTR00\nATCTCA00\nAPPL01\nLOCAL\n\nView APPL01 to see defined VTAM applications.",
+      "expected": "Locate VTAM configuration to enumerate network resources.",
+      "hint": "VTAM application definitions reveal APPLIDs that can be targeted.",
+      "assessment": "Q5: System configuration is in datasets, not config files in /etc."
+    }
+  ]
+}

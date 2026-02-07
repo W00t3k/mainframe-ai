@@ -1,0 +1,832 @@
+"""
+Walkthrough Scripts
+
+Autonomous walkthrough definitions for the guided mainframe education system.
+These scripts define step-by-step actions with narration for teaching mainframe concepts.
+"""
+
+WALKTHROUGH_SCRIPTS = {
+    "quick-demo": {
+        "title": "30-Second Demo: ISPF Primary Menu",
+        "steps": [
+            {
+                "title": "Connect to Mainframe",
+                "control_plane": "vtam",
+                "narration": "**Connecting to MVS TK5 via TN3270**\n\nEstablishing session to the VTAM entry point.",
+                "actions": [{"type": "connect"}],
+                "expect": ["VTAM", "Logon", "TK5", "MVS"],
+                "display_seconds": 3,
+            },
+            {
+                "title": "Authenticate",
+                "control_plane": "tso",
+                "narration": "**Logging in as HERC01**\n\nEntering userid and password. RACF verifies credentials.",
+                "actions": [{"type": "tso_login"}],
+                "expect": ["READY", "ISPF", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Enter ISPF",
+                "control_plane": "tso",
+                "narration": "**Entering ISPF**\n\nNavigating to the ISPF Primary Option Menu — the main interactive interface.",
+                "actions": [{"type": "enter_rfe"}, {"type": "wait", "seconds": 2}],
+                "expect": ["ISPF", "primary", "option", "menu", "BROWSE", "EDIT"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "ISPF Primary Option Menu",
+                "control_plane": "tso",
+                "narration": "**ISPF Primary Option Menu displayed.**\n\nThis is the central hub for interactive mainframe work:\n- **0** ISPF PARMS — terminal settings\n- **1** BROWSE — view datasets\n- **2** EDIT — modify source\n- **3** UTILITIES — dataset management\n- **X** EXIT — return to TSO\n\nDemo complete. Exiting cleanly.",
+                "actions": [{"type": "wait", "seconds": 4}],
+                "expect": ["ISPF", "primary", "option"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Exit ISPF",
+                "control_plane": "tso",
+                "narration": "**Exiting ISPF**\n\nPressing PF3 to return to TSO READY prompt.",
+                "actions": [
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["READY"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Logoff",
+                "control_plane": "vtam",
+                "narration": "**Clean exit**\n\nLogging off TSO. Identity unbound, returning to VTAM session fabric.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM", "LOGON"],
+                "display_seconds": 4,
+            },
+        ],
+    },
+    "session-stack": {
+        "title": "Session Stack: VTAM → TSO → ISPF → Datasets",
+        "steps": [
+            {
+                "title": "Connect to Mainframe",
+                "control_plane": "vtam",
+                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nWe begin by establishing a TN3270 connection. This creates a Logical Unit (LU) session in VTAM — the session fabric that exists independently of TCP/IP.\n\n**Key concept:** The session is managed by VTAM, not the network stack. When we connect, we are assigned an LU session that can outlive the TCP connection itself.",
+                "actions": [{"type": "connect"}],
+                "expect": [],
+                "display_seconds": 5,
+            },
+            {
+                "title": "VTAM Entry Screen",
+                "control_plane": "vtam",
+                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nYou are at the VTAM entry screen — the session fabric layer. On TK5, this shows the MVS 3.8j splash.\n\n**Note:** On the first connection, the `Logon ===>` prompt may be missing. Press Enter and it will appear. On subsequent connections, the `Logon ===>` prompt is displayed immediately.\n\n**Broken Assumption:** *\"Ports define exposure.\"* In z/OS, the session fabric outlives TCP connections. What you see here is not a \"service on a port\" — it's the session manager itself.\n\n**Assessment Question Q1:** Identity is not yet bound. You are an anonymous VTAM session. No userid, no authority — just a session handle.",
+                "actions": [{"type": "wait", "seconds": 4}],
+                "expect": ["VTAM", "Logon", "TK5", "MVS"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "TSO Logon — Identity Binding",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO / RACF (Identity Binding & Authentication)**\n\nWe log in as HERC01. The login sequence traverses several screens:\n\n1. **Userid** — entered at the `Logon ===>` prompt, routes our VTAM session to TSO\n2. **Password** — verified by RACF (not TSO)\n3. **Broadcast messages** — system announcements, press Enter\n4. **Fortune screen** — press Enter to continue\n5. **TSO Applications Menu** — identity is now bound\n\n**Key concept:** VTAM acts as a session router. The transition from VTAM to TSO is a control-plane boundary crossing.\n\n**Broken Assumption:** *\"There is a root user.\"* There is no root. RACF distributes authority across profiles. The userid `HERC01` determines which profile set applies.\n\nAuthentication proves identity, but authentication is not authorization.",
+                "actions": [{"type": "tso_login"}],
+                "expect": ["READY", "ISPF", "IKJ56455I", "RFE", "TSOAPPLS"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Enter RFE (ISPF)",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/RFE (Interactive Desktop)**\n\nAfter login, TK5 shows the TSO Applications Menu. We select option 1 (RFE) — the Review Front End, an ISPF-like productivity tool. RFE shows the Primary Option Menu with options: 1 (BROWSE), 2 (EDIT), R (RPF), 3 (UTILITIES), M (TSOAPPLS), and X (EXIT).\n\n**Broken Assumption:** *\"Processes are short-lived.\"* This TSO address space persists. Your identity context survives across panels, utilities, and program invocations.\n\n**Note:** TK5 uses RFE (not modern z/OS ISPF). There is no SDSF panel. Job output is viewed via TSO commands or the QUEUE spool browser.",
+                "actions": [
+                    {"type": "enter_rfe"}, {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["ISPF", "OPTION", "BROWSE", "EDIT", "UTILITIES", "RFE"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "ISPF Utilities — Dataset List (3.4)",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (Dataset Navigation)**\n\nWe use RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) to list datasets. Datasets are the z/OS storage model — not a filesystem.\n\n**Key concept:** z/OS does not have `/etc`, `/var`, or config files in the Unix sense. Everything is stored in datasets: cataloged, named objects with structure (PDS, sequential, VSAM). Access is controlled by RACF profiles, not filesystem permissions.\n\n**Assessment Question Q5:** z/OS uses a flat catalog namespace with profile-based protection — not a filesystem hierarchy.",
+                "actions": [
+                    {"type": "home"}, {"type": "eraseeof"},
+                    {"type": "string", "value": "3"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "home"}, {"type": "eraseeof"},
+                    {"type": "string", "value": "4"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["DSLIST", "DATA SET", "DATASET"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Browse System Datasets",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe enter `SYS1` as the dataset name level to browse system datasets. `SYS1.PARMLIB`, `SYS1.PROCLIB`, and `SYS1.LINKLIB` are critical system datasets.\n\n**Key concept:** System configuration lives in datasets like `SYS1.PARMLIB` — not in `/etc`. These datasets define system behavior: started tasks, security policy, IPL parameters. Access to them is controlled by RACF dataset profiles.\n\n**Assessment Question Q4:** RACF enforces access to system datasets. Anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior.",
+                "actions": [{"type": "string", "value": "SYS1"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
+                "expect": ["SYS1", "PARMLIB", "PROCLIB", "LINKLIB"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Exit ISPF → TSO Command Line",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Command Execution)**\n\nPF3 navigates back through the RFE panel stack: dataset list → Utilities → RFE Primary Menu. Then we type `X` at the RFE Primary Menu to exit and reach the TSO READY prompt.\n\n**Key concept:** Every command at TSO READY runs under the authority of HERC01. There is no `sudo` — your authority is determined by your RACF profile, not by how you invoke a command.\n\n**Note:** `X` is an RFE/ISPF command — it only works from the Primary Option Menu. At TSO READY, you use TSO commands like LOGOFF, STATUS, LISTALC.",
+                "actions": [
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "X"}, {"type": "enter"}, {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["READY"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "LISTALC — Identity Context",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Identity in Action)**\n\nThe `LISTALC STATUS` command shows every dataset allocated to this TSO session. These allocations reveal the identity context — what resources are bound to HERC01's address space.\n\n**Key concept:** Dataset allocations are the footprint of your identity. STEPLIB, ISPTLIB — these control which programs and panels are available. The allocations were established when you logged in, and they persist for the lifetime of your session.\n\n**Assessment Question Q1:** Identity was bound at TSO logon. Here we see the *resource context* of that identity.",
+                "actions": [{"type": "string", "value": "LISTALC STATUS"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
+                "expect": ["LISTALC", "HERC01", "SYS1", "KEEP", "STEPLIB"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Logoff — Return to VTAM",
+                "control_plane": "vtam",
+                "narration": "**Control Plane: VTAM (Session Unbinding)**\n\nTo logoff: PF3 back through panels to the RFE main menu, then `X` or PF3 to exit to the TSO READY prompt, then type `LOGOFF`. The identity is unbound and we return to the anonymous VTAM session fabric.\n\n**Session lifecycle summary:**\n1. **VTAM** — anonymous session established\n2. **TSO** — identity bound via logon (HERC01)\n3. **ISPF** — interactive desktop, dataset navigation\n4. **RACF** — continuous authority enforcement\n5. **VTAM** — identity unbound, back to anonymous\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.\n\n**Key takeaway:** Three control planes were traversed. Identity was bound at TSO, enforced by RACF, and the session fabric (VTAM) existed before and after authentication.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM", "LOGON"],
+                "display_seconds": 8,
+            },
+        ],
+    },
+    "deferred-exec": {
+        "title": "Deferred Execution: JCL → JES",
+        "steps": [
+            {
+                "title": "Connect & Login",
+                "control_plane": "tso",
+                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough inspects the system configuration model — how MVS 3.8j defines its runtime through datasets, procedures, and catalogs.",
+                "actions": [
+                    {"type": "connect"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "tso_login"},
+                ],
+                "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "STATUS — Active Jobs",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Active Address Spaces)**\n\nWe exit the TSO Applications Menu (PF3) to reach the TSO READY prompt, then run `STATUS` to show active jobs and sessions. On TK5 MVS 3.8j, there is no SDSF — we use TSO commands to inspect JES.\n\n**Broken Assumption:** *\"Work executes immediately.\"* On z/OS, work is *declared* via JCL, *queued* by JES, and *scheduled* by the system.\n\n**Key concept:** These address spaces may have been running since IPL. The identity context bound to each one was set at startup and persists for the lifetime of the address space.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "STATUS"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["STATUS", "JOB", "HERC", "EXECUTING", "READY"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Browse JCL — SYS2.JCLLIB",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Job Declaration)**\n\nWe enter RFE to browse `SYS2.JCLLIB` — the JCL library on TK5. JCL (Job Control Language) *declares* work: what programs to run, what datasets to use, what resources to allocate.\n\n**Key concept:** JCL is a declaration, not a script. It tells JES what to do, but JES decides *when* to do it. The gap between submission and execution is a security-relevant window.\n\n**Assessment Question Q3:** Everything in JES executes later than expected.",
+                "actions": [
+                    {"type": "enter_rfe"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "1"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "home"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "SYS2"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "JCLLIB"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "tab"},
+                    {"type": "eraseeof"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["SYS2", "JCLLIB", "MEMBER", "NAME"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "View a JCL Job",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Job Structure)**\n\nEach member in `SYS2.JCLLIB` is a complete JCL job. A job has:\n- **JOB card** — identity, class, priority\n- **EXEC statements** — programs to run\n- **DD statements** — dataset allocations\n\n**Key concept:** The JOB card carries the submitter's identity. When JES executes this job, RACF evaluates every resource access against that identity — even if the submitter has logged off.\n\n**Assessment Question Q3:** The identity bound at submission time governs execution.",
+                "actions": [
+                    {"type": "wait", "seconds": 4},
+                ],
+                "expect": ["JOB", "EXEC", "DD", "MEMBER"],
+                "display_seconds": 7,
+            },
+            {
+                "title": "Return to TSO & Check Output",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Job Output)**\n\nWe return to TSO and use the `OUTPUT` command to check job output. On TK5, job output is viewed via TSO commands — not SDSF.\n\n**Key concept:** JES output is the audit trail of deferred execution. The job's identity, class, return code, and output are all preserved. This is evidence of who submitted what, and when it ran.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "X"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "string", "value": "OUTPUT"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["OUTPUT", "READY", "NO OUTPUT"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Logoff",
+                "control_plane": "vtam",
+                "narration": "**Summary: Deferred Execution**\n\nJES demonstrates that z/OS separates work *declaration* from work *execution*:\n\n1. **Identity persists:** The submitter's identity governs execution\n2. **Authority is evaluated at submission:** RACF checks happen when the job is submitted\n3. **Audit trail exists:** Every job's identity, input, and output are preserved in JES\n\nOn z/OS, you must ask: \"What work was declared but hasn't run yet? Under whose authority will it run?\"\n\n**Warning:** Never disconnect the terminal while logged in \u2014 it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM"],
+                "display_seconds": 6,
+            },
+        ],
+    },
+    "system-inspection": {
+        "title": "System Inspection: Configuration & Procedures",
+        "steps": [
+            {
+                "title": "Connect & Login to TSO",
+                "control_plane": "tso",
+                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough inspects the system configuration model — how MVS 3.8j defines its runtime through datasets, procedures, and catalogs.",
+                "actions": [
+                    {"type": "connect"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "tso_login"},
+                ],
+                "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "TSO STATUS — Active Sessions",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Session Discovery)**\n\nWe exit the TSO Applications Menu (PF3) to reach the TSO READY prompt, then run `STATUS`. This command shows active jobs and TSO sessions. Each represents a bound identity — an address space with a userid attached.\n\n**Key concept:** Unlike `who` on Unix, TSO STATUS shows persistent address spaces. These sessions may have been active for hours or days.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "STATUS"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["STATUS", "HERC", "LOGON", "READY"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "TSO TIME — System Clock",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (System Context)**\n\nThe `TIME` command shows the system clock. Every command you execute runs under your bound identity.\n\n**Key concept:** There is no `sudo`. When HERC01 types any command, RACF evaluates authority. Authority is continuous, not one-time.",
+                "actions": [
+                    {"type": "string", "value": "TIME"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["TIME", "READY"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Enter RFE (ISPF)",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/RFE (Interactive Desktop)**\n\nWe enter RFE — the interactive development environment on TK5 MVS 3.8j.\n\n**RFE Options on TK5:**\n- **Option 1** — BROWSE (read-only view)\n- **Option 2** — EDIT (source editing)\n- **Option 3** — UTILITIES (dataset management)\n- **Option R** — RPF (Browse, Edit, Reset, PDS with RPF)\n\nRFE is where COBOL programmers spend most of their time: editing source, browsing JCL, and submitting jobs.",
+                "actions": [
+                    {"type": "enter_rfe"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["ISPF", "OPTION", "BROWSE", "EDIT", "UTILITIES", "RFE"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Browse SYS1.PROCLIB — System Procedures",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe use RFE option 1 (BROWSE) to examine `SYS1.PROCLIB` — the library of started task procedures. Every address space on the system is defined by a PROC in this library.\n\n**Broken Assumption:** *\"Services are configured in config files.\"* On z/OS, services are defined as JCL procedures in datasets. There is no `/etc/init.d` — there are PROCs.",
+                "actions": [
+                    {"type": "string", "value": "1"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "home"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "SYS1"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "PROCLIB"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "tab"},
+                    {"type": "eraseeof"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["SYS1", "PROCLIB", "MEMBER", "NAME"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Return to TSO",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF**\n\nWe return through RFE panels. The session persists — identity still bound, address space still alive.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "X"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["READY"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Logoff",
+                "control_plane": "vtam",
+                "narration": "**Summary: System Inspection**\n\n1. **TSO STATUS** revealed active sessions — each with a bound identity\n2. **Every command** executes under your identity — no sudo, no elevation\n3. **SYS1.PROCLIB** defines the system's services — access = control\n4. **RACF enforces** who can read, update, or alter system configuration\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM"],
+                "display_seconds": 7,
+            },
+        ],
+    },
+    "auth-model": {
+        "title": "Authorization Model: RACF",
+        "steps": [
+            {
+                "title": "Connect & Login to TSO",
+                "control_plane": "tso",
+                "narration": "**Setup: Establishing Identity for RACF Demonstration**\n\nWe connect and log in to demonstrate the RACF authorization model. RACF is not a subsystem you \"enter\" — it is the continuous authorization engine that every other subsystem queries.",
+                "actions": [
+                    {"type": "connect"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "tso_login"},
+                ],
+                "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "LISTALC — Session Resource Context",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Identity in Action)**\n\nWe exit the TSO Applications Menu (PF3) to reach the TSO READY prompt, then run `LISTALC STATUS` which shows every dataset allocated to this TSO session. These allocations reveal the identity context.\n\n**Key concept:** Your RACF profile is the source of truth for your identity. Every subsystem queries RACF to determine what you may do.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "LISTALC STATUS"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["LISTALC", "SYS1", "KEEP", "STEPLIB", "ALLOC"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "LISTCAT — Dataset Catalog Entries",
+                "control_plane": "racf",
+                "narration": "**Control Plane: RACF (Resource Protection)**\n\n`LISTCAT` shows catalog entries. The catalog is the namespace — but access is controlled by RACF profiles.\n\n**Broken Assumption:** *\"There is a root user.\"* Even the most privileged user is governed by profiles — authority is distributed, not concentrated.",
+                "actions": [
+                    {"type": "string", "value": "LISTCAT ENT('SYS1.PARMLIB')"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["LISTCAT", "SYS1", "PARMLIB", "NONVSAM", "VOLSER"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "PROFILE — TSO Session Profile",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Identity Attributes)**\n\nThe `PROFILE` command shows your TSO session settings: PREFIX (your default HLQ), message class, etc.\n\n**Key concept:** The PREFIX determines your default dataset high-level qualifier. Unqualified names are resolved relative to your identity's PREFIX.",
+                "actions": [
+                    {"type": "string", "value": "PROFILE"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["PROFILE", "PREFIX", "HERC01", "CHAR"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Logoff",
+                "control_plane": "vtam",
+                "narration": "**Summary: RACF Authorization Model**\n\n1. **RACF is continuous:** Every resource access triggers a RACF check\n2. **Profiles, not roles:** Access is defined per-resource, not per-role\n3. **Authority is distributed:** No single account has unconditional access\n4. **ICH messages are evidence:** Every authorization decision is logged\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM"],
+                "display_seconds": 7,
+            },
+        ],
+    },
+    "dataset-model": {
+        "title": "Dataset Model: PDS, Members & Catalogs",
+        "steps": [
+            {
+                "title": "Connect & Login",
+                "control_plane": "tso",
+                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough explores the MVS 3.8j storage model — datasets, partitioned data sets (PDS), members, and the catalog structure.",
+                "actions": [
+                    {"type": "connect"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "tso_login"},
+                ],
+                "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Enter RFE (ISPF)",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/RFE (Dataset Interface)**\n\nWe enter RFE. Unlike a Unix filesystem, z/OS uses a flat catalog namespace. Datasets are named objects — not files in directories.\n\n**Broken Assumption:** *\"There is a filesystem hierarchy.\"* z/OS has no `/home`, `/etc`, `/var`. Datasets are named with dot-separated qualifiers (e.g. `SYS1.PARMLIB`).",
+                "actions": [
+                    {"type": "enter_rfe"},
+                    {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["ISPF", "OPTION", "BROWSE", "EDIT", "UTILITIES", "RFE"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Dataset List — User Datasets",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (User Dataset Namespace)**\n\nWe navigate to RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) and list datasets under `HERC01`. The high-level qualifier (HLQ) is identity-driven.",
+                "actions": [
+                    {"type": "string", "value": "3"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "string", "value": "4"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "string", "value": "HERC01"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["HERC01", "DSLIST", "DATA SET"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "System Dataset Namespace",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (System Namespace)**\n\nNow we list `SYS1` datasets — the system namespace. `SYS1.PARMLIB` (config), `SYS1.PROCLIB` (services), `SYS1.LINKLIB` (programs).\n\n**Key concept:** There is no `/etc/init.d` or `systemd`. System configuration lives in datasets.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "home"},
+                    {"type": "tab"},
+                    {"type": "eraseeof"},
+                    {"type": "string", "value": "SYS1"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["SYS1", "PARMLIB", "PROCLIB"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Browse PDS Members — SYS1.PARMLIB",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (PDS Structure)**\n\nWe go back and use RFE option 1 (BROWSE) to open `SYS1.PARMLIB`. A Partitioned Data Set (PDS) is like a directory with members — each member is a named record.\n\n**Broken Assumption:** *\"Config files are in /etc.\"* On z/OS, you must know which PDS contains the configuration and which member is active.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "1"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "home"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "SYS1"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "PARMLIB"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "tab"},
+                    {"type": "eraseeof"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["SYS1", "PARMLIB", "MEMBER", "NAME"],
+                "display_seconds": 7,
+            },
+            {
+                "title": "Catalog Structure — LISTCAT",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Catalog Discovery)**\n\nWe return to TSO and use `LISTCAT` to examine catalog entries. The catalog maps dataset names to physical DASD locations.\n\n**Key concept:** The catalog is the namespace. RACF profiles control who can access each cataloged dataset.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "X"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "string", "value": "LISTCAT ENT('SYS1.LINKLIB')"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["LISTCAT", "SYS1", "LINKLIB", "NONVSAM"],
+                "display_seconds": 7,
+            },
+            {
+                "title": "Logoff",
+                "control_plane": "vtam",
+                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** z/OS uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM"],
+                "display_seconds": 8,
+            },
+        ],
+    },
+    "cobol-basics": {
+        "title": "COBOL Development: Your First Program",
+        "steps": [
+            {
+                "title": "Connect & Login",
+                "control_plane": "tso",
+                "narration": "**Your First COBOL Program on TK5/MVS 3.8j**\n\nCOBOL (Common Business-Oriented Language) was designed in 1959. The version on MVS 3.8j is COBOL-65.\n\n**Key concept:** COBOL programs on MVS follow a declarative workflow:\n1. Source stored in a PDS member (not a file)\n2. Compile/link declared via JCL\n3. Execute as a batch job under your identity\n\nThis is fundamentally different from `gcc hello.c && ./a.out`. The compile-link-go lifecycle is **deferred execution** — JES queues and schedules each step.",
+                "actions": [{"type": "connect"}, {"type": "wait", "seconds": 2}, {"type": "tso_login"}],
+                "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Enter RFE (ISPF)",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/RFE (Development Environment)**\n\nWe enter RFE — the interactive development environment on TK5 MVS 3.8j.\n\n**RFE Options on TK5:**\n- **Option 1** — BROWSE (read-only view)\n- **Option 2** — EDIT (source editing)\n- **Option 3** — UTILITIES (dataset management)\n- **Option R** — RPF (Browse, Edit, Reset, PDS with RPF)\n\nRFE is where COBOL programmers spend most of their time: editing source, browsing JCL, and submitting jobs.",
+                "actions": [
+                    {"type": "enter_rfe"}, {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["ISPF", "OPTION", "BROWSE", "EDIT", "UTILITIES", "RFE"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Open COBOL Sample — SYS2.JCLLIB(TESTCOB)",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO/ISPF (Edit)**\n\nWe use RFE option 2 (EDIT) to open `SYS2.JCLLIB(TESTCOB)` — a sample COBOL compile-link-go job with embedded source.\n\n**JCL Library Structure:**\n- `SYS2.JCLLIB` is a PDS (Partitioned Data Set) containing job streams\n- `TESTCOB` is a member — a complete JCL job with embedded COBOL source\n- The job uses the `COBUCG` procedure (COmpile, Bind, Use/Go)\n\n**Key concept:** Source can be embedded in JCL (instream) or referenced from a separate PDS.",
+                "actions": [
+                    {"type": "string", "value": "2"}, {"type": "enter"}, {"type": "wait", "seconds": 3},
+                    {"type": "home"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "SYS2"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "JCLLIB"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "tab"},
+                    {"type": "eraseeof"}, {"type": "string", "value": "TESTCOB"}, {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["TESTCOB", "JOB", "COB", "COBOL", "EDIT"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Read the COBOL Source",
+                "control_plane": "tso",
+                "narration": "**COBOL Program Structure — Four Divisions**\n\nEvery COBOL program has four divisions:\n\n1. **IDENTIFICATION DIVISION** — `PROGRAM-ID. name.`\n2. **ENVIRONMENT DIVISION** — SOURCE-COMPUTER, OBJECT-COMPUTER, FILE-CONTROL\n3. **DATA DIVISION** — FILE SECTION, WORKING-STORAGE SECTION, PIC clauses\n4. **PROCEDURE DIVISION** — Paragraphs with verbs: OPEN, READ, WRITE, MOVE, DISPLAY, PERFORM, GOBACK\n\n**Column Rules (COBOL-65):**\n- Columns 1-6: Sequence numbers\n- Column 7: Indicator (`*` = comment)\n- Columns 8-11: Area A (division/section/paragraph names)\n- Columns 12-72: Area B (statements)\n- All code must be UPPERCASE",
+                "actions": [
+                    {"type": "pf", "value": "8"}, {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "8"}, {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["DIVISION", "SECTION", "PIC", "PROCEDURE", "WORKING"],
+                "display_seconds": 8,
+            },
+            {
+                "title": "Submit Compile-Link-Go Job",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Deferred Execution)**\n\nWe submit the job to JES for compilation. The `SUBMIT` command queues the job.\n\n**Compile-Link-Go Workflow:**\n1. **COB step** — COBOL compiler reads source, produces object deck\n2. **LKED step** — Linkage editor binds object with `SYS1.COBLIB` runtime\n3. **GO step** — Executes the linked program\n\n**Broken Assumption:** *\"Code compiles and runs immediately.\"* Not on z/OS. JES **queues** the job. The identity of the submitter (HERC01) governs execution.\n\n**Assessment Question Q3:** This is deferred execution.",
+                "actions": [
+                    {"type": "home"}, {"type": "eraseeof"},
+                    {"type": "string", "value": "SUBMIT"}, {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["SUBMITTED", "JOB", "IKJ"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Check Job Output",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Job Output)**\n\nWe return to TSO and use the `OUTPUT` command to check compilation results. On TK5 MVS 3.8j, there is no SDSF — job output is viewed via TSO commands.\n\n**What to Look For:**\n- **Return Code 0000** — Compilation successful\n- **Compiler listing** — Shows translated COBOL statements\n- **GO step output** — Program execution results\n\n**Assessment Question Q4:** RACF controls every stage: who can read source, execute the compiler, access runtime libraries, and view output. The compiler runs under **your identity**.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "X"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                    {"type": "string", "value": "OUTPUT"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["OUTPUT", "READY", "TESTCOB"],
+                "display_seconds": 7,
+            },
+            {
+                "title": "Logoff — Return to VTAM",
+                "control_plane": "vtam",
+                "narration": "**Summary: COBOL Development Lifecycle**\n\n1. **Source in PDS** — Not files. Members in partitioned datasets.\n2. **JCL declares workflow** — Compile/link/go steps declared, not executed inline\n3. **JES defers execution** — Jobs queued, scheduled, run under submitter's identity\n4. **RACF enforces everywhere** — Source, compiler, libraries, output\n5. **Output in spool** — Audit trail of what was compiled and when\n\n**The Mental Model Shift:**\nOn Unix: `gcc hello.c && ./a.out` — immediate, ephemeral.\nOn MVS: Declare → Queue → Schedule → Execute → Preserve.\n\nThe compile job is now part of the permanent audit record.\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM"],
+                "display_seconds": 10,
+            },
+        ],
+    },
+    "address-spaces": {
+        "title": "Address Space Anatomy: What's Running",
+        "steps": [
+            {
+                "title": "Connect & Login",
+                "control_plane": "tso",
+                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough examines address spaces — the MVS equivalent of processes. Unlike Unix processes, address spaces are persistent and identity-bound.",
+                "actions": [
+                    {"type": "connect"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "tso_login"},
+                ],
+                "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "STATUS — Active Jobs & Sessions",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (System Activity)**\n\nWe exit the TSO Applications Menu (PF3) to reach the TSO READY prompt, then run `STATUS`. On TK5 MVS 3.8j, there is no SDSF — we use TSO commands to inspect the system.\n\n**Key concept:** `STATUS` is the MVS 3.8j equivalent of `ps` — but it shows *address spaces*, not processes. These may have been running since IPL.",
+                "actions": [
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "string", "value": "STATUS"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["STATUS", "JOB", "HERC", "EXECUTING", "READY"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "LISTALC — Address Space Allocations",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (Address Space Resources)**\n\nThe `LISTALC STATUS` command shows every dataset allocated to this address space. These allocations reveal what resources are bound to your session.\n\n**Broken Assumption:** *\"Processes are short-lived.\"* This TSO address space persists. Its dataset allocations were established at logon and remain for the session lifetime.\n\n**Key concept:** Each address space has an identity bound at startup time. The allocations show the resource footprint of that identity.",
+                "actions": [
+                    {"type": "string", "value": "LISTALC STATUS"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["LISTALC", "SYS1", "KEEP", "STEPLIB"],
+                "display_seconds": 7,
+            },
+            {
+                "title": "OUTPUT — Completed Job Results",
+                "control_plane": "jes",
+                "narration": "**Control Plane: JES (Deferred Execution)**\n\nThe TSO `OUTPUT` command shows output from completed jobs. Each job preserves the identity of its submitter.\n\n**Broken Assumption:** *\"Work executes immediately.\"* The gap between submission and execution is a security-relevant window. JES preserves the audit trail.",
+                "actions": [
+                    {"type": "string", "value": "OUTPUT"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["OUTPUT", "READY", "NO OUTPUT"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "LISTCAT — System Catalog",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO (System Discovery)**\n\n`LISTCAT` shows catalog entries — the namespace of all datasets on the system. The catalog maps names to physical DASD volumes.\n\n**Key concept:** Look for system datasets (SYS1.*), user datasets (HERC01.*), and product datasets (SYS2.*). Each has RACF profiles controlling access. ICH messages in the system log record every authorization decision.",
+                "actions": [
+                    {"type": "string", "value": "LISTCAT ENT('SYS1.PARMLIB')"},
+                    {"type": "enter"},
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["LISTCAT", "SYS1", "PARMLIB", "NONVSAM"],
+                "display_seconds": 7,
+            },
+            {
+                "title": "Logoff",
+                "control_plane": "vtam",
+                "narration": "**Summary: Address Space Anatomy**\n\n1. **Address spaces, not processes:** MVS runs persistent address spaces\n2. **Identity is bound at startup:** Each address space carries the identity of its creator\n3. **Deferred execution:** Jobs wait in queues before running\n4. **TSO commands for inspection:** STATUS, LISTALC, OUTPUT, LISTCAT\n5. **No SDSF on MVS 3.8j:** Use TSO commands and the Hercules console for system visibility\n\n**Warning:** Never disconnect the terminal while logged in \u2014 it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "actions": [{"type": "tso_logoff"}],
+                "expect": ["LOGOFF", "VTAM"],
+                "display_seconds": 8,
+            },
+        ],
+    },
+}
+
+# Assessment question mapping per walkthrough step
+# Maps walkthrough name → step index → list of Q's addressed
+WT_QUESTIONS = {
+    "quick-demo": {
+        0: ["Q1", "Q5"],   # VTAM Session Fabric — anonymous session, session fabric
+        1: ["Q1", "Q2"],   # TSO Login — identity binding, authentication
+        2: ["Q1", "Q2", "Q4"],  # Identity Bound — RACF enforces, no sudo
+    },
+    "session-stack": {
+        1: ["Q1", "Q5"],   # VTAM Entry — identity not bound, ports != exposure
+        2: ["Q1", "Q2"],   # TSO Logon — identity binding + authentication
+        3: ["Q4", "Q5"],   # Enter ISPF — RACF enforces, processes not short-lived
+        4: ["Q5"],         # Dataset List — no filesystem
+        5: ["Q4"],         # Browse System Datasets — RACF enforces
+        7: ["Q1"],         # LISTALC — identity context
+    },
+    "deferred-exec": {
+        1: ["Q3", "Q5"],   # STATUS — active jobs, deferred execution
+        2: ["Q3"],         # Browse JCL — job declaration
+        3: ["Q3"],         # View JCL Job — identity at submission
+        4: ["Q3"],         # Return to TSO & Check Output — audit trail
+        5: ["Q3"],         # Logoff — summary
+    },
+    "system-inspection": {
+        1: ["Q1"],         # TSO STATUS — active sessions, bound identities
+        2: ["Q2"],         # TSO TIME — authority at every command
+        4: ["Q4", "Q5"],   # SYS1.PROCLIB — RACF enforces, not config files
+        5: ["Q5"],         # Return — browsing reveals config
+        6: ["Q1", "Q2", "Q4", "Q5"],  # Logoff summary
+    },
+    "auth-model": {
+        1: ["Q1"],         # LISTALC — identity context
+        2: ["Q4", "Q5"],   # LISTCAT — RACF enforces, not roles
+        3: ["Q5"],         # PROFILE — PREFIX, not absolute paths
+        4: ["Q1", "Q2", "Q4", "Q5"],  # Logoff summary
+    },
+    "dataset-model": {
+        1: ["Q5"],         # Enter ISPF — no filesystem
+        2: ["Q1", "Q5"],   # User datasets — HLQ = identity
+        3: ["Q4", "Q5"],   # System datasets — RACF enforces
+        4: ["Q5"],         # PDS members — not config files
+        5: ["Q5"],         # LISTCAT — catalog structure
+        6: ["Q1", "Q4", "Q5"],  # Logoff summary
+    },
+    "address-spaces": {
+        1: ["Q2", "Q5"],   # STATUS — active jobs, persistent address spaces
+        2: ["Q1", "Q5"],   # LISTALC — identity context, resource footprint
+        3: ["Q3"],         # OUTPUT — deferred execution audit
+        4: ["Q5"],         # LISTCAT — catalog namespace, RACF profiles
+        5: ["Q1", "Q2", "Q3", "Q5"],  # Logoff summary
+    },
+    "cobol-basics": {
+        0: ["Q5"],          # Connect & Login — declarative workflow intro
+        1: ["Q5"],          # Enter RFE — development environment
+        2: ["Q5"],          # Open COBOL sample — JCL library structure
+        3: ["Q5"],          # Read source — COBOL structure, not config files
+        4: ["Q3"],          # Submit job — deferred execution
+        5: ["Q3", "Q4"],    # Check output — JES audit, RACF enforcement
+        6: ["Q3", "Q4", "Q5"],  # Logoff summary — mental model shift
+    },
+    "cics-kicks": {
+        "title": "CICS/KICKS: Transaction Processing",
+        "steps": [
+            {
+                "title": "Connect to Mainframe",
+                "control_plane": "vtam",
+                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nConnecting to MVS TK5. KICKS is a CICS-compatible transaction processing system that runs under TSO.",
+                "actions": [{"type": "connect"}],
+                "expect": ["VTAM", "Logon", "TK5", "MVS"],
+                "display_seconds": 3,
+            },
+            {
+                "title": "TSO Login",
+                "control_plane": "tso",
+                "narration": "**Control Plane: TSO / RACF**\n\nLogging in as HERC01. KICKS runs as a TSO application, unlike IBM CICS which runs as a started task.",
+                "actions": [{"type": "tso_login"}],
+                "expect": ["READY", "ISPF", "RFE", "TSOAPPLS"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Exit to TSO READY",
+                "control_plane": "tso",
+                "narration": "**Preparing for KICKS**\n\nExiting ISPF to reach TSO READY prompt where we can start KICKS.",
+                "actions": [
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
+                ],
+                "expect": ["READY"],
+                "display_seconds": 3,
+            },
+            {
+                "title": "Start KICKS",
+                "control_plane": "cics",
+                "narration": "**Control Plane: CICS (Transaction Processing)**\n\nStarting KICKS with the EXEC command. KICKS provides CICS-compatible transaction processing:\n\n- **Transaction IDs** — 4-character codes that invoke programs\n- **BMS Maps** — Screen definitions for 3270 terminals\n- **VSAM Files** — Data storage for transactions\n- **Pseudo-conversational** — Programs end after each screen, freeing resources\n\nKICKS is source-compatible with IBM CICS — programs can migrate between them.",
+                "actions": [
+                    {"type": "string", "value": "EXEC 'KICKS.KICKSSYS.V1R5M0.CLIST(KICKS)'"}, 
+                    {"type": "enter"}, 
+                    {"type": "wait", "seconds": 5},
+                ],
+                "expect": ["KICKS", "KSGM", "transaction"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "KICKS Banner Screen",
+                "control_plane": "cics",
+                "narration": "**KICKS is running!**\n\nThe KICKS banner shows the system is active. Key transactions:\n\n- **KSGM** — Good morning (startup screen)\n- **MENU** — Application menu\n- **INQ1** — Customer inquiry\n- **MNT1** — Customer maintenance\n- **KSSF** — Sign off (shutdown)\n\nPress CLEAR then type a transaction ID to execute it.",
+                "actions": [{"type": "enter"}, {"type": "wait", "seconds": 3}],
+                "expect": ["KICKS", "KSGM"],
+                "display_seconds": 6,
+            },
+            {
+                "title": "Run MENU Transaction",
+                "control_plane": "cics",
+                "narration": "**Running a CICS Transaction**\n\nClearing screen and entering MENU to see available applications. Each transaction:\n\n1. Receives terminal input\n2. Executes a COBOL/Assembler program\n3. Sends output to terminal\n4. Ends (pseudo-conversational)\n\nThis is fundamentally different from batch — transactions are interactive and immediate.",
+                "actions": [
+                    {"type": "clear"}, {"type": "wait", "seconds": 1},
+                    {"type": "string", "value": "MENU"}, 
+                    {"type": "enter"}, 
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["MENU", "CUSTOMER", "ORDER", "application"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Sign Off KICKS",
+                "control_plane": "cics",
+                "narration": "**Clean CICS Exit**\n\nSigning off with KSSF transaction. This cleanly terminates the KICKS region and returns to TSO.\n\n**Key CICS Concepts Demonstrated:**\n- Transaction processing (not batch)\n- Pseudo-conversational design\n- BMS screen handling\n- Program-to-transaction mapping",
+                "actions": [
+                    {"type": "clear"}, {"type": "wait", "seconds": 1},
+                    {"type": "string", "value": "KSSF"}, 
+                    {"type": "enter"}, 
+                    {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["SIGNOFF", "READY", "ended"],
+                "display_seconds": 5,
+            },
+            {
+                "title": "Return to TSO",
+                "control_plane": "tso",
+                "narration": "**Back at TSO READY**\n\nKICKS has terminated. You've seen:\n\n- **VTAM** — Session fabric\n- **TSO** — Interactive environment hosting KICKS\n- **CICS/KICKS** — Transaction processing layer\n\nCICS is how most real-time mainframe applications work — banking, retail, airlines all use CICS transactions.",
+                "actions": [{"type": "enter"}, {"type": "wait", "seconds": 2}],
+                "expect": ["READY"],
+                "display_seconds": 5,
+            },
+        ],
+    },
+}

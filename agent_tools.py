@@ -11,36 +11,15 @@ from typing import Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 
-# BIRP modules - check current directory first, then fallback paths
-BIRP_AVAILABLE = False
-WrappedEmulator = None
-Screen = None
+# TN3270 emulator - uses py3270 library
+TN3270_AVAILABLE = False
+Emulator = None
 
-# Try direct import first (if birpv2_modules is in same directory or PYTHONPATH)
 try:
-    from birpv2_modules.emulator.wrapper import WrappedEmulator
-    from birpv2_modules.core.models import Screen
-    BIRP_AVAILABLE = True
+    from py3270 import Emulator
+    TN3270_AVAILABLE = True
 except ImportError:
-    # Try adding the current script's directory to path
-    SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
-    if SCRIPT_DIR not in sys.path:
-        sys.path.insert(0, SCRIPT_DIR)
-    try:
-        from birpv2_modules.emulator.wrapper import WrappedEmulator
-        from birpv2_modules.core.models import Screen
-        BIRP_AVAILABLE = True
-    except ImportError:
-        # Fallback: try ~/Desktop/STuFF /birp
-        BIRP_PATH = os.path.expanduser("~/Desktop/STuFF /birp")
-        if os.path.exists(BIRP_PATH) and BIRP_PATH not in sys.path:
-            sys.path.insert(0, BIRP_PATH)
-            try:
-                from birpv2_modules.emulator.wrapper import WrappedEmulator
-                from birpv2_modules.core.models import Screen
-                BIRP_AVAILABLE = True
-            except ImportError:
-                pass
+    pass
 
 
 @dataclass
@@ -120,14 +99,52 @@ def normalize_screen_text(buffer):
 
 
 def screen_from_readbuffer(buffer):
-    """Convert ReadBuffer(Ascii) output to a printable screen."""
+    """Convert ReadBuffer(Ascii) output to a printable screen.
+    
+    ReadBuffer(Ascii) returns hex-encoded bytes with field markers like SF(c0=c8).
+    We need to decode the hex bytes to get the actual text.
+    """
+    import re
+    
     lines = normalize_screen_buffer(buffer)
     if not lines:
         return ""
-    try:
-        return str(Screen(lines))
-    except Exception:
-        return "\n".join(lines)
+    
+    raw_text = "\n".join(lines)
+    
+    # Remove field markers like SF(c0=c8), SF(c0=c0), etc.
+    text = re.sub(r'SF\([^)]*\)', ' ', raw_text)
+    
+    # Try to decode hex sequences (e.g., "49 4b 4a" -> "IKJ")
+    def decode_hex_line(line):
+        # Check if line looks like hex data (space-separated hex bytes)
+        parts = line.split()
+        if all(len(p) == 2 and all(c in '0123456789abcdefABCDEF' for c in p) for p in parts if p):
+            try:
+                # ReadBuffer(Ascii) returns ASCII hex, not EBCDIC
+                decoded = bytes.fromhex(''.join(parts)).decode('ascii', errors='replace')
+                # Filter out nulls and unprintable chars, replace with space
+                return ''.join(c if (c.isprintable() and ord(c) >= 32) else ' ' for c in decoded)
+            except Exception:
+                pass
+        return line
+    
+    # Process each line
+    result_lines = []
+    for line in text.split('\n'):
+        decoded = decode_hex_line(line.strip())
+        if decoded.strip():  # Skip empty lines
+            result_lines.append(decoded)
+    
+    # If we got meaningful text, return it
+    if result_lines:
+        # Format as 80-column screen
+        final_text = '\n'.join(result_lines)
+        # Clean up multiple spaces but preserve structure
+        final_text = re.sub(r'  +', '  ', final_text)
+        return final_text
+    
+    return raw_text
 
 
 # =============================================================================
@@ -158,8 +175,8 @@ def connect_mainframe(target: str) -> tuple[bool, str]:
     """
     global connection
 
-    if not BIRP_AVAILABLE:
-        return False, "BIRP modules not available. TN3270 connectivity disabled."
+    if not TN3270_AVAILABLE:
+        return False, "py3270 not available. Install with: pip install py3270"
 
     try:
         if ":" in target:
@@ -176,11 +193,8 @@ def connect_mainframe(target: str) -> tuple[bool, str]:
             except:
                 pass
 
-        connection.emulator = WrappedEmulator(visible=False, command_timeout=5)
-        try:
-            connection.emulator.connect(f"{host}:{port}", timeout=5)
-        except TypeError:
-            connection.emulator.connect(f"{host}:{port}")
+        connection.emulator = Emulator(visible=False)
+        connection.emulator.connect(f"{host}:{port}")
 
         connection.host = host
         connection.port = port
@@ -238,13 +252,120 @@ def read_screen() -> str:
         return "[Not connected]"
 
     try:
-        response = exec_emulator_command(b'ReadBuffer(Ascii)', timeout=6)
-        buffer = response.data if response else ""
-        screen_text = screen_from_readbuffer(buffer)
+        em = connection.emulator
+        # Use py3270's string_get to read entire screen as plain text
+        # string_get(ypos, xpos, length) - 1-indexed
+        lines = []
+        for row in range(1, 25):  # 24 rows, 1-indexed
+            try:
+                line = em.string_get(row, 1, 80)
+                lines.append(line.rstrip() if line else '')
+            except Exception:
+                lines.append('')
+        
+        screen_text = '\n'.join(lines)
         connection.current_screen = screen_text
         return connection.current_screen
+    except Exception as e:
+        return connection.current_screen or f"[Screen unavailable: {e}]"
+
+
+def read_screen_with_color() -> str:
+    """Read current 3270 screen with color styling.
+    
+    Returns HTML with color spans for proper 3270 rendering.
+    Uses heuristic-based coloring since py3270 doesn't expose extended attributes.
+    """
+    global connection
+    
+    if not connection.connected or not connection.emulator:
+        return "[Not connected]"
+    
+    try:
+        # Get plain text screen
+        screen_text = read_screen()
+        if not screen_text or screen_text.startswith("["):
+            return screen_text
+        
+        return colorize_3270_screen(screen_text)
     except Exception:
-        return connection.current_screen or "[Screen unavailable]"
+        return read_screen()
+
+
+def colorize_3270_screen(screen_text: str) -> str:
+    """Apply 3270-style coloring to screen text using heuristics.
+    
+    Standard 3270 color conventions:
+    - Blue/Turquoise: Labels, titles, protected fields
+    - Green: Input fields, general text
+    - Red: Error messages, warnings
+    - Yellow: Intensified/highlighted text
+    - White: High-intensity fields
+    - Pink: Special status
+    """
+    import html
+    import re
+    
+    lines = screen_text.split('\n')
+    result_lines = []
+    
+    # Patterns for different colors
+    error_patterns = [
+        r'ERROR', r'INVALID', r'FAILED', r'DENIED', r'NOT AUTHORIZED',
+        r'ABEND', r'IKJ\d+E', r'IEF\d+E', r'IEC\d+E', r'IGD\d+E',
+        r'NOT FOUND', r'REJECTED', r'VIOLATION'
+    ]
+    warning_patterns = [
+        r'WARNING', r'CAUTION', r'IKJ\d+W', r'IEF\d+W'
+    ]
+    info_patterns = [
+        r'IKJ\d+I', r'IEF\d+I', r'IGD\d+I', r'READY', r'LOGON', r'LOGOFF'
+    ]
+    title_patterns = [
+        r'^[\s]*[A-Z][A-Z0-9\s\-]{10,}[\s]*$',  # All-caps titles
+        r'={5,}', r'-{5,}', r'\*{5,}',  # Separators
+        r'MENU', r'OPTION', r'COMMAND', r'ENTER', r'PF\d+',
+        r'ISPF', r'TSO', r'SDSF', r'VTAM', r'CICS', r'KICKS', r'JCL'
+    ]
+    
+    for line in lines:
+        if not line.strip():
+            result_lines.append('')
+            continue
+        
+        escaped = html.escape(line)
+        
+        # Check for errors (red)
+        if any(re.search(p, line, re.IGNORECASE) for p in error_patterns):
+            result_lines.append(f'<span class="c3270-red">{escaped}</span>')
+        # Check for warnings (yellow)
+        elif any(re.search(p, line, re.IGNORECASE) for p in warning_patterns):
+            result_lines.append(f'<span class="c3270-yellow">{escaped}</span>')
+        # Check for info messages (turquoise)
+        elif any(re.search(p, line, re.IGNORECASE) for p in info_patterns):
+            result_lines.append(f'<span class="c3270-turquoise">{escaped}</span>')
+        # Check for titles/headers (blue + bold)
+        elif any(re.search(p, line) for p in title_patterns):
+            result_lines.append(f'<span class="c3270-blue c3270-intensified">{escaped}</span>')
+        # Check for input prompts (white for labels, green for input area)
+        elif re.search(r'[=:]\s*$', line) or re.search(r'^[\s]*[A-Z][A-Za-z\s]+[=:]', line):
+            # Colorize label vs input area
+            match = re.match(r'^(.*?[=:]\s*)(.*?)$', escaped)
+            if match and match.group(2).strip():
+                result_lines.append(
+                    f'<span class="c3270-turquoise">{match.group(1)}</span>'
+                    f'<span class="c3270-green">{match.group(2)}</span>'
+                )
+            else:
+                result_lines.append(f'<span class="c3270-turquoise">{escaped}</span>')
+        # Version info, credits (cyan)
+        elif re.search(r'Version|Copyright|Created|Update|\d+\.\d+\.\d+', line, re.IGNORECASE):
+            result_lines.append(f'<span class="c3270-turquoise">{escaped}</span>')
+        # Default: green
+        else:
+            result_lines.append(f'<span class="c3270-green">{escaped}</span>')
+    
+    return '\n'.join(result_lines)
 
 
 def get_screen_data() -> dict:
@@ -255,6 +376,7 @@ def get_screen_data() -> dict:
         return {
             "connected": False,
             "screen": "",
+            "screen_html": "",
             "rows": 24,
             "cols": 80,
             "cursor_row": 0,
@@ -266,9 +388,14 @@ def get_screen_data() -> dict:
 
 def get_cached_screen_data() -> dict:
     """Return cached screen data without hitting the emulator."""
+    screen_html = ""
+    if connection.current_screen:
+        screen_html = colorize_3270_screen(connection.current_screen)
+
     return {
         "connected": connection.connected,
         "screen": connection.current_screen,
+        "screen_html": screen_html,
         "rows": connection.screen_rows,
         "cols": connection.screen_cols,
         "cursor_row": connection.cursor_row,
@@ -445,7 +572,7 @@ def get_connection_status() -> dict:
         "host": connection.host if connection.connected else "",
         "port": connection.port if connection.connected else 0,
         "target": f"{connection.host}:{connection.port}" if connection.connected else "",
-        "birp_available": BIRP_AVAILABLE
+        "tn3270_available": TN3270_AVAILABLE
     }
 
 
@@ -708,8 +835,8 @@ def execute_tool(name: str, arguments: dict, rag_engine=None) -> str:
         elif name == "get_connection_status":
             status = get_connection_status()
             if status["connected"]:
-                return f"Connected to {status['target']} (BIRP: {status['birp_available']})"
-            return f"Not connected (BIRP available: {status['birp_available']})"
+                return f"Connected to {status['target']}"
+            return f"Not connected (TN3270 available: {status['tn3270_available']})"
 
         else:
             return f"Unknown tool: {name}"

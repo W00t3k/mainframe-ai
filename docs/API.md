@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API documentation for BIRP v2 modules.
+Complete API documentation for TN3270 v2 modules.
 
 ## Table of Contents
 
@@ -129,7 +129,7 @@ class WrappedEmulator(Emulator):
         self,
         visible: bool = True,           # GUI vs headless
         delay: float = 0,               # Command delay
-        window_title: str = "BIRP v2",  # Window title
+        window_title: str = "TN3270 v2",  # Window title
         command_timeout: int = 10       # Default timeout
     )
 
@@ -379,7 +379,7 @@ class JESParser:
 ### Logger
 
 ```python
-class BIRPLogger:
+class TN3270Logger:
     """Colored console logger"""
 
     def __init__(
@@ -398,7 +398,7 @@ class BIRPLogger:
 
 # Global functions
 def setup_logger(log_file: str = None, log_level: str = 'INFO') -> None: ...
-def get_logger() -> BIRPLogger: ...
+def get_logger() -> TN3270Logger: ...
 def log_info(message: str, level: int = 0) -> None: ...
 def log_warning(message: str, level: int = 0) -> None: ...
 def log_error(message: str, level: int = 0) -> None: ...
@@ -406,7 +406,7 @@ def log_debug(message: str, level: int = 0) -> None: ...
 def log_success(message: str, level: int = 0) -> None: ...
 def create_logger(
     quiet: bool = False, log_file: str = None, log_level: int = logging.INFO
-) -> BIRPLogger: ...
+) -> TN3270Logger: ...
 ```
 
 ### Search

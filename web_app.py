@@ -23,7 +23,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, UploadFile, File
+from fastapi import FastAPI, Request, WebSocket, WebSocketDisconnect, UploadFile, File, BackgroundTasks
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -41,7 +41,7 @@ except ImportError as e:
 # Import agent tools (connection management, tool definitions)
 try:
     from agent_tools import (
-        connection, BIRP_AVAILABLE, TOOL_DEFINITIONS,
+        connection, TN3270_AVAILABLE, TOOL_DEFINITIONS,
         connect_mainframe, disconnect_mainframe, read_screen,
         send_terminal_key, get_screen_data, get_cached_screen_data,
         capture_screen, get_connection_status, execute_tool_async,
@@ -51,7 +51,7 @@ try:
 except ImportError as e:
     print(f"Agent tools import error: {e}")
     AGENT_TOOLS_AVAILABLE = False
-    BIRP_AVAILABLE = False
+    TN3270_AVAILABLE = False
 
 # Import trust graph
 try:
@@ -591,6 +591,10 @@ async def rag_page(request: Request):
 @app.get("/architecture", response_class=HTMLResponse)
 async def architecture_page(request: Request):
     return templates.TemplateResponse("architecture.html", {"request": request})
+
+@app.get("/docs", response_class=HTMLResponse)
+async def docs_page(request: Request):
+    return templates.TemplateResponse("docs.html", {"request": request})
 
 
 @app.get("/abstract-models", response_class=HTMLResponse)
@@ -1620,7 +1624,6 @@ async def api_status():
         "connected": connection.connected,
         "host": f"{connection.host}:{connection.port}" if connection.connected else "",
         "screen": connection.current_screen if connection.connected else None,
-        "birp_available": BIRP_AVAILABLE,
         "ollama_running": ollama_ok,
         "model": OLLAMA_MODEL
     })
@@ -1629,6 +1632,18 @@ async def api_status():
 @app.get("/api/screen")
 async def api_screen():
     return JSONResponse(get_cached_screen_data())
+
+
+@app.get("/api/terminal/screen")
+async def api_terminal_screen():
+    """Get current terminal screen for the preview pane."""
+    if not connection or not connection.connected:
+        return JSONResponse({"screen": None, "connected": False})
+    try:
+        data = get_cached_screen_data()
+        return JSONResponse({"screen": data.get("screen", ""), "screen_html": data.get("screen_html", ""), "connected": True})
+    except Exception:
+        return JSONResponse({"screen": connection.current_screen if connection else "", "connected": True})
 
 
 @app.post("/api/terminal/key")
@@ -2116,958 +2131,98 @@ async def api_recon_explain_screen(request: Request):
 
 
 # ============================================================================
-# Autonomous Walkthrough System
+# System / Mainframe Control
+# ============================================================================
+
+import subprocess as _subprocess
+from pathlib import Path as _Path
+
+_TK5_DIR = _Path(__file__).parent / "tk5" / "mvs-tk5"
+_TK5_START = _TK5_DIR / "start_tk5.sh"
+_TK5_STOP = _TK5_DIR / "stop_tk5.sh"
+
+def _check_hercules_running() -> bool:
+    try:
+        result = _subprocess.run(["pgrep", "-x", "hercules"], capture_output=True)
+        return result.returncode == 0
+    except Exception:
+        return False
+
+@app.get("/api/system/mainframe/status")
+async def mainframe_status():
+    running = _check_hercules_running()
+    return {"running": running, "status": "online" if running else "offline", "tk5_available": _TK5_START.exists()}
+
+@app.post("/api/system/mainframe/restart")
+async def restart_mainframe(background_tasks: BackgroundTasks):
+    if not _TK5_START.exists() or not _TK5_STOP.exists():
+        return JSONResponse({"success": False, "error": "TK5 scripts not found"}, status_code=404)
+    def _restart():
+        import time
+        if _check_hercules_running():
+            _subprocess.run(["bash", str(_TK5_STOP)], cwd=str(_TK5_DIR))
+            time.sleep(3)
+        _subprocess.run(["bash", str(_TK5_START)], cwd=str(_TK5_DIR))
+    background_tasks.add_task(_restart)
+    return JSONResponse({"success": True, "status": "restarting", "message": "Mainframe is restarting..."})
+
+
+@app.post("/api/terminal/reset-session")
+async def api_terminal_reset_session():
+    """Logoff any TSO session and return to clean VTAM screen."""
+    import time as _rst_time
+    try:
+        if not connection or not connection.connected:
+            return JSONResponse({"success": False, "error": "Not connected"})
+
+        # Try PF3 repeatedly to exit any ISPF panels
+        for _ in range(6):
+            screen = read_screen()
+            if "READY" in screen or "LOGON" in screen or "VTAM" in screen or "USS" in screen:
+                break
+            send_terminal_key("pf", "3")
+            _rst_time.sleep(1.5)
+
+        screen = read_screen()
+        # If at TSO READY, logoff
+        if "READY" in screen:
+            send_terminal_key("string", "LOGOFF")
+            send_terminal_key("enter")
+            _rst_time.sleep(2)
+            screen = read_screen()
+
+        # If at IKJ56400 prompt, type LOGOFF
+        if "IKJ56400" in screen or "ENTER LOGON OR LOGOFF" in screen:
+            send_terminal_key("home")
+            _rst_time.sleep(0.2)
+            send_terminal_key("eraseeof")
+            _rst_time.sleep(0.2)
+            send_terminal_key("string", "LOGOFF")
+            send_terminal_key("enter")
+            _rst_time.sleep(2)
+            screen = read_screen()
+
+        # Disconnect and reconnect for a truly clean state
+        from agent_tools import disconnect_mainframe
+        disconnect_mainframe()
+        _rst_time.sleep(1)
+        host = f"{connection.host}:{connection.port}" if connection else "localhost:3270"
+        connect_mainframe(host)
+        _rst_time.sleep(2)
+        screen = read_screen()
+
+        return JSONResponse({"success": True, "message": "Session reset — clean VTAM screen", "screen": screen})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+
+# ============================================================================
+# Autonomous Walkthrough System (imported from app modules)
 # ============================================================================
 
 import time as _time
-
-WALKTHROUGH_SCRIPTS = {
-    "session-stack": {
-        "title": "Session Stack: VTAM \u2192 TSO \u2192 ISPF \u2192 Datasets",
-        "steps": [
-            {
-                "title": "Connect to Mainframe",
-                "control_plane": "vtam",
-                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nWe begin by establishing a TN3270 connection. This creates a Logical Unit (LU) session in VTAM \u2014 the session fabric that exists independently of TCP/IP.\n\n**Key concept:** The session is managed by VTAM, not the network stack. When we connect, we are assigned an LU session that can outlive the TCP connection itself.",
-                "actions": [{"type": "connect"}],
-                "expect": [],
-                "display_seconds": 5,
-            },
-            {
-                "title": "VTAM Entry Screen",
-                "control_plane": "vtam",
-                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nYou are at the VTAM entry screen \u2014 the session fabric layer. VTAM manages LU sessions that exist independently of TCP/IP.\n\n**Broken Assumption:** *\"Ports define exposure.\"* In z/OS, the session fabric outlives TCP connections. What you see here is not a \"service on a port\" \u2014 it's the session manager itself.\n\n**Assessment Question Q1:** Identity is not yet bound. You are an anonymous VTAM session. No userid, no authority \u2014 just a session handle.\n\nWe'll type `TSO` to leave the session fabric and enter the human interaction plane.",
-                "actions": [{"type": "clear"}, {"type": "wait", "seconds": 2}],
-                "expect": ["VTAM", "USS", "LOGON", "NVAS"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "TSO Logon — Identity Binding",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO / RACF (Identity Binding & Authentication)**\n\nWe transition from the VTAM session fabric to TSO — the human interaction plane. VTAM routes our session to the TSO APPLID, and we authenticate as HERC01.\n\n**Key concept:** VTAM acts as a session router. `TSO` is an APPLID registered in the session fabric. The transition from VTAM to TSO is a control-plane boundary crossing.\n\n**Broken Assumption:** *\"There is a root user.\"* There is no root. RACF distributes authority across profiles. The userid `HERC01` determines which profile set applies.\n\nPassword verification is handled by RACF, not TSO. Authentication proves identity, but authentication is not authorization — RACF evaluates every resource access separately. Logging in does not grant blanket access.",
-                "actions": [{"type": "tso_login"}],
-                "expect": ["READY", "ISPF", "IKJ56455I"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Enter ISPF",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (Human Interaction Desktop)**\n\nWe type `ISPF` to launch the Interactive System Productivity Facility, then navigate to RFE (Review Front End) \u2014 the primary interactive tool on TK5 for dataset management and development.\n\n**Broken Assumption:** *\"Processes are short-lived.\"* This TSO address space persists. Your identity context survives across panels, utilities, and program invocations. The address space may run for hours or days.\n\n**Assessment Question Q4:** TSO/ISPF enforces panel-level access. But the real enforcement is RACF, which every subsystem queries. ISPF is the interface; RACF is the authority engine.\n\nYou've now traversed: VTAM (session) \u2192 TSO (identity) \u2192 ISPF/RFE (interaction).",
-                "actions": [
-                    {"type": "string", "value": "ISPF"}, {"type": "enter"}, {"type": "wait", "seconds": 3},
-                    {"type": "home"},
-                    {"type": "string", "value": "=M"}, {"type": "enter"}, {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "1"}, {"type": "enter"}, {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["RFE", "OPTION", "UTILITIES", "BROWSE", "EDIT"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Dataset List (3.4)",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (Dataset Navigation)**\n\nOption 3.4 opens the Dataset List utility within RFE. Datasets are the z/OS storage model \u2014 not a filesystem.\n\n**Key concept:** z/OS does not have `/etc`, `/var`, or config files in the Unix sense. Everything is stored in datasets: cataloged, named objects with structure (PDS, sequential, VSAM). Access is controlled by RACF profiles, not filesystem permissions.\n\n**Assessment Question Q5:** If you are importing the assumption that \"there is a filesystem hierarchy,\" stop. z/OS uses a flat catalog namespace with profile-based protection.",
-                "actions": [
-                    {"type": "string", "value": "3"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "string", "value": "4"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["DSLIST", "DATA SET", "DATASET"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "Browse System Datasets",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (System Configuration)**\n\nWe enter `SYS1` as the dataset name level to browse system datasets. `SYS1.PARMLIB`, `SYS1.PROCLIB`, and `SYS1.LINKLIB` are critical system datasets.\n\n**Key concept:** System configuration lives in datasets like `SYS1.PARMLIB` \u2014 not in `/etc`. These datasets define system behavior: started tasks, security policy, IPL parameters. Access to them is controlled by RACF dataset profiles.\n\n**Assessment Question Q4:** RACF enforces access to system datasets. Anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior.",
-                "actions": [{"type": "string", "value": "SYS1"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
-                "expect": ["SYS1", "PARMLIB", "PROCLIB", "LINKLIB"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "Return to RFE",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE**\n\nPF3 navigates back through the RFE panel stack: dataset list \u2192 Utilities \u2192 RFE main menu. The session persists \u2014 identity is still bound, the address space is still alive. We haven't \"logged out\" by going back.\n\n**Key concept:** Navigation does not destroy sessions. The address space continues. This is fundamentally different from web applications where navigating away may end a session.",
-                "actions": [{"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2}, {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2}, {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2}],
-                "expect": ["RFE", "OPTION", "UTILITIES"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "TSO Command Line",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Command Execution)**\n\nWe exit ISPF to reach the TSO READY prompt \u2014 raw command execution under the bound identity.\n\n**Key concept:** Every command you execute here runs under the authority of HERC01. There is no `sudo` \u2014 your authority is determined by your RACF profile, not by how you invoke a command.",
-                "actions": [{"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2}, {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 3}],
-                "expect": ["READY", "TSO", "COMMAND", "ENTER"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "LISTALC \u2014 Identity Context",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Identity in Action)**\n\nThe `LISTALC STATUS` command shows every dataset allocated to this TSO session. These allocations reveal the identity context \u2014 what resources are bound to HERC01's address space.\n\n**Key concept:** Dataset allocations are the footprint of your identity. STEPLIB, ISPLLIB, ISPTLIB \u2014 these control which programs and panels are available. The allocations were established when you logged in, and they persist for the lifetime of your session.\n\n**Assessment Question Q1:** Identity was bound at TSO logon. Here we see the *resource context* of that identity \u2014 which libraries, which datasets, which execution environment.",
-                "actions": [{"type": "string", "value": "LISTALC STATUS"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
-                "expect": ["LISTALC", "HERC01", "SYS1", "KEEP", "STEPLIB", "ISPF", "ALLOC"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Logoff \u2014 Return to VTAM",
-                "control_plane": "vtam",
-                "narration": "**Control Plane: VTAM (Session Unbinding)**\n\nThe `LOGOFF` command unbinds the identity from the session. We return to the anonymous VTAM session fabric.\n\n**Session lifecycle summary:**\n1. **VTAM** \u2014 anonymous session established\n2. **TSO** \u2014 identity bound via logon (HERC01)\n3. **ISPF** \u2014 interactive desktop, dataset navigation\n4. **RACF** \u2014 identity inspection, authority model revealed\n5. **VTAM** \u2014 identity unbound, back to anonymous\n\n**Key takeaway:** Three control planes were traversed. Identity was bound at TSO, enforced by RACF, and the session fabric (VTAM) existed before and after authentication. This layered model is fundamentally different from modern systems where login and session management are unified.",
-                "actions": [{"type": "tso_logoff"}],
-                "expect": ["LOGOFF", "VTAM", "LOGON"],
-                "display_seconds": 8,
-            },
-        ],
-    },
-    "deferred-exec": {
-        "title": "Deferred Execution: JCL \u2192 JES",
-        "steps": [
-            {
-                "title": "Connect & Login",
-                "control_plane": "tso",
-                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. The deferred execution walkthrough requires an authenticated session because JES associates submitted jobs with the submitter's identity.\n\n**Key concept:** JES is the deferred execution broker. It doesn't execute work directly \u2014 it queues, schedules, and manages output. Every job carries the identity of its submitter.",
-                "actions": [
-                    {"type": "connect"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "tso_login"},
-                ],
-                "expect": ["READY", "ISPF", "IKJ"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "Enter ISPF and Navigate to SDSF",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (Deferred Execution)**\n\nSDSF (System Display and Search Facility) is the window into JES. It shows active jobs, input queues, output queues, and system activity.\n\n**Broken Assumption:** *\"Work executes immediately.\"* On z/OS, work is *declared* via JCL, *queued* by JES, and *scheduled* by the system. The time between submission and execution may be seconds, minutes, hours, or days.\n\n**Assessment Question Q3:** Everything in JES executes later than expected.",
-                "actions": [
-                    {"type": "string", "value": "ISPF"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "home"},
-                    {"type": "string", "value": "=S"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["SDSF", "DISPLAY", "ACTIVE", "PRIMARY"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "Display Active Jobs",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (Active Address Spaces)**\n\nThe `DA` (Display Active) command shows all active address spaces. These are long-running processes: started tasks, TSO sessions, batch jobs, and system services.\n\n**Key concept:** These address spaces may have been running for days or months. CICS regions, JES itself, VTAM \u2014 these are persistent. The identity context bound to each one was set at startup and persists for the lifetime of the address space.\n\n**Assessment Question Q2:** Authority was evaluated when each address space started. Changes to RACF profiles after startup may not take effect until restart.",
-                "actions": [
-                    {"type": "string", "value": "DA"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["ACTIVE", "JOBS", "JOBNAME", "OWNERID"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Display Output Queue",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (Job Output)**\n\nThe output queue shows completed jobs and their spool output. Each entry preserves the identity of the submitter.\n\n**Key concept:** JES output is the audit trail of deferred execution. The job's identity, class, priority, return code, and output are all preserved. This is evidence of who submitted what, and when it ran.\n\n**Assessment Question Q3:** These jobs ran later than they were submitted. The identity bound at submission time governed the execution \u2014 even if the submitter logged off in the meantime.",
-                "actions": [
-                    {"type": "home"},
-                    {"type": "eraseeof"},
-                    {"type": "string", "value": "H"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["HELD", "OUTPUT", "QUEUE", "JOBNAME"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Return & Logoff",
-                "control_plane": "vtam",
-                "narration": "**Summary: Deferred Execution**\n\nJES demonstrates that z/OS separates work *declaration* from work *execution*. This has profound security implications:\n\n1. **Identity persists:** The submitter's identity governs execution, not the current user\n2. **Authority is evaluated at submission:** RACF checks happen when the job is submitted, not when it runs\n3. **Audit trail exists:** Every job's identity, input, and output are preserved in JES\n\nOn z/OS, you must ask: \"What work was declared but hasn't run yet? Under whose authority will it run?\"",
-                "actions": [{"type": "tso_logoff"}],
-                "expect": ["LOGOFF", "VTAM"],
-                "display_seconds": 6,
-            },
-        ],
-    },
-    "system-inspection": {
-        "title": "System Inspection: Configuration & Procedures",
-        "steps": [
-            {
-                "title": "Connect & Login to TSO",
-                "control_plane": "tso",
-                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough inspects the system configuration model \u2014 how z/OS defines its runtime through datasets, procedures, and catalogs.",
-                "actions": [
-                    {"type": "connect"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "tso_login"},
-                ],
-                "expect": ["READY", "ISPF", "IKJ"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "TSO STATUS \u2014 Active Sessions",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Session Discovery)**\n\nThe `STATUS` command shows all active TSO sessions. Each session represents a bound identity \u2014 an address space with a userid attached.\n\n**Key concept:** Unlike `who` on Unix, TSO STATUS shows persistent address spaces. These sessions may have been active for hours or days. Each one has its own identity context, dataset allocations, and authority scope.\n\n**Assessment Question Q1:** Every active session here has an identity bound to it. The identity was established at logon and persists for the lifetime of the address space.",
-                "actions": [
-                    {"type": "string", "value": "STATUS"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                ],
-                "expect": ["STATUS", "HERC", "LOGON", "READY"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "TSO TIME \u2014 System Clock",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (System Context)**\n\nThe `TIME` command shows the system clock and your session CPU time. This is a simple command, but it demonstrates an important principle: every command you execute runs under your bound identity.\n\n**Key concept:** There is no `sudo`. When HERC01 types `TIME`, the system executes it as HERC01. When HERC01 types any command, RACF evaluates whether HERC01 has authority. Authority is continuous, not one-time.\n\n**Assessment Question Q2:** Authority is evaluated at every command invocation. The TIME command succeeds because it requires no special authority. Other commands may not.",
-                "actions": [
-                    {"type": "string", "value": "TIME"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                ],
-                "expect": ["TIME", "READY"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "Enter ISPF",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF/RFE (Interactive Desktop)**\n\nWe enter ISPF and navigate to RFE (Review Front End) to explore the system configuration. RFE provides structured access to datasets, utilities, and system management tools on TK5.\n\n**Key concept:** RFE is a panel-driven interface. Navigation follows a hierarchical menu structure. But the real enforcement is RACF \u2014 RFE presents options, RACF decides whether you can use them.",
-                "actions": [
-                    {"type": "string", "value": "ISPF"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "home"},
-                    {"type": "string", "value": "=M"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "1"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["RFE", "OPTION", "UTILITIES"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "System Procedures (SYS1.PROCLIB)",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (System Configuration)**\n\nWe navigate to the dataset list and examine `SYS1.PROCLIB` \u2014 the library of started task procedures. Every address space on the system (JES, VTAM, TSO, catalogs) is defined by a PROC in this library.\n\n**Broken Assumption:** *\"Services are configured in config files.\"* On z/OS, services are defined as JCL procedures in datasets. The PROC defines what program runs, what datasets it uses, and what authority it needs. There is no `/etc/init.d` or `systemd` \u2014 there are PROCs.\n\n**Assessment Question Q4:** The system's runtime behavior is defined by PROCs in SYS1.PROCLIB. Access to this dataset is controlled by RACF. Anyone who can UPDATE SYS1.PROCLIB can alter what services run at IPL.",
-                "actions": [
-                    {"type": "string", "value": "3"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "string", "value": "4"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "string", "value": "SYS1.PROCLIB"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["SYS1", "PROCLIB", "MEMBER"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Return to ISPF",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE**\n\nWe return through RFE and ISPF. The session persists \u2014 identity still bound, address space still alive.\n\n**Assessment Question Q5:** If you are importing the assumption that \"browsing means no risk,\" stop. On z/OS, the ability to *read* system datasets reveals the entire system configuration. Knowing which PROCs exist, which programs they invoke, and which datasets they reference is the first step in understanding the system's trust boundaries.",
-                "actions": [
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                ],
-                "expect": ["READY"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "Logoff",
-                "control_plane": "vtam",
-                "narration": "**Summary: System Inspection**\n\n1. **TSO STATUS** revealed active sessions \u2014 each with a bound identity\n2. **Every command** executes under your identity \u2014 no sudo, no elevation\n3. **SYS1.PROCLIB** defines the system's services \u2014 access = control\n4. **RACF enforces** who can read, update, or alter system configuration\n\n**Assessment Questions Answered:**\n- Q1: Identity is bound at TSO logon and persists through all commands\n- Q2: Authority is evaluated at every command and resource access\n- Q4: RACF enforces access to system configuration datasets\n- Q5: \"Config files are in /etc\" is wrong \u2014 configuration lives in PDS members",
-                "actions": [{"type": "tso_logoff"}],
-                "expect": ["LOGOFF", "VTAM"],
-                "display_seconds": 7,
-            },
-        ],
-    },
-    "auth-model": {
-        "title": "Authorization Model: RACF",
-        "steps": [
-            {
-                "title": "Connect & Login to TSO",
-                "control_plane": "tso",
-                "narration": "**Setup: Establishing Identity for RACF Demonstration**\n\nWe connect and log in to demonstrate the RACF authorization model. RACF is not a subsystem you \"enter\" \u2014 it is the continuous authorization engine that every other subsystem queries.",
-                "actions": [
-                    {"type": "connect"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "tso_login"},
-                ],
-                "expect": ["READY", "ISPF", "IKJ"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "LISTALC \u2014 Session Resource Context",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Identity in Action)**\n\n`LISTALC STATUS` shows every dataset allocated to this TSO session. These allocations reveal the identity context \u2014 what resources are bound to HERC01's address space.\n\n**Key concept:** Your RACF profile is the source of truth for your identity. Every subsystem \u2014 TSO, CICS, JES, batch \u2014 queries RACF to determine what you may do. The dataset allocations you see here were established at logon based on your RACF profile.\n\n**Assessment Question Q1:** Identity is defined in RACF profiles. The allocations here are the *result* of that identity being bound to this session.",
-                "actions": [
-                    {"type": "string", "value": "LISTALC STATUS"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                ],
-                "expect": ["LISTALC", "SYS1", "KEEP", "STEPLIB", "ALLOC"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "LISTCAT \u2014 Dataset Catalog Entries",
-                "control_plane": "racf",
-                "narration": "**Control Plane: RACF (Resource Protection)**\n\n`LISTCAT` shows catalog entries for system datasets. The catalog is the namespace \u2014 but access to the datasets is controlled by RACF profiles, not the catalog itself.\n\n**Broken Assumption:** *\"There is a root user.\"* RACF profiles grant specific access levels (NONE, READ, UPDATE, CONTROL, ALTER) to specific userids and groups. Even the most privileged user is governed by profiles \u2014 authority is distributed, not concentrated.\n\n**Assessment Question Q4:** RACF is the subsystem that enforces policy for datasets. The catalog tells you what exists; RACF tells you who may access it.",
-                "actions": [
-                    {"type": "string", "value": "LISTCAT ENT('SYS1.PARMLIB')"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                ],
-                "expect": ["LISTCAT", "SYS1", "PARMLIB", "NONVSAM", "VOLSER"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "PROFILE \u2014 TSO Session Profile",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Identity Attributes)**\n\nThe `PROFILE` command shows your TSO session settings: PREFIX (your default HLQ), message class, and other session parameters.\n\n**Key concept:** The PREFIX setting determines your default dataset high-level qualifier. When you reference a dataset without quotes, TSO prepends your PREFIX. This is identity-driven behavior \u2014 your PREFIX is typically your userid.\n\n**Assessment Question Q5:** If you are importing the assumption that \"paths are absolute,\" stop. On z/OS, unqualified dataset names are resolved relative to your identity's PREFIX. The same dataset reference means different things for different users.",
-                "actions": [
-                    {"type": "string", "value": "PROFILE"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                ],
-                "expect": ["PROFILE", "PREFIX", "HERC01", "CHAR"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Logoff",
-                "control_plane": "vtam",
-                "narration": "**Summary: RACF Authorization Model**\n\n1. **RACF is continuous:** Every resource access triggers a RACF check\n2. **Profiles, not roles:** Access is defined per-resource, not per-role\n3. **Authority is distributed:** No single account has unconditional access\n4. **ICH messages are evidence:** Every authorization decision generates an ICH message in the system log\n\n**Assessment Questions Answered:**\n- Q1: Identity is bound in RACF profiles\n- Q2: Authority is evaluated at every resource access\n- Q4: RACF is the subsystem that enforces policy\n- Q5: \"Roles define access\" and \"there is a root user\" are incorrect assumptions",
-                "actions": [{"type": "tso_logoff"}],
-                "expect": ["LOGOFF", "VTAM"],
-                "display_seconds": 7,
-            },
-        ],
-    },
-    "dataset-model": {
-        "title": "Dataset Model: PDS, Members & Catalogs",
-        "steps": [
-            {
-                "title": "Connect & Login",
-                "control_plane": "tso",
-                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough explores the z/OS storage model \u2014 datasets, partitioned data sets (PDS), members, and the catalog structure that replaces a traditional filesystem.",
-                "actions": [
-                    {"type": "connect"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "tso_login"},
-                ],
-                "expect": ["READY", "ISPF", "IKJ"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "Enter ISPF",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF/RFE (Dataset Interface)**\n\nWe enter ISPF and navigate to RFE (Review Front End) for structured access to the dataset model. Unlike a Unix filesystem with directories and files, z/OS uses a flat catalog namespace. Datasets are named objects \u2014 not files in directories.\n\n**Broken Assumption:** *\"There is a filesystem hierarchy.\"* z/OS has no `/home`, `/etc`, `/var`. Instead, datasets are named with dot-separated qualifiers: `SYS1.PARMLIB`, `HERC01.MY.DATA`. The catalog maps names to physical locations on DASD volumes.",
-                "actions": [
-                    {"type": "string", "value": "ISPF"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "home"},
-                    {"type": "string", "value": "=M"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "1"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["RFE", "OPTION", "UTILITIES"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "Dataset List \u2014 User Datasets",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (User Dataset Namespace)**\n\nWe navigate to RFE option 3.4 (DSLIST) and list datasets under our userid prefix `HERC01`. Every user has a dataset namespace rooted at their userid.\n\n**Key concept:** The high-level qualifier (HLQ) is identity-driven. `HERC01.*` datasets belong to this identity. RACF controls who can create, read, update, or delete datasets under each HLQ. This is the storage equivalent of identity binding.",
-                "actions": [
-                    {"type": "string", "value": "3"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "string", "value": "4"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "string", "value": "HERC01"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["HERC01", "DSLIST", "DATA SET"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "System Dataset Namespace",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (System Namespace)**\n\nNow we list `SYS1` datasets \u2014 the system namespace. These datasets define the operating system's behavior: `SYS1.PARMLIB` (configuration), `SYS1.PROCLIB` (service definitions), `SYS1.LINKLIB` (system programs).\n\n**Key concept:** There is no `/etc/init.d` or `systemd`. The entire system configuration model lives in datasets. Access to these datasets is controlled by RACF \u2014 anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior at the next IPL.",
-                "actions": [
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 1},
-                    {"type": "home"},
-                    {"type": "tab"},
-                    {"type": "eraseeof"},
-                    {"type": "string", "value": "SYS1"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["SYS1", "PARMLIB", "PROCLIB"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "Browse PDS Members \u2014 SYS1.PARMLIB",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (PDS Structure)**\n\nA Partitioned Data Set (PDS) is like a directory with members. `SYS1.PARMLIB` is a PDS containing system configuration members \u2014 each member is a named configuration object.\n\n**Key concept:** PDS members are the closest analog to \"config files.\" But they are not files in a filesystem \u2014 they are records in a dataset. `IEASYSxx` controls IPL parameters, `SMFPRMxx` controls auditing, `IKJTSOxx` controls TSO behavior. Each member name follows a naming convention that the operating system resolves at IPL time.\n\n**Broken Assumption:** *\"Config files are in /etc.\"* On z/OS, you must know which PDS contains the configuration, which member is active, and which suffix (`xx`) the system is using. This is not discoverable through filesystem traversal.",
-                "actions": [
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 1},
-                    {"type": "home"},
-                    {"type": "tab"},
-                    {"type": "eraseeof"},
-                    {"type": "string", "value": "SYS1.PARMLIB"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["SYS1.PARMLIB", "MEMBER", "NAME"],
-                "display_seconds": 7,
-            },
-            {
-                "title": "Catalog Structure \u2014 LISTCAT",
-                "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Catalog Discovery)**\n\nWe return to TSO and use `LISTCAT` to examine catalog entries. The catalog is the master index \u2014 it maps dataset names to physical DASD locations.\n\n**Key concept:** The catalog is the namespace authority. Without a catalog entry, a dataset is \"uncataloged\" and can only be accessed by specifying its physical volume. The master catalog (`SYS1.MASTER.CATALOG`) chains to user catalogs, creating a federated namespace.\n\nThis is fundamentally different from a filesystem's inode table. Catalogs can be restructured, datasets can move between volumes, and the same physical data can be cataloged under different names.",
-                "actions": [
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "pf", "value": "3"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "string", "value": "LISTCAT ENT('SYS1.LINKLIB')"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["LISTCAT", "SYS1", "LINKLIB", "NONVSAM"],
-                "display_seconds": 7,
-            },
-            {
-                "title": "Logoff",
-                "control_plane": "vtam",
-                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** z/OS uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members (config, source, JCL)\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\nThe dataset model is the foundation of z/OS storage. Every assessment must understand how data is organized, protected, and accessed \u2014 because there are no files to `find`, no permissions to `ls -la`, and no paths to traverse.",
-                "actions": [{"type": "tso_logoff"}],
-                "expect": ["LOGOFF", "VTAM"],
-                "display_seconds": 8,
-            },
-        ],
-    },
-    "address-spaces": {
-        "title": "Address Space Anatomy: What's Running",
-        "steps": [
-            {
-                "title": "Connect & Login",
-                "control_plane": "tso",
-                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough examines address spaces \u2014 the z/OS equivalent of processes. Unlike Unix processes, address spaces are persistent, identity-bound, and managed by the system rather than user-initiated fork/exec.",
-                "actions": [
-                    {"type": "connect"},
-                    {"type": "wait", "seconds": 2},
-                    {"type": "tso_login"},
-                ],
-                "expect": ["READY", "ISPF", "IKJ"],
-                "display_seconds": 4,
-            },
-            {
-                "title": "ISPF \u2192 SDSF (System Activity)",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (System Display)**\n\nSDSF (System Display and Search Facility) provides visibility into the system's runtime state. We navigate to SDSF to examine what's running.\n\n**Key concept:** SDSF is the operator's window into the system. It shows active address spaces, job queues, system messages, and resource utilization. This is the z/OS equivalent of `ps`, `top`, and `journalctl` combined \u2014 but it shows *address spaces*, not processes.",
-                "actions": [
-                    {"type": "string", "value": "ISPF"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                    {"type": "home"},
-                    {"type": "string", "value": "=S"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["SDSF", "PRIMARY", "DISPLAY"],
-                "display_seconds": 5,
-            },
-            {
-                "title": "Display Active \u2014 Running Address Spaces",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (Active Address Spaces)**\n\nThe `DA` (Display Active) panel shows every active address space on the system. Each row represents a long-running entity: JES2, VTAM, TSO sessions, catalog address spaces, and system services.\n\n**Broken Assumption:** *\"Processes are short-lived.\"* These address spaces may have been running since IPL (the last system boot). They are persistent services, not spawned-and-exited processes. Each one has an identity bound at startup time.\n\n**Key concept:** The JOBNAME column shows the address space name. The OWNERID shows the identity. Started tasks (STC) run under system identities. TSO users run under their own userid. Batch jobs carry the submitter's identity.",
-                "actions": [
-                    {"type": "string", "value": "DA"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["ACTIVE", "JOBNAME", "OWNERID", "STEPNAME"],
-                "display_seconds": 7,
-            },
-            {
-                "title": "Display Input Queue \u2014 Pending Work",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (Deferred Execution)**\n\nThe `I` (Input) panel shows jobs waiting to execute. These jobs have been submitted but not yet started.\n\n**Key concept:** This is deferred execution in action. Each job in this queue was declared via JCL and submitted by a user or automated process. The identity of the submitter is preserved \u2014 when the job eventually runs, it runs under that identity.\n\n**Broken Assumption:** *\"Work executes immediately.\"* These jobs may wait for initiators, resources, or scheduling constraints. The gap between submission and execution is a security-relevant window.",
-                "actions": [
-                    {"type": "home"},
-                    {"type": "eraseeof"},
-                    {"type": "string", "value": "I"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["INPUT", "QUEUE", "JOBNAME", "JOBID"],
-                "display_seconds": 6,
-            },
-            {
-                "title": "System Log \u2014 Operator Messages",
-                "control_plane": "jes",
-                "narration": "**Control Plane: JES (System Messages)**\n\nThe `LOG` panel shows the system log \u2014 operator messages, IPL messages, and system events. This is the audit trail of system activity.\n\n**Key concept:** The system log records everything: IPL events, device activations, security violations (ICH messages), job completions, and operator commands. This is the primary source of evidence for any assessment. Unlike Unix syslog, the system log is a JES-managed spool dataset that persists across sessions.\n\nLook for ICH messages (RACF security decisions), IEF messages (job lifecycle), and IKJ messages (TSO events).",
-                "actions": [
-                    {"type": "home"},
-                    {"type": "eraseeof"},
-                    {"type": "string", "value": "LOG"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
-                ],
-                "expect": ["LOG", "SYSLOG", "SYSTEM"],
-                "display_seconds": 7,
-            },
-            {
-                "title": "Return & Logoff",
-                "control_plane": "vtam",
-                "narration": "**Summary: Address Space Anatomy**\n\n1. **Address spaces, not processes:** z/OS runs persistent address spaces that may live for weeks or months\n2. **Identity is bound at startup:** Each address space carries the identity of its creator/submitter\n3. **Deferred execution:** Jobs wait in queues before running \u2014 the submission-execution gap matters\n4. **System log is evidence:** Every security decision, job lifecycle event, and system change is logged\n5. **No `ps` equivalent:** SDSF shows the system's runtime state, but it shows much more than a process list\n\nUnderstanding what's running \u2014 and under whose authority \u2014 is the foundation of any mainframe assessment.",
-                "actions": [{"type": "tso_logoff"}],
-                "expect": ["LOGOFF", "VTAM"],
-                "display_seconds": 8,
-            },
-        ],
-    },
-}
-
-
-# Assessment question mapping per walkthrough step
-# Maps walkthrough name → step index → list of Q's addressed
-_WT_QUESTIONS: dict[str, dict[int, list[str]]] = {
-    "session-stack": {
-        1: ["Q1", "Q5"],   # VTAM Entry — identity not bound, ports != exposure
-        2: ["Q1", "Q2"],   # TSO Logon — identity binding + authentication
-        3: ["Q4", "Q5"],   # Enter ISPF — RACF enforces, processes not short-lived
-        4: ["Q5"],          # Dataset List — no filesystem
-        5: ["Q4"],          # Browse System Datasets — RACF enforces
-        8: ["Q1"],          # LISTALC — identity context
-    },
-    "deferred-exec": {
-        1: ["Q3", "Q5"],    # ISPF→SDSF — work executes later
-        2: ["Q2"],          # Display Active — authority at startup
-        3: ["Q3"],          # Display Output — deferred execution audit
-        4: ["Q3"],          # Return & Logoff — summary
-    },
-    "system-inspection": {
-        1: ["Q1"],          # TSO STATUS — active sessions, bound identities
-        2: ["Q2"],          # TSO TIME — authority at every command
-        4: ["Q4", "Q5"],    # SYS1.PROCLIB — RACF enforces, not config files
-        5: ["Q5"],          # Return — browsing reveals config
-        6: ["Q1", "Q2", "Q4", "Q5"],  # Logoff summary
-    },
-    "auth-model": {
-        1: ["Q1"],          # LISTALC — identity context
-        2: ["Q4", "Q5"],    # LISTCAT — RACF enforces, not roles
-        3: ["Q5"],          # PROFILE — PREFIX, not absolute paths
-        4: ["Q1", "Q2", "Q4", "Q5"],  # Logoff summary
-    },
-    "dataset-model": {
-        1: ["Q5"],          # Enter ISPF — no filesystem
-        2: ["Q1", "Q5"],    # User datasets — HLQ = identity
-        3: ["Q4", "Q5"],    # System datasets — RACF enforces
-        4: ["Q5"],          # PDS members — not config files
-        5: ["Q5"],          # LISTCAT — catalog structure
-        6: ["Q1", "Q4", "Q5"],  # Logoff summary
-    },
-    "address-spaces": {
-        2: ["Q2", "Q5"],    # Display Active — persistent, identity-bound
-        3: ["Q3"],          # Input queue — deferred execution
-        4: ["Q2"],          # System log — audit trail
-        5: ["Q1", "Q2", "Q3", "Q5"],  # Logoff summary
-    },
-}
-
-
-class WalkthroughRunner:
-    """Server-side autonomous walkthrough executor."""
-
-    def __init__(self):
-        self.running = False
-        self.paused = False
-        self.current_step = 0
-        self.total_steps = 0
-        self.current_title = ""
-        self.current_narration = ""
-        self.current_screen = ""
-        self.current_control_plane = ""
-        self.walkthrough_name = ""
-        self.log: list[dict] = []
-        self.finished = False
-        self.error: str | None = None
-        self.display_seconds = 4.0  # default per-step display time
-        self.questions_answered: set = set()
-        self._thread: threading.Thread | None = None
-
-    def start(self, name: str, target: str, speed: float = 4.0):
-        # If the thread died but running flag is stale, reset it
-        if self.running and (self._thread is None or not self._thread.is_alive()):
-            self.running = False
-        if self.running:
-            return
-        # Wait for any previous thread to finish
-        if self._thread and self._thread.is_alive():
-            self._thread.join(timeout=5)
-        # Clean up any leftover TSO session before starting fresh
-        try:
-            if connection.connected:
-                self._tso_logoff()
-        except Exception:
-            pass
-        self.running = True
-        self.paused = False
-        self.finished = False
-        self.error = None
-        self.current_step = 0
-        self.current_screen = ""
-        self.log = []
-        self.questions_answered = set()
-        self.display_seconds = speed
-        self._thread = threading.Thread(
-            target=self._run, args=(name, target), daemon=True
-        )
-        self._thread.start()
-
-    def stop(self):
-        self.running = False
-
-    def pause(self):
-        self.paused = True
-
-    def resume(self):
-        self.paused = False
-
-    def get_status(self) -> dict:
-        # Auto-clear stale running flag if thread is dead
-        if self.running and (self._thread is None or not self._thread.is_alive()):
-            self.running = False
-        return {
-            "running": self.running,
-            "paused": self.paused,
-            "step": self.current_step,
-            "total": self.total_steps,
-            "title": self.current_title,
-            "narration": self.current_narration,
-            "screen": self.current_screen,
-            "control_plane": self.current_control_plane,
-            "walkthrough_name": self.walkthrough_name,
-            "finished": self.finished,
-            "error": self.error,
-            "log": list(self.log),
-            "questions_answered": sorted(self.questions_answered),
-        }
-
-    # ---- internal ----
-
-    def _run(self, name: str, target: str):
-        script = WALKTHROUGH_SCRIPTS.get(name)
-        if not script:
-            self.error = f"Unknown walkthrough: {name}"
-            self.running = False
-            return
-
-        self.walkthrough_name = script["title"]
-        steps = script["steps"]
-        self.total_steps = len(steps)
-
-        step_qs_map = _WT_QUESTIONS.get(name, {})
-
-        for idx, step in enumerate(steps):
-            if not self.running:
-                break
-
-            # Wait while paused
-            while self.paused and self.running:
-                _time.sleep(0.25)
-
-            if not self.running:
-                break
-
-            self.current_step = idx
-            self.current_title = step["title"]
-            self.current_control_plane = step.get("control_plane", "")
-            self.current_narration = ""  # narration comes after actions
-
-            step_qs = step_qs_map.get(idx, [])
-
-            # Phase 1: Append log entry with header only — narration
-            # will be filled after actions complete so it aligns with
-            # the settled terminal screen
-            log_entry = {
-                "step": idx,
-                "title": step["title"],
-                "control_plane": step.get("control_plane", ""),
-                "narration": "",
-                "executing": True,
-                "questions": step_qs,
-            }
-            self.log.append(log_entry)
-
-            # Execute actions, reading screen after each one so
-            # the terminal view updates live during execution
-            try:
-                for action in step.get("actions", []):
-                    if not self.running:
-                        break
-                    while self.paused and self.running:
-                        _time.sleep(0.25)
-                    if not self.running:
-                        break
-                    self._exec_action(action, target)
-                    # Update screen after every screen-changing action
-                    if action["type"] not in ("wait",):
-                        try:
-                            self.current_screen = read_screen()
-                        except Exception:
-                            self.current_screen = connection.current_screen or ""
-            except Exception as e:
-                self.error = f"Step {idx + 1} failed: {e}"
-                self.running = False
-                break
-
-            # Final screen read after all actions settle
-            try:
-                self.current_screen = read_screen()
-            except Exception:
-                self.current_screen = connection.current_screen or ""
-
-            # Phase 2: Actions done — set narration aligned with screen
-            log_entry["narration"] = step["narration"]
-            log_entry["executing"] = False
-            self.current_narration = step["narration"]
-
-            # Track assessment questions answered
-            for q in step_qs:
-                self.questions_answered.add(q)
-
-            # Display pause — user reads narration with settled screen
-            step_display = step.get("display_seconds", self.display_seconds)
-            wait_end = _time.time() + step_display
-            while _time.time() < wait_end and self.running:
-                while self.paused and self.running:
-                    _time.sleep(0.25)
-                _time.sleep(0.2)
-
-        if self.running:
-            self.finished = True
-        self.running = False
-
-    def _exec_action(self, action: dict, target: str):
-        atype = action["type"]
-        if atype == "connect":
-            if not connection.connected:
-                connect_mainframe(target)
-                _time.sleep(1)
-        elif atype == "string":
-            send_terminal_key("string", action["value"])
-        elif atype == "enter":
-            send_terminal_key("enter")
-            _time.sleep(0.5)  # let terminal process the command
-        elif atype == "clear":
-            send_terminal_key("clear")
-            _time.sleep(0.3)
-        elif atype == "pf":
-            send_terminal_key("pf", str(action["value"]))
-            _time.sleep(0.5)
-        elif atype == "tab":
-            send_terminal_key("tab")
-        elif atype == "home":
-            send_terminal_key("home")
-        elif atype == "eraseeof":
-            send_terminal_key("eraseeof")
-        elif atype == "wait":
-            _time.sleep(action.get("seconds", 1))
-
-        elif atype == "tso_login":
-            userid = action.get("userid", "HERC01")
-            password = action.get("password", "CUL8TR")
-            self._tso_login(userid, password, target)
-
-        elif atype == "tso_logoff":
-            self._tso_logoff()
-
-    # ---- TSO login/logoff helpers ----
-
-    def _read_screen_safe(self) -> str:
-        """Read current screen, returning empty string on failure."""
-        try:
-            return read_screen()
-        except Exception:
-            return connection.current_screen or ""
-
-    def _tso_logoff(self):
-        """Clean logoff: exit any ISPF panels, then LOGOFF."""
-        # PF3 several times to exit SDSF / ISPF / panels
-        for _ in range(6):
-            try:
-                send_terminal_key("pf", "3")
-                _time.sleep(1.5)
-            except Exception:
-                break
-            screen = self._read_screen_safe()
-            if "READY" in screen or "LOGON" in screen or "VTAM" in screen:
-                break
-        _time.sleep(1)
-        # Check if at READY prompt or need LOGOFF
-        screen = self._read_screen_safe()
-        if "LOGON" in screen or "VTAM" in screen or "USS" in screen:
-            return  # Already at VTAM, no logoff needed
-        send_terminal_key("string", "LOGOFF")
-        send_terminal_key("enter")
-        _time.sleep(2)
-
-    def _tso_login(self, userid: str, password: str, target: str):
-        """Robust TSO login handling USERID-IN-USE and stuck states."""
-        max_attempts = 3
-        for attempt in range(max_attempts):
-            if not self.running:
-                return
-
-            # Ensure connected
-            if not connection.connected:
-                connect_mainframe(target)
-                _time.sleep(1)
-
-            # Read current screen to determine state
-            screen = self._read_screen_safe()
-            self.current_screen = screen
-
-            # If stuck at IKJ error/reenter prompt, clear to reset
-            if "IKJ56712" in screen or "IKJ56703" in screen or "REENTER" in screen:
-                send_terminal_key("clear")
-                _time.sleep(1)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-
-            # If stuck at "ENTER LOGON OR LOGOFF", send LOGOFF first
-            if "LOGON OR LOGOFF" in screen or "IKJ56400" in screen:
-                send_terminal_key("string", "LOGOFF")
-                send_terminal_key("enter")
-                _time.sleep(2)
-                send_terminal_key("clear")
-                _time.sleep(1)
-                screen = self._read_screen_safe()
-
-            # If already at READY prompt (already logged in), we're done
-            if "READY" in screen:
-                self.current_screen = screen
-                return
-
-            # If at ISPF, we're already logged in — done
-            if "ISPF" in screen and "PRIMARY" in screen:
-                self.current_screen = screen
-                return
-
-            # If at SDSF or other ISPF panel, already logged in
-            if "SDSF" in screen or "ISPF" in screen:
-                self.current_screen = screen
-                return
-
-            # If at TSO logon panel (asking for userid), skip "TSO" command
-            if "ENTER USERID" in screen or "IKJ56700" in screen or "LOGON" in screen.upper().split("LOGOFF")[0]:
-                send_terminal_key("string", userid)
-                send_terminal_key("enter")
-                _time.sleep(2)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-            else:
-                # Navigate to TSO from VTAM
-                send_terminal_key("clear")
-                _time.sleep(1)
-                send_terminal_key("string", "TSO")
-                send_terminal_key("enter")
-                _time.sleep(2)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-
-                # Enter userid
-                send_terminal_key("string", userid)
-                send_terminal_key("enter")
-                _time.sleep(2)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-
-            # Check for "USERID IN USE"
-            if "IN USE" in screen or "IKJ56425" in screen:
-                # Try RECONNECT to existing session
-                _time.sleep(1)
-                # We're stuck at "ENTER LOGON OR LOGOFF" — send LOGON RECONNECT
-                send_terminal_key("string", f"LOGON {userid} RECONNECT")
-                send_terminal_key("enter")
-                _time.sleep(3)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-
-                # If RECONNECT asks for password
-                if "PASSWORD" in screen or "IKJ56476" in screen:
-                    send_terminal_key("string", password)
-                    send_terminal_key("enter")
-                    _time.sleep(3)
-                    screen = self._read_screen_safe()
-                    self.current_screen = screen
-
-                # Reconnected — now normalize and logoff cleanly
-                self._tso_logoff()
-                _time.sleep(1)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-
-                # Retry fresh login on next iteration
-                continue
-
-            # Check for "LOGON OR LOGOFF" stuck state (different path)
-            if "LOGON OR LOGOFF" in screen or "IKJ56400" in screen:
-                send_terminal_key("string", "LOGOFF")
-                send_terminal_key("enter")
-                _time.sleep(2)
-                continue
-
-            # Normal flow: enter password
-            if "PASSWORD" in screen or "IKJ56476" in screen or "IKJ56700" in screen:
-                send_terminal_key("string", password)
-                send_terminal_key("enter")
-                _time.sleep(3)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-
-                # Verify login succeeded
-                if "READY" in screen or "ISPF" in screen or "IKJ56455" in screen:
-                    return  # Success
-
-                # If still problematic, retry
-                if "IN USE" in screen or "LOGON OR LOGOFF" in screen:
-                    continue
-
-                # Accept whatever state we're in
-                return
-
-            # If we got READY directly (no password prompt on TK5 sometimes)
-            if "READY" in screen:
-                return
-
-        # All attempts exhausted
-        self.error = f"TSO login failed after {max_attempts} attempts"
-
+from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS, WT_QUESTIONS as _WT_QUESTIONS
+from app.routes.walkthrough import WalkthroughRunner
 
 # Singleton runner
 _walkthrough_runner = WalkthroughRunner()
@@ -3076,7 +2231,6 @@ _walkthrough_runner = WalkthroughRunner()
 @app.post("/api/walkthrough/start")
 async def api_walkthrough_start(request: Request):
     """Start an autonomous walkthrough."""
-    global _walkthrough_runner
     data = await request.json()
     name = data.get("name", "session-stack")
     target = data.get("target", "localhost:3270")
@@ -3086,7 +2240,6 @@ async def api_walkthrough_start(request: Request):
     if not script:
         return JSONResponse({"success": False, "error": f"Unknown walkthrough: {name}"})
 
-    # Stop any previous run and clean up before starting
     if _walkthrough_runner.running:
         _walkthrough_runner.stop()
 
@@ -3670,7 +2823,6 @@ def main():
 ║  Chat:          http://{args.host}:{args.port}/chat                ║
 ╠══════════════════════════════════════════════════════════╣
 ║  LLM Backend:   Ollama ({OLLAMA_MODEL})             ║
-║  BIRP Available: {str(BIRP_AVAILABLE):<39} ║
 ╠══════════════════════════════════════════════════════════╣
 ║  No API key required! Runs 100% locally.                 ║
 ║  Web Terminal: Type in browser, no shell needed!         ║

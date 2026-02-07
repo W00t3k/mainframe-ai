@@ -4,6 +4,9 @@
 #
 cd "$(dirname "$0")"
 
+# Ensure homebrew binaries are on PATH (needed when launched from web server)
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 # Kill any existing Hercules processes
 pkill -9 hercules 2>/dev/null
 sleep 1

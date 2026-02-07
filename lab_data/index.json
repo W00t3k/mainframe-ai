@@ -4,13 +4,109 @@
       "id": "session-stack",
       "title": "Session Stack Walkthrough",
       "description": "Walk the VTAM -> TSO -> ISPF layers and learn where trust boundaries shift.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "questions": ["Q1", "Q5"],
       "steps": 4
     },
     {
       "id": "batch-basics",
       "title": "Batch Execution Basics",
       "description": "Submit a simple job and map the JCL -> JES -> program execution chain.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "questions": ["Q2", "Q3"],
       "steps": 3
+    },
+    {
+      "id": "racf-basics",
+      "title": "RACF Authorization Model",
+      "description": "Understand how RACF enforces access control on datasets, programs, and resources.",
+      "category": "security",
+      "difficulty": "beginner",
+      "questions": ["Q1", "Q4"],
+      "steps": 4
+    },
+    {
+      "id": "dataset-enumeration",
+      "title": "Dataset Enumeration",
+      "description": "Discover and catalog datasets to map the system's data landscape.",
+      "category": "recon",
+      "difficulty": "intermediate",
+      "questions": ["Q5"],
+      "steps": 4
+    },
+    {
+      "id": "tso-enumeration",
+      "title": "TSO User Enumeration",
+      "description": "Discover valid TSO userids through logon response analysis.",
+      "category": "recon",
+      "difficulty": "intermediate",
+      "questions": ["Q1", "Q2"],
+      "steps": 4
+    },
+    {
+      "id": "jcl-analysis",
+      "title": "JCL Security Analysis",
+      "description": "Analyze JCL for security implications and privilege escalation paths.",
+      "category": "security",
+      "difficulty": "intermediate",
+      "questions": ["Q2", "Q3"],
+      "steps": 4
+    },
+    {
+      "id": "hidden-fields",
+      "title": "Hidden Field Detection",
+      "description": "Identify non-display fields that may contain sensitive data or bypass controls.",
+      "category": "recon",
+      "difficulty": "advanced",
+      "questions": ["Q5"],
+      "steps": 4
+    },
+    {
+      "id": "sdsf-inspection",
+      "title": "SDSF Job Inspection",
+      "description": "Use SDSF to examine running jobs, output, and system activity.",
+      "category": "recon",
+      "difficulty": "beginner",
+      "questions": ["Q2", "Q3"],
+      "steps": 4
+    },
+    {
+      "id": "cics-enumeration",
+      "title": "CICS Transaction Enumeration",
+      "description": "Discover valid CICS transactions and understand the transaction security model.",
+      "category": "recon",
+      "difficulty": "advanced",
+      "questions": ["Q1", "Q2", "Q4"],
+      "steps": 4
+    },
+    {
+      "id": "mvs-ipl-operations",
+      "title": "MVS IPL & System Operations",
+      "description": "IPL the MVS system, start VTAM/TSO, submit jobs, manage JES2 queues, display system status, and perform a clean shutdown. Every command documented with mental models.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "questions": ["Q1", "Q5"],
+      "steps": 6
+    },
+    {
+      "id": "cobol-compile-run",
+      "title": "COBOL Compile & Run on MVS",
+      "description": "Create a COBOL program using RPF, write JCL, submit the job, and view output. Every command and JCL parameter documented with mental models.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "questions": ["Q2", "Q3"],
+      "steps": 4
+    },
+    {
+      "id": "mvs-command-reference",
+      "title": "MVS 3.8j Command Reference",
+      "description": "Comprehensive reference for Hercules, MVS operator, JES2, TSO, RPF, and JCL commands — with mental models explaining what each command does and why.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "questions": ["Q1", "Q2", "Q3", "Q5"],
+      "steps": 7
     }
   ]
 }

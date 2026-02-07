@@ -1,0 +1,1056 @@
+{% extends "base.html" %}
+
+{% block title %}Presentation - Mainframe Security Toolkit{% endblock %}
+
+{% block page_styles %}
+<style>
+:root {
+    --slide-bg: #0d0d0d;
+    --slide-text: #f4f4f4;
+    --accent: #4589ff;
+}
+
+.presentation {
+    min-height: 100vh;
+    background: var(--slide-bg);
+    color: var(--slide-text);
+    position: relative;
+}
+
+.presentation::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: url('/static/img/mainframe.png');
+    background-repeat: no-repeat;
+    background-position: center center;
+    background-size: 60%;
+    opacity: 0.03;
+    pointer-events: none;
+    z-index: 0;
+}
+
+.pres-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 24px;
+    background: #161616;
+    border-bottom: 1px solid #262626;
+}
+
+.pres-nav {
+    display: flex;
+    gap: 8px;
+}
+
+.pres-nav button {
+    background: #262626;
+    border: 2px solid #333;
+    color: #a8a8a8;
+    padding: 14px 24px;
+    cursor: pointer;
+    font-size: 16px;
+    font-weight: 500;
+    transition: all 0.2s ease;
+}
+
+.pres-nav button:hover {
+    background: #4589ff;
+    border-color: #4589ff;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(69, 137, 255, 0.4);
+}
+
+.pres-nav button.active {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 8px rgba(69, 137, 255, 0.3);
+}
+
+.slide-counter {
+    font-family: 'IBM Plex Mono', monospace;
+    color: #6f6f6f;
+}
+
+.slides-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 24px;
+    position: relative;
+    z-index: 1;
+}
+
+.slide {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+.slide.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide h1 {
+    font-size: 48px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #fff;
+}
+
+.slide h2 {
+    font-size: 28px;
+    color: var(--accent);
+    margin-bottom: 24px;
+}
+
+.slide h3 {
+    font-size: 20px;
+    color: #a8a8a8;
+    margin-bottom: 32px;
+}
+
+.slide p {
+    font-size: 18px;
+    line-height: 1.6;
+    color: #c6c6c6;
+    margin-bottom: 16px;
+}
+
+.slide ul {
+    list-style: none;
+    padding: 0;
+}
+
+.slide li {
+    font-size: 18px;
+    padding: 8px 0;
+    padding-left: 24px;
+    position: relative;
+    color: #c6c6c6;
+}
+
+.slide li::before {
+    content: "→";
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+}
+
+.slide-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin: 32px 0;
+}
+
+.slide-card {
+    background: #161616;
+    border: 1px solid #262626;
+    border-top: 3px solid var(--accent);
+    padding: 20px;
+}
+
+.slide-card h4 {
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 8px;
+}
+
+.slide-card p {
+    font-size: 14px;
+    color: #6f6f6f;
+    margin: 0;
+}
+
+.code-block {
+    background: #000;
+    border: 1px solid #262626;
+    padding: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 14px;
+    color: #42be65;
+    white-space: pre;
+    overflow-x: auto;
+    margin: 24px 0;
+}
+
+.speaker-notes {
+    background: rgba(69, 137, 255, 0.1);
+    border-left: 3px solid var(--accent);
+    padding: 16px 20px;
+    margin-top: 40px;
+    font-size: 14px;
+    color: #a8a8a8;
+}
+
+.speaker-notes strong {
+    color: var(--accent);
+}
+
+.control-plane-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin: 32px 0;
+}
+
+.cp-card {
+    text-align: center;
+    padding: 20px 12px;
+    background: #161616;
+    border: 1px solid #262626;
+    border-top: 3px solid;
+}
+
+.cp-card.vtam { border-top-color: #a78bfa; }
+.cp-card.tso { border-top-color: #63a7ff; }
+.cp-card.racf { border-top-color: #f59e0b; }
+.cp-card.cics { border-top-color: #34d399; }
+.cp-card.jes { border-top-color: #fb7185; }
+
+.cp-card .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.cp-card.vtam .label { color: #a78bfa; }
+.cp-card.tso .label { color: #63a7ff; }
+.cp-card.racf .label { color: #f59e0b; }
+.cp-card.cics .label { color: #34d399; }
+.cp-card.jes .label { color: #fb7185; }
+
+.cp-card .name {
+    font-size: 12px;
+    color: #6f6f6f;
+}
+
+.question-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+}
+
+.question-table th,
+.question-table td {
+    text-align: left;
+    padding: 12px 16px;
+    border-bottom: 1px solid #262626;
+}
+
+.question-table th {
+    background: #161616;
+    color: #6f6f6f;
+    font-size: 12px;
+    text-transform: uppercase;
+}
+
+.question-table td {
+    font-size: 16px;
+}
+
+.question-table .q-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-weight: 700;
+    color: var(--accent);
+}
+
+.title-slide {
+    text-align: center;
+    padding: 80px 0;
+}
+
+.title-slide h1 {
+    font-size: 64px;
+    margin-bottom: 8px;
+}
+
+.title-slide h2 {
+    font-size: 24px;
+    color: #6f6f6f;
+    font-weight: 400;
+}
+
+.pres-footer {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 24px;
+    background: #111;
+    border-top: 1px solid #262626;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.key-hint {
+    font-size: 12px;
+    color: #6f6f6f;
+}
+
+.key-hint kbd {
+    background: #262626;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin: 0 2px;
+}
+
+.export-btn {
+    background: #262626;
+    border: 1px solid #393939;
+    color: #a8a8a8;
+    padding: 8px 14px;
+    cursor: pointer;
+    font-size: 13px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.export-btn:hover {
+    background: #4589ff;
+    border-color: #4589ff;
+    color: #fff;
+}
+
+.speaker-card {
+    background: rgba(22, 22, 22, 0.8);
+    border: 1px solid #333;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.speaker-card h4 {
+    font-size: 15px;
+    margin-bottom: 12px;
+    color: #f4f4f4;
+}
+
+.speaker-card ul {
+    font-size: 13px;
+    color: #a8a8a8;
+    padding-left: 18px;
+    line-height: 1.7;
+}
+
+.speaker-card li {
+    margin-bottom: 4px;
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="presentation">
+    <header class="pres-header">
+        <a href="/" class="back-link" title="Back to Home" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+<img src="/static/img/ibm-old.png" alt="IBM" style="height:28px;width:auto;">
+            <span style="color:#393939;font-size:20px;font-weight:300;">|</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:#f4f4f4;">Presentation</span>
+        </a>
+        <div class="pres-nav">
+            <button onclick="goToSlide(0)" id="nav-0">Intro</button>
+            <button onclick="goToSlide(1)" id="nav-1">Keyboard</button>
+            <button onclick="goToSlide(2)" id="nav-2">TSO Login</button>
+            <button onclick="goToSlide(3)" id="nav-3">ISPF</button>
+            <button onclick="goToSlide(4)" id="nav-4">Control Planes</button>
+            <button onclick="goToSlide(5)" id="nav-5">Model Lineage</button>
+            <button onclick="goToSlide(6)" id="nav-6">Live Terminal</button>
+            <button onclick="goToSlide(7)" id="nav-7">Walkthrough</button>
+            <button onclick="goToSlide(8)" id="nav-8">Speaker Notes</button>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+            <span class="slide-counter"><span id="currentSlide">1</span> / <span id="totalSlides">8</span></span>
+            <button onclick="exportPresentation()" class="export-btn" title="Export to HTML/PPTX">📤 Export</button>
+        </div>
+    </header>
+
+    <div class="slides-container">
+        <!-- Slide 0: Title -->
+        <div class="slide active" data-slide="0">
+            <div class="title-slide">
+                <h1>Mainframe Security Toolkit</h1>
+                <h2>AI-Powered MVS Operations & Security Assessment</h2>
+                <div style="margin-top:48px;">
+                    <div class="slide-grid" style="max-width:800px;margin:0 auto;">
+                        <div class="slide-card">
+                            <h4>🔒 100% Local</h4>
+                            <p>No cloud APIs, fully air-gapped</p>
+                        </div>
+                        <div class="slide-card">
+                            <h4>🧠 Local LLM</h4>
+                            <p>Ollama - runs on your machine</p>
+                        </div>
+                        <div class="slide-card">
+                            <h4>💻 Commodity HW</h4>
+                            <p>Any laptop/desktop, M1+ Mac, Linux</p>
+                        </div>
+                        <div class="slide-card">
+                            <h4>📺 TN3270</h4>
+                            <p>Live terminal via py3270</p>
+                        </div>
+                        <div class="slide-card">
+                            <h4>🎯 Red Team</h4>
+                            <p>Security assessment focus</p>
+                        </div>
+                        <div class="slide-card">
+                            <h4>🚫 No Cloud</h4>
+                            <p>Zero data leaves your network</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 1: Keyboard / PF Keys -->
+        <div class="slide" data-slide="1">
+            <h2>3270 Keyboard Essentials</h2>
+            <h3>Program Function Keys & Navigation</h3>
+            
+            <div class="slide-grid" style="grid-template-columns: repeat(4, 1fr); gap: 12px;">
+                <div class="slide-card" style="border-top-color:#4589ff;">
+                    <h4>PF3 / F3</h4>
+                    <p><strong>Exit / Back</strong><br>Return to previous screen</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#42be65;">
+                    <h4>PF7 / F7</h4>
+                    <p><strong>Scroll Up</strong><br>Page up in listings</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#42be65;">
+                    <h4>PF8 / F8</h4>
+                    <p><strong>Scroll Down</strong><br>Page down in listings</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#ff832b;">
+                    <h4>PF1 / F1</h4>
+                    <p><strong>Help</strong><br>Context-sensitive help</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#8a3ffc;">
+                    <h4>Enter</h4>
+                    <p><strong>Submit</strong><br>Execute command or action</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#fa4d56;">
+                    <h4>Clear / Esc</h4>
+                    <p><strong>Clear Screen</strong><br>Return to command line</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#08bdba;">
+                    <h4>Tab</h4>
+                    <p><strong>Next Field</strong><br>Jump to next input</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#6f6f6f;">
+                    <h4>Home</h4>
+                    <p><strong>First Field</strong><br>Jump to command line</p>
+                </div>
+            </div>
+
+            <div class="code-block" style="margin-top:24px;">┌─────────────────────────────────────────────────────────────┐
+│  Common Commands:                                            │
+│  ─────────────────                                           │
+│  LOGON userid    - Login to TSO                             │
+│  LOGOFF          - Exit TSO session                         │
+│  ISPF / PDF      - Launch ISPF panels                       │
+│  =X              - Fast exit from anywhere in ISPF          │
+│  =M              - Jump to main menu (RFE)                  │
+│  =3.4            - Jump to dataset list (ISPF 3.4)          │
+└─────────────────────────────────────────────────────────────┘</div>
+        </div>
+
+        <!-- Slide 2: TSO Login -->
+        <div class="slide" data-slide="2">
+            <h2>TSO Login Process</h2>
+            <h3>Step-by-Step Authentication</h3>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                <div>
+                    <div class="code-block" style="font-size:13px;">┌──────────────────────────────────────────┐
+│  MVS - VTAM APPLICATION SELECTION        │
+│                                          │
+│  Enter application name:                 │
+│                                          │
+│  ===> TSO_                               │
+│                                          │
+│  Available Applications:                 │
+│    TSO   - Time Sharing Option           │
+│    CICS  - Customer Information          │
+│    IMS   - Information Management        │
+│                                          │
+└──────────────────────────────────────────┘</div>
+                    <p style="color:#6f6f6f;font-size:13px;margin-top:12px;"><strong>Step 1:</strong> At VTAM screen, type <code>TSO</code> and press Enter</p>
+                </div>
+                <div>
+                    <div class="code-block" style="font-size:13px;">┌──────────────────────────────────────────┐
+│           TSO/E LOGON                     │
+│                                          │
+│  Enter LOGON parameters below:           │
+│                                          │
+│  Userid    ===> HERC01_                  │
+│  Password  ===> ______                   │
+│  Procedure ===> IKJACCNT                 │
+│  Acct Nmbr ===> ACCT#                    │
+│                                          │
+│  Enter LOGON to logon, PF3 to exit       │
+└──────────────────────────────────────────┘</div>
+                    <p style="color:#6f6f6f;font-size:13px;margin-top:12px;"><strong>Step 2:</strong> Enter userid <code>HERC01</code>, password <code>CUL8TR</code></p>
+                </div>
+            </div>
+
+            <div class="slide-grid" style="margin-top:24px;grid-template-columns:repeat(3,1fr);">
+                <div class="slide-card" style="border-top-color:#a78bfa;">
+                    <h4>VTAM → TSO</h4>
+                    <p>Session binding occurs here. You transition from anonymous to authenticated.</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#f59e0b;">
+                    <h4>RACF Validates</h4>
+                    <p>Password checked by RACF, not TSO. Identity now bound to session.</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#42be65;">
+                    <h4>READY Prompt</h4>
+                    <p>After login, you see READY. Type <code>ISPF</code> to launch panels.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 3: ISPF Navigation -->
+        <div class="slide" data-slide="3">
+            <h2>ISPF Navigation</h2>
+            <h3>Interactive System Productivity Facility</h3>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+                <div>
+                    <div class="code-block" style="font-size:12px;">┌──────────────────────────────────────────┐
+│           ISPF Primary Option Menu       │
+│                                          │
+│  0  Settings      - Terminal settings    │
+│  1  View          - Browse datasets      │
+│  2  Edit          - Edit datasets        │
+│  3  Utilities     - Dataset utilities    │
+│  4  Foreground    - Compile/Link         │
+│  5  Batch         - Submit JCL           │
+│  6  Command       - TSO command          │
+│  M  More          - Additional options   │
+│  X  Exit          - Leave ISPF           │
+│                                          │
+│  Option ===> _                           │
+└──────────────────────────────────────────┘</div>
+                </div>
+                <div>
+                    <h4 style="color:#4589ff;margin-bottom:12px;">Quick Navigation</h4>
+                    <ul style="font-size:14px;line-height:1.8;">
+                        <li><code>=3.4</code> - Dataset list (most used!)</li>
+                        <li><code>=2</code> - Edit a dataset</li>
+                        <li><code>=1</code> - View/Browse a dataset</li>
+                        <li><code>=6</code> - TSO command line</li>
+                        <li><code>=M</code> - Return to main menu</li>
+                        <li><code>=X</code> - Exit ISPF completely</li>
+                    </ul>
+                    <h4 style="color:#42be65;margin-top:20px;margin-bottom:12px;">Dataset List (3.4)</h4>
+                    <ul style="font-size:14px;line-height:1.8;">
+                        <li>Enter HLQ: <code>SYS1</code> to see system datasets</li>
+                        <li>Line commands: <code>B</code>=Browse, <code>E</code>=Edit, <code>D</code>=Delete</li>
+                        <li><code>S</code> on PDS to see members</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="slide-grid" style="margin-top:20px;grid-template-columns:repeat(4,1fr);">
+                <div class="slide-card" style="border-top-color:#4589ff;"><h4>PF3</h4><p>Exit / Go back</p></div>
+                <div class="slide-card" style="border-top-color:#42be65;"><h4>PF7/PF8</h4><p>Scroll up/down</p></div>
+                <div class="slide-card" style="border-top-color:#ff832b;"><h4>PF10/PF11</h4><p>Scroll left/right</p></div>
+                <div class="slide-card" style="border-top-color:#8a3ffc;"><h4>PF5</h4><p>Repeat find</p></div>
+            </div>
+        </div>
+
+        <!-- Slide 4: Control Planes -->
+        <div class="slide" data-slide="4">
+            <h2>The 5 Control Planes</h2>
+            <h3>Understanding Mainframe Subsystems</h3>
+
+            <div class="control-plane-grid">
+                <div class="cp-card vtam">
+                    <div class="label">VTAM</div>
+                    <div class="name">Network Access</div>
+                    <p style="font-size:11px;color:#888;margin-top:8px;">Entry point, APPLIDs, LU sessions</p>
+                </div>
+                <div class="cp-card tso">
+                    <div class="label">TSO</div>
+                    <div class="name">Time Sharing</div>
+                    <p style="font-size:11px;color:#888;margin-top:8px;">Interactive sessions, LOGON</p>
+                </div>
+                <div class="cp-card racf">
+                    <div class="label">RACF</div>
+                    <div class="name">Security</div>
+                    <p style="font-size:11px;color:#888;margin-top:8px;">Identity, profiles, authorization</p>
+                </div>
+                <div class="cp-card cics">
+                    <div class="label">CICS</div>
+                    <div class="name">Transactions</div>
+                    <p style="font-size:11px;color:#888;margin-top:8px;">Online regions, CESN</p>
+                </div>
+                <div class="cp-card jes">
+                    <div class="label">JES</div>
+                    <div class="name">Batch</div>
+                    <p style="font-size:11px;color:#888;margin-top:8px;">JCL, job queues, SDSF</p>
+                </div>
+            </div>
+
+            <div class="code-block" style="margin-top:24px;font-size:14px;">Session Flow:   VTAM (Entry) ──▶ TSO (Login) ──▶ ISPF (Panels) ──▶ Datasets
+                        │
+                        └──▶ RACF validates every access request
+                        │
+              ┌─────────┴─────────┐
+              ▼                   ▼
+         JES (Batch)        CICS (Online)</div>
+        </div>
+
+        <!-- Slide 5: Model Lineage - Temporal Validation -->
+        <div class="slide" data-slide="5">
+            <h2>This Isn't New — The Model Predates the Tool</h2>
+            <h3>Temporal validation: the same mental model, different platforms</h3>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:32px;margin-top:32px;">
+                <div>
+                    <div style="background:#161616;border:1px solid #333;border-left:4px solid #f59e0b;padding:20px;margin-bottom:20px;">
+                        <h4 style="color:#f59e0b;margin-bottom:12px;font-size:14px;">📅 2018 — Active Directory & Enterprise Infra</h4>
+                        <p style="font-size:15px;line-height:1.7;color:#c6c6c6;font-style:italic;">
+                            "Attackers consistently succeed not because of exploits, but because defenders misunderstand where authority is actually enforced."
+                        </p>
+                        <p style="font-size:13px;color:#6f6f6f;margin-top:12px;">
+                            — Applied to AD delegation abuse, ADCS misconfigurations, service account sprawl
+                        </p>
+                    </div>
+
+                    <div style="background:#161616;border:1px solid #333;border-left:4px solid #4589ff;padding:20px;">
+                        <h4 style="color:#4589ff;margin-bottom:12px;font-size:14px;">📅 2024 — Mainframe / MVS</h4>
+                        <p style="font-size:15px;line-height:1.7;color:#c6c6c6;font-style:italic;">
+                            "Security is explicitly federated across subsystems. If you bring the wrong mental model, you miss the real attack paths."
+                        </p>
+                        <p style="font-size:13px;color:#6f6f6f;margin-top:12px;">
+                            — Same model applied to RACF, VTAM, JES, CICS trust boundaries
+                        </p>
+                    </div>
+                </div>
+
+                <div>
+                    <h4 style="color:#42be65;margin-bottom:16px;">What Changed?</h4>
+                    <ul style="font-size:16px;line-height:2;">
+                        <li><strong>Not the model</strong> — same failure modes, same root causes</li>
+                        <li><strong>The platform</strong> — mainframes expose it more explicitly</li>
+                        <li><strong>The tooling</strong> — now operationalized in code</li>
+                    </ul>
+
+                    <div style="background:rgba(69,137,255,0.1);border:1px solid rgba(69,137,255,0.3);padding:20px;margin-top:24px;border-radius:8px;">
+                        <p style="font-size:20px;color:#fff;font-weight:600;text-align:center;">
+                            "The tool didn't invent the idea.<br>It operationalizes it."
+                        </p>
+                    </div>
+
+                    <div style="margin-top:24px;">
+                        <h4 style="color:#a8a8a8;margin-bottom:12px;font-size:14px;">Why This Matters</h4>
+                        <ul style="font-size:14px;color:#6f6f6f;line-height:1.8;">
+                            <li>Proves the model <strong>generalizes</strong> across platforms</li>
+                            <li>Not a one-off demo — years of validation</li>
+                            <li>Same patterns: delegation, misplaced trust, authority confusion</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="speaker-notes">
+                <strong>Speaker Note:</strong> "In 2018, I was writing about how attackers succeed because defenders misunderstand where authority is enforced. At the time, it was AD. What changed isn't the model — what changed is that I now have a platform where the same failure modes are even more visible. Mainframes expose this clearly because security is explicitly federated across subsystems."
+            </div>
+        </div>
+
+        <!-- Slide 6: Live Terminal -->
+        <div class="slide" data-slide="6">
+            <h2>Live Terminal</h2>
+            <h3>Connect to the mainframe and try it yourself</h3>
+
+            <div style="background:#000;border:2px solid #333;border-radius:8px;height:400px;display:flex;align-items:center;justify-content:center;position:relative;">
+                <iframe src="/terminal" style="width:100%;height:100%;border:none;border-radius:6px;" id="terminalFrame"></iframe>
+            </div>
+
+            <div class="slide-grid" style="margin-top:20px;grid-template-columns:repeat(4,1fr);">
+                <div class="slide-card" style="border-top-color:#42be65;">
+                    <h4>1. Connect</h4>
+                    <p>Target: localhost:3270</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#4589ff;">
+                    <h4>2. TSO</h4>
+                    <p>Type TSO, press Enter</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#f59e0b;">
+                    <h4>3. Login</h4>
+                    <p>HERC01 / CUL8TR</p>
+                </div>
+                <div class="slide-card" style="border-top-color:#8a3ffc;">
+                    <h4>4. ISPF</h4>
+                    <p>Type ISPF, press Enter</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Slide 7: Walkthrough -->
+        <div class="slide" data-slide="7">
+            <h2>Autonomous Walkthrough</h2>
+            <h3>Watch the system demonstrate itself with narration</h3>
+
+            <div style="background:#000;border:2px solid #333;border-radius:8px;height:420px;display:flex;align-items:center;justify-content:center;position:relative;">
+                <iframe src="/walkthrough" style="width:100%;height:100%;border:none;border-radius:6px;" id="walkthroughFrame"></iframe>
+            </div>
+
+            <div style="margin-top:16px;text-align:center;">
+                <p style="color:#6f6f6f;font-size:14px;">Select a walkthrough from the dropdown and click <strong>Start</strong> to begin the autonomous demonstration.</p>
+            </div>
+        </div>
+
+        <!-- Slide 8: Speaker Notes / Talking Points -->
+        <div class="slide" data-slide="8">
+            <h2>Speaker Notes & Talking Points</h2>
+            <h3>Key messages for each section</h3>
+
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:24px;">
+                <div class="speaker-card">
+                    <h4>🎯 Opening (2 min)</h4>
+                    <ul>
+                        <li>Mainframes run 70% of global transactions</li>
+                        <li>Security teams lack mainframe expertise</li>
+                        <li>This toolkit bridges the gap with AI assistance</li>
+                        <li>Runs 100% locally - no data leaves your machine</li>
+                    </ul>
+                </div>
+                <div class="speaker-card">
+                    <h4>⌨️ Keyboard & Navigation (3 min)</h4>
+                    <ul>
+                        <li>PF3 = Exit (most important key!)</li>
+                        <li>PF7/PF8 = Scroll up/down</li>
+                        <li>Tab moves between fields</li>
+                        <li>Enter submits, Clear resets screen</li>
+                        <li>"=3.4" is the most used ISPF shortcut</li>
+                    </ul>
+                </div>
+                <div class="speaker-card">
+                    <h4>🔐 TSO Login Demo (3 min)</h4>
+                    <ul>
+                        <li>VTAM is the session fabric - anonymous until login</li>
+                        <li>TSO binds your identity to the session</li>
+                        <li>RACF validates password, not TSO</li>
+                        <li>Credentials: HERC01 / CUL8TR</li>
+                        <li>After login, type ISPF to launch panels</li>
+                    </ul>
+                </div>
+                <div class="speaker-card">
+                    <h4>📊 Control Planes (3 min)</h4>
+                    <ul>
+                        <li>5 planes: VTAM, TSO, RACF, CICS, JES</li>
+                        <li>RACF validates EVERY access request</li>
+                        <li>No root user - authority is distributed</li>
+                        <li>Sessions persist - not like web apps</li>
+                    </ul>
+                </div>
+                <div class="speaker-card">
+                    <h4>🧬 Model Lineage (3 min)</h4>
+                    <ul>
+                        <li>Reference 2018 blog on AD trust/authority</li>
+                        <li>"Same failure mode, different platform"</li>
+                        <li>Key line: "The tool didn't invent the idea — it operationalizes it"</li>
+                        <li>Shows model generalizes beyond one-off demo</li>
+                        <li>Proves years of validation, not just recent work</li>
+                    </ul>
+                </div>
+                <div class="speaker-card">
+                    <h4>💻 Live Terminal Demo (5 min)</h4>
+                    <ul>
+                        <li>Show real connection to TK5 mainframe</li>
+                        <li>Walk through TSO → ISPF → Dataset list</li>
+                        <li>Browse SYS1.PARMLIB to show system config</li>
+                        <li>Exit cleanly with =X or PF3 repeatedly</li>
+                    </ul>
+                </div>
+                <div class="speaker-card">
+                    <h4>🤖 Walkthrough Demo (5 min)</h4>
+                    <ul>
+                        <li>Show autonomous demo - system drives itself</li>
+                        <li>AI narrates what's happening in real-time</li>
+                        <li>Covers Q1-Q5 assessment framework</li>
+                        <li>Can pause/resume as needed</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="margin-top:24px;padding:16px;background:rgba(69,137,255,0.1);border:1px solid rgba(69,137,255,0.3);border-radius:8px;">
+                <h4 style="color:#4589ff;margin-bottom:8px;">📌 Key Takeaways</h4>
+                <ul style="font-size:14px;line-height:1.8;">
+                    <li><strong>Local-first:</strong> All AI runs via Ollama locally - air-gapped capable</li>
+                    <li><strong>Educational:</strong> Built for learning, not just pentesting</li>
+                    <li><strong>Practical:</strong> Real terminal, real mainframe, real skills</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <footer class="pres-footer">
+        <a href="/" style="color:#6f6f6f;text-decoration:none;">Mainframe Security Toolkit</a>
+        <div class="key-hint">
+            <kbd>←</kbd> Previous &nbsp;&nbsp; <kbd>→</kbd> Next &nbsp;&nbsp; <kbd>F</kbd> Fullscreen
+        </div>
+    </footer>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+let currentSlide = 0;
+const totalSlides = document.querySelectorAll('.slide').length;
+
+document.getElementById('totalSlides').textContent = totalSlides;
+
+function goToSlide(n) {
+    const slides = document.querySelectorAll('.slide');
+    const navButtons = document.querySelectorAll('.pres-nav button');
+    
+    slides.forEach(s => s.classList.remove('active'));
+    navButtons.forEach(b => b.classList.remove('active'));
+    
+    currentSlide = Math.max(0, Math.min(n, totalSlides - 1));
+    slides[currentSlide].classList.add('active');
+    navButtons[currentSlide].classList.add('active');
+    
+    document.getElementById('currentSlide').textContent = currentSlide + 1;
+}
+
+function nextSlide() {
+    goToSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+    goToSlide(currentSlide - 1);
+}
+
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') {
+        e.preventDefault();
+        nextSlide();
+    } else if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        prevSlide();
+    } else if (e.key === 'f' || e.key === 'F') {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            document.documentElement.requestFullscreen();
+        }
+    }
+});
+
+// Initialize
+goToSlide(0);
+
+// Export presentation as standalone HTML
+function exportPresentation() {
+    const exportHTML = `<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mainframe Security Toolkit - Presentation</title>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'IBM Plex Sans', sans-serif; background: #0d0d0d; color: #f4f4f4; }
+        .slide { display: none; min-height: 100vh; padding: 60px; }
+        .slide.active { display: block; }
+        .slide h1 { font-size: 56px; color: #fff; margin-bottom: 16px; }
+        .slide h2 { font-size: 36px; color: #4589ff; margin-bottom: 12px; }
+        .slide h3 { font-size: 20px; color: #6f6f6f; margin-bottom: 32px; }
+        .slide h4 { font-size: 18px; color: #f4f4f4; margin-bottom: 8px; }
+        .slide p, .slide li { font-size: 16px; color: #a8a8a8; line-height: 1.6; }
+        .slide ul { padding-left: 24px; }
+        .slide li { margin-bottom: 8px; }
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin: 24px 0; }
+        .card { background: #161616; border: 1px solid #333; border-radius: 8px; padding: 20px; }
+        .card h4 { color: #4589ff; }
+        code { font-family: 'IBM Plex Mono', monospace; background: #262626; padding: 2px 6px; border-radius: 3px; }
+        .code-block { font-family: 'IBM Plex Mono', monospace; background: #161616; border: 1px solid #333; padding: 16px; white-space: pre; font-size: 13px; color: #42be65; margin: 16px 0; border-radius: 4px; overflow-x: auto; }
+        .nav { position: fixed; bottom: 20px; right: 20px; display: flex; gap: 8px; }
+        .nav button { background: #4589ff; border: none; color: #fff; padding: 12px 20px; cursor: pointer; font-size: 14px; border-radius: 4px; }
+        .nav button:hover { background: #6ea6ff; }
+        .counter { position: fixed; bottom: 24px; left: 24px; font-family: 'IBM Plex Mono', monospace; color: #6f6f6f; }
+        .title-slide { text-align: center; padding-top: 15vh; }
+        .cp-grid { display: flex; gap: 16px; justify-content: center; margin: 24px 0; }
+        .cp-card { background: #161616; border: 1px solid #333; border-top: 4px solid; padding: 20px 24px; text-align: center; min-width: 140px; }
+        .cp-card.vtam { border-top-color: #a78bfa; }
+        .cp-card.tso { border-top-color: #63a7ff; }
+        .cp-card.racf { border-top-color: #f59e0b; }
+        .cp-card.cics { border-top-color: #34d399; }
+        .cp-card.jes { border-top-color: #fb7185; }
+        .cp-card .label { font-family: 'IBM Plex Mono', monospace; font-weight: 700; font-size: 18px; }
+        .cp-card.vtam .label { color: #a78bfa; }
+        .cp-card.tso .label { color: #63a7ff; }
+        .cp-card.racf .label { color: #f59e0b; }
+        .cp-card.cics .label { color: #34d399; }
+        .cp-card.jes .label { color: #fb7185; }
+        .cp-card .name { font-size: 13px; color: #888; margin-top: 4px; }
+        @media print { .nav, .counter { display: none; } .slide { display: block !important; page-break-after: always; } }
+    </style>
+</head>
+<body>
+    <div class="slide active" data-slide="0">
+        <div class="title-slide">
+            <h1>Mainframe Security Toolkit</h1>
+            <h2>AI-Powered z/OS Operations & Security Assessment</h2>
+            <div class="grid" style="max-width:600px;margin:40px auto;">
+                <div class="card"><h4>🔒 Local-First</h4><p>No cloud APIs, runs air-gapped</p></div>
+                <div class="card"><h4>🧠 AI-Powered</h4><p>Ollama LLM for analysis</p></div>
+                <div class="card"><h4>📺 TN3270</h4><p>Live terminal integration</p></div>
+                <div class="card"><h4>🎯 Red Team</h4><p>Security-focused methodology</p></div>
+            </div>
+        </div>
+    </div>
+    <div class="slide" data-slide="1">
+        <h2>3270 Keyboard Essentials</h2>
+        <h3>Program Function Keys & Navigation</h3>
+        <div class="grid" style="grid-template-columns:repeat(4,1fr);">
+            <div class="card"><h4>PF3 / F3</h4><p><strong>Exit / Back</strong></p></div>
+            <div class="card"><h4>PF7 / F7</h4><p><strong>Scroll Up</strong></p></div>
+            <div class="card"><h4>PF8 / F8</h4><p><strong>Scroll Down</strong></p></div>
+            <div class="card"><h4>PF1 / F1</h4><p><strong>Help</strong></p></div>
+            <div class="card"><h4>Enter</h4><p><strong>Submit</strong></p></div>
+            <div class="card"><h4>Clear / Esc</h4><p><strong>Clear Screen</strong></p></div>
+            <div class="card"><h4>Tab</h4><p><strong>Next Field</strong></p></div>
+            <div class="card"><h4>Home</h4><p><strong>First Field</strong></p></div>
+        </div>
+        <div class="code-block">Common Commands:
+LOGON userid    - Login to TSO
+LOGOFF          - Exit TSO session
+ISPF / PDF      - Launch ISPF panels
+=X              - Fast exit from ISPF
+=3.4            - Jump to dataset list</div>
+    </div>
+    <div class="slide" data-slide="2">
+        <h2>TSO Login Process</h2>
+        <h3>Step-by-Step Authentication</h3>
+        <div class="grid">
+            <div>
+                <div class="code-block">VTAM APPLICATION SELECTION
+
+Enter application name:
+===> TSO
+
+Available Applications:
+  TSO   - Time Sharing Option
+  CICS  - Customer Information</div>
+                <p><strong>Step 1:</strong> Type <code>TSO</code> and press Enter</p>
+            </div>
+            <div>
+                <div class="code-block">TSO/E LOGON
+
+Userid    ===> HERC01
+Password  ===> ______
+Procedure ===> IKJACCNT</div>
+                <p><strong>Step 2:</strong> Enter <code>HERC01</code> / <code>CUL8TR</code></p>
+            </div>
+        </div>
+    </div>
+    <div class="slide" data-slide="3">
+        <h2>ISPF Navigation</h2>
+        <h3>Interactive System Productivity Facility</h3>
+        <div class="grid">
+            <div class="code-block">ISPF Primary Option Menu
+
+0  Settings      - Terminal settings
+1  View          - Browse datasets
+2  Edit          - Edit datasets
+3  Utilities     - Dataset utilities
+M  More          - Additional options
+X  Exit          - Leave ISPF
+
+Option ===> _</div>
+            <div>
+                <h4 style="color:#4589ff;">Quick Navigation</h4>
+                <ul>
+                    <li><code>=3.4</code> - Dataset list (most used!)</li>
+                    <li><code>=2</code> - Edit a dataset</li>
+                    <li><code>=M</code> - Return to main menu</li>
+                    <li><code>=X</code> - Exit ISPF completely</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="slide" data-slide="4">
+        <h2>The 5 Control Planes</h2>
+        <h3>Understanding Mainframe Subsystems</h3>
+        <div class="cp-grid">
+            <div class="cp-card vtam"><div class="label">VTAM</div><div class="name">Network Access</div></div>
+            <div class="cp-card tso"><div class="label">TSO</div><div class="name">Time Sharing</div></div>
+            <div class="cp-card racf"><div class="label">RACF</div><div class="name">Security</div></div>
+            <div class="cp-card cics"><div class="label">CICS</div><div class="name">Transactions</div></div>
+            <div class="cp-card jes"><div class="label">JES</div><div class="name">Batch</div></div>
+        </div>
+        <div class="code-block">Session Flow:   VTAM (Entry) ──▶ TSO (Login) ──▶ ISPF (Panels) ──▶ Datasets
+                        │
+                        └──▶ RACF validates every access request</div>
+    </div>
+    <div class="slide" data-slide="5">
+        <h2>Speaker Notes & Talking Points</h2>
+        <div class="grid">
+            <div class="card"><h4>🎯 Opening (2 min)</h4><ul><li>Mainframes run 70% of global transactions</li><li>This toolkit bridges the gap with AI</li><li>Runs 100% locally</li></ul></div>
+            <div class="card"><h4>⌨️ Keyboard (3 min)</h4><ul><li>PF3 = Exit (most important!)</li><li>PF7/PF8 = Scroll</li><li>"=3.4" most used shortcut</li></ul></div>
+            <div class="card"><h4>🔐 TSO Login (3 min)</h4><ul><li>VTAM is session fabric</li><li>RACF validates password</li><li>Credentials: HERC01 / CUL8TR</li></ul></div>
+            <div class="card"><h4>📊 Control Planes (3 min)</h4><ul><li>5 planes: VTAM, TSO, RACF, CICS, JES</li><li>No root user - distributed authority</li></ul></div>
+        </div>
+        <div style="margin-top:24px;padding:20px;background:#161616;border:1px solid #4589ff;border-radius:8px;">
+            <h4 style="color:#4589ff;">📌 Key Takeaways</h4>
+            <ul><li><strong>Local-first:</strong> Air-gapped capable</li><li><strong>Educational:</strong> Built for learning</li><li><strong>Practical:</strong> Real terminal, real skills</li></ul>
+        </div>
+    </div>
+    <div class="counter"><span id="current">1</span> / <span id="total">6</span></div>
+    <div class="nav">
+        <button onclick="prev()">← Prev</button>
+        <button onclick="next()">Next →</button>
+    </div>
+    <script>
+        let cur = 0;
+        const slides = document.querySelectorAll('.slide');
+        const total = slides.length;
+        document.getElementById('total').textContent = total;
+        function show(n) {
+            slides.forEach(s => s.classList.remove('active'));
+            cur = Math.max(0, Math.min(n, total - 1));
+            slides[cur].classList.add('active');
+            document.getElementById('current').textContent = cur + 1;
+        }
+        function next() { show(cur + 1); }
+        function prev() { show(cur - 1); }
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); next(); }
+            else if (e.key === 'ArrowLeft') { e.preventDefault(); prev(); }
+        });
+    </script>
+</body>
+</html>`;
+
+    const blob = new Blob([exportHTML], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'mainframe-security-presentation.html';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    
+    if (window.showToast) {
+        showToast('Presentation exported! Open in browser or import to Google Slides via File > Import slides', { type: 'success', duration: 5000 });
+    }
+}
+</script>
+{% endblock %}

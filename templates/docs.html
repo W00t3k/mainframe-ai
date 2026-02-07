@@ -1,0 +1,392 @@
+{% extends "base.html" %}
+
+{% block title %}Documentation - IBM MVS AI Assistant{% endblock %}
+
+{% block page_styles %}
+<style>
+    .docs-page {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .docs-header {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid var(--ibm-gray-70);
+    }
+    .docs-header img {
+        width: 48px;
+        height: 48px;
+    }
+    .docs-header h1 {
+        font-size: 1.75rem;
+        font-weight: 400;
+    }
+    .docs-header .back-home {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        color: #6f6f6f;
+        font-size: 16px;
+        text-decoration: none;
+        border: 1px solid #262626;
+        margin-right: 12px;
+    }
+    .docs-header .back-home:hover {
+        color: #f4f4f4;
+        border-color: #393939;
+    }
+    .docs-content {
+        color: var(--ibm-gray-10);
+        line-height: 1.7;
+    }
+    .docs-content h2 {
+        font-size: 1.5rem;
+        font-weight: 500;
+        margin-top: 2.5rem;
+        margin-bottom: 1rem;
+        color: var(--ibm-blue-40);
+        border-bottom: 1px solid var(--ibm-gray-80);
+        padding-bottom: 0.5rem;
+    }
+    .docs-content h3 {
+        font-size: 1.1rem;
+        font-weight: 500;
+        margin-top: 1.5rem;
+        margin-bottom: 0.75rem;
+        color: var(--ibm-gray-10);
+    }
+    .docs-content p {
+        margin-bottom: 1rem;
+        color: var(--ibm-gray-30);
+    }
+    .docs-content ul, .docs-content ol {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+        color: var(--ibm-gray-30);
+    }
+    .docs-content li {
+        margin-bottom: 0.5rem;
+    }
+    .docs-content code {
+        background: var(--ibm-gray-90);
+        padding: 0.15rem 0.4rem;
+        border-radius: 3px;
+        font-family: 'IBM Plex Mono', monospace;
+        font-size: 0.85em;
+        color: var(--ibm-blue-40);
+    }
+    .docs-content pre {
+        background: var(--ibm-gray-90);
+        padding: 1rem;
+        border-radius: 6px;
+        overflow-x: auto;
+        margin-bottom: 1rem;
+        border: 1px solid var(--ibm-gray-80);
+    }
+    .docs-content pre code {
+        background: none;
+        padding: 0;
+        color: var(--ibm-gray-10);
+    }
+    .docs-content strong {
+        color: var(--ibm-gray-10);
+        font-weight: 600;
+    }
+    .docs-content a {
+        color: var(--ibm-blue-40);
+        text-decoration: none;
+    }
+    .docs-content a:hover {
+        text-decoration: underline;
+    }
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    .feature-card {
+        background: var(--ibm-gray-90);
+        border: 1px solid var(--ibm-gray-80);
+        border-radius: 6px;
+        padding: 1rem;
+    }
+    .feature-card h4 {
+        font-size: 0.95rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+        color: var(--ibm-gray-10);
+    }
+    .feature-card p {
+        font-size: 0.85rem;
+        margin: 0;
+        color: var(--ibm-gray-40);
+    }
+    .quick-start {
+        background: linear-gradient(135deg, var(--ibm-gray-90), var(--ibm-gray-100));
+        border: 1px solid var(--ibm-blue-60);
+        border-radius: 8px;
+        padding: 1.5rem;
+        margin: 1.5rem 0;
+    }
+    .quick-start h3 {
+        margin-top: 0;
+        color: var(--ibm-blue-40);
+    }
+    .env-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 1rem 0;
+        font-size: 0.9rem;
+    }
+    .env-table th, .env-table td {
+        text-align: left;
+        padding: 0.75rem;
+        border-bottom: 1px solid var(--ibm-gray-80);
+    }
+    .env-table th {
+        background: var(--ibm-gray-90);
+        color: var(--ibm-gray-10);
+        font-weight: 500;
+    }
+    .env-table td {
+        color: var(--ibm-gray-30);
+    }
+    .env-table code {
+        font-size: 0.8rem;
+    }
+    .toc {
+        background: var(--ibm-gray-90);
+        border: 1px solid var(--ibm-gray-80);
+        border-radius: 6px;
+        padding: 1rem 1.5rem;
+        margin-bottom: 2rem;
+    }
+    .toc h3 {
+        margin-top: 0;
+        font-size: 0.95rem;
+        color: var(--ibm-gray-30);
+    }
+    .toc ul {
+        margin: 0;
+        padding-left: 1rem;
+    }
+    .toc li {
+        margin-bottom: 0.25rem;
+    }
+    .toc a {
+        color: var(--ibm-blue-40);
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+    .toc a:hover {
+        text-decoration: underline;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="docs-page">
+    <header class="docs-header">
+        <a href="/" class="back-link" title="Back to Home" style="display:flex;align-items:center;gap:12px;text-decoration:none;">
+<img src="/static/img/ibm-old.png" alt="IBM" style="height:28px;width:auto;">
+            <span style="color:#393939;font-size:20px;font-weight:300;">|</span>
+            <span style="font-family:'IBM Plex Mono',monospace;font-size:16px;font-weight:600;color:#f4f4f4;">Documentation</span>
+        </a>
+    </header>
+
+    <div class="docs-content">
+        <div class="toc">
+            <h3>Contents</h3>
+            <ul>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#features">Features</a></li>
+                <li><a href="#quick-start">Quick Start</a></li>
+                <li><a href="#modules">Modules</a></li>
+                <li><a href="#configuration">Configuration</a></li>
+                <li><a href="#methodology">Assessment Methodology</a></li>
+            </ul>
+        </div>
+
+        <h2 id="overview">Overview</h2>
+        <p>
+            The <strong>Mainframe AI Assistant</strong> is a natural language interface for MVS mainframe operations.
+            It runs entirely locally using Ollama, with no API keys required. Connect to real mainframes via TN3270,
+            ask questions about JCL and ABEND codes, and get AI-powered assistance for security assessments.
+        </p>
+
+        <h2 id="features">Features</h2>
+        <div class="feature-grid">
+            <div class="feature-card">
+                <h4>🎬 Autonomous Walkthrough</h4>
+                <p>Watch live demonstrations of mainframe navigation with methodology narration.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🛡️ Recon & Assessment</h4>
+                <p>Native TN3270 enumeration — TSO users, CICS transactions, VTAM applications.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🖥️ Terminal Console</h4>
+                <p>Full TN3270 terminal with keyboard support, PF keys, and screen capture.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🔍 Mainframe Scanner</h4>
+                <p>Network scanning for TN3270 services with banner grabbing and fingerprinting.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🤖 AI Chat Assistant</h4>
+                <p>Ask questions about MVS, JCL, COBOL, ABEND codes with RAG-enhanced responses.</p>
+            </div>
+            <div class="feature-card">
+                <h4>🕸️ Trust Graph</h4>
+                <p>BloodHound-inspired visualization of jobs, datasets, and trust boundaries.</p>
+            </div>
+        </div>
+
+        <h2 id="quick-start">Quick Start</h2>
+        <div class="quick-start">
+            <h3>Setup (5 minutes)</h3>
+            <pre><code># 1. Set up virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# 2. Install dependencies
+pip install -r requirements.txt
+
+# 3. Start Ollama (in another terminal)
+ollama serve
+ollama pull llama3.1:8b
+
+# 4. Run the web app
+python web_app.py</code></pre>
+            <p>Then open <code>http://127.0.0.1:8080</code> in your browser.</p>
+        </div>
+
+        <h3>Demo Without a Mainframe</h3>
+        <ul>
+            <li>Start Ollama (<code>ollama serve</code>)</li>
+            <li>Run the web app (<code>python web_app.py</code>)</li>
+            <li>Open <code>/chat</code>, <code>/tutor</code>, and <code>/graph</code></li>
+            <li><code>/terminal</code> requires a TN3270 target (TK5 or a real mainframe)</li>
+        </ul>
+
+        <h3>TK5 Bundle (Local MVS)</h3>
+        <p>
+            The TK5 distribution provides a local MVS 3.8j environment for testing. Download from your
+            MVS documentation and unzip into <code>tk5/mvs-tk5</code>. Connect to <code>localhost:3270</code>
+            after starting the emulator.
+        </p>
+
+        <h2 id="modules">Modules</h2>
+
+        <h3>Walkthrough</h3>
+        <p>
+            Autonomous demonstrations that connect, login, and navigate through mainframe subsystems
+            while narrating each screen through the control-plane methodology lens. Available walkthroughs:
+        </p>
+        <ul>
+            <li><strong>Session Stack</strong> — VTAM → TSO → ISPF traversal, dataset browsing</li>
+            <li><strong>Deferred Execution</strong> — JES queues, active jobs, output history</li>
+            <li><strong>System Inspection</strong> — TSO sessions, system procedures, configuration</li>
+            <li><strong>Authorization Model</strong> — RACF profiles, dataset protection</li>
+            <li><strong>Dataset Model</strong> — PDS structure, catalogs, HLQ identity binding</li>
+            <li><strong>Address Spaces</strong> — What's running, SDSF inspection</li>
+            <li><strong>COBOL Development</strong> — Create datasets, edit source, compile workflow</li>
+        </ul>
+
+        <h3>Recon & Assessment</h3>
+        <p>Native TN3270 enumeration capabilities:</p>
+        <ul>
+            <li><strong>TSO Enumeration</strong> — Discover valid userids via logon response analysis</li>
+            <li><strong>CICS Enumeration</strong> — Probe transaction codes for valid responses</li>
+            <li><strong>VTAM Enumeration</strong> — Discover APPLIDs and network resources</li>
+            <li><strong>Hidden Fields</strong> — Detect non-display fields that may contain sensitive data</li>
+            <li><strong>AI Analysis</strong> — LLM-powered screen analysis through methodology lens</li>
+        </ul>
+
+        <h3>Trust Graph</h3>
+        <p>
+            Visualize mainframe relationships in a BloodHound-inspired graph. Ingest JCL, SYSOUT,
+            and screen captures to build a map of:
+        </p>
+        <ul>
+            <li>Jobs and their submitting identities</li>
+            <li>Programs and their execution contexts</li>
+            <li>Datasets and access permissions</li>
+            <li>Trust boundaries and privilege paths</li>
+        </ul>
+
+        <h2 id="configuration">Configuration</h2>
+        <table class="env-table">
+            <thead>
+                <tr>
+                    <th>Variable</th>
+                    <th>Description</th>
+                    <th>Default</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><code>OLLAMA_URL</code></td>
+                    <td>Ollama API endpoint</td>
+                    <td><code>http://localhost:11434</code></td>
+                </tr>
+                <tr>
+                    <td><code>OLLAMA_MODEL</code></td>
+                    <td>Default Ollama model</td>
+                    <td><code>llama3.1:8b</code></td>
+                </tr>
+                <tr>
+                    <td><code>MAINFRAME_HOST</code></td>
+                    <td>Default mainframe target</td>
+                    <td><code>localhost:3270</code></td>
+                </tr>
+                <tr>
+                    <td><code>MAINFRAME_USER</code></td>
+                    <td>Default TSO userid</td>
+                    <td><code>HERC01</code></td>
+                </tr>
+            </tbody>
+        </table>
+
+        <h3>Command Line Options</h3>
+        <pre><code>python web_app.py --host 0.0.0.0 --port 8080 --model llama3.1:8b</code></pre>
+
+        <h2 id="methodology">Assessment Methodology</h2>
+        <p>
+            The assistant uses a <strong>control-plane assessment methodology</strong> designed for
+            security professionals approaching mainframes from a Linux/Unix background. Key principles:
+        </p>
+
+        <h3>The 5 Assessment Questions</h3>
+        <ol>
+            <li><strong>Q1: Where is identity bound?</strong> — Identity binds at TSO logon, not VTAM entry</li>
+            <li><strong>Q2: When is authority evaluated?</strong> — At command execution, not session start</li>
+            <li><strong>Q3: What executes later than expected?</strong> — JCL submits now, runs later under submitter's identity</li>
+            <li><strong>Q4: Which subsystem enforces policy?</strong> — RACF, not the application or menu</li>
+            <li><strong>Q5: What assumptions are you importing?</strong> — Datasets ≠ files, address spaces ≠ processes</li>
+        </ol>
+
+        <h3>Control Planes</h3>
+        <p>The mainframe operates across multiple control planes:</p>
+        <ul>
+            <li><strong>VTAM</strong> — Network entry, no identity yet</li>
+            <li><strong>TSO</strong> — Interactive sessions, identity-bound</li>
+            <li><strong>ISPF/RFE</strong> — Menu-driven interface over TSO</li>
+            <li><strong>JES</strong> — Batch execution, deferred under submitter identity</li>
+            <li><strong>RACF</strong> — Central security enforcement</li>
+            <li><strong>CICS</strong> — Transaction processing subsystem</li>
+        </ul>
+
+        <p style="margin-top: 3rem; color: var(--ibm-gray-50); font-size: 0.85rem; text-align: center;">
+            Built with Ollama | 100% Local LLM | No API Key Required
+        </p>
+    </div>
+</div>
+{% endblock %}

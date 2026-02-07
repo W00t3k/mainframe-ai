@@ -17,86 +17,373 @@
 {% include "partials/site_header.html" %}
 
 <main class="page">
-    <h1 class="page-title">Mainframe Scanner</h1>
-    <p class="page-subtitle">Scan networks for TN3270 services and IBM mainframes</p>
+    <h1 class="page-title">Mainframe Scanner &amp; Capture</h1>
+    <p class="page-subtitle">Scan, fingerprint, grab banners, decode EBCDIC, and capture system info</p>
 
-    <div class="scan-form">
-        <div class="form-row">
-            <div class="form-group">
-                <label>Target (IP, hostname, or CIDR)</label>
-                <input type="text" id="target" value="localhost" placeholder="192.168.1.0/24">
-            </div>
-            <div class="form-group">
-                <label>Ports</label>
-                <input type="text" id="ports" value="23,3270,2323" placeholder="23,3270,2323">
-            </div>
-        </div>
-        <button class="btn" id="scanBtn" onclick="startScan()">Start Scan</button>
+    <!-- ── Tabs ── -->
+    <div class="sc-tabs">
+        <button class="sc-tab active" data-tab="scan">&#128269; Scan</button>
+        <button class="sc-tab" data-tab="banner">&#128225; Banner Grab</button>
+        <button class="sc-tab" data-tab="fingerprint">&#128270; Fingerprint</button>
+        <button class="sc-tab" data-tab="ebcdic">&#128290; EBCDIC</button>
+        <button class="sc-tab" data-tab="captures">&#128190; Captures</button>
     </div>
 
-    <div class="results" id="results">
-        <div class="empty">Enter a target and click Start Scan</div>
+    <!-- ══════ SCAN TAB ══════ -->
+    <div class="sc-panel active" id="tab-scan">
+        <div class="scan-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Target (IP, hostname, or CIDR)</label>
+                    <input type="text" id="scanTarget" value="localhost" placeholder="192.168.1.0/24">
+                </div>
+                <div class="form-group">
+                    <label>Ports</label>
+                    <input type="text" id="scanPorts" value="23,3270,2323" placeholder="23,3270,2323">
+                </div>
+            </div>
+            <button class="btn" id="scanBtn" onclick="startScan()">Start Scan</button>
+        </div>
+        <div class="results" id="scanResults">
+            <div class="empty">Enter a target and click Start Scan</div>
+        </div>
+    </div>
+
+    <!-- ══════ BANNER GRAB TAB ══════ -->
+    <div class="sc-panel" id="tab-banner">
+        <div class="scan-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Host</label>
+                    <input type="text" id="bannerHost" value="localhost" placeholder="hostname or IP">
+                </div>
+                <div class="form-group">
+                    <label>Port</label>
+                    <input type="text" id="bannerPort" value="3270" placeholder="3270">
+                </div>
+            </div>
+            <div class="btn-row">
+                <button class="btn" id="bannerBtn" onclick="grabBanner()">Grab Banner</button>
+                <button class="btn btn-green" onclick="saveBannerCapture()">Save Capture</button>
+            </div>
+        </div>
+        <div class="results" id="bannerResults">
+            <div class="empty">Connect to a TN3270 port and extract the VTAM banner, screen text, and APPLIDs</div>
+        </div>
+    </div>
+
+    <!-- ══════ FINGERPRINT TAB ══════ -->
+    <div class="sc-panel" id="tab-fingerprint">
+        <div class="scan-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Host</label>
+                    <input type="text" id="fpHost" value="localhost" placeholder="hostname or IP">
+                </div>
+                <div class="form-group">
+                    <label>Port</label>
+                    <input type="text" id="fpPort" value="3270" placeholder="3270">
+                </div>
+            </div>
+            <button class="btn" id="fpBtn" onclick="runFingerprint()">Fingerprint Service</button>
+        </div>
+        <div class="results" id="fpResults">
+            <div class="empty">Detect VTAM, TSO, CICS, IMS, SSL/TLS status, and security issues</div>
+        </div>
+    </div>
+
+    <!-- ══════ EBCDIC TAB ══════ -->
+    <div class="sc-panel" id="tab-ebcdic">
+        <div class="scan-form">
+            <div class="form-row">
+                <div class="form-group" style="flex:2">
+                    <label>ASCII Text</label>
+                    <input type="text" id="ebcAscii" placeholder="HELLO WORLD">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-sm" onclick="encodeEbcdic()" style="margin-top:1.4rem">Encode &rarr;</button>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group" style="flex:2">
+                    <label>EBCDIC Hex</label>
+                    <input type="text" id="ebcHex" placeholder="C8 C5 D3 D3 D6">
+                </div>
+                <div class="form-group">
+                    <button class="btn btn-sm" onclick="decodeEbcdic()" style="margin-top:1.4rem">&larr; Decode</button>
+                </div>
+            </div>
+        </div>
+        <div class="results" id="ebcResults">
+            <div class="empty">Convert between ASCII and EBCDIC. Mainframes use EBCDIC encoding &mdash; all TN3270 data is EBCDIC on the wire.</div>
+        </div>
+    </div>
+
+    <!-- ══════ CAPTURES TAB ══════ -->
+    <div class="sc-panel" id="tab-captures">
+        <div class="btn-row" style="margin-bottom:1rem">
+            <button class="btn" onclick="loadCaptures()">Refresh</button>
+            <button class="btn btn-green" onclick="captureCurrentScreen()">Capture Live Screen</button>
+        </div>
+        <div class="results" id="captureResults">
+            <div class="empty">Saved banners, screen captures, and fingerprint results</div>
+        </div>
     </div>
 </main>
 {% endblock %}
 
 {% block page_scripts %}
 <script>
-    async function startScan() {
-        const target = document.getElementById('target').value.trim();
-        const ports = document.getElementById('ports').value.trim();
-        const results = document.getElementById('results');
-        const btn = document.getElementById('scanBtn');
+// ── Tab switching ──
+document.querySelectorAll('.sc-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.sc-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.sc-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+});
 
-        if (!target) {
-            showToast('Enter a target to scan.', { type: 'warning', title: 'Scanner' });
-            return;
-        }
+// ── Scan ──
+async function startScan() {
+    const target = document.getElementById('scanTarget').value.trim();
+    const ports = document.getElementById('scanPorts').value.trim();
+    const out = document.getElementById('scanResults');
+    const btn = document.getElementById('scanBtn');
+    if (!target) return;
 
-        btn.disabled = true;
-        btn.textContent = 'Scanning...';
-        results.innerHTML = '<div class="loading"><div class="spinner"></div>Scanning ' + target + '...</div>';
+    btn.disabled = true; btn.textContent = 'Scanning...';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Scanning ' + target + '...</div>';
 
-        try {
-            const response = await fetch('/api/scanner/scan', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target, ports })
-            });
-            const data = await response.json();
+    try {
+        const res = await fetch('/api/scanner/scan', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({target, ports})
+        });
+        const data = await res.json();
+        if (data.error) { out.innerHTML = '<div class="empty">' + data.error + '</div>'; return; }
 
-            if (!response.ok || data.error) {
-                const message = data.error || 'Scan failed';
-                results.innerHTML = '<div class="empty">' + message + '</div>';
-                showToast(message, { type: 'error', title: 'Scanner' });
-                return;
-            }
+        const hosts = data.results || [];
+        if (!hosts.length) { out.innerHTML = '<div class="empty">No TN3270 services found</div>'; return; }
 
-            const hosts = data.results || [];
-
-            if (hosts.length === 0) {
-                results.innerHTML = '<div class="empty">No TN3270 services found on ' + target + '</div>';
-                return;
-            }
-
-            results.innerHTML = hosts.map(h => `
-                <div class="result-card">
-                    <div class="icon">🖥️</div>
-                    <div class="info">
-                        <div class="host">${h.host}:${h.port}</div>
-                        <div class="details">${h.type} - ${h.details}</div>
-                    </div>
-                    <a href="/terminal?host=${h.host}:${h.port}" class="connect-btn">Connect</a>
+        out.innerHTML = hosts.map(h => `
+            <div class="result-card">
+                <div class="rc-icon">&#128421;</div>
+                <div class="rc-body">
+                    <div class="rc-host">${h.host}:${h.port}</div>
+                    <div class="rc-detail">${h.type} &mdash; ${h.details}</div>
                 </div>
-            `).join('');
-        } catch (e) {
-            const message = 'Scan error: ' + e.message;
-            results.innerHTML = '<div class="empty">' + message + '</div>';
-            showToast(message, { type: 'error', title: 'Scanner' });
-        } finally {
-            btn.disabled = false;
-            btn.textContent = 'Start Scan';
-        }
+                <div class="rc-actions">
+                    <button class="btn btn-sm" onclick="document.getElementById('bannerHost').value='${h.host}';document.getElementById('bannerPort').value='${h.port}';document.querySelector('[data-tab=banner]').click();">Banner</button>
+                    <button class="btn btn-sm" onclick="document.getElementById('fpHost').value='${h.host}';document.getElementById('fpPort').value='${h.port}';document.querySelector('[data-tab=fingerprint]').click();">Fingerprint</button>
+                    <a href="/terminal?host=${h.host}:${h.port}" class="btn btn-sm btn-green">Connect</a>
+                </div>
+            </div>
+        `).join('');
+    } catch(e) {
+        out.innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+    } finally {
+        btn.disabled = false; btn.textContent = 'Start Scan';
     }
+}
+
+// ── Banner Grab ──
+let lastBanner = null;
+async function grabBanner() {
+    const host = document.getElementById('bannerHost').value.trim();
+    const port = parseInt(document.getElementById('bannerPort').value) || 3270;
+    const out = document.getElementById('bannerResults');
+    const btn = document.getElementById('bannerBtn');
+    if (!host) return;
+
+    btn.disabled = true; btn.textContent = 'Grabbing...';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Connecting to ' + host + ':' + port + '...</div>';
+
+    try {
+        const res = await fetch('/api/scanner/banner', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({host, port})
+        });
+        lastBanner = await res.json();
+        renderBanner(lastBanner, out);
+    } catch(e) {
+        out.innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+    } finally {
+        btn.disabled = false; btn.textContent = 'Grab Banner';
+    }
+}
+
+function renderBanner(b, out) {
+    const applids = (b.applids || []).map(a => `<span class="sc-tag">${a}</span>`).join(' ');
+    out.innerHTML = `
+        <div class="sc-capture-block">
+            <div class="sc-cap-header">
+                <span class="sc-cap-host">${b.host}:${b.port}</span>
+                <span class="sc-cap-badge ${b.is_tn3270 ? 'badge-green' : 'badge-red'}">${b.is_tn3270 ? 'TN3270' : 'Unknown'}</span>
+            </div>
+            ${b.banner ? `<div class="sc-section"><div class="sc-label">Banner</div><pre class="sc-pre">${escHtml(b.banner)}</pre></div>` : ''}
+            ${b.screen_text ? `<div class="sc-section"><div class="sc-label">Screen Text (EBCDIC decoded)</div><pre class="sc-pre sc-pre-lg">${escHtml(b.screen_text)}</pre></div>` : ''}
+            ${applids ? `<div class="sc-section"><div class="sc-label">Detected APPLIDs</div><div class="sc-tags">${applids}</div></div>` : ''}
+            ${b.raw_bytes ? `<div class="sc-section"><div class="sc-label">Raw Bytes (first 200 hex)</div><pre class="sc-pre sc-pre-hex">${b.raw_bytes}</pre></div>` : ''}
+            ${b.error ? `<div class="sc-section"><div class="sc-label sc-label-err">Error</div><pre class="sc-pre">${escHtml(b.error)}</pre></div>` : ''}
+        </div>`;
+}
+
+async function saveBannerCapture() {
+    if (!lastBanner) { showToast('Grab a banner first', {type:'warning'}); return; }
+    const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+    captures.unshift({
+        type: 'banner',
+        time: new Date().toISOString(),
+        data: lastBanner
+    });
+    localStorage.setItem('sc_captures', JSON.stringify(captures.slice(0, 100)));
+    showToast('Banner capture saved', {type:'success'});
+}
+
+// ── Fingerprint ──
+async function runFingerprint() {
+    const host = document.getElementById('fpHost').value.trim();
+    const port = parseInt(document.getElementById('fpPort').value) || 3270;
+    const out = document.getElementById('fpResults');
+    const btn = document.getElementById('fpBtn');
+    if (!host) return;
+
+    btn.disabled = true; btn.textContent = 'Fingerprinting...';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Fingerprinting ' + host + ':' + port + '...</div>';
+
+    try {
+        const res = await fetch('/api/scanner/fingerprint', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({host, port})
+        });
+        const fp = await res.json();
+
+        const apps = (fp.applications || []).map(a => `<span class="sc-tag">${a}</span>`).join(' ');
+        const issues = (fp.security_issues || []).map(i => `<div class="sc-issue">&#9888; ${escHtml(i)}</div>`).join('');
+
+        out.innerHTML = `
+            <div class="sc-capture-block">
+                <div class="sc-cap-header">
+                    <span class="sc-cap-host">${fp.host}:${fp.port}</span>
+                    <span class="sc-cap-badge ${fp.ssl ? 'badge-green' : 'badge-red'}">${fp.ssl ? 'SSL/TLS' : 'NO SSL'}</span>
+                    <span class="sc-cap-badge badge-blue">${fp.service}</span>
+                </div>
+                ${fp.vtam ? '<div class="sc-section"><div class="sc-label">VTAM Detected</div><div class="sc-value">Session fabric is active</div></div>' : ''}
+                ${apps ? `<div class="sc-section"><div class="sc-label">Applications</div><div class="sc-tags">${apps}</div></div>` : ''}
+                ${fp.banner ? `<div class="sc-section"><div class="sc-label">Banner</div><pre class="sc-pre">${escHtml(fp.banner)}</pre></div>` : ''}
+                ${fp.screen_text ? `<div class="sc-section"><div class="sc-label">Screen Text</div><pre class="sc-pre sc-pre-lg">${escHtml(fp.screen_text)}</pre></div>` : ''}
+                ${issues ? `<div class="sc-section"><div class="sc-label sc-label-err">Security Issues</div>${issues}</div>` : ''}
+            </div>`;
+
+        // Auto-save fingerprint
+        const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+        captures.unshift({ type:'fingerprint', time: new Date().toISOString(), data: fp });
+        localStorage.setItem('sc_captures', JSON.stringify(captures.slice(0, 100)));
+    } catch(e) {
+        out.innerHTML = '<div class="empty">Error: ' + e.message + '</div>';
+    } finally {
+        btn.disabled = false; btn.textContent = 'Fingerprint Service';
+    }
+}
+
+// ── EBCDIC ──
+async function encodeEbcdic() {
+    const text = document.getElementById('ebcAscii').value.trim();
+    if (!text) return;
+    const out = document.getElementById('ebcResults');
+    try {
+        const res = await fetch('/api/scanner/ebcdic/encode', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({text})
+        });
+        const d = await res.json();
+        document.getElementById('ebcHex').value = d.ebcdic_hex || '';
+        out.innerHTML = `
+            <div class="sc-capture-block">
+                <div class="sc-section"><div class="sc-label">ASCII</div><pre class="sc-pre">${escHtml(d.ascii)}</pre></div>
+                <div class="sc-section"><div class="sc-label">EBCDIC Hex</div><pre class="sc-pre sc-pre-hex">${escHtml(d.ebcdic_hex)}</pre></div>
+                <div class="sc-section"><div class="sc-label">Length</div><div class="sc-value">${d.length} bytes</div></div>
+            </div>`;
+    } catch(e) { out.innerHTML = '<div class="empty">Error: ' + e.message + '</div>'; }
+}
+
+async function decodeEbcdic() {
+    const hex = document.getElementById('ebcHex').value.trim();
+    if (!hex) return;
+    const out = document.getElementById('ebcResults');
+    try {
+        const res = await fetch('/api/scanner/ebcdic/decode', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({hex})
+        });
+        const d = await res.json();
+        if (d.error) { out.innerHTML = '<div class="empty">' + d.error + '</div>'; return; }
+        document.getElementById('ebcAscii').value = d.ascii || '';
+        out.innerHTML = `
+            <div class="sc-capture-block">
+                <div class="sc-section"><div class="sc-label">EBCDIC Hex</div><pre class="sc-pre sc-pre-hex">${escHtml(d.ebcdic_hex)}</pre></div>
+                <div class="sc-section"><div class="sc-label">ASCII</div><pre class="sc-pre">${escHtml(d.ascii)}</pre></div>
+                <div class="sc-section"><div class="sc-label">Length</div><div class="sc-value">${d.length} bytes</div></div>
+            </div>`;
+    } catch(e) { out.innerHTML = '<div class="empty">Error: ' + e.message + '</div>'; }
+}
+
+// ── Captures ──
+async function captureCurrentScreen() {
+    try {
+        const res = await fetch('/api/screencap', {method:'POST'});
+        const d = await res.json();
+        if (d.success) {
+            const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+            captures.unshift({ type:'screen', time: new Date().toISOString(), data: {host: d.screencap.host, screen: d.screencap.screen, id: d.screencap.id} });
+            localStorage.setItem('sc_captures', JSON.stringify(captures.slice(0, 100)));
+            showToast('Screen captured', {type:'success'});
+            loadCaptures();
+        } else {
+            showToast(d.error || 'Not connected', {type:'error'});
+        }
+    } catch(e) { showToast('Capture failed: ' + e.message, {type:'error'}); }
+}
+
+function loadCaptures() {
+    const out = document.getElementById('captureResults');
+    const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+    if (!captures.length) { out.innerHTML = '<div class="empty">No captures yet. Use Banner Grab, Fingerprint, or Capture Live Screen.</div>'; return; }
+
+    out.innerHTML = captures.map((c, i) => {
+        const icon = c.type === 'banner' ? '&#128225;' : c.type === 'fingerprint' ? '&#128270;' : '&#128421;';
+        const label = c.type === 'banner' ? 'Banner' : c.type === 'fingerprint' ? 'Fingerprint' : 'Screen';
+        const host = c.data.host || (c.data.host + ':' + c.data.port) || '?';
+        const time = new Date(c.time).toLocaleString();
+        const preview = c.type === 'screen' ? (c.data.screen || '').substring(0, 120) + '...' :
+                        c.type === 'banner' ? (c.data.banner || c.data.screen_text || '').substring(0, 120) + '...' :
+                        (c.data.service || '') + ' ' + (c.data.applications || []).join(', ');
+        return `
+            <div class="result-card">
+                <div class="rc-icon">${icon}</div>
+                <div class="rc-body">
+                    <div class="rc-host">${escHtml(host)} <span class="sc-cap-badge badge-blue">${label}</span></div>
+                    <div class="rc-detail">${escHtml(time)}</div>
+                    <pre class="rc-preview">${escHtml(preview)}</pre>
+                </div>
+                <div class="rc-actions">
+                    <button class="btn btn-sm btn-red" onclick="deleteCapture(${i})">&#10005;</button>
+                </div>
+            </div>`;
+    }).join('');
+}
+
+function deleteCapture(idx) {
+    const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+    captures.splice(idx, 1);
+    localStorage.setItem('sc_captures', JSON.stringify(captures));
+    loadCaptures();
+}
+
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+// Auto-load captures tab
+loadCaptures();
 </script>
 {% endblock %}

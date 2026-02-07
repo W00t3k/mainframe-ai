@@ -1,0 +1,38 @@
+{
+  "id": "racf-basics",
+  "title": "RACF Authorization Model",
+  "description": "Understand how RACF enforces access control on datasets, programs, and resources.",
+  "category": "security",
+  "difficulty": "beginner",
+  "questions": ["Q4"],
+  "steps": [
+    {
+      "title": "Dataset Profile",
+      "screen": "LISTDSD DATASET('SYS1.PARMLIB') ALL\n\nDATASET SYS1.PARMLIB\n  OWNER: SYS1\n  UACC: NONE\n  AUDIT: SUCCESS(READ)\n\nACCESS LIST:\n  USER    ACCESS\n  ----    ------\n  HERC01  READ\n  IBMUSER UPDATE",
+      "expected": "Identify the access control list and understand UACC (Universal Access).",
+      "hint": "UACC=NONE means no default access. Only users in the ACCESS LIST have permissions.",
+      "assessment": "Q4: RACF enforces policy, not the application or menu system."
+    },
+    {
+      "title": "User Profile",
+      "screen": "LISTUSER HERC01\n\nUSER=HERC01\n  DEFAULT-GROUP=SYS1\n  OWNER=IBMUSER\n  CREATED=2024.001\n  ATTRIBUTES=NONE\n  LAST-ACCESS=2024.035/14:22:31",
+      "expected": "Understand the user identity model and group membership.",
+      "hint": "DEFAULT-GROUP determines the identity context for new objects created by the user.",
+      "assessment": "Q1: Identity is bound at TSO logon and carried through all operations."
+    },
+    {
+      "title": "Permission Check",
+      "screen": "EDIT 'SYS1.PARMLIB(IEASYS00)'\nICH408I USER(HERC01) NOT AUTHORIZED TO EDIT 'SYS1.PARMLIB'\n\nPERMISSION DENIED",
+      "expected": "Recognize a RACF authorization failure and trace it to profile rules.",
+      "hint": "HERC01 has READ but not UPDATE access. EDIT requires UPDATE permission.",
+      "assessment": "Q4: RACF evaluated the request and denied it based on the profile."
+    },
+    {
+      "title": "Elevated Access",
+      "screen": "PERMIT 'SYS1.PARMLIB' ID(HERC01) ACCESS(UPDATE)\nICH06011I RACLISTED PROFILES FOR DATASET WILL NOT REFLECT CHANGE UNTIL SETROPTS REFRESH\n\nSETROPTS REFRESH RACLIST(DATASET)\nICH10003I SETROPTS COMMAND COMPLETE",
+      "expected": "Understand how access is granted and when changes take effect.",
+      "hint": "RACF caches profiles for performance. SETROPTS REFRESH updates the in-memory cache.",
+      "assessment": "Q4: Authorization changes require explicit refresh to take effect."
+    }
+  ]
+}

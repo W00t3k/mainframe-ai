@@ -1,154 +1,192 @@
 {% extends "base.html" %}
 
-{% block title %}Labs - Mainframe AI Assistant{% endblock %}
+{% block title %}Security Labs - Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/labs.css">
 {% endblock %}
 
 {% block body %}
-<div class="labs-layout">
+<div class="labs-page">
+    <!-- ── Header ── -->
     <header class="labs-header">
-        <div class="labs-title">
+        <a href="/" class="labs-back">&larr; Home</a>
+        <div class="labs-brand">
             <h1>Security Labs</h1>
-            <p>Deterministic walkthroughs you can run without a live mainframe.</p>
+            <p class="labs-subtitle">Deterministic walkthroughs &mdash; no live mainframe required</p>
         </div>
-        <div class="labs-actions">
-            <button class="btn" id="loadDemoGraph">Load Demo Graph Data</button>
-            <a class="btn btn-outline" href="/graph">Open Trust Graph</a>
+        <div class="labs-header-actions">
+            <button class="labs-btn labs-btn-ghost" id="loadDemoGraph">Load Demo Graph</button>
+            <a href="/graph" class="labs-btn labs-btn-outline">Trust Graph &rarr;</a>
         </div>
     </header>
 
-    <div class="labs-body">
-        <aside class="labs-list" id="labsList">
-            <div class="empty">Loading labs...</div>
-        </aside>
+    <!-- ── Card Grid (default view) ── -->
+    <section class="labs-grid" id="labsGrid">
+        <div class="labs-loading">Loading labs...</div>
+    </section>
 
-        <section class="labs-detail" id="labsDetail">
-            <div class="empty">Select a lab to begin.</div>
-        </section>
-    </div>
+    <!-- ── Detail View (shown when a lab is selected) ── -->
+    <section class="labs-detail" id="labsDetail" style="display:none;">
+        <div class="detail-inner" id="detailInner"></div>
+    </section>
 </div>
 {% endblock %}
 
 {% block page_scripts %}
 <script>
-    const labsListEl = document.getElementById('labsList');
-    const labsDetailEl = document.getElementById('labsDetail');
-    const loadDemoBtn = document.getElementById('loadDemoGraph');
+const gridEl   = document.getElementById('labsGrid');
+const detailEl = document.getElementById('labsDetail');
+const innerEl  = document.getElementById('detailInner');
+const demoBtn  = document.getElementById('loadDemoGraph');
 
-    let labsIndex = [];
-    let activeLab = null;
-    let activeStepIndex = 0;
+let labsIndex = [];
+let activeLab = null;
+let stepIdx   = 0;
 
-    function renderLabsList() {
-        labsListEl.innerHTML = '';
-        labsIndex.forEach(lab => {
-            const item = document.createElement('button');
-            item.className = 'lab-card' + (activeLab && activeLab.id === lab.id ? ' active' : '');
-            item.innerHTML = `
-                <div class="lab-title">${lab.title}</div>
-                <div class="lab-desc">${lab.description}</div>
-                <div class="lab-meta">Steps: ${lab.steps}</div>
-            `;
-            item.addEventListener('click', () => loadLab(lab.id));
-            labsListEl.appendChild(item);
-        });
+const catMeta = {
+    fundamentals: { color: '#4589ff', icon: '&#128218;', label: 'Fundamentals' },
+    security:     { color: '#ff6b6b', icon: '&#128274;', label: 'Security' },
+    recon:        { color: '#ffb020', icon: '&#128269;', label: 'Recon' }
+};
+
+const diffMeta = {
+    beginner:     { color: '#42be65', label: 'Beginner' },
+    intermediate: { color: '#ffb020', label: 'Intermediate' },
+    advanced:     { color: '#ff6b6b', label: 'Advanced' }
+};
+
+function renderGrid() {
+    if (!labsIndex.length) {
+        gridEl.innerHTML = '<div class="labs-empty">No labs available.</div>';
+        return;
     }
+    gridEl.innerHTML = labsIndex.map(lab => {
+        const cat  = catMeta[lab.category]  || catMeta.fundamentals;
+        const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
+        return `
+        <button class="lab-card" data-id="${lab.id}" style="--accent:${cat.color}">
+            <div class="lab-card-top">
+                <span class="lab-card-icon">${cat.icon}</span>
+                <span class="lab-card-cat" style="color:${cat.color}">${cat.label}</span>
+            </div>
+            <h3 class="lab-card-title">${lab.title}</h3>
+            <p class="lab-card-desc">${lab.description}</p>
+            <div class="lab-card-footer">
+                <span class="lab-card-diff" style="--dc:${diff.color}">${diff.label}</span>
+                <span class="lab-card-steps">${lab.steps} steps</span>
+            </div>
+        </button>`;
+    }).join('');
 
-    function renderLabDetail() {
-        if (!activeLab) {
-            labsDetailEl.innerHTML = '<div class="empty">Select a lab to begin.</div>';
-            return;
-        }
+    gridEl.querySelectorAll('.lab-card').forEach(card => {
+        card.addEventListener('click', () => loadLab(card.dataset.id));
+    });
+}
 
-        const step = activeLab.steps[activeStepIndex];
-        labsDetailEl.innerHTML = `
-            <div class="lab-header">
-                <div>
-                    <h2>${activeLab.title}</h2>
-                    <p>${activeLab.description}</p>
+function renderDetail() {
+    if (!activeLab) return;
+    const step = activeLab.steps[stepIdx];
+    const cat  = catMeta[activeLab.category] || catMeta.fundamentals;
+    const total = activeLab.steps.length;
+
+    innerEl.innerHTML = `
+        <div class="detail-header">
+            <button class="labs-btn labs-btn-ghost" id="backToGrid">&larr; All Labs</button>
+            <div class="detail-title-row">
+                <span class="detail-cat" style="color:${cat.color}">${cat.icon} ${cat.label}</span>
+                <h2>${activeLab.title}</h2>
+                <p class="detail-desc">${activeLab.description}</p>
+            </div>
+        </div>
+
+        <div class="detail-progress">
+            ${activeLab.steps.map((s, i) => `<div class="prog-dot ${i === stepIdx ? 'active' : ''} ${i < stepIdx ? 'done' : ''}" title="Step ${i+1}: ${s.title}"></div>`).join('')}
+            <span class="prog-label">Step ${stepIdx + 1} / ${total}</span>
+        </div>
+
+        <div class="detail-step">
+            <h3 class="step-title">${step.title}</h3>
+            <div class="step-screen"><pre>${step.screen}</pre></div>
+            <div class="step-info">
+                <div class="step-block step-expected">
+                    <div class="step-block-label">Expected</div>
+                    <div class="step-block-text">${step.expected}</div>
                 </div>
-                <div class="lab-step-counter">Step ${activeStepIndex + 1} / ${activeLab.steps.length}</div>
+                <div class="step-block step-hint">
+                    <div class="step-block-label">Hint</div>
+                    <div class="step-block-text">${step.hint}</div>
+                </div>
             </div>
-            <div class="lab-step">
-                <h3>${step.title}</h3>
-                <pre class="lab-screen">${step.screen}</pre>
-                <div class="lab-note"><strong>Expected:</strong> ${step.expected}</div>
-                <div class="lab-hint"><strong>Hint:</strong> ${step.hint}</div>
-            </div>
-            <div class="lab-controls">
-                <button class="btn btn-outline" id="prevStep" ${activeStepIndex === 0 ? 'disabled' : ''}>Previous</button>
-                <button class="btn" id="nextStep" ${activeStepIndex === activeLab.steps.length - 1 ? 'disabled' : ''}>Next</button>
-            </div>
-        `;
+        </div>
 
-        const prevBtn = document.getElementById('prevStep');
-        const nextBtn = document.getElementById('nextStep');
-        if (prevBtn) prevBtn.addEventListener('click', () => changeStep(-1));
-        if (nextBtn) nextBtn.addEventListener('click', () => changeStep(1));
+        <div class="detail-nav">
+            <button class="labs-btn labs-btn-outline" id="prevStep" ${stepIdx === 0 ? 'disabled' : ''}>&larr; Previous</button>
+            <button class="labs-btn labs-btn-primary" id="nextStep" ${stepIdx === total - 1 ? 'disabled' : ''}>Next &rarr;</button>
+        </div>
+    `;
+
+    document.getElementById('backToGrid').addEventListener('click', showGrid);
+    const prev = document.getElementById('prevStep');
+    const next = document.getElementById('nextStep');
+    if (prev) prev.addEventListener('click', () => { stepIdx--; renderDetail(); });
+    if (next) next.addEventListener('click', () => { stepIdx++; renderDetail(); });
+}
+
+function showGrid() {
+    activeLab = null;
+    gridEl.style.display = '';
+    detailEl.style.display = 'none';
+}
+
+function showDetail() {
+    gridEl.style.display = 'none';
+    detailEl.style.display = '';
+}
+
+async function loadLab(id) {
+    try {
+        const res = await fetch(`/api/labs/${id}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        // Merge category/difficulty from index
+        const meta = labsIndex.find(l => l.id === id) || {};
+        activeLab = { ...data, category: meta.category, difficulty: meta.difficulty };
+        stepIdx = 0;
+        showDetail();
+        renderDetail();
+    } catch (err) {
+        if (window.showToast) window.showToast(err.message || 'Failed to load lab', { type: 'error' });
     }
+}
 
-    function changeStep(delta) {
-        const nextIndex = activeStepIndex + delta;
-        if (nextIndex < 0 || nextIndex >= activeLab.steps.length) return;
-        activeStepIndex = nextIndex;
-        renderLabDetail();
+async function loadIndex() {
+    try {
+        const res = await fetch('/api/labs');
+        const data = await res.json();
+        labsIndex = data.labs || [];
+        renderGrid();
+    } catch (err) {
+        gridEl.innerHTML = '<div class="labs-empty">Failed to load labs.</div>';
     }
+}
 
-    async function loadLab(id) {
-        try {
-            const response = await fetch(`/api/labs/${id}`);
-            const data = await response.json();
-            if (data.error) throw new Error(data.error);
-            activeLab = data;
-            activeStepIndex = 0;
-            renderLabsList();
-            renderLabDetail();
-        } catch (err) {
-            if (window.showToast) {
-                window.showToast(err.message || 'Failed to load lab', { type: 'error' });
-            }
-        }
+async function loadDemoGraph() {
+    try {
+        const res = await fetch('/api/demo/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ type: 'all' })
+        });
+        const data = await res.json();
+        if (data.error || data.success === false) throw new Error(data.error || 'Failed');
+        if (window.showToast) window.showToast('Demo data loaded into trust graph.', { type: 'success' });
+    } catch (err) {
+        if (window.showToast) window.showToast(err.message || 'Demo load failed', { type: 'error' });
     }
+}
 
-    async function loadLabsIndex() {
-        try {
-            const response = await fetch('/api/labs');
-            const data = await response.json();
-            labsIndex = data.labs || [];
-            if (!labsIndex.length) {
-                labsListEl.innerHTML = '<div class="empty">No labs found.</div>';
-                return;
-            }
-            renderLabsList();
-        } catch (err) {
-            labsListEl.innerHTML = '<div class="empty">Failed to load labs.</div>';
-        }
-    }
-
-    async function loadDemoGraph() {
-        try {
-            const response = await fetch('/api/demo/load', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ type: 'all' })
-            });
-            const data = await response.json();
-            if (data.error || data.success === false) {
-                throw new Error(data.error || 'Demo load failed');
-            }
-            if (window.showToast) {
-                window.showToast('Loaded demo data into the trust graph.', { type: 'success' });
-            }
-        } catch (err) {
-            if (window.showToast) {
-                window.showToast(err.message || 'Demo load failed', { type: 'error' });
-            }
-        }
-    }
-
-    loadDemoBtn.addEventListener('click', loadDemoGraph);
-    loadLabsIndex();
+demoBtn.addEventListener('click', loadDemoGraph);
+loadIndex();
 </script>
 {% endblock %}

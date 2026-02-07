@@ -1,0 +1,478 @@
+{
+  "id": "mvs-command-reference",
+  "title": "MVS 3.8j Command Reference",
+  "description": "Comprehensive command reference for MVS operator commands, JES2 commands, TSO commands, and Hercules console commands. Every command you need to operate, manage, and troubleshoot MVS 3.8j.",
+  "sections": [
+    {
+      "id": "hercules-console",
+      "title": "Hercules Console Commands",
+      "context": "These commands are entered at the Hercules emulator console — NOT the MVS console. They control the emulated hardware layer.",
+      "commands": [
+        {
+          "command": "ipl 150",
+          "description": "Initial Program Load — boots MVS from device address 150 (MVSRES volume)",
+          "mental_model": "Think of IPL as pressing the power button on the mainframe. Device 150 is the 3350 DASD containing the MVS System Residence. The CPU reads the boot record from track 0 of that volume and begins loading the operating system into memory.",
+          "variants": ["ipl 150 clear — IPL with memory cleared first"],
+          "when": "Starting MVS for the first time or after a shutdown"
+        },
+        {
+          "command": "script conf/mvs.script",
+          "description": "Execute a Hercules command script to attach new DASD volumes",
+          "mental_model": "Scripts batch multiple Hercules commands together. The mvs.script attaches PUB000 and PUB001 volumes to the running emulator without restarting.",
+          "when": "After creating new DASD volumes that need to be attached to the running system"
+        },
+        {
+          "command": "devinit 100 tape/tsoaps.het",
+          "description": "Initialize device 100 (tape drive) with a tape image file",
+          "mental_model": "This is the virtual equivalent of a computer operator physically mounting a tape reel on a tape drive. Device 100 is a 3420 tape drive. The .het file is a Hercules Emulated Tape image.",
+          "when": "When MVS requests a tape mount (e.g., installing TSO applications)"
+        },
+        {
+          "command": "sh ./submit.sh jcl/mvs00.jcl",
+          "description": "Execute a host OS shell command from the Hercules console — submits JCL to the socket reader",
+          "mental_model": "The 'sh' prefix tells Hercules to pass the rest of the line to the host operating system's shell. The submit script uses ncat to send the JCL file contents to port 3505, where the MVS socket reader is listening.",
+          "variants": ["sh ./submit.sh <dir>/<file> — submit any JCL file"],
+          "when": "Submitting batch jobs from host OS files to MVS"
+        },
+        {
+          "command": "quit",
+          "description": "Shut down the Hercules emulator",
+          "mental_model": "This is the final step after MVS has been quiesced. It terminates the emulator process. NEVER use this while MVS is still running — always shut down MVS first with the orderly shutdown sequence.",
+          "when": "After MVS has been fully shut down and quiesced"
+        }
+      ]
+    },
+    {
+      "id": "mvs-operator",
+      "title": "MVS Operator Console Commands",
+      "context": "These commands are entered on the MVS master console (device 010) — the 3270 terminal connected as the system console. The input area is near the bottom of the screen.",
+      "commands": [
+        {
+          "command": "r <id>,<response>",
+          "description": "Reply to a system message that requires operator action",
+          "mental_model": "MVS assigns a sequential reply ID to each message requiring a response. You must use the correct ID number. Think of it as answering a question the system is asking — the ID tells MVS which question you're answering.",
+          "examples": [
+            "r 0,clpa — reply to IEA101A: rebuild Link Pack Area (first IPL)",
+            "r 0, — reply to IEA101A: accept defaults (subsequent IPLs)",
+            "r 0,u — reply to IFB010D: IPL reason code (unplanned)",
+            "r 1,format,noreq — reply to $HASP426: format JES2 spool (first time)",
+            "r 2,y — reply to $HASP479: confirm checkpoint format",
+            "r 3,y — reply to $HASP436: confirm checkpoint record change",
+            "r <id>,sysprog — reply to catalog password prompt"
+          ],
+          "when": "Whenever a message ending in 'A' or 'D' appears — these require operator action"
+        },
+        {
+          "command": "s <procname>",
+          "description": "Start a cataloged procedure (started task)",
+          "mental_model": "Cataloged procedures are pre-written JCL stored in SYS1.PROCLIB. The 's' command tells MVS to find and execute that procedure as a started task. Started tasks run in their own address space, separate from batch jobs.",
+          "examples": [
+            "s net — start VTAM (the terminal network manager)",
+            "s tso — start TSO (normally auto-started by VTAM)"
+          ],
+          "when": "Starting system services like VTAM, TSO, or other subsystems"
+        },
+        {
+          "command": "p <taskname>",
+          "description": "Stop (quiesce) a started task or subsystem",
+          "mental_model": "The 'p' command sends a polite stop request. The task performs cleanup before terminating. This is the graceful way to stop a service — it allows in-flight work to complete.",
+          "examples": [
+            "p tso — stop TSO (log off all users first!)",
+            "p <jobname> — cancel a running batch job gracefully"
+          ],
+          "when": "Shutting down services in the correct order during system shutdown"
+        },
+        {
+          "command": "z net,quick",
+          "description": "Halt VTAM immediately",
+          "mental_model": "The 'z' command is a more forceful shutdown than 'p'. The QUICK option tells VTAM to terminate without waiting for all sessions to end gracefully. Use this after TSO is already stopped.",
+          "when": "Shutting down VTAM during orderly system shutdown"
+        },
+        {
+          "command": "z eod",
+          "description": "End of day — triggers SMF dataset switch and final record writing",
+          "mental_model": "SMF (System Management Facility) collects accounting and performance data. End-of-day processing writes final records and switches to the alternate SMF dataset. This is important for data integrity.",
+          "when": "During orderly shutdown, after JES2 is stopped"
+        },
+        {
+          "command": "quiesce",
+          "description": "Flush all memory buffers to DASD — system enters wait state",
+          "mental_model": "MVS keeps data in memory buffers for performance. QUIESCE forces all buffered data to be written to disk, ensuring nothing is lost. After this, the system enters a hardware wait state — it's safe to quit Hercules.",
+          "when": "Final step before quitting Hercules — ensures no data loss"
+        },
+        {
+          "command": "d u,dasd",
+          "description": "Display status of all DASD devices",
+          "mental_model": "Shows every DASD volume attached to the system — address, volume serial, status (online/offline), and device type. Essential for verifying volumes are mounted and available.",
+          "variants": [
+            "d u,tape — display tape drive status",
+            "d u,online — display only online devices",
+            "d u,offline — display only offline devices",
+            "d u,<addr> — display status of a specific device"
+          ],
+          "when": "Checking which volumes are online, troubleshooting missing volumes"
+        },
+        {
+          "command": "d a,l",
+          "description": "Display all active address spaces (jobs, started tasks, TSO users)",
+          "mental_model": "Every running program in MVS has its own address space. This command shows all of them — batch jobs, started tasks (like VTAM, JES2), and TSO user sessions. Think of it as 'ps aux' on Unix.",
+          "variants": [
+            "d a,<jobname> — display a specific job's status",
+            "d a,ts — display TSO user sessions only"
+          ],
+          "when": "Checking what's running on the system"
+        },
+        {
+          "command": "d pfk",
+          "description": "Display current PF key assignments for the MVS console",
+          "mental_model": "PF keys on the MVS console are programmable shortcuts for frequently used commands. The default assignments are set by SETPFK00 in SYS1.PARMLIB at IPL time.",
+          "when": "Checking what each PF key does on the console"
+        },
+        {
+          "command": "v <addr>,online",
+          "description": "Vary a device online — make it available to MVS",
+          "mental_model": "Devices can be online (available) or offline (unavailable). Varying a device online tells MVS it can use that device. New DASD volumes must be varied online after being attached to Hercules.",
+          "examples": [
+            "v 180,online — bring PUB000 online",
+            "v 190,online — bring PUB001 online"
+          ],
+          "when": "After attaching new DASD volumes or bringing devices back into service"
+        },
+        {
+          "command": "m <addr>,vol=(sl,<volser>),use=private",
+          "description": "Mount command — set volume attributes",
+          "mental_model": "The mount command tells MVS the volume serial and usage attributes of a DASD volume. PRIVATE means only specifically requested datasets can be allocated on it. PUBLIC means any dataset can be placed there.",
+          "when": "After initializing new DASD volumes"
+        }
+      ]
+    },
+    {
+      "id": "jes2-commands",
+      "title": "JES2 Commands",
+      "context": "JES2 commands are prefixed with $ and entered on the MVS console. JES2 manages job entry, execution scheduling, and output processing.",
+      "commands": [
+        {
+          "command": "$d a",
+          "description": "Display all active JES2 jobs",
+          "mental_model": "Shows every job currently being processed by JES2 — queued, executing, or producing output. This is the JES2 equivalent of checking the job queue.",
+          "when": "Checking what jobs are running or queued"
+        },
+        {
+          "command": "$d q",
+          "description": "Display JES2 queue status — counts of jobs in each phase",
+          "mental_model": "Shows how many jobs are in input, execution, and output phases. Useful for monitoring system workload and detecting queue backlogs.",
+          "when": "Monitoring system workload"
+        },
+        {
+          "command": "$p jes2",
+          "description": "Stop JES2 — waits for managed processes to complete",
+          "mental_model": "JES2 is the job entry subsystem. Stopping it halts all job processing. JES2 will wait for active jobs to finish before terminating. This is part of the orderly shutdown sequence.",
+          "when": "During orderly shutdown, after VTAM is stopped"
+        },
+        {
+          "command": "$s jes2",
+          "description": "Start JES2",
+          "mental_model": "Starts the job entry subsystem. Usually JES2 starts automatically at IPL, but this command can restart it if it was stopped.",
+          "when": "Restarting JES2 after a stop"
+        },
+        {
+          "command": "$d i",
+          "description": "Display JES2 initiator status",
+          "mental_model": "Shows which initiators are active, what job classes they process, and whether they're busy or idle. Initiators are the 'workers' that execute batch jobs.",
+          "variants": [
+            "$d i1 — display initiator 1 only",
+            "$d i1-6 — display initiators 1 through 6"
+          ],
+          "when": "Checking if initiators are available to run jobs"
+        },
+        {
+          "command": "$si<n>",
+          "description": "Start initiator number n",
+          "mental_model": "Activates an idle initiator so it can begin picking up jobs from the queue. By default, initiators 1-3 are auto-started; 4-6 must be started manually.",
+          "examples": [
+            "$si4 — start initiator 4 (classes D,C,B,A)",
+            "$si5 — start initiator 5 (classes E,C,B,A)"
+          ],
+          "when": "Need more job processing capacity"
+        },
+        {
+          "command": "$pi<n>",
+          "description": "Stop initiator number n",
+          "mental_model": "Deactivates an initiator. It will finish its current job before stopping.",
+          "when": "Reducing job processing capacity or during shutdown"
+        },
+        {
+          "command": "$d prt<n>",
+          "description": "Display printer status",
+          "mental_model": "Shows the status of JES2-managed printers — whether they're active, draining, or idle, and what output class they're processing.",
+          "when": "Checking printer status"
+        },
+        {
+          "command": "$po <jobname>",
+          "description": "Purge output for a specific job",
+          "mental_model": "Removes all output for the named job from the JES2 spool. This frees spool space. Be careful — purged output cannot be recovered.",
+          "when": "Cleaning up old job output to free spool space"
+        },
+        {
+          "command": "$c <jobname>",
+          "description": "Cancel a running job",
+          "mental_model": "Immediately terminates the named job. The job receives an abend (abnormal end). Use this for jobs that are hung or running too long.",
+          "when": "Killing a stuck or runaway job"
+        }
+      ]
+    },
+    {
+      "id": "tso-commands",
+      "title": "TSO Commands",
+      "context": "TSO (Time Sharing Option) commands are entered at the TSO READY prompt or within TSO applications. TSO provides the interactive user interface to MVS.",
+      "commands": [
+        {
+          "command": "logon <userid>",
+          "description": "Log on to a TSO session",
+          "mental_model": "TSO authenticates users and creates a personal session. Each user gets their own address space with access to their datasets. The userid determines your prefix for dataset names.",
+          "examples": ["logon herc01", "logon hmvs01"],
+          "when": "Connecting to MVS via a TN3270 terminal"
+        },
+        {
+          "command": "logoff",
+          "description": "Log off the current TSO session",
+          "mental_model": "Cleanly terminates your TSO session and releases the address space. ALWAYS logoff before closing your terminal — closing without logging off can leave the userid in a stuck state.",
+          "when": "Done working, or before system shutdown"
+        },
+        {
+          "command": "rpf",
+          "description": "Launch RPF — Rob Prins' Programming Facility (ISPF-like editor)",
+          "mental_model": "RPF is the primary interactive tool for editing datasets, managing files, and submitting jobs. It provides a menu-driven interface similar to ISPF. Options: 0=Parms, 1=Browse, 2=Edit, 3=Utility, 4=Compile, 5=Help.",
+          "when": "Editing source code, JCL, or managing datasets"
+        },
+        {
+          "command": "q",
+          "description": "Launch QUEUE — JES2 spool browser",
+          "mental_model": "QUEUE lets you view and manage job output interactively. You can browse held output, purge old jobs, and search through listings. Think of it as a visual job output manager.",
+          "subcommands": [
+            "ho — display held output queue",
+            "st <jobname> — show status of a specific job",
+            "s — select/view job output",
+            "d — display SYSOUT DDs for a job",
+            "p — purge job output",
+            "n — next output dataset",
+            "f <text> — find text in current output",
+            "dd — list all output datasets",
+            "PF1 — help",
+            "PF3 — exit QUEUE"
+          ],
+          "when": "Checking job output, debugging failed jobs"
+        },
+        {
+          "command": "review <dsname>",
+          "description": "Browse a dataset with the REVIEW full-screen browser",
+          "mental_model": "REVIEW is a powerful dataset browser that can handle sequential files, PDS members, and VSAM datasets. It's faster than RPF for quick browsing.",
+          "variants": ["rfe — launch Review Front End (menu-driven interface)"],
+          "when": "Quickly viewing dataset contents without editing"
+        },
+        {
+          "command": "date",
+          "description": "Display system date and time in multiple formats",
+          "mental_model": "Shows the current system date in text format, Julian format, and the system time. Useful for verifying the system clock is correct.",
+          "when": "Checking system date/time"
+        },
+        {
+          "command": "submit '<dsname>'",
+          "description": "Submit a JCL dataset to JES2 for execution",
+          "mental_model": "Reads JCL from the named dataset and passes it to JES2's internal reader for processing. The job enters the input queue and waits for an available initiator with a matching job class.",
+          "examples": ["submit 'herc01.cntl(cobucg)'"],
+          "when": "Running batch jobs from TSO"
+        },
+        {
+          "command": "listcat",
+          "description": "List catalog entries",
+          "mental_model": "Queries the VSAM catalog to show what datasets are cataloged. Can filter by high-level qualifier. Essential for discovering what datasets exist on the system.",
+          "examples": [
+            "listcat — list all entries in the master catalog",
+            "listcat entries('SYS1.*') — list all SYS1 datasets"
+          ],
+          "when": "Discovering datasets, checking catalog entries"
+        },
+        {
+          "command": "listds '<dsname>'",
+          "description": "Display dataset attributes — organization, record format, block size, etc.",
+          "mental_model": "Shows the physical characteristics of a dataset: DSORG (PS/PO/VS), RECFM (F/FB/V/VB), LRECL, BLKSIZE, and volume location. For PDS datasets, you can list members.",
+          "variants": ["listds '<dsname>' members — also list PDS members"],
+          "when": "Checking dataset properties, finding PDS members"
+        },
+        {
+          "command": "profile prefix(<userid>)",
+          "description": "Set your TSO prefix — prepended to unqualified dataset names",
+          "mental_model": "When you reference a dataset without quotes, TSO prepends your prefix. Setting prefix to your userid means 'SOURCE' becomes 'HERC01.SOURCE'. Use quotes around dataset names to bypass the prefix.",
+          "when": "Setting up your TSO session, changing default dataset qualifier"
+        },
+        {
+          "command": "help <command>",
+          "description": "Display help for a TSO command",
+          "mental_model": "TSO has built-in help for most commands. The help text explains syntax, parameters, and examples.",
+          "examples": ["help review", "help rfe", "help submit"],
+          "when": "Learning a new command"
+        }
+      ]
+    },
+    {
+      "id": "rpf-commands",
+      "title": "RPF Editor Commands",
+      "context": "RPF commands are entered in the Cmd field at the top of the RPF editor screen. RPF is the primary interactive editor for MVS 3.8j.",
+      "commands": [
+        {
+          "command": "save",
+          "description": "Save the current member to the dataset",
+          "when": "After making changes to source or JCL"
+        },
+        {
+          "command": "submit",
+          "description": "Submit the current JCL member to JES2 for execution",
+          "mental_model": "Sends the JCL you're editing directly to the JES2 internal reader. You'll see a confirmation message with the job name and number.",
+          "when": "Running a job you just wrote or edited"
+        },
+        {
+          "command": "s <member>",
+          "description": "Select (open) a PDS member — creates it if it doesn't exist",
+          "mental_model": "The 's' command opens a member for editing. If the member doesn't exist yet, RPF creates it as a new empty member. This is how you create new source files and JCL members.",
+          "when": "Opening or creating PDS members"
+        },
+        {
+          "command": "cols",
+          "description": "Display a column ruler at the top of the editor",
+          "mental_model": "JCL is column-sensitive — certain fields must start in specific columns. The ruler helps you position text correctly. Essential when writing JCL.",
+          "when": "Writing JCL or column-sensitive source code"
+        },
+        {
+          "command": "find <text>",
+          "description": "Search for text in the current member",
+          "when": "Locating specific text in a large file"
+        },
+        {
+          "command": "PF3",
+          "description": "Exit current panel / go back",
+          "mental_model": "PF3 is the universal 'back' key in RPF (and most TSO applications). Press it repeatedly to back out through menus to the TSO READY prompt.",
+          "when": "Exiting editors, menus, or returning to TSO"
+        },
+        {
+          "command": "PF7 / PF8",
+          "description": "Scroll up / scroll down",
+          "mental_model": "3270 terminals don't have scroll wheels. PF7 pages up, PF8 pages down. These work in RPF, QUEUE, REVIEW, and most TSO applications.",
+          "when": "Navigating through data that doesn't fit on one screen"
+        }
+      ]
+    },
+    {
+      "id": "jcl-essentials",
+      "title": "JCL Essentials",
+      "context": "Job Control Language (JCL) tells MVS what programs to run, what datasets to use, and how to handle output. Every batch job requires JCL.",
+      "commands": [
+        {
+          "command": "//jobname JOB (acct),'desc',CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1)",
+          "description": "JOB statement — defines a batch job",
+          "mental_model": "The JOB statement is always first. CLASS determines which initiator runs it (A=general, S=sysprog). MSGCLASS determines where messages go (X=held queue). MSGLEVEL=(1,1) means show all JCL and all messages.",
+          "fields": {
+            "CLASS": "Job class — determines which initiator picks it up (A,B,C,D,E,F,S)",
+            "MSGCLASS": "Message class — where JES2 sends job messages (A=print, X=hold)",
+            "MSGLEVEL": "(stmt,msg) — 1,1 = show all JCL and all allocation messages"
+          }
+        },
+        {
+          "command": "//stepname EXEC PGM=program",
+          "description": "EXEC statement — execute a program",
+          "mental_model": "Each EXEC statement is a step in the job. MVS loads and runs the named program. Steps execute sequentially. If a step fails, subsequent steps may be skipped depending on COND parameters.",
+          "variants": [
+            "//step EXEC PGM=IEBGENER — run the IEBGENER copy utility",
+            "//step EXEC COBUCG — run the COBOL compile/link/go procedure"
+          ]
+        },
+        {
+          "command": "//ddname DD DSN=dataset,DISP=SHR",
+          "description": "DD statement — define a dataset for the program to use",
+          "mental_model": "DD (Data Definition) statements connect program file references to actual datasets. DISP=SHR means shared read access. DISP=(NEW,CATLG) creates and catalogs a new dataset.",
+          "fields": {
+            "DSN": "Dataset name — up to 44 characters, dot-separated qualifiers",
+            "DISP": "Disposition — (status,normal-end,abnormal-end): SHR, OLD, NEW, MOD",
+            "UNIT": "Device type — 3350, 3380, 3390, SYSDA (any DASD)",
+            "VOL=SER": "Volume serial — which DASD volume to use",
+            "SPACE": "Space allocation — (unit,(primary,secondary,directory))",
+            "DCB": "Data Control Block — RECFM, LRECL, BLKSIZE"
+          }
+        },
+        {
+          "command": "//ddname DD SYSOUT=*",
+          "description": "DD statement — direct output to JES2 spool",
+          "mental_model": "SYSOUT=* sends program output to the JES2 spool in the same class as MSGCLASS on the JOB statement. This is how you capture program output for viewing in QUEUE.",
+          "when": "Capturing program output (compiler listings, program DISPLAY output, etc.)"
+        },
+        {
+          "command": "COBUCG",
+          "description": "Cataloged procedure — COBOL compile, link edit, and execute",
+          "mental_model": "COBUCG is a pre-written JCL procedure that chains three steps: COB (compile COBOL source), LKED (link edit the object code into a load module), and GO (execute the load module). The procedure is stored in SYS1.PROCLIB.",
+          "steps": {
+            "COB": "COBOL compiler — reads source from COB.SYSIN, produces object deck",
+            "LKED": "Linkage editor — combines object code into executable load module",
+            "GO": "Execute — runs the linked program, output to GO.SYSOUT"
+          }
+        }
+      ]
+    },
+    {
+      "id": "troubleshooting",
+      "title": "Troubleshooting Commands",
+      "context": "When things go wrong — and they will — these commands help you diagnose and recover.",
+      "commands": [
+        {
+          "command": "d c",
+          "description": "Display pending console messages requiring operator reply",
+          "mental_model": "If the system seems hung, there may be messages waiting for a reply that scrolled off screen. This command shows all pending messages.",
+          "when": "System appears hung or unresponsive"
+        },
+        {
+          "command": "d r,l",
+          "description": "Display all outstanding reply messages",
+          "mental_model": "Shows every message that needs an operator reply, with its reply ID. Essential when you've lost track of what the system is waiting for.",
+          "when": "Need to find what reply IDs are pending"
+        },
+        {
+          "command": "k e,d",
+          "description": "Set console to Roll Delete mode — old messages scroll off automatically",
+          "mental_model": "Without this, the console fills up and stops displaying new messages until you manually delete old ones. Roll Delete mode keeps the console flowing.",
+          "when": "Console fills up and stops showing new messages"
+        },
+        {
+          "command": "c u=<userid>",
+          "description": "Cancel a stuck TSO user session (from Hercules console: /c u=<userid>)",
+          "mental_model": "If a TSO user disconnects without logging off, their session stays active and the userid is locked. This command forcibly terminates the stuck session so the userid can log on again.",
+          "when": "A userid is stuck because the terminal was closed without LOGOFF"
+        },
+        {
+          "command": "mvslog.txt",
+          "description": "Hardcopy console log file — contains ALL console messages",
+          "mental_model": "Every message that appears on the MVS console is also written to mvslog.txt by the hardcopy console at address 015. When messages scroll off the screen too fast, check this file.",
+          "when": "Need to review messages that scrolled off the console"
+        },
+        {
+          "command": "condcode.rexx prt00e.txt <jobname>",
+          "description": "REXX script to extract and display condition codes from printer output",
+          "mental_model": "Reads the printer output file and extracts the completion code for each step of the named job. A code of 0000 means success. Codes starting with U are user abends, S are system abends.",
+          "when": "Checking if a batch job completed successfully"
+        }
+      ]
+    },
+    {
+      "id": "iefactrt-format",
+      "title": "IEFACTRT Step Completion Messages",
+      "context": "The IEFACTRT user modification prints step completion information on the MVS console for every job step that finishes.",
+      "format": "IEFACTRT SSSSSSSS/PPPPPPPP/CP:UT:IM.EX/WA:LL:TI.ME/CCCCC/JJJJJJJJ",
+      "fields": [
+        {"field": "SSSSSSSS", "meaning": "Step name (JS#999 if omitted)"},
+        {"field": "PPPPPPPP", "meaning": "Program name executed"},
+        {"field": "CP:UT:IM.EX", "meaning": "CPU time (HH:MM:SS.hh)"},
+        {"field": "WA:LL:TI.ME", "meaning": "Wall clock time (HH:MM:SS.hh)"},
+        {"field": "CCCCC", "meaning": "Completion code — 0000=success, Ucccc=user abend, S-ccc=system abend"},
+        {"field": "JJJJJJJJ", "meaning": "Job name"}
+      ]
+    }
+  ]
+}

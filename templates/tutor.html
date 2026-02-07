@@ -16,85 +16,11 @@
             <h1>Red Team Tutor</h1>
         </div>
 
-        <!-- Modules Section (Primary) -->
+        <!-- Labs Section (loaded dynamically) -->
         <div class="sidebar-section">
-            <div class="section-title">Modules</div>
+            <div class="section-title">Labs</div>
             <div class="module-list" id="moduleList">
-                <div class="module-item" data-module="session-stack">
-                    <div class="module-header">
-                        <span class="module-name">Session Stack</span>
-                        <span class="module-time">~15m</span>
-                    </div>
-                    <div class="module-desc">VTAM→TSO→ISPF navigation and PF keys</div>
-                    <div class="module-meta">
-                        <span class="module-level beginner">Beginner</span>
-                        <span class="module-status">Not started</span>
-                    </div>
-                </div>
-                <div class="module-item" data-module="batch-execution">
-                    <div class="module-header">
-                        <span class="module-name">Batch Execution</span>
-                        <span class="module-time">~25m</span>
-                    </div>
-                    <div class="module-desc">JCL, job submission, JES output</div>
-                    <div class="module-meta">
-                        <span class="module-level intermediate">Intermediate</span>
-                        <span class="module-status">Not started</span>
-                    </div>
-                </div>
-                <div class="module-item" data-module="dataset-trust">
-                    <div class="module-header">
-                        <span class="module-name">Dataset Trust</span>
-                        <span class="module-time">~20m</span>
-                    </div>
-                    <div class="module-desc">RACF profiles and access patterns</div>
-                    <div class="module-meta">
-                        <span class="module-level intermediate">Intermediate</span>
-                        <span class="module-status">Not started</span>
-                    </div>
-                </div>
-                <div class="module-item" data-module="free-explore">
-                    <div class="module-header">
-                        <span class="module-name">Free Explore</span>
-                        <span class="module-time">Open</span>
-                    </div>
-                    <div class="module-desc">Ask questions about any screen</div>
-                    <div class="module-meta">
-                        <span class="module-level any">Any Level</span>
-                        <span class="module-status">Not started</span>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Persona Section (Secondary) -->
-        <div class="sidebar-section">
-            <div class="section-title">Tutor Persona</div>
-            <div class="persona-list" id="personaList">
-                <div class="persona-item selected" data-persona="mentor">
-                    <span class="persona-icon">🎓</span>
-                    <span class="persona-name">The Mentor</span>
-                </div>
-                <div class="persona-item" data-persona="operator">
-                    <span class="persona-icon">🧰</span>
-                    <span class="persona-name">The Operator</span>
-                </div>
-                <div class="persona-item" data-persona="redteam">
-                    <span class="persona-icon">🩸</span>
-                    <span class="persona-name">Red Teamer</span>
-                </div>
-                <div class="persona-item" data-persona="forensics">
-                    <span class="persona-icon">🔎</span>
-                    <span class="persona-name">Forensics</span>
-                </div>
-                <div class="persona-item" data-persona="architect">
-                    <span class="persona-icon">🏗️</span>
-                    <span class="persona-name">Architect</span>
-                </div>
-                <div class="persona-item" data-persona="policy">
-                    <span class="persona-icon">🛡️</span>
-                    <span class="persona-name">Policy Coach</span>
-                </div>
+                <div class="module-loading">Loading labs...</div>
             </div>
         </div>
 
@@ -117,9 +43,9 @@
                 <span class="crumb-persona" id="crumbPersona">The Mentor</span>
             </div>
             <div class="header-actions">
+                <button class="action-btn" id="prevBtn">← Back</button>
+                <button class="action-btn primary" id="nextBtn">Next →</button>
                 <button class="action-btn" id="analyzeBtn">Analyze</button>
-                <button class="action-btn" id="verifyBtn">Verify</button>
-                <button class="action-btn primary" id="nextBtn">Next Step</button>
             </div>
         </header>
 
@@ -265,65 +191,79 @@
 const state = {
     connected: false,
     host: '',
-    currentModule: null,
-    currentPersona: 'mentor',
+    currentLab: null,
     currentStep: 0,
     session: null,
     messages: [],
     isLoading: false
 };
 
-const personas = {
-    mentor: { name: 'The Mentor', icon: '🎓' },
-    operator: { name: 'The Operator', icon: '🧰' },
-    redteam: { name: 'Red Teamer', icon: '🩸' },
-    forensics: { name: 'Forensics', icon: '🔎' },
-    architect: { name: 'Architect', icon: '🏗️' },
-    policy: { name: 'Policy Coach', icon: '🛡️' }
+let labsIndex = [];
+
+const catMeta = {
+    fundamentals: { color: '#4589ff', icon: '📚', label: 'Fundamentals' },
+    security:     { color: '#ff6b6b', icon: '🔒', label: 'Security' },
+    recon:        { color: '#ffb020', icon: '🔍', label: 'Recon' }
 };
 
-const modules = {
-    'session-stack': {
-        id: 'session-stack',
-        title: 'Session Stack',
-        description: 'VTAM→TSO→ISPF navigation and PF keys',
-        level: 'Beginner',
-        time: '~15m'
-    },
-    'batch-execution': {
-        id: 'batch-execution',
-        title: 'Batch Execution',
-        description: 'JCL, job submission, JES output',
-        level: 'Intermediate',
-        time: '~25m'
-    },
-    'dataset-trust': {
-        id: 'dataset-trust',
-        title: 'Dataset Trust',
-        description: 'RACF profiles and access patterns',
-        level: 'Intermediate',
-        time: '~20m'
-    },
-    'free-explore': {
-        id: 'free-explore',
-        title: 'Free Explore',
-        description: 'Ask questions about any screen',
-        level: 'Any',
-        time: 'Open'
-    }
+const diffMeta = {
+    beginner:     { color: '#42be65', label: 'Beginner' },
+    intermediate: { color: '#ffb020', label: 'Intermediate' },
+    advanced:     { color: '#ff6b6b', label: 'Advanced' }
 };
 
 // ============ DOM ELEMENTS ============
 const $ = (sel) => document.querySelector(sel);
 const $$ = (sel) => document.querySelectorAll(sel);
 
+// ============ LABS LOADING ============
+async function loadLabs() {
+    const listEl = $('#moduleList');
+    try {
+        const res = await fetch('/api/labs');
+        const data = await res.json();
+        labsIndex = data.labs || [];
+        renderLabsList();
+    } catch (err) {
+        listEl.innerHTML = '<div class="module-loading">Failed to load labs.</div>';
+    }
+}
+
+function renderLabsList() {
+    const listEl = $('#moduleList');
+    if (!labsIndex.length) {
+        listEl.innerHTML = '<div class="module-loading">No labs available.</div>';
+        return;
+    }
+    listEl.innerHTML = labsIndex.map(lab => {
+        const cat = catMeta[lab.category] || catMeta.fundamentals;
+        const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
+        return `
+        <div class="module-item" data-lab="${lab.id}">
+            <div class="module-header">
+                <span class="module-name">${lab.title}</span>
+                <span class="module-time">${lab.steps || '?'} steps</span>
+            </div>
+            <div class="module-desc">${lab.description}</div>
+            <div class="module-meta">
+                <span class="module-level" style="background:${diff.color}">${diff.label}</span>
+                <span class="module-status">Not started</span>
+            </div>
+        </div>`;
+    }).join('');
+
+    // Bind click handlers
+    $$('.module-item').forEach(el => {
+        el.addEventListener('click', () => selectLab(el.dataset.lab));
+    });
+}
+
 // ============ RENDERING ============
 function render() {
     // Breadcrumb
-    $('#crumbModule').textContent = state.currentModule
-        ? modules[state.currentModule]?.title || 'Module'
-        : 'No module selected';
-    $('#crumbPersona').textContent = personas[state.currentPersona]?.name || 'Tutor';
+    const currentLabData = labsIndex.find(l => l.id === state.currentLab);
+    $('#crumbModule').textContent = currentLabData?.title || 'No lab selected';
+    $('#crumbPersona').textContent = 'Red Team Tutor';
 
     // Connection status
     const connStatus = $('#connStatus');
@@ -332,29 +272,24 @@ function render() {
         ? state.host
         : 'Disconnected';
 
-    // Module selection
+    // Lab selection
     $$('.module-item').forEach(el => {
-        el.classList.toggle('selected', el.dataset.module === state.currentModule);
-    });
-
-    // Persona selection
-    $$('.persona-item').forEach(el => {
-        el.classList.toggle('selected', el.dataset.persona === state.currentPersona);
+        el.classList.toggle('selected', el.dataset.lab === state.currentLab);
     });
 
     // Welcome vs Step card
     const tutorPanel = document.querySelector('.tutor-panel');
-    if (state.currentModule && state.session?.steps?.length) {
+    if (state.currentLab && state.session?.steps?.length) {
         tutorPanel.classList.remove('mode-welcome');
         $('#welcomeCard').style.display = 'none';
         $('#stepCard').style.display = 'block';
         renderStep();
-    } else if (state.currentModule) {
+    } else if (state.currentLab) {
         tutorPanel.classList.remove('mode-welcome');
         $('#welcomeCard').style.display = 'none';
         $('#stepCard').style.display = 'block';
         $('#stepNumber').textContent = 'Loading...';
-        $('#stepTitle').textContent = modules[state.currentModule]?.title || 'Module';
+        $('#stepTitle').textContent = currentLabData?.title || 'Lab';
         $('#stepInstruction').textContent = 'Loading steps...';
         $('#stepRationale').textContent = '';
         $('#stepExpected').textContent = '';
@@ -472,8 +407,12 @@ async function disconnectTerminal() {
 }
 
 function updateTerminalDisplay(data) {
-    if (data?.connected && data?.screen) {
-        $('#terminalScreen').textContent = data.screen;
+    if (!data) return;
+    const el = $('#terminalScreen');
+    if (data.screen_html) {
+        el.innerHTML = '<pre>' + data.screen_html + '</pre>';
+    } else if (data.screen) {
+        el.innerHTML = '<pre>' + data.screen + '</pre>';
     }
 }
 
@@ -491,50 +430,42 @@ async function sendKey(keyType, value = '') {
     }
 }
 
-// ============ MODULE SELECTION ============
-async function selectModule(moduleId) {
-    state.currentModule = moduleId;
+// ============ LAB SELECTION ============
+async function selectLab(labId) {
+    state.currentLab = labId;
     state.currentStep = 0;
-    // Show fallback steps immediately to avoid "Loading..." placeholders.
-    state.session = { steps: getFallbackSteps(moduleId) };
     state.messages = [];
 
-    // Update module status
-    const moduleItem = $(`.module-item[data-module="${moduleId}"]`);
-    if (moduleItem) {
-        moduleItem.querySelector('.module-status').textContent = 'In progress';
+    // Update lab status in sidebar
+    const labItem = $(`.module-item[data-lab="${labId}"]`);
+    if (labItem) {
+        const statusEl = labItem.querySelector('.module-status');
+        if (statusEl) statusEl.textContent = 'In progress';
     }
 
     render();
 
-    // Load session steps
-    await loadSession(moduleId);
+    // Load lab steps from API
+    await loadLabSession(labId);
 }
 
-async function loadSession(moduleId) {
+async function loadLabSession(labId) {
     try {
-        // Get current screen
-        const screenResp = await fetch('/api/screen');
-        const screenData = await screenResp.json();
-        const screenText = screenData?.screen || '';
-
-        const resp = await fetch('/api/tutor/path_start', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                path: modules[moduleId],
-                tutor_id: state.currentPersona,
-                screen: screenText
-            })
-        });
-        const data = await resp.json();
-        state.session = data.session || { steps: [] };
+        const res = await fetch(`/api/labs/${labId}`);
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+        
+        state.session = { 
+            steps: data.steps || [],
+            title: data.title,
+            description: data.description
+        };
 
         if (!state.session.steps?.length) {
-            state.session = { steps: getFallbackSteps(moduleId) };
+            state.session = { steps: [{ title: 'No steps', instruction: 'This lab has no steps defined.', rationale: '', expected: '' }] };
         }
     } catch (e) {
-        state.session = { steps: getFallbackSteps(moduleId) };
+        state.session = { steps: [{ title: 'Error', instruction: 'Failed to load lab: ' + e.message, rationale: '', expected: '' }] };
     }
 
     hideLoading();
@@ -616,7 +547,7 @@ async function verifyStep() {
     const step = state.session.steps[state.currentStep];
 
     try {
-        const screenResp = await fetch('/api/screen');
+        const screenResp = await fetch('/api/terminal/screen');
         const screenData = await screenResp.json();
 
         const resp = await fetch('/api/tutor/path_verify', {
@@ -651,6 +582,15 @@ async function verifyStep() {
     } catch (e) {
         hideLoading();
         addMessage('error', 'Error', e.message);
+    }
+}
+
+function prevStep() {
+    if (!state.session?.steps?.length) return;
+    if (state.currentStep > 0) {
+        state.currentStep--;
+        render();
+        addMessage('info', 'Previous Step', 'Moved to previous step.');
     }
 }
 
@@ -694,9 +634,8 @@ async function askTutor() {
         if (data.error) {
             addMessage('error', 'Error', data.error);
         } else if (data.answer) {
-            const persona = personas[state.currentPersona];
             const rendered = window.marked ? marked.parse(data.answer) : data.answer;
-            addMessage('assistant', persona.name, rendered);
+            addMessage('assistant', 'Tutor', rendered);
         } else {
             addMessage('warning', 'No Response', 'No response received. Try again.');
         }
@@ -711,7 +650,6 @@ $('#connectBtn').addEventListener('click', connectTerminal);
 $('#disconnectBtn').addEventListener('click', disconnectTerminal);
 
 $('#analyzeBtn').addEventListener('click', analyzeScreen);
-$('#verifyBtn').addEventListener('click', verifyStep);
 $('#nextBtn').addEventListener('click', nextStep);
 
 $('#sendBtn').addEventListener('click', askTutor);
@@ -719,15 +657,8 @@ $('#askInput').addEventListener('keydown', (e) => {
     if (e.key === 'Enter') askTutor();
 });
 
-// Module clicks
-$$('.module-item').forEach(el => {
-    el.addEventListener('click', () => selectModule(el.dataset.module));
-});
-
-// Persona clicks
-$$('.persona-item').forEach(el => {
-    el.addEventListener('click', () => selectPersona(el.dataset.persona));
-});
+// Back step button
+$('#prevBtn').addEventListener('click', prevStep);
 
 // Quick chips
 $$('.chip').forEach(el => {
@@ -767,6 +698,9 @@ $('#terminalScreen').addEventListener('keydown', (e) => {
 
 // ============ INIT ============
 async function init() {
+    // Load labs first
+    await loadLabs();
+
     // Check connection status
     try {
         const resp = await fetch('/api/status');
@@ -777,7 +711,7 @@ async function init() {
             $('#connectBtn').style.display = 'none';
             $('#disconnectBtn').style.display = '';
 
-            const screenResp = await fetch('/api/screen');
+            const screenResp = await fetch('/api/terminal/screen');
             const screenData = await screenResp.json();
             updateTerminalDisplay(screenData);
         }

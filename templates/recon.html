@@ -38,10 +38,6 @@
             <span class="label">Host:</span>
             <span class="value" id="connHost">-</span>
         </div>
-        <div>
-            <span class="label">BIRP:</span>
-            <span class="value" id="birpStatus">-</span>
-        </div>
     </div>
 
     <!-- Tab bar -->
@@ -50,6 +46,8 @@
         <button class="tab-btn" data-tab="assess">Assess</button>
         <button class="tab-btn" data-tab="findings">Findings</button>
         <button class="tab-btn" data-tab="report">Report</button>
+        <button class="tab-btn" data-tab="captures">Captures</button>
+        <button class="tab-btn" data-tab="ebcdic">EBCDIC / TN3270</button>
     </div>
 
     <!-- Main content -->
@@ -667,6 +665,118 @@
             </div>
         </div>
 
+        <!-- ============ CAPTURES TAB ============ -->
+        <div class="tab-panel" id="tab-captures">
+            <div class="panel-section">
+                <div class="captures-header">
+                    <h2>Screen Captures</h2>
+                    <p class="assess-intro">Saved terminal screens for documentation and analysis.</p>
+                </div>
+
+                <div class="cap-stats" id="capStats">
+                    <div class="cap-stat"><span class="cap-stat-val" id="capTotal">0</span><span class="cap-stat-lbl">Total</span></div>
+                    <div class="cap-stat"><span class="cap-stat-val" id="capToday">0</span><span class="cap-stat-lbl">Today</span></div>
+                    <div class="cap-stat"><span class="cap-stat-val" id="capStorage">0 KB</span><span class="cap-stat-lbl">Storage</span></div>
+                </div>
+
+                <div class="cap-grid" id="capGrid">
+                    <div class="empty-state">Loading captures...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============ EBCDIC / TN3270 TAB ============ -->
+        <div class="tab-panel" id="tab-ebcdic">
+            <div class="panel-section">
+                <h2>EBCDIC &amp; TN3270 Tools</h2>
+                <p class="assess-intro">
+                    z/OS uses EBCDIC encoding — not ASCII. TN3270 transmits everything in plaintext EBCDIC.
+                    Use these tools to encode, decode, and observe the wire format.
+                </p>
+
+                <div class="ebcdic-layout">
+                    <!-- Encoder / Decoder -->
+                    <div class="ebcdic-tools">
+                        <div class="ebcdic-tool-card">
+                            <h3>ASCII → EBCDIC</h3>
+                            <div class="form-group">
+                                <label>ASCII Text</label>
+                                <input type="text" id="ebcAsciiIn" placeholder="HELLO WORLD" value="LOGON TSO">
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="encodeEbcdic()">Encode</button>
+                            <div class="ebcdic-result" id="ebcEncodeResult">
+                                <div class="ebcdic-hex-display" id="ebcEncodeHex">—</div>
+                                <div class="ebcdic-meta" id="ebcEncodeMeta"></div>
+                            </div>
+                        </div>
+
+                        <div class="ebcdic-tool-card">
+                            <h3>EBCDIC → ASCII</h3>
+                            <div class="form-group">
+                                <label>EBCDIC Hex</label>
+                                <input type="text" id="ebcHexIn" placeholder="D3 D6 C7 D6 D5" value="D3 D6 C7 D6 D5 40 E3 E2 D6">
+                            </div>
+                            <button class="btn btn-primary btn-sm" onclick="decodeEbcdic()">Decode</button>
+                            <div class="ebcdic-result" id="ebcDecodeResult">
+                                <div class="ebcdic-ascii-display" id="ebcDecodeAscii">—</div>
+                                <div class="ebcdic-meta" id="ebcDecodeMeta"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TN3270 Demo Window -->
+                    <div class="tn3270-demo">
+                        <div class="tn3270-demo-header">
+                            <span class="tn3270-demo-title">TN3270 Wire View</span>
+                            <div class="tn3270-demo-controls">
+                                <input type="text" id="tn3270DemoHost" value="localhost:3270" placeholder="host:port" style="width:140px;">
+                                <button class="btn btn-primary btn-sm" id="tn3270ConnBtn" onclick="tn3270Connect()">Connect</button>
+                            </div>
+                        </div>
+                        <div class="tn3270-demo-screen" id="tn3270Screen">
+                            <div class="tn3270-placeholder">
+                                <p>TN3270 Wire Viewer</p>
+                                <p class="tn3270-sub">Connect to see live EBCDIC ↔ ASCII translation</p>
+                                <p class="tn3270-sub">All data on the wire is <strong>plaintext EBCDIC</strong> — no encryption</p>
+                            </div>
+                        </div>
+                        <div class="tn3270-demo-wire" id="tn3270Wire">
+                            <div class="wire-label">Wire (hex)</div>
+                            <div class="wire-data" id="tn3270WireData">—</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- EBCDIC Reference Table -->
+                <div class="ebcdic-ref-section">
+                    <h3 class="section-toggle" onclick="toggleSection(this)">
+                        <span class="toggle-icon">&#9654;</span>
+                        EBCDIC Reference Table
+                    </h3>
+                    <div class="section-body">
+                        <div class="ebcdic-table-wrap" id="ebcTableWrap">
+                            <button class="btn btn-secondary btn-sm" onclick="loadEbcdicTable()">Load Table</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Capture View Modal -->
+        <div class="cap-modal" id="capModal">
+            <div class="cap-modal-content">
+                <div class="cap-modal-header">
+                    <h3 id="capModalTitle">Screen Capture</h3>
+                    <button class="cap-modal-close" onclick="closeCapModal()">&times;</button>
+                </div>
+                <div class="cap-modal-screen" id="capModalScreen"></div>
+                <div class="cap-modal-footer">
+                    <button class="btn btn-secondary" onclick="downloadCap()">Download</button>
+                    <button class="btn btn-danger" onclick="deleteCap()">Delete</button>
+                </div>
+            </div>
+        </div>
+
     </div>
 {% endblock %}
 
@@ -708,14 +818,11 @@ async function checkStatus() {
         const data = await res.json();
         const connEl = document.getElementById('connStatus');
         const hostEl = document.getElementById('connHost');
-        const birpEl = document.getElementById('birpStatus');
 
         isConnected = data.connected;
         connEl.textContent = data.connected ? 'Connected' : 'Disconnected';
         connEl.className = 'value ' + (data.connected ? 'ok' : 'err');
         hostEl.textContent = data.connected ? data.host : '-';
-        birpEl.textContent = data.birp_available ? 'Available' : 'Not Found';
-        birpEl.className = 'value ' + (data.birp_available ? 'ok' : 'err');
 
         document.getElementById('connBtn').style.display = data.connected ? 'none' : 'inline-block';
         document.getElementById('disconnBtn').style.display = data.connected ? 'inline-block' : 'none';
@@ -1334,6 +1441,212 @@ function downloadReport() {
     a.download = `recon_report_${new Date().toISOString().slice(0,10)}.${ext}`;
     a.click();
     URL.revokeObjectURL(url);
+}
+
+// ==========================================================================
+// Captures
+// ==========================================================================
+let capList = [];
+let selectedCap = null;
+
+async function loadCaptures() {
+    const grid = document.getElementById('capGrid');
+    try {
+        const res = await fetch('/api/screencaps');
+        const data = await res.json();
+        capList = data.captures || [];
+        updateCapStats();
+        renderCapGrid();
+    } catch (e) {
+        grid.innerHTML = '<div class="empty-state">Failed to load captures.</div>';
+    }
+}
+
+function updateCapStats() {
+    document.getElementById('capTotal').textContent = capList.length;
+    const today = new Date().toDateString();
+    document.getElementById('capToday').textContent = capList.filter(c => new Date(c.timestamp * 1000).toDateString() === today).length;
+    const kb = Math.round(capList.reduce((s, c) => s + (c.screen?.length || 0), 0) / 1024);
+    document.getElementById('capStorage').textContent = kb + ' KB';
+}
+
+function renderCapGrid() {
+    const grid = document.getElementById('capGrid');
+    if (!capList.length) {
+        grid.innerHTML = '<div class="empty-state">No captures yet. Connect to a terminal and capture screens.</div>';
+        return;
+    }
+    grid.innerHTML = capList.map(cap => {
+        const d = new Date(cap.timestamp * 1000);
+        const preview = cap.screen ? cap.screen.substring(0, 600) : '';
+        return `<div class="cap-card" onclick="viewCap('${cap.id}')">
+            <pre class="cap-preview">${escapeCapHtml(preview)}</pre>
+            <div class="cap-info">
+                <span class="cap-host">${cap.host || 'Unknown'}</span>
+                <span class="cap-date">${d.toLocaleDateString()} ${d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</span>
+            </div>
+        </div>`;
+    }).join('');
+}
+
+function escapeCapHtml(t) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+async function viewCap(id) {
+    try {
+        const res = await fetch(`/api/screencap/${id}`);
+        const data = await res.json();
+        if (data.error) return;
+        selectedCap = data;
+        document.getElementById('capModalTitle').textContent = `${data.host || 'Capture'} — ${data.id}`;
+        const screenEl = document.getElementById('capModalScreen');
+        if (data.screen_html) {
+            screenEl.innerHTML = data.screen_html;
+        } else {
+            screenEl.textContent = data.screen || '';
+        }
+        document.getElementById('capModal').classList.add('active');
+    } catch (e) {}
+}
+
+function closeCapModal() {
+    document.getElementById('capModal').classList.remove('active');
+    selectedCap = null;
+}
+
+function downloadCap() {
+    if (!selectedCap) return;
+    const blob = new Blob([selectedCap.screen || ''], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = `screencap_${selectedCap.id}.txt`; a.click();
+    URL.revokeObjectURL(url);
+}
+
+async function deleteCap() {
+    if (!selectedCap || !confirm('Delete this capture?')) return;
+    try {
+        await fetch(`/api/screencap/${selectedCap.id}`, { method: 'DELETE' });
+        capList = capList.filter(c => c.id !== selectedCap.id);
+        updateCapStats();
+        renderCapGrid();
+        closeCapModal();
+    } catch (e) {}
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeCapModal(); });
+document.getElementById('capModal').addEventListener('click', e => { if (e.target.classList.contains('cap-modal')) closeCapModal(); });
+
+// Load captures when tab is first clicked
+document.querySelector('[data-tab="captures"]').addEventListener('click', () => {
+    if (!capList.length) loadCaptures();
+}, { once: true });
+
+// ==========================================================================
+// EBCDIC / TN3270
+// ==========================================================================
+async function encodeEbcdic() {
+    const text = document.getElementById('ebcAsciiIn').value;
+    if (!text) return;
+    try {
+        const res = await fetch('/api/scanner/ebcdic/encode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); return; }
+        document.getElementById('ebcEncodeHex').textContent = data.ebcdic_hex;
+        document.getElementById('ebcEncodeMeta').textContent = `${data.length} bytes`;
+    } catch (e) { showToast('Encode failed', 'error'); }
+}
+
+async function decodeEbcdic() {
+    const hex = document.getElementById('ebcHexIn').value;
+    if (!hex) return;
+    try {
+        const res = await fetch('/api/scanner/ebcdic/decode', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ hex })
+        });
+        const data = await res.json();
+        if (data.error) { showToast(data.error, 'error'); return; }
+        document.getElementById('ebcDecodeAscii').textContent = data.ascii;
+        document.getElementById('ebcDecodeMeta').textContent = `${data.length} bytes`;
+    } catch (e) { showToast('Decode failed', 'error'); }
+}
+
+async function loadEbcdicTable() {
+    const wrap = document.getElementById('ebcTableWrap');
+    wrap.innerHTML = '<div class="empty-state">Loading...</div>';
+    try {
+        const res = await fetch('/api/scanner/ebcdic/table');
+        const data = await res.json();
+        const rows = data.table.map(r =>
+            `<tr><td class="ebc-hex">${r.ebcdic_hex}</td><td>${r.ebcdic_dec}</td><td class="ebc-char">${r.ascii_char === ' ' ? '␣' : r.ascii_char}</td><td>${r.ascii_dec}</td></tr>`
+        ).join('');
+        wrap.innerHTML = `<table class="results-table ebcdic-ref-table">
+            <thead><tr><th>EBCDIC Hex</th><th>Dec</th><th>ASCII</th><th>Dec</th></tr></thead>
+            <tbody>${rows}</tbody>
+        </table>`;
+    } catch (e) { wrap.innerHTML = '<div class="empty-state">Failed to load table.</div>'; }
+}
+
+async function tn3270Connect() {
+    const hostInput = document.getElementById('tn3270DemoHost').value.trim();
+    const screen = document.getElementById('tn3270Screen');
+    const wireData = document.getElementById('tn3270WireData');
+    const btn = document.getElementById('tn3270ConnBtn');
+
+    if (!hostInput) return;
+    const parts = hostInput.split(':');
+    const host = parts[0];
+    const port = parseInt(parts[1] || '3270');
+
+    btn.disabled = true;
+    btn.textContent = 'Connecting...';
+    screen.innerHTML = '<div class="tn3270-placeholder"><p>Connecting to ' + host + ':' + port + '...</p></div>';
+
+    try {
+        const res = await fetch('/api/scanner/banner', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ host, port })
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            screen.innerHTML = '<div class="tn3270-placeholder"><p class="tn3270-err">Connection failed: ' + data.error + '</p></div>';
+            wireData.textContent = '—';
+            return;
+        }
+
+        if (data.screen_text) {
+            // Show the decoded screen
+            const escaped = data.screen_text.replace(/&/g,'&amp;').replace(/</g,'&lt;');
+            screen.innerHTML = '<pre class="tn3270-screen-text">' + escaped + '</pre>';
+        } else {
+            screen.innerHTML = '<div class="tn3270-placeholder"><p>Connected — no screen data received</p></div>';
+        }
+
+        // Show raw wire hex
+        if (data.raw_bytes) {
+            const hex = data.raw_bytes.match(/.{1,2}/g).join(' ').toUpperCase();
+            wireData.textContent = hex;
+        }
+
+        // Show detected APPLIDs
+        if (data.applids && data.applids.length) {
+            screen.innerHTML += '<div class="tn3270-applids">Detected: ' + data.applids.join(', ') + '</div>';
+        }
+
+        screen.innerHTML += '<div class="tn3270-warning">⚠ All data above was transmitted in <strong>plaintext EBCDIC</strong> — no encryption</div>';
+
+    } catch (e) {
+        screen.innerHTML = '<div class="tn3270-placeholder"><p class="tn3270-err">Error: ' + e.message + '</p></div>';
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Connect';
+    }
 }
 
 // ==========================================================================

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Native Recon Engine for Mainframe AI Assistant
-Reimplements BIRP/NMAP TN3270 enumeration logic as pure Python
+Reimplements TN3270 enumeration logic as pure Python
 using agent_tools.py for all emulator I/O.
 
 Classes:

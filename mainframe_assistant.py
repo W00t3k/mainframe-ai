@@ -2,25 +2,16 @@
 """
 Mainframe AI Assistant - Natural language interface for z/OS operations
 
-Combines Claude AI with TN3270 connectivity for intelligent mainframe interaction.
+Combines local LLM (Ollama) with TN3270 connectivity for intelligent mainframe interaction.
+Runs 100% locally on commodity hardware - no cloud APIs required.
 """
 
 import os
 import sys
 import json
+import httpx
 from typing import Optional
 from dataclasses import dataclass, field
-
-# Add BIRP to path if available
-BIRP_PATH = os.path.expanduser("~/Desktop/STuFF /birp")
-if os.path.exists(BIRP_PATH):
-    sys.path.insert(0, BIRP_PATH)
-
-try:
-    from anthropic import Anthropic
-except ImportError:
-    print("Run: pip install anthropic")
-    sys.exit(1)
 
 try:
     from rich.console import Console
@@ -34,13 +25,11 @@ except ImportError:
     print("Run: pip install rich prompt_toolkit")
     sys.exit(1)
 
-
-# Try to import BIRP modules
-BIRP_AVAILABLE = False
+# TN3270 emulator - uses py3270 library
+TN3270_AVAILABLE = False
 try:
-    from birpv2_modules.emulator.wrapper import WrappedEmulator
-    from birpv2_modules.core.models import Screen, History
-    BIRP_AVAILABLE = True
+    from py3270 import Emulator
+    TN3270_AVAILABLE = True
 except ImportError:
     pass
 
@@ -104,23 +93,19 @@ class MainframeConnection:
 
 
 class MainframeAssistant:
-    """AI-powered mainframe assistant"""
+    """AI-powered mainframe assistant - runs 100% locally via Ollama"""
 
-    def __init__(self, api_key: Optional[str] = None):
-        self.api_key = api_key or os.getenv("ANTHROPIC_API_KEY")
-        if not self.api_key:
-            raise ValueError("ANTHROPIC_API_KEY required. Set env var or pass api_key.")
-
-        self.client = Anthropic(api_key=self.api_key)
+    def __init__(self, ollama_url: Optional[str] = None, model: Optional[str] = None):
+        self.ollama_url = ollama_url or os.getenv("OLLAMA_URL", "http://localhost:11434")
+        self.model = model or os.getenv("OLLAMA_MODEL", "llama3.1:8b")
         self.console = Console()
         self.connection = MainframeConnection()
         self.conversation_history = []
-        self.model = "claude-sonnet-4-20250514"
 
     def connect(self, target: str) -> bool:
         """Connect to mainframe via TN3270"""
-        if not BIRP_AVAILABLE:
-            self.console.print("[yellow]BIRP not available. Running in offline mode.[/yellow]")
+        if not TN3270_AVAILABLE:
+            self.console.print("[yellow]py3270 not available. Running in offline mode.[/yellow]")
             self.console.print(f"[dim]Would connect to: {target}[/dim]")
             return False
 
@@ -137,7 +122,7 @@ class MainframeAssistant:
             self.connection.port = port
 
             # Create emulator
-            self.connection.emulator = WrappedEmulator(visible=False)
+            self.connection.emulator = Emulator(visible=False)
             self.connection.emulator.connect(f"{host}:{port}")
             self.connection.connected = True
 

@@ -10,18 +10,10 @@ import hashlib
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 
-# Import BIRP helpers
-try:
-    from birpv2_modules.zos.tso_helper import TSOHelper
-    from birpv2_modules.zos.cics_helper import CICSHelper
-    from birpv2_modules.zos.jes_parser import JESParser
-    TSO_HELPER = TSOHelper()
-    CICS_HELPER = CICSHelper()
-    JES_PARSER = JESParser()
-except ImportError:
-    TSO_HELPER = None
-    CICS_HELPER = None
-    JES_PARSER = None
+# Helpers for parsing z/OS output (optional)
+TSO_HELPER = None
+CICS_HELPER = None
+JES_PARSER = None
 
 from trust_graph import get_trust_graph, TrustGraph
 
@@ -39,7 +31,7 @@ JOBID_PATTERN = re.compile(r"JOB\d{5}|J\d{7}")
 # Job name: 1-8 alphanumeric starting with letter
 JOBNAME_PATTERN = re.compile(r"\b[A-Z][A-Z0-9]{0,7}\b")
 
-# CICS transaction: 4 chars
+# CICS/KICKS transaction: 4 chars
 TRANS_PATTERN = re.compile(r"\b[A-Z][A-Z0-9]{3}\b")
 
 # Program name: 1-8 chars
@@ -68,7 +60,7 @@ USERID_PATTERN = re.compile(r"\bUSERID[=:\s]+([A-Z][A-Z0-9]{0,7})\b", re.IGNOREC
 def classify_panel(screen_text: str) -> Dict:
     """Classify a 3270 screen into a panel type.
 
-    Uses BIRP helpers plus additional pattern matching.
+    Uses pattern matching to identify panel types.
 
     Returns:
         {
@@ -141,6 +133,12 @@ def classify_panel(screen_text: str) -> Dict:
             result["title"] = "CICS Execution Diagnostic"
         else:
             result["panel_type"] = "CICS_OTHER"
+
+    # KICKS (CICS-compatible) detection
+    elif "KICKS" in upper or "KSGM" in upper or "KSSF" in upper:
+        result["environment"] = "KICKS"
+        result["panel_type"] = "KICKS_TRANSACTION"
+        result["title"] = "KICKS Transaction Processing"
 
     elif JES_PARSER and JES_PARSER.detect_jes_screen(screen_text):
         result["environment"] = "JES"
@@ -244,12 +242,13 @@ def extract_identifiers(screen_text: str) -> Dict:
     userid_matches = USERID_PATTERN.findall(screen_text)
     result["userids"] = list(set(userid_matches))
 
-    # Transactions (4-char codes in CICS context)
-    # Only extract if screen looks like CICS
-    if CICS_HELPER and CICS_HELPER.detect_cics_screen(screen_text):
+    # Transactions (4-char codes in CICS/KICKS context)
+    # Only extract if screen looks like CICS or KICKS
+    if (CICS_HELPER and CICS_HELPER.detect_cics_screen(screen_text)) or "KICKS" in screen_text.upper():
         # Look for transaction patterns
         trans_candidates = TRANS_PATTERN.findall(screen_text.upper())
-        known_trans = {"CEMT", "CEDA", "CECI", "CEDF", "CESN", "CESF", "CEBR"}
+        known_trans = {"CEMT", "CEDA", "CECI", "CEDF", "CESN", "CESF", "CEBR", 
+                       "KSGM", "KSSF", "MENU", "INQ1", "MNT1", "ORD1"}  # KICKS transactions
         result["transactions"] = [t for t in trans_candidates if t in known_trans or len(t) == 4]
 
     # Commands - look for lines with ===> followed by text
@@ -792,7 +791,7 @@ def update_graph_from_screen(graph: TrustGraph, screen_text: str,
         ds_id = graph.add_node("Dataset", ds, evidence=evidence)
         stats["nodes_added"] += 1
 
-    # Add identified transactions (if CICS)
+    # Add identified transactions (if CICS/KICKS)
     for trans in identifiers.get("transactions", []):
         trans_id = graph.add_node("Transaction", trans, evidence=evidence)
         stats["nodes_added"] += 1

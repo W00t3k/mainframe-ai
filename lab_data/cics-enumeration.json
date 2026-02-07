@@ -1,0 +1,38 @@
+{
+  "id": "cics-enumeration",
+  "title": "CICS Transaction Enumeration",
+  "description": "Discover valid CICS transactions and understand the transaction security model.",
+  "category": "recon",
+  "difficulty": "advanced",
+  "questions": ["Q1", "Q2", "Q4"],
+  "steps": [
+    {
+      "title": "CICS Signon",
+      "screen": "CESN - CICS SIGNON\n\nUserid:    HERC01\nPassword:  ********\nLanguage:  E\nNew Pass:\n\nPF3=Exit",
+      "expected": "Understand that CICS has its own authentication (CESN transaction).",
+      "hint": "CICS can use RACF for authentication but has its own transaction security.",
+      "assessment": "Q1: Identity binds at CESN signon in CICS, separate from TSO."
+    },
+    {
+      "title": "Valid Transaction Response",
+      "screen": "CEMT I TASK\n\nTASK    TRAN    FACILITY  USER\n0001    CEMT    TERM01    HERC01\n0002    CESN    TERM02    CICSUSER\n\nSTATUS: NORMAL",
+      "expected": "Identify a valid transaction that returns data.",
+      "hint": "CEMT (master terminal) returns task info. Valid transactions give meaningful output.",
+      "assessment": "Q2: Transaction authority checked at execution time."
+    },
+    {
+      "title": "Invalid Transaction Response",
+      "screen": "XXXX\n\nDFHAC2001 TRANSACTION XXXX IS NOT RECOGNIZED\n\nor\n\nDFHAC2002 TRANSACTION YYYY IS NOT AUTHORIZED",
+      "expected": "Distinguish between non-existent and unauthorized transactions.",
+      "hint": "AC2001 = doesn't exist. AC2002 = exists but you can't run it. Enumeration!",
+      "assessment": "Q4: CICS (or RACF via CICS) enforces transaction security."
+    },
+    {
+      "title": "Transaction List Discovery",
+      "screen": "CEDA DISPLAY GROUP(DFHTRANS) TRANSACTION(*)\n\nTRAN    PROGRAM   STATUS\n----    -------   ------\nCECI    DFHECI    ENABLED\nCEDA    DFHEDA    ENABLED\nCEMT    DFHEMT    ENABLED\nCESN    DFHSNP    ENABLED\nINQ1    CUSTINQ   ENABLED\nUPD1    CUSTUPD   ENABLED",
+      "expected": "Enumerate defined transactions to find targets.",
+      "hint": "CEDA DISPLAY shows transaction definitions. Custom trans (INQ1, UPD1) may be interesting.",
+      "assessment": "Q4: Transaction definitions reveal what's available to attack."
+    }
+  ]
+}

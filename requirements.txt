@@ -2,7 +2,7 @@
 anthropic>=0.40.0
 openai>=1.0.0  # Optional: for GPT fallback
 
-# Mainframe connectivity (uses BIRP)
+# Mainframe connectivity
 py3270>=0.3.5
 
 # CLI interface

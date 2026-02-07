@@ -1,201 +1,219 @@
 # Mainframe AI Assistant
 
-Natural language interface for z/OS mainframe operations. Uses a local LLM by default (Ollama), with a pluggable backend.
+**A reference implementation for trust-boundary assessment on z/OS.**
 
-## Features
+This tool operationalizes a mental model I've been applying since 2018 — first to Active Directory and enterprise Windows environments, now to mainframe systems. The model isn't new. The tool is.
 
-- **Conversational Interface**: Ask questions in plain English about z/OS, JCL, COBOL, ABEND codes
-- **Live Connection**: Connect to real mainframes via TN3270 (uses BIRP modules)
-- **Screen Analysis**: LLM can read and explain 3270 terminal screens
-- **JCL Generation**: Generate JCL for common tasks from natural language descriptions
-- **ABEND Debugging**: Get explanations and fix suggestions for system abends
-- **Offline Mode**: Works without mainframe connection for Q&A and code generation
+## The Problem
 
-## Quick Start (Web UI, Ollama default)
+Most offensive security methodologies import assumptions from Unix, Windows, and cloud environments. These assumptions fail on mainframe operating systems:
+
+| Assumption | Reality on z/OS |
+|------------|-----------------|
+| "Ports define exposure" | VTAM session fabric exists independently of TCP/IP. Sessions outlive connections. |
+| "There is a root user" | RACF distributes authority across profiles. No omnipotent account exists. |
+| "Processes are short-lived" | Address spaces persist for weeks or months. Identity is bound at startup. |
+| "Work executes immediately" | JES queues, schedules, and defers execution. Identity preserved from submission. |
+| "There is a filesystem" | Datasets, catalogs, PDS members. No `/etc`, no hierarchy. |
+
+**Assessments that import these assumptions miss the real attack surface.**
+
+This is the same failure mode I wrote about in 2018 regarding Active Directory — attackers succeed not because of exploits, but because defenders misunderstand where authority is actually enforced. ADCS, delegation abuse, service account sprawl — these weren't "new vulnerabilities." They were trust boundaries that existed all along, invisible to teams using the wrong mental model.
+
+Mainframes expose this more clearly because security is explicitly federated across five control planes:
+
+1. **VTAM** — Session fabric (purple)
+2. **TSO** — Human interaction (blue)
+3. **RACF** — Authorization engine (amber)
+4. **JES** — Deferred execution (pink)
+5. **CICS** — Transaction processing (green)
+
+If you bring the wrong mental model, you miss the real attack paths — just like people missed delegation abuse for years.
+
+## What This Tool Does
+
+- **Autonomous Walkthroughs** — Watch the tool connect, navigate, and narrate VTAM, TSO, ISPF, JES, and RACF. No keyboard needed. Educational narration explains what's happening at each control plane boundary.
+
+- **Trust Graph** — BloodHound-style visualization of mainframe trust relationships. Map identities, datasets, jobs, and their connections.
+
+- **Red Team Tutor** — AI-guided learning paths for mainframe security assessment. Ask questions, get contextual help on the current screen.
+
+- **Recon Engine** — TSO/CICS/VTAM enumeration, hidden field detection, application mapping.
+
+- **Security Labs** — Deterministic walkthroughs you can run offline. Replay VTAM → TSO → ISPF flows and batch execution patterns.
+
+- **COBOL Development** — Complete compile-link-go walkthrough demonstrating the batch-oriented development lifecycle.
+
+**100% local. No API keys. No cloud dependencies.** Uses Ollama for local LLM inference.
+
+## Quick Start
+
+### Requirements
+
+- Python 3.10+
+- [Ollama](https://ollama.com) for local LLM
+- TK5 MVS 3.8j emulator (optional, for live terminal)
+
+### macOS
 
 ```bash
-# 1. Set up virtual environment
-python3 -m venv venv
-source venv/bin/activate
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
 
-# 2. Install dependencies
+# Install dependencies
 pip install -r requirements.txt
 
-# 3. Start Ollama (in another terminal)
+# Start Ollama
+brew install ollama
 ollama serve
 ollama pull llama3.1:8b
 
-# 4. Run the web app
-python web_app.py
+# Start TK5 (optional)
+cd tk5/mvs-tk5 && ./mvs
+
+# Run the web app
+python run.py
+# Or: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
 ```
 
-Open:
-
-- `http://127.0.0.1:8080/chat` (AI chat)
-- `http://127.0.0.1:8080/tutor` (red team tutor)
-- `http://127.0.0.1:8080/graph` (trust graph)
-
-### CLI (Optional)
-
-The CLI uses Anthropic by default. If you want the CLI:
+### Linux
 
 ```bash
-export ANTHROPIC_API_KEY="your-key-here"
-python mainframe_assistant.py
+# Install Python
+sudo apt install python3 python3-venv python3-pip
 
-# Or connect directly to a mainframe
-python mainframe_assistant.py -t localhost:3270
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+ollama serve &
+ollama pull llama3.1:8b
+
+# Run
+python run.py
 ```
 
-### TK5 Bundle (Local MVS)
+### Verify
 
-The TK5 distribution zip is not included in this repo. Download it from your
-custom MVS docs and unzip into `tk5/mvs-tk5` so the emulator assets are present.
-
-## Usage
-
-### Interactive Mode
-
-```
-$ python mainframe_assistant.py
-
-╭─ Welcome ─────────────────────────────────────────────╮
-│ Mainframe AI Assistant                                │
-│ Natural language interface for z/OS operations        │
-│                                                       │
-│ Commands:                                             │
-│   /connect <host:port> - Connect to mainframe         │
-│   /screen             - Show current screen           │
-│   /disconnect         - Disconnect                    │
-│   /clear              - Clear conversation            │
-│   /quit               - Exit                          │
-╰───────────────────────────────────────────────────────╯
-
-○ You: What does ABEND S0C7 mean?
-
-╭─ Assistant ───────────────────────────────────────────╮
-│ S0C7 is a **Data Exception** - one of the most common │
-│ ABEND codes in COBOL programs.                        │
-│                                                       │
-│ **Common causes:**                                    │
-│ - Invalid data in a packed decimal field              │
-│ - Moving non-numeric data to a numeric field          │
-│ - Uninitialized working storage                       │
-│ ...                                                   │
-╰───────────────────────────────────────────────────────╯
+```bash
+curl http://localhost:8080/api/status
 ```
 
-### Example Queries
+Open in browser:
 
-**General z/OS:**
-- "What does ABEND S0C7 mean?"
-- "Explain the difference between PDS and PDSE"
-- "How do I check if a dataset exists in JCL?"
+| URL | Feature |
+|-----|---------|
+| `http://localhost:8080/` | Dashboard |
+| `http://localhost:8080/walkthrough` | Autonomous walkthroughs |
+| `http://localhost:8080/tutor` | Red team tutor |
+| `http://localhost:8080/graph` | Trust graph |
+| `http://localhost:8080/terminal` | 3270 terminal (requires TK5) |
+| `http://localhost:8080/recon` | Recon engine |
+| `http://localhost:8080/labs` | Security labs |
 
-**JCL Generation:**
-- "Generate JCL to copy PROD.DATA.FILE to TEST.DATA.FILE"
-- "Write JCL for a COBOL compile and link"
-- "Create JCL to run IEBGENER with SORTOUT"
+## Walkthroughs
 
-**Connected Mode:**
-- "/connect mainframe.example.com:23"
-- "What's on the current screen?"
-- "Navigate to ISPF option 3.4"
-- "Submit the JCL on this screen"
+Seven autonomous walkthroughs demonstrate mainframe control planes:
 
-**Demo Without a Mainframe:**
-- Start Ollama (`ollama serve`)
-- Run the web app (`python web_app.py`)
-- Open `/chat`, `/tutor`, and `/graph`
-- `/terminal` requires a TN3270 target (TK5 or a real mainframe)
+| Walkthrough | What It Teaches |
+|-------------|-----------------|
+| **Session Stack** | VTAM → TSO → ISPF layer traversal, identity binding |
+| **Deferred Execution** | JCL → JES workflow, jobs run later under submitter identity |
+| **System Inspection** | SYS1.PROCLIB, SYS1.PARMLIB — where "config files" live |
+| **Authorization Model** | RACF profiles, LISTCAT, how authority is distributed |
+| **Dataset Model** | PDS, members, catalogs — no filesystem, just datasets |
+| **Address Spaces** | SDSF, active jobs, persistent address spaces |
+| **COBOL Development** | Compile-link-go lifecycle, batch-oriented programming |
 
-**COBOL/Code:**
-- "Explain this COBOL paragraph: [paste code]"
-- "How do I read a VSAM file in COBOL?"
-- "Convert this PERFORM VARYING to a modern loop"
+Each walkthrough narrates five assessment questions:
 
-### Screenshots / Demo Media
+- **Q1:** Where is identity bound?
+- **Q2:** When is authority evaluated?
+- **Q3:** What executes later than expected?
+- **Q4:** Which subsystem enforces policy?
+- **Q5:** What assumptions are you importing?
 
-Add 2–4 visuals before publishing a blog post. Suggested captures:
+## The Mental Model
 
-- `/terminal` with the floating chat panel
-- `/tutor` learning path screen
-- `/graph` trust graph view
-- `/chat` answer explaining an ABEND
+This tool didn't invent the trust-boundary assessment model. It **operationalizes** it.
 
-Place assets under `docs/assets/` (see `docs/assets/README.md` for naming).
+The same mental model that exposed ADCS abuse, Kerberos delegation attacks, and service account sprawl in Active Directory applies directly to mainframes — but mainframes make the boundaries *explicit*. On z/OS, you can literally watch identity cross from VTAM to TSO to RACF.
+
+**What changed isn't the model. What changed is that I now have a platform where the same failure modes are even more visible.**
+
+The walkthroughs don't just show you how to navigate ISPF. They show you *where trust decisions happen* and *which assumptions break* at each boundary crossing.
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────────────────┐
-│                    User Interface                    │
-│              (rich CLI / prompt_toolkit)             │
-└─────────────────────┬───────────────────────────────┘
-                      │
-┌─────────────────────▼───────────────────────────────┐
-│              MainframeAssistant                      │
-│  - Conversation management                           │
-│  - Command parsing                                   │
-│  - Action extraction from LLM responses              │
-└──────────┬────────────────────────┬─────────────────┘
-           │                        │
-┌──────────▼──────────┐  ┌─────────▼─────────────────┐
-│   LLM Backend       │  │   BIRP TN3270 Layer       │
-│   (Ollama default)  │  │   - Screen reading        │
-│   - Q&A             │  │   - Command execution     │
-│   - Code generation │  │   - Session history       │
-│   - Analysis        │  │   - Field parsing         │
-└─────────────────────┘  └───────────────────────────┘
+┌──────────────────────────────────────────────────────────┐
+│                     Web Interface                         │
+│         FastAPI + HTMX + IBM Plex typography              │
+└─────────────────────────┬────────────────────────────────┘
+                          │
+┌─────────────────────────▼────────────────────────────────┐
+│                    app/ (modular)                         │
+│  routes/     - API endpoints                              │
+│  services/   - Business logic (chat, walkthrough, LLM)    │
+│  constants/  - Prompts, paths, walkthrough scripts        │
+│  models/     - Pydantic schemas                           │
+│  websocket/  - Real-time handlers                         │
+└──────────┬───────────────────────────┬───────────────────┘
+           │                           │
+┌──────────▼──────────┐  ┌────────────▼────────────────────┐
+│    Ollama (LLM)     │  │   TN3270 Layer (py3270)          │
+│  - Q&A              │  │   - Screen reading              │
+│  - Narration        │  │   - Command execution           │
+│  - Code analysis    │  │   - Session management          │
+└─────────────────────┘  └─────────────────────────────────┘
 ```
-
-## Integration with BIRP
-
-This assistant can use [BIRP v2](../STuFF%20/birp/) modules for mainframe connectivity:
-
-```python
-# Automatically detected if BIRP is at ~/Desktop/STuFF /birp/
-from birpv2_modules.emulator.wrapper import WrappedEmulator
-from birpv2_modules.core.models import Screen, History
-```
-
-Without BIRP, the assistant runs in offline mode (Q&A only, no live connection).
 
 ## Configuration
 
-### Environment Variables
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `OLLAMA_URL` | `http://localhost:11434` | Ollama API endpoint |
+| `OLLAMA_MODEL` | `llama3.1:8b` | Model for inference |
+| `MAINFRAME_HOST` | `localhost:3270` | Default TN3270 target |
 
-| Variable | Description |
-|----------|-------------|
-| `OLLAMA_URL` | Ollama API endpoint (default: `http://localhost:11434`) |
-| `OLLAMA_MODEL` | Default Ollama model (default: `llama3.1:8b`) |
-| `MAINFRAME_HOST` | Default mainframe target |
-| `MAINFRAME_USER` | Default TSO userid |
-| `ANTHROPIC_API_KEY` | Optional. Only needed for CLI usage |
-
-### CLI Options
+## File Structure
 
 ```
--t, --target HOST:PORT   Connect to mainframe on startup
--k, --api-key KEY        Anthropic API key (or use env var)
---model MODEL            Claude model (default: claude-sonnet-4-20250514)
+mainframe_ai_assistant/
+├── app/                    # Modular FastAPI application
+│   ├── routes/             # API endpoints by feature
+│   ├── services/           # Business logic
+│   ├── constants/          # Prompts, walkthroughs, paths
+│   └── models/             # Pydantic schemas
+├── templates/              # Jinja2 HTML templates
+├── static/                 # CSS, JS, fonts
+├── lab_data/               # Lab exercise definitions
+├── trust_graph_data/       # Graph persistence
+├── tk5/                    # TK5 MVS 3.8j emulator (not included)
+├── run.py                  # Application entry point
+├── agent_tools.py          # TN3270 connection tools
+├── trust_graph.py          # Graph data structures
+├── recon_engine.py         # Enumeration engines
+└── rag_engine.py           # RAG with local embeddings
 ```
 
-## Roadmap
+## Related Work
 
-- [ ] RAG with z/OS documentation corpus
-- [ ] Web UI (FastAPI + HTMX)
-- [ ] JCL syntax validation
-- [ ] SYSOUT analysis and explanation
-- [ ] Multi-mainframe session support
-- [ ] Voice input/output
-- [ ] Integration with VS Code extension
+- [py3270](https://pypi.org/project/py3270/) — Python TN3270 library
+- [Mainframed](https://github.com/mainframed) — Mainframe security tools by Soldier of FORTRAN
+- [TK5](https://www.prince-webdesign.nl/tk5) — MVS 3.8j Turnkey distribution
 
-## Related Projects
+## Lineage
 
-- [BIRP v2](https://github.com/w00t3k/birpv2) - Big Iron Recon & Pwnage toolkit
-- [IBM watsonx Code Assistant for Z](https://www.ibm.com/products/watsonx-code-assistant-z) - IBM's commercial offering
-- [Mainframed](https://github.com/mainframed) - Mainframe security tools by Soldier of FORTRAN
+This work builds on trust-boundary and assessment models I've been writing about since 2018 in the context of Active Directory and enterprise systems. The mainframe environment makes those same failure modes explicit, and this tool serves as a reference implementation of that model.
+
+The insight is durable. I've been applying it across platforms for years. The tooling has simply caught up.
 
 ## License
 

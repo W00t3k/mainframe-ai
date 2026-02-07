@@ -38,10 +38,6 @@
             <span class="label">Host:</span>
             <span class="value" id="connHost">-</span>
         </div>
-        <div>
-            <span class="label">BIRP:</span>
-            <span class="value" id="birpStatus">-</span>
-        </div>
     </div>
 
     <!-- Main content -->
@@ -51,6 +47,7 @@
         <div class="wt-controls-bar">
             <div class="wt-controls-left">
                 <select id="walkthroughSelect">
+                    <option value="quick-demo">Quick Demo: Connect &amp; Login</option>
                     <option value="session-stack">Session Stack (VTAM &rarr; TSO &rarr; ISPF)</option>
                     <option value="deferred-exec">Deferred Execution (JCL &rarr; JES)</option>
                     <option value="system-inspection">System Inspection (Procedures &amp; Config)</option>
@@ -109,7 +106,7 @@
                         <span class="cp-tag cp-vtam">VTAM</span>
                         <span class="cp-tag cp-tso">TSO</span>
                         <span class="cp-tag cp-racf">RACF</span>
-                        <span class="cp-tag cp-cics">CICS</span>
+                        <span class="cp-tag cp-cics">CICS/KICKS</span>
                         <span class="cp-tag cp-jes">JES</span>
                     </div>
                 </div>
@@ -152,14 +149,11 @@ async function checkStatus() {
         const data = await res.json();
         const connEl = document.getElementById('connStatus');
         const hostEl = document.getElementById('connHost');
-        const birpEl = document.getElementById('birpStatus');
 
         isConnected = data.connected;
         connEl.textContent = data.connected ? 'Connected' : 'Disconnected';
         connEl.className = 'value ' + (data.connected ? 'ok' : 'err');
         hostEl.textContent = data.connected ? data.host : '-';
-        birpEl.textContent = data.birp_available ? 'Available' : 'Not Found';
-        birpEl.className = 'value ' + (data.birp_available ? 'ok' : 'err');
 
         document.getElementById('connBtn').style.display = data.connected ? 'none' : 'inline-block';
         document.getElementById('disconnBtn').style.display = data.connected ? 'inline-block' : 'none';
@@ -276,7 +270,12 @@ async function pollWalkthroughStatus() {
         const data = await res.json();
 
         // Always update screen (shows live terminal changes during actions)
-        document.getElementById('wtScreen').textContent = data.screen || '';
+        const screenEl = document.getElementById('wtScreen');
+        if (data.screen_html) {
+            screenEl.innerHTML = data.screen_html;
+        } else {
+            screenEl.textContent = data.screen || '';
+        }
 
         // Update progress bar
         const pct = data.total > 0 ? ((data.step + 1) / data.total * 100) : 0;
@@ -529,6 +528,35 @@ async function explainCurrentScreen() {
         loadingEntry.innerHTML = `<div style="color:var(--wt-locked);padding:0.5rem;">Explain screen failed: ${e.message}</div>`;
     }
 }
+
+// ==========================================================================
+// Auto-select walkthrough based on URL parameter
+// ==========================================================================
+function initFromUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    const plane = params.get('plane');
+    if (!plane) return;
+    
+    // Map control planes to walkthroughs
+    const planeToWalkthrough = {
+        'vtam': 'session-stack',
+        'tso': 'quick-demo',
+        'racf': 'auth-model',
+        'jes': 'deferred-exec',
+        'cics': 'cics-kicks'  // KICKS transaction processing demo
+    };
+    
+    const walkthrough = planeToWalkthrough[plane.toLowerCase()];
+    if (walkthrough) {
+        const select = document.getElementById('walkthroughSelect');
+        if (select) {
+            select.value = walkthrough;
+        }
+    }
+}
+
+// Call on page load
+initFromUrlParams();
 
 // ==========================================================================
 // Toast helper

@@ -1,0 +1,38 @@
+{
+  "id": "sdsf-inspection",
+  "title": "SDSF Job Inspection",
+  "description": "Use SDSF to examine running jobs, output, and system activity.",
+  "category": "recon",
+  "difficulty": "beginner",
+  "questions": ["Q2", "Q3"],
+  "steps": [
+    {
+      "title": "Display Active Jobs",
+      "screen": "SDSF DA (Display Active)\n\nNP   JOBNAME  STEPNAME PROCSTEP  JOBID    OWNER    C  EXCP\n     JES2     JES2              STC00001 STCUSER  A  12345\n     VTAM     VTAM              STC00002 STCUSER  A  8901\n     TSO001   IKJEFT01          TSU00015 HERC01   A  234\n     BACKUP   IEBCOPY  STEP1    JOB00045 IBMUSER  A  5678",
+      "expected": "Identify running address spaces and their owners.",
+      "hint": "OWNER column shows who started each job. STC=Started Task, TSU=TSO User, JOB=Batch.",
+      "assessment": "Q2: Each address space runs under a specific identity established at startup."
+    },
+    {
+      "title": "Job Output Queue",
+      "screen": "SDSF H (Held Output)\n\nNP   JOBNAME  JOBID    OWNER    C  DEST     TOT-REC\n     BACKUP   JOB00045 IBMUSER  H  LOCAL    15234\n     REPORT   JOB00044 HERC01   H  LOCAL    892\n     COMPILE  JOB00043 HERC01   H  LOCAL    3456",
+      "expected": "View job output and understand the SYSOUT model.",
+      "hint": "Output stays in JES spool until printed or purged. Can contain sensitive data.",
+      "assessment": "Q3: Job output is retained - deferred availability of results."
+    },
+    {
+      "title": "Examine Job JCL",
+      "screen": "SDSF: Display BACKUP JOB00045 JCL\n\n//BACKUP JOB (ACCT),'NIGHTLY BACKUP',CLASS=A\n//STEP1 EXEC PGM=IEBCOPY\n//SYSUT1 DD DSN=PROD.DATABASE,DISP=SHR\n//SYSUT2 DD DSN=BACKUP.DATABASE,\n//          DISP=(NEW,CATLG),UNIT=TAPE",
+      "expected": "Extract JCL from a completed job to understand what it accessed.",
+      "hint": "Job JCL reveals datasets accessed, programs run, and processing logic.",
+      "assessment": "Q3: Retained job info shows what ran and under whose authority."
+    },
+    {
+      "title": "System Log",
+      "screen": "SDSF LOG\n\n14:22:31 HERC01   TSO LOGON\n14:23:45 HERC01   ISPF ENTRY\n14:25:12 ICH408I  HERC01 NOT AUTH TO SYS1.PARMLIB\n14:30:00 JOB00045 BACKUP STARTED\n14:45:23 JOB00045 BACKUP ENDED CC=0000",
+      "expected": "Use system log to trace user activity and security events.",
+      "hint": "ICH messages are RACF security events. LOG shows timeline of activity.",
+      "assessment": "Q2: Every authorization check is logged - audit trail exists."
+    }
+  ]
+}
