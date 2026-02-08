@@ -1,6 +1,6 @@
 # Mainframe AI Assistant
 
-A comprehensive, locally-hosted AI-powered platform for mainframe operations, security education, and trust relationship analysis. Built for security professionals who need to understand IBM mainframe systems.
+A comprehensive, locally-hosted AI-powered platform for mainframe operations, security education, and trust relationship analysis. Built for security professionals who need to understand IBM mainframe systems. Features a retro IBM Lumon-style CRT interface with live TN3270 terminal overlay, click-to-analyze AI, and hover-reveal contextual hints.
 
 ## Features
 
@@ -8,13 +8,17 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
 
 | Feature | Description |
 |---------|-------------|
-| **TN3270 Terminal** | Full 3270 terminal emulation via TN3270 v2 |
+| **TN3270 Terminal** | Full 3270 terminal emulation with AI-powered screen analysis |
 | **AI Chat** | Local LLM (Ollama default, pluggable backend) for mainframe Q&A |
 | **Red Team Tutor** | Guided learning paths for security professionals |
 | **Trust Graph** | BloodHound-inspired relationship visualization |
+| **Test & Report** | Pentest findings engine with professional report generation |
+| **Abstract Models** | Interactive mental model explorer with click-to-map |
 | **RAG Knowledge Base** | Retrieval-augmented generation with mainframe docs |
-| **MCP Server** | Model Context Protocol for Ollama Desktop (optional) |
+| **Security Labs** | Hands-on exercises for mainframe security skills |
 | **Network Scanner** | Discover TN3270 services on networks |
+| **MCP Server** | Model Context Protocol for Ollama Desktop (optional) |
+| **Presentation Slides** | Built-in slide deck for talks and training |
 
 ### What Makes This Different
 
@@ -68,8 +72,8 @@ A comprehensive, locally-hosted AI-powered platform for mainframe operations, se
 cd mainframe_ai_assistant
 
 # Create virtual environment
-python3 -m venv venv
-source venv/bin/activate
+python3 -m venv .venv
+source .venv/bin/activate
 
 # Install dependencies
 pip install -r requirements.txt
@@ -84,19 +88,27 @@ ollama serve
 ollama pull llama3.1:8b
 
 # Start the web app
-python web_app.py
+python run.py
 ```
 
 ### Access Points
 
 | URL | Description |
 |-----|-------------|
-| http://127.0.0.1:8080 | Landing page |
+| http://127.0.0.1:8080 | Home — retro CRT terminal with live overlay |
+| http://127.0.0.1:8080/terminal | Full-screen TN3270 terminal |
+| http://127.0.0.1:8080/walkthrough | Autonomous walkthroughs |
 | http://127.0.0.1:8080/tutor | Red Team Tutor |
-| http://127.0.0.1:8080/terminal | TN3270 Terminal |
-| http://127.0.0.1:8080/chat | AI Chat |
 | http://127.0.0.1:8080/graph | Trust Graph |
+| http://127.0.0.1:8080/recon | Test & Report |
+| http://127.0.0.1:8080/labs | Security Labs |
+| http://127.0.0.1:8080/chat | AI Chat |
+| http://127.0.0.1:8080/abstract-models | Abstract Models |
+| http://127.0.0.1:8080/scanner | Network Scanner |
 | http://127.0.0.1:8080/rag | Knowledge Base |
+| http://127.0.0.1:8080/architecture | Architecture |
+| http://127.0.0.1:8080/docs | API Docs |
+| http://127.0.0.1:8080/slides | Presentation Slides |
 
 ### Demo Without a Mainframe
 
@@ -105,12 +117,14 @@ The `/terminal` page requires a TN3270 target (TK5 or a real mainframe).
 
 ### Screenshots / Demo Media
 
-Add 2–4 visuals before publishing a blog post. Suggested captures:
+Suggested captures for blog posts and presentations:
 
-- `/terminal` with the floating chat panel
-- `/tutor` learning path screen
-- `/graph` trust graph view
-- `/chat` answer explaining an ABEND
+- `/` — retro CRT home screen with live terminal overlay
+- `/terminal` — full-screen TN3270 with AI chat panel
+- `/tutor` — Red Team Tutor learning path
+- `/graph` — trust graph visualization
+- `/recon` — Test & Report findings view
+- `/abstract-models` — mental model mapping
 
 Place assets under `docs/assets/` (see `docs/assets/README.md` for naming).
 
@@ -223,7 +237,7 @@ File-based retrieval-augmented generation.
 - Markdown (.md)
 
 **Built-in Knowledge:**
-- z/OS concepts
+- Mainframe concepts
 - ABEND code database
 - JCL templates
 - TSO/ISPF guides
@@ -265,40 +279,49 @@ Add to `~/.config/ollama/ollama_desktop_config.json`:
 
 ```
 mainframe_ai_assistant/
-├── web_app.py              # FastAPI main application
-├── agent_tools.py          # Shared tool definitions
+├── run.py                  # Application entry point
+├── app/                    # Modular FastAPI application
+│   ├── routes/             # API endpoints (14 modules)
+│   ├── services/           # Business logic
+│   ├── constants/          # Prompts, walkthroughs, paths
+│   └── models/             # Pydantic schemas
+├── agent_tools.py          # TN3270 connection tools
 ├── trust_graph.py          # Graph data model + queries
 ├── graph_tools.py          # Parsers + agent loops
 ├── rag_engine.py           # RAG with file-based embeddings
+├── recon_engine.py         # Enumeration and findings engine
+├── methodology_engine.py   # Assessment methodology
 ├── mcp_server.py           # MCP server for Ollama Desktop
+├── ai_bridge.py            # CICS AI bridge
 ├── mainframe_assistant.py  # CLI interface (alternative)
 │
-├── tn3270v2_modules/         # TN3270 v2 TN3270 toolkit
-│   ├── emulator/           # WrappedEmulator
-│   ├── core/               # Screen, Field models
-│   └── zos/                # TSO, CICS, JES helpers
-│
-├── templates/              # Jinja2 HTML templates
-│   ├── base.html
-│   ├── index.html          # Landing page
+├── templates/              # Jinja2 HTML templates (16 pages)
+│   ├── base.html           # Base template
+│   ├── index.html          # Home — retro CRT terminal
+│   ├── terminal.html       # Full-screen TN3270
 │   ├── tutor.html          # Red Team Tutor
-│   ├── terminal.html       # TN3270 Terminal
 │   ├── chat.html           # AI Chat
 │   ├── graph.html          # Trust Graph
-│   └── rag.html            # Knowledge Base
+│   ├── recon.html          # Test & Report
+│   ├── abstract_models.html # Abstract Models
+│   ├── scanner.html        # Network Scanner
+│   ├── rag.html            # Knowledge Base
+│   └── slides.html         # Presentation Slides
 │
 ├── static/
-│   ├── css/pages/          # Page-specific styles
+│   ├── css/pages/          # Per-page stylesheets
+│   ├── img/                # IBM logos, retro terminal image
+│   ├── fonts/              # IBM Plex Mono, IBM Plex Sans
 │   └── js/                 # JavaScript utilities
 │
-├── rag_data/               # RAG storage
-│   ├── documents/          # Uploaded docs
-│   └── embeddings/         # Vector store
+├── slides/                 # Presentation assets
+│   ├── screenshots/        # Slide images
+│   └── ocr/                # OCR text from slides
 │
+├── lab_data/               # Lab exercise definitions (JSON)
 ├── trust_graph_data/       # Graph persistence
-│   └── graph.json
-│
-└── screencaps/             # Captured screens
+├── kicks/                  # CICS/KICKS BMS, COBOL, JCL
+└── tk5/                    # TK5 MVS 3.8j emulator
 ```
 
 ---
@@ -428,7 +451,7 @@ You can point `OLLAMA_URL` to any Ollama-compatible `/api/chat` server. For non-
 
 ## TK5 Integration
 
-This system is designed for TK5 (MVS 3.8J under Hercules).
+This system is designed for TK5 (MVS 3.8j under Hercules).
 
 **Starting TK5:**
 ```bash
@@ -471,7 +494,7 @@ Educational use. See LICENSE file.
 
 ## Acknowledgments
 
-- **TN3270 v2** - TN3270 terminal emulation framework
+- **py3270** - TN3270 terminal emulation
 - **TK5/Hercules** - MVS 3.8J emulation
 - **Ollama** - Local LLM inference
 - **D3.js** - Graph visualization

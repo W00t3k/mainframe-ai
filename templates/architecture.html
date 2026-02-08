@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
-{% block title %}Architecture - IBM z/OS AI Assistant{% endblock %}
+{% block title %}Architecture - IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/architecture.css">
 {% endblock %}
 
 {% block body %}
-{% set brand_title = "z/OS Architecture" %}
+{% set brand_title = "Mainframe Architecture" %}
 {% set nav_items = [
     {'href': '/', 'label': 'Home'},
     {'href': '/terminal', 'label': 'Terminal'},
@@ -23,7 +23,6 @@
 
 <main class="page">
     <section class="arch-hero">
-        <a href="/" class="back-link">← Back</a>
         <h1>System Architecture</h1>
         <p>
             A local-first mainframe operations assistant with FastAPI at the center, Ollama for LLM + embeddings,
@@ -422,7 +421,7 @@
                     </tr>
                     <tr>
                         <td>Chat</td>
-                        <td>Natural language interface to z/OS expertise.</td>
+                        <td>Natural language interface to Mainframe expertise.</td>
                         <td><code>/api/chat</code></td>
                     </tr>
                     <tr>

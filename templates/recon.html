@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Recon & Assessment - IBM z/OS AI Assistant{% endblock %}
+{% block title %}Test & Report - IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/recon.css">
@@ -14,10 +14,11 @@
     <!-- Header -->
     <header class="recon-header">
         <div class="brand">
-            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
-            <h1><span>Recon</span> & Assessment</h1>
+            <a href="/" title="Home" style="display:flex;align-items:center;">
+                <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
+            </a>
+            <h1><span>Test</span> & Report</h1>
         </div>
-        <a href="/" class="back-link">&larr; Back to Dashboard</a>
     </header>
 
     <!-- Connection bar -->
@@ -69,10 +70,10 @@
                             not technical. Exploits are rarely required when authority is misunderstood.
                         </blockquote>
                         <p class="methodology-text">
-                            z/OS is not a server. It is a federation of subsystems where security decisions occur
+                            Mainframe is not a server. It is a federation of subsystems where security decisions occur
                             outside the kernel. Modern assessors import assumptions from Unix and cloud that do not
                             apply. The result: critical exposure is missed not because testers lack skill, but
-                            because they ask the wrong questions.
+                            because they apply the wrong model.
                         </p>
                     </div>
                 </div>
@@ -85,7 +86,7 @@
                     </h2>
                     <div class="section-body open">
                         <p class="methodology-text" style="margin-bottom:1rem;">
-                            5 assumptions modern assessors import that do not apply to z/OS:
+                            5 assumptions modern assessors import that do not apply to Mainframe:
                         </p>
                         <div class="assumption-cards">
 
@@ -94,10 +95,10 @@
                                     <div class="card-front">
                                         <div class="card-label">Assumption</div>
                                         <div class="card-text">"There is a root user"</div>
-                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                        <div class="card-hint">Click to reveal Mainframe reality</div>
                                     </div>
                                     <div class="card-back">
-                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-label">Mainframe Reality</div>
                                         <div class="card-text">RACF distributes authority across profiles, not a single account. There is no omnipotent root -- authority is granted per-resource through profile definitions.</div>
                                     </div>
                                 </div>
@@ -108,10 +109,10 @@
                                     <div class="card-front">
                                         <div class="card-label">Assumption</div>
                                         <div class="card-text">"Processes are short-lived"</div>
-                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                        <div class="card-hint">Click to reveal Mainframe reality</div>
                                     </div>
                                     <div class="card-back">
-                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-label">Mainframe Reality</div>
                                         <div class="card-text">Address spaces persist. Identity outlives sessions. A CICS region may run for months. The security context you inherit depends on when and how you entered, not just who you are.</div>
                                     </div>
                                 </div>
@@ -122,10 +123,10 @@
                                     <div class="card-front">
                                         <div class="card-label">Assumption</div>
                                         <div class="card-text">"Ports define exposure"</div>
-                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                        <div class="card-hint">Click to reveal Mainframe reality</div>
                                     </div>
                                     <div class="card-back">
-                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-label">Mainframe Reality</div>
                                         <div class="card-text">VTAM sessions outlive TCP connections. Network exposure does not equal authority. The session fabric exists independently of IP ports -- scanning nmap-style misses the real attack surface.</div>
                                     </div>
                                 </div>
@@ -136,10 +137,10 @@
                                     <div class="card-front">
                                         <div class="card-label">Assumption</div>
                                         <div class="card-text">"Authentication = Authorization"</div>
-                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                        <div class="card-hint">Click to reveal Mainframe reality</div>
                                     </div>
                                     <div class="card-back">
-                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-label">Mainframe Reality</div>
                                         <div class="card-text">RACF separates these completely. Subsystems ask "may this identity do this action?" -- authentication proves who you are, but every resource access is a separate authorization decision.</div>
                                     </div>
                                 </div>
@@ -150,10 +151,10 @@
                                     <div class="card-front">
                                         <div class="card-label">Assumption</div>
                                         <div class="card-text">"Work executes immediately"</div>
-                                        <div class="card-hint">Click to reveal z/OS reality</div>
+                                        <div class="card-hint">Click to reveal Mainframe reality</div>
                                     </div>
                                     <div class="card-back">
-                                        <div class="card-label">z/OS Reality</div>
+                                        <div class="card-label">Mainframe Reality</div>
                                         <div class="card-text">JES brokers deferred privileged execution. Jobs are declared, queued, and run later -- often under a different identity context. Authority decisions precede execution by minutes, hours, or days.</div>
                                     </div>
                                 </div>
@@ -171,7 +172,7 @@
                     </h2>
                     <div class="section-body open">
                         <p class="methodology-text" style="margin-bottom:1rem;">
-                            z/OS security is not enforced by a single kernel. It is distributed across 5 control planes, each with its own
+                            Mainframe security is not enforced by a single kernel. It is distributed across 5 control planes, each with its own
                             identity model, enforcement boundary, and failure modes. Click a plane to jump to its assessment step.
                         </p>
                         <div class="control-plane-cards">
@@ -219,65 +220,65 @@
                 <div class="methodology-section">
                     <h2 class="section-toggle" onclick="toggleSection(this)">
                         <span class="toggle-icon">&#9660;</span>
-                        The Assessment Checklist
+                        Assessment Findings Checklist
                     </h2>
                     <div class="section-body open">
                         <p class="methodology-text" style="margin-bottom:1rem;">
-                            Every assessment must answer these 5 questions. Check them off as you work through the Assess tab.
+                            Track findings as you work through the Assess tab. Check off each area as you identify issues.
                         </p>
                         <div class="checklist">
-                            <label class="checklist-item" data-question="1">
+                            <label class="checklist-item" data-finding="1">
                                 <input type="checkbox" id="check1" onchange="updateChecklist()">
                                 <div class="checklist-content">
-                                    <span class="checklist-num">Q1</span>
+                                    <span class="checklist-num">F1</span>
                                     <div>
-                                        <strong>Where is identity bound?</strong>
-                                        <p>How does the system associate a user identity with a session, job, or transaction?</p>
+                                        <strong>Identity Binding</strong>
+                                        <p>How the system associates a user identity with a session, job, or transaction.</p>
                                     </div>
                                 </div>
                             </label>
-                            <label class="checklist-item" data-question="2">
+                            <label class="checklist-item" data-finding="2">
                                 <input type="checkbox" id="check2" onchange="updateChecklist()">
                                 <div class="checklist-content">
-                                    <span class="checklist-num">Q2</span>
+                                    <span class="checklist-num">F2</span>
                                     <div>
-                                        <strong>When is authority evaluated?</strong>
-                                        <p>At what point does the system check whether an identity may perform an action?</p>
+                                        <strong>Authority Evaluation</strong>
+                                        <p>Where the system checks whether an identity may perform an action.</p>
                                     </div>
                                 </div>
                             </label>
-                            <label class="checklist-item" data-question="3">
+                            <label class="checklist-item" data-finding="3">
                                 <input type="checkbox" id="check3" onchange="updateChecklist()">
                                 <div class="checklist-content">
-                                    <span class="checklist-num">Q3</span>
+                                    <span class="checklist-num">F3</span>
                                     <div>
-                                        <strong>What executes later than expected?</strong>
-                                        <p>Which operations are deferred, queued, or scheduled -- and under whose authority do they run?</p>
+                                        <strong>Deferred Execution</strong>
+                                        <p>Operations that are deferred, queued, or scheduled — and under whose authority they run.</p>
                                     </div>
                                 </div>
                             </label>
-                            <label class="checklist-item" data-question="4">
+                            <label class="checklist-item" data-finding="4">
                                 <input type="checkbox" id="check4" onchange="updateChecklist()">
                                 <div class="checklist-content">
-                                    <span class="checklist-num">Q4</span>
+                                    <span class="checklist-num">F4</span>
                                     <div>
-                                        <strong>Which subsystem enforces policy?</strong>
-                                        <p>Is it TSO, RACF, CICS, JES, or VTAM that actually says "no" to an unauthorized request?</p>
+                                        <strong>Policy Enforcement</strong>
+                                        <p>Which subsystem (TSO, RACF, CICS, JES, VTAM) enforces access control.</p>
                                     </div>
                                 </div>
                             </label>
-                            <label class="checklist-item" data-question="5">
+                            <label class="checklist-item" data-finding="5">
                                 <input type="checkbox" id="check5" onchange="updateChecklist()">
                                 <div class="checklist-content">
-                                    <span class="checklist-num">Q5</span>
+                                    <span class="checklist-num">F5</span>
                                     <div>
-                                        <strong>What assumptions are you importing incorrectly?</strong>
-                                        <p>What do you "know" from Unix/cloud/Windows that simply does not apply here?</p>
+                                        <strong>Incorrect Assumptions</strong>
+                                        <p>Unix/cloud/Windows assumptions that do not apply to Mainframe.</p>
                                     </div>
                                 </div>
                             </label>
                         </div>
-                        <div class="checklist-progress" id="checklistProgress">0 / 5 questions addressed</div>
+                        <div class="checklist-progress" id="checklistProgress">0 / 5 findings areas checked</div>
                     </div>
                 </div>
 
@@ -322,7 +323,7 @@
                         <p>Sessions outlive TCP connections. Network exposure does not equal authority.
                            VTAM APPLIDs reveal which control planes are active on this LPAR -- before you
                            interact with any of them, you need to know what's there.</p>
-                        <div class="rationale-question">Answers: Q1 (Where is identity bound?) and Q5 (What assumptions are you importing?)</div>
+                        <div class="rationale-tags"><span class="tag">Identity Binding</span><span class="tag">Incorrect Assumptions</span></div>
                     </div>
                     <div class="step-controls">
                         <div class="form-row">
@@ -370,7 +371,7 @@
                         <p>Identity persists across time and execution modes. TSO userids are the primary
                            interactive identity. RACF messages on screen reveal the authorization model in action --
                            users, groups, profiles, classes.</p>
-                        <div class="rationale-question">Answers: Q1 (Where is identity bound?) and Q2 (When is authority evaluated?)</div>
+                        <div class="rationale-tags"><span class="tag">Identity Binding</span><span class="tag">Authority Evaluation</span></div>
                     </div>
                     <div class="step-controls">
                         <div class="form-row">
@@ -423,7 +424,7 @@
                         <p>Transactions are the real security boundary. CICS mediates execution, not the OS.
                            Enumerating which transactions are accessible vs restricted reveals the actual enforcement surface --
                            not the perceived one.</p>
-                        <div class="rationale-question">Answers: Q2 (When is authority evaluated?) and Q4 (Which subsystem enforces policy?)</div>
+                        <div class="rationale-tags"><span class="tag">Authority Evaluation</span><span class="tag">Policy Enforcement</span></div>
                     </div>
                     <div class="step-controls">
                         <div class="form-row">
@@ -476,7 +477,7 @@
                         <p>Test enforcement points, not ports. Hidden fields may contain identity tokens or authority
                            indicators. Screen patterns reveal RACF messages, credential prompts, and access control
                            indicators that expose the authorization model in action.</p>
-                        <div class="rationale-question">Answers: Q2 (When is authority evaluated?) and Q4 (Which subsystem enforces policy?)</div>
+                        <div class="rationale-tags"><span class="tag">Authority Evaluation</span><span class="tag">Policy Enforcement</span></div>
                     </div>
                     <div class="step-controls">
                         <div class="form-row">
@@ -524,7 +525,7 @@
                            Crawling the application structure reveals execution paths, menu hierarchies, and
                            deferred operations that may run under different identity contexts than the one that
                            submitted them.</p>
-                        <div class="rationale-question">Answers: Q3 (What executes later than expected?) and Q5 (What assumptions are you importing?)</div>
+                        <div class="rationale-tags"><span class="tag">Deferred Execution</span><span class="tag">Incorrect Assumptions</span></div>
                     </div>
                     <div class="step-controls">
                         <div class="form-row">
@@ -631,7 +632,7 @@
             <div class="panel-section">
                 <h2>Assessment Report</h2>
                 <p class="assess-intro">
-                    Generate a report organized by the 5 assessment questions and control planes.
+                    Generate a report organized by findings and control planes.
                 </p>
 
                 <div class="report-methodology-summary" id="reportMethodSummary">
@@ -690,7 +691,7 @@
             <div class="panel-section">
                 <h2>EBCDIC &amp; TN3270 Tools</h2>
                 <p class="assess-intro">
-                    z/OS uses EBCDIC encoding — not ASCII. TN3270 transmits everything in plaintext EBCDIC.
+                    Mainframe uses EBCDIC encoding — not ASCII. TN3270 transmits everything in plaintext EBCDIC.
                     Use these tools to encode, decode, and observe the wire format.
                 </p>
 
@@ -893,7 +894,7 @@ function updateChecklist() {
     for (let i = 1; i <= 5; i++) {
         if (document.getElementById('check' + i).checked) count++;
     }
-    document.getElementById('checklistProgress').textContent = count + ' / 5 questions addressed';
+    document.getElementById('checklistProgress').textContent = count + ' / 5 findings areas checked';
 }
 
 function goToAssessStep(step) {
@@ -1256,7 +1257,7 @@ function updateFindingsTab(module, results) {
                     <span class="badge sev-medium">medium</span>
                     <span class="finding-desc">${assessResults.screen.hidden.length} hidden field(s) detected on screen</span>
                 </div>
-                <div class="finding-location">Answers Q4: Which subsystem enforces policy?</div>
+                <div class="finding-location">Finding: Policy enforcement point</div>
             `;
             listEl.appendChild(card);
         }
@@ -1269,7 +1270,7 @@ function updateFindingsTab(module, results) {
                     <span class="finding-desc">${f.description}</span>
                 </div>
                 <code class="finding-match">${(f.match || '').replace(/</g, '&lt;')}</code>
-                <div class="finding-location">${f.location} | Answers Q2: When is authority evaluated?</div>
+                <div class="finding-location">${f.location}</div>
             `;
             listEl.appendChild(card);
         });
@@ -1286,10 +1287,10 @@ function updateFindingsTab(module, results) {
         return;
     }
 
-    const questionMap = {
-        vtam: 'Answers Q1: Where is identity bound?',
-        tso: 'Answers Q1 & Q2: Identity binding and authority evaluation',
-        cics: 'Answers Q2 & Q4: Authority evaluation and subsystem enforcement',
+    const findingMap = {
+        vtam: 'Finding: VTAM session enumeration',
+        tso: 'Finding: TSO identity enumeration',
+        cics: 'Finding: CICS transaction enumeration',
     };
 
     valid.forEach(r => {
@@ -1302,7 +1303,7 @@ function updateFindingsTab(module, results) {
                 <span class="badge sev-${sev}">${r.status}</span>
                 <span class="finding-desc"><strong>${name}</strong>: ${r.message}</span>
             </div>
-            <div class="finding-location">${questionMap[module] || ''}</div>
+            <div class="finding-location">${findingMap[module] || ''}</div>
         `;
         listEl.appendChild(card);
     });

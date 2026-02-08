@@ -15,7 +15,7 @@
             <a href="/" class="home-btn" title="Home">
                 <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
             </a>
-            <h1>Red Team Tutor</h1>
+            <h1><span style="color:#fa4d56;">Red Team Tutor</span></h1>
         </div>
 
         <!-- Labs Section (loaded dynamically) -->
@@ -109,7 +109,7 @@
 
                 <!-- Welcome (shown when no module) -->
                 <div class="welcome-card" id="welcomeCard">
-                    <h2>Welcome to Red Team Tutor</h2>
+                    <h2>Welcome to <span style="color:#fa4d56;">Red Team Tutor</span></h2>
                     <p>Learn mainframe security through guided exploration.</p>
                     <div class="welcome-highlights">
                         <div class="welcome-panel">
@@ -265,7 +265,7 @@ function render() {
     // Breadcrumb
     const currentLabData = labsIndex.find(l => l.id === state.currentLab);
     $('#crumbModule').textContent = currentLabData?.title || 'No lab selected';
-    $('#crumbPersona').textContent = 'Red Team Tutor';
+    $('#crumbPersona').innerHTML = '<span style="color:#fa4d56;">Red Team Tutor</span>';
 
     // Connection status
     const connStatus = $('#connStatus');

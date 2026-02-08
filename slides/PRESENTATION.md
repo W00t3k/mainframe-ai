@@ -6,33 +6,35 @@
 # Slide 1: Title
 
 ## **Mainframe Security Toolkit**
-### AI-Powered z/OS Operations & Security Assessment
+### AI-Powered Mainframe Operations & Security Assessment
 
 **Key Points:**
-- Local-first design (no cloud APIs)
+- Local-first design (no cloud APIs, no data leaves your machine)
 - Ollama LLM for AI capabilities
-- TN3270 terminal integration
+- Live TN3270 terminal with click-to-analyze
+- Retro IBM Lumon-style CRT interface
 - Red team focused methodology
+- 14+ integrated tools in one platform
 
 **Speaker Notes:**
-> This toolkit is designed for security professionals learning mainframe operations. Everything runs locally - no data leaves your machine.
+> This toolkit is designed for security professionals learning mainframe operations. Everything runs locally - no data leaves your machine. The retro IBM interface isn't just aesthetic — it reinforces the mental model of interacting with a real mainframe terminal.
 
 ---
 
-# Slide 2: The 5 Assessment Questions
+# Slide 2: The 5 Findings Areas
 
 ## Core Methodology Framework
 
-| # | Question | Focus Area |
-|---|----------|------------|
-| Q1 | Where is identity bound? | Authentication points |
-| Q2 | When is authority evaluated? | Authorization timing |
-| Q3 | What executes later than expected? | Deferred execution |
-| Q4 | Which subsystem enforces policy? | Security enforcement |
-| Q5 | What assumptions are you importing? | Implicit trust |
+| # | Finding | Focus Area |
+|---|---------|------------|
+| F1 | Identity Binding | Where is identity bound? |
+| F2 | Authority Evaluation | When is authority evaluated? |
+| F3 | Deferred Execution | What executes later than expected? |
+| F4 | Policy Enforcement | Which subsystem enforces policy? |
+| F5 | Imported Assumptions | What assumptions are you importing? |
 
 **Speaker Notes:**
-> These 5 questions form the assessment framework. Every screen, every action should be evaluated against these questions. They help identify security gaps in mainframe environments.
+> These 5 findings areas form the assessment framework. Every screen, every action should be evaluated against these areas. They help identify security gaps in mainframe environments. This is the same model that exposed ADCS abuse and Kerberos delegation attacks in Active Directory.
 
 ---
 
@@ -179,11 +181,11 @@
 
 ---
 
-# Slide 9: Module - Recon Engine
+# Slide 9: Module - Test & Report
 
-## `recon_engine.py` - Enumeration
+## `recon_engine.py` - Enumeration & Findings
 
-**Purpose:** Native Python TN3270 enumeration
+**Purpose:** Native Python TN3270 enumeration and pentest reporting
 
 **Enumerators:**
 | Class | Target | Method |
@@ -192,13 +194,15 @@
 | `CICSEnumerator` | Transactions | CESN/CEMT |
 | `VTAMEnumerator` | APPLIDs | LOGON attempts |
 
-**Detectors:**
+**Detectors & Reporting:**
 - `HiddenFieldDetector` - Find hidden screen fields
-- `ScreenAnalyzer` - AI-assisted analysis
+- `ScreenAnalyzer` - Security findings detection
 - `ApplicationMapper` - Map application paths
+- Report generation in JSON, Markdown, and HTML
+- Findings organized by F1–F5 areas
 
 **Speaker Notes:**
-> This reimplements classic mainframe enumeration in Python. No external tools needed. All I/O goes through our TN3270 connection.
+> This reimplements classic mainframe enumeration in Python. No external tools needed. All I/O goes through our TN3270 connection. Reports are organized by findings areas, not questions.
 
 ---
 
@@ -236,15 +240,16 @@
 - Deferred Execution (JCL → JES)
 - Authorization Model (RACF)
 - COBOL Development
+- System Inspection, Dataset Model, Address Spaces
 
 **How It Works:**
 1. Auto-connects to mainframe
 2. Sends keystrokes automatically
-3. Narrates each step
-4. Tracks Q1-Q5 coverage
+3. Narrates each step with AI
+4. Maps to F1–F5 findings areas
 
 **Speaker Notes:**
-> Great for demonstrations. The system drives itself through the mainframe while explaining what's happening. Audience just watches and learns.
+> Great for demonstrations. The system drives itself through the mainframe while explaining what's happening. Audience just watches and learns. Seven walkthroughs cover all five control planes.
 
 ---
 
@@ -305,19 +310,22 @@ Response to User
 | Layer | Technology |
 |-------|------------|
 | Web Framework | FastAPI + Jinja2 |
-| Frontend | Vanilla JS + CSS |
+| Frontend | Vanilla JS + IBM Plex Mono + Retro IBM CSS |
 | LLM | Ollama (local) |
 | Embeddings | Ollama (nomic-embed) |
 | Terminal | py3270 / TN3270 |
-| Visualization | D3.js |
+| Visualization | D3.js (trust graph) |
+| UI Theme | IBM Retro / Lumon CRT aesthetic |
 
 **Key Design Decisions:**
 - No cloud APIs = air-gapped capable
 - File-based storage = portable
-- Modular architecture = extensible
+- Modular architecture = extensible (14 route modules)
+- Click-to-analyze = instant AI on any terminal line
+- Hover hints = contextual help everywhere
 
 **Speaker Notes:**
-> Everything runs locally. You can use this on a disconnected network. The only external requirement is the mainframe itself (TK5 for learning).
+> Everything runs locally. You can use this on a disconnected network. The retro IBM aesthetic with IBM Plex Mono font reinforces the mainframe mental model. The click-to-analyze feature means every line on screen becomes a teaching moment.
 
 ---
 
@@ -325,28 +333,38 @@ Response to User
 
 ## Suggested Demo Flow
 
-1. **Landing Page** (2 min)
-   - Show control planes
-   - Explain card categories
+1. **Home Screen** (2 min)
+   - Show retro CRT terminal with live overlay
+   - Click a terminal line → AI analysis appears
+   - Hover over control plane cards → descriptions appear
+   - Show invisible toolbar reveal on hover
 
 2. **Terminal Connection** (3 min)
-   - Connect to TK5
+   - Connect to TK5 via toolbar CONNECT button
    - Navigate to TSO logon
+   - Click lines to explain what's on screen
 
 3. **Walkthrough** (5 min)
    - Run Session Stack walkthrough
-   - Show Q1-Q5 tracking
+   - Show F1–F5 findings tracking
+   - AI narrates each control plane boundary
 
-4. **Trust Graph** (3 min)
+4. **Abstract Models** (3 min)
+   - Click terminal lines to map against mental models
+   - Show Session Stack, Control Planes, Trust Boundaries
+
+5. **Trust Graph** (3 min)
    - Load demo data
    - Run path queries
+   - Show BloodHound-style visualization
 
-5. **Recon** (5 min)
-   - TSO enumeration demo
-   - Show AI analysis
+6. **Test & Report** (4 min)
+   - Run TSO enumeration
+   - Show findings (not questions)
+   - Generate pentest report
 
 **Speaker Notes:**
-> This 18-minute demo hits all major features. Adjust timing based on audience questions and interest areas.
+> This 20-minute demo hits all major features. Start with the home screen — the retro CRT visual is a strong opener. Click-to-analyze is the most impressive feature for live demos. Adjust timing based on audience questions.
 
 ---
 
@@ -397,21 +415,24 @@ Response to User
 
 ## Key Takeaways
 
-1. **5 Questions** - Framework for every assessment
+1. **5 Findings Areas** - F1–F5 framework for every assessment
 2. **5 Control Planes** - VTAM, TSO, RACF, JES, CICS
-3. **Trust Graph** - Visualize relationships
-4. **Local AI** - No data leaves your machine
-5. **Hands-On** - Learn by doing
+3. **Click-to-Analyze** - Every terminal line is a learning moment
+4. **Trust Graph** - Visualize relationships like BloodHound for AD
+5. **Local AI** - No data leaves your machine
+6. **Hands-On** - 14+ tools, labs, walkthroughs, and reports
 
 ## Resources
 
+- `/` - Home screen with live terminal
+- `/abstract-models` - Mental model explorer
 - `/docs` - API documentation
 - `/architecture` - System design
 - `README.md` - Quick start guide
 - `MODULES.md` - Code documentation
 
 **Speaker Notes:**
-> Wrap up with the key concepts. Direct them to resources for continued learning.
+> Wrap up with the key concepts. The click-to-analyze feature is the most memorable demo moment — use it throughout. Direct them to the abstract models page for continued self-study.
 
 ---
 
@@ -421,16 +442,20 @@ Response to User
 mainframe_ai_assistant/
 ├── run.py                 # Entry point
 ├── app/                   # FastAPI application
-│   ├── routes/            # API endpoints
+│   ├── routes/            # API endpoints (14 modules)
 │   ├── services/          # Business logic
 │   └── constants/         # Config & prompts
 ├── agent_tools.py         # TN3270 connection
 ├── trust_graph.py         # Graph data model
 ├── graph_tools.py         # Graph analysis
 ├── rag_engine.py          # Knowledge retrieval
-├── recon_engine.py        # Enumeration tools
-├── templates/             # HTML templates
-├── static/                # CSS & JS
+├── recon_engine.py        # Enumeration & findings
+├── methodology_engine.py  # Assessment methodology
+├── ai_bridge.py           # CICS AI bridge
+├── templates/             # HTML templates (16 pages)
+├── static/                # CSS, JS, fonts, images
+├── slides/                # Presentation assets
+├── lab_data/              # Lab exercises (JSON)
 └── docs/                  # Documentation
 ```
 

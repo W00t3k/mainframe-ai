@@ -1,6 +1,6 @@
 # Architecture
 
-This document describes the architecture of the Mainframe AI Assistant and TN3270 v2 modules.
+This document describes the architecture of the Mainframe AI Assistant.
 
 ## System Overview
 
@@ -8,8 +8,9 @@ This document describes the architecture of the Mainframe AI Assistant and TN327
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         User Interfaces                                  │
 ├─────────────────────┬─────────────────────┬─────────────────────────────┤
-│  mainframe_assistant│    web_app.py       │   TN3270 GUI/CLI              │
-│      (CLI)          │    (FastAPI)        │   (tkinter/console)         │
+│  Web App (run.py)   │  CLI (mainframe_   │   MCP Server                  │
+│  FastAPI + Jinja2   │  assistant.py)     │   (mcp_server.py)             │
+│  16 HTML templates  │                    │                               │
 └──────────┬──────────┴──────────┬──────────┴──────────────┬──────────────┘
            │                     │                          │
            ▼                     ▼                          ▼
@@ -21,6 +22,8 @@ This document describes the architecture of the Mainframe AI Assistant and TN327
 │  - Q&A                   │  - Semantic search                            │
 │  - Code generation       │  - Context augmentation                       │
 │  - Screen analysis       │                                             │
+│  - Click-to-analyze      │  methodology_engine.py                       │
+│                          │  - F1–F5 findings framework                   │
 └─────────────────────┬───────────────────────────────────────────────────┘
                       │
                       ▼
@@ -47,33 +50,33 @@ This document describes the architecture of the Mainframe AI Assistant and TN327
 
 ### User Interfaces
 
-#### mainframe_assistant.py
+#### run.py → app/ (Primary)
+
+Modular FastAPI web application with Jinja2 templates.
+
+- 14 API route modules
+- 16 HTML templates with IBM Plex Mono retro theme
+- REST API endpoints
+- WebSocket for real-time updates
+- Click-to-analyze AI on terminal screens
+- Hover hints for contextual descriptions
+- Invisible toolbar with scroll-up reveal
+
+#### mainframe_assistant.py (CLI)
 
 Command-line interface for conversational mainframe interaction.
 
 - Natural language queries
 - Command parsing (/connect, /screen, etc.)
 - Action extraction from LLM responses
-- CLI currently uses Anthropic client by default; can be swapped for other backends
-- Rich terminal output
+- Uses Ollama for LLM inference
 
-#### web_app.py
+#### mcp_server.py (MCP)
 
-FastAPI-based web application with HTMX frontend.
+Model Context Protocol server for external AI tool integration.
 
-- REST API endpoints
-- WebSocket for real-time updates
-- Template-based UI
-- RAG integration
-
-#### TN3270 GUI/CLI
-
-Native Python interfaces for direct mainframe interaction.
-
-- tkinter GUI terminal (TN3270Terminal)
-- Console mode (ConsoleMode)
-- History browser
-- Python REPL integration
+- Exposes mainframe tools via MCP protocol
+- Enables Claude Desktop and other MCP clients
 
 ### AI / RAG Layer
 
@@ -155,7 +158,7 @@ File Operations
 └── load_history()
 ```
 
-#### z/OS (tn3270v2_modules/zos/)
+#### Mainframe Helpers
 
 Mainframe subsystem parsers:
 

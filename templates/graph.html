@@ -5,17 +5,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Trust Graph - Mainframe AI Assistant</title>
     <link rel="stylesheet" href="/static/css/base.css">
+    <link rel="stylesheet" href="/static/css/fonts.css">
     <script src="/static/js/vendor/d3.v7.min.js"></script>
     <style>
         :root {
-            --bg-primary: #0a0a0a;
-            --bg-secondary: #1a1a1a;
-            --bg-tertiary: #2a2a2a;
-            --text-primary: #e0e0e0;
-            --text-secondary: #a0a0a0;
-            --accent: #00ff88;
-            --accent-dim: #00aa55;
-            --border: #333;
+            --bg-primary: #0a0d11;
+            --bg-secondary: #10141a;
+            --bg-tertiary: #1a2030;
+            --text-primary: #dde1e6;
+            --text-secondary: #8d99a8;
+            --accent: #4589ff;
+            --accent-dim: #2a5db0;
+            --border: #1e2a36;
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -23,7 +24,7 @@
         body {
             background: var(--bg-primary);
             color: var(--text-primary);
-            font-family: 'SF Mono', 'Consolas', monospace;
+            font-family: 'IBM Plex Mono', 'SF Mono', 'Consolas', monospace;
             height: 100vh;
             overflow: hidden;
         }
@@ -48,9 +49,11 @@
         }
 
         header h1 {
-            font-size: 16px;
-            font-weight: 500;
-            color: var(--accent);
+            font-size: 13px;
+            font-weight: 700;
+            color: var(--text-primary);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .stats {
@@ -67,7 +70,7 @@
 
         .stat-value {
             color: var(--accent);
-            font-weight: 600;
+            font-weight: 700;
         }
 
         .sidebar {
@@ -77,10 +80,11 @@
         }
 
         .sidebar h3 {
-            font-size: 11px;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
+            letter-spacing: 0.08em;
+            color: var(--accent);
             margin-bottom: 10px;
             padding-bottom: 5px;
             border-bottom: 1px solid var(--border);
@@ -94,12 +98,12 @@
             display: flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 10px;
-            margin-bottom: 4px;
-            border-radius: 4px;
+            padding: 6px 10px;
+            margin-bottom: 2px;
             cursor: pointer;
-            font-size: 12px;
-            transition: background 0.2s;
+            font-size: 11px;
+            transition: background 0.12s;
+            border-left: 2px solid transparent;
         }
 
         .node-type:hover, .query-btn:hover {
@@ -107,20 +111,22 @@
         }
 
         .node-type.active {
-            background: var(--accent-dim);
-            color: var(--bg-primary);
+            background: rgba(69, 137, 255, 0.12);
+            border-left-color: var(--accent);
+            color: var(--accent);
         }
 
         .node-color {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
+            width: 10px;
+            height: 10px;
+            border-radius: 0;
         }
 
         .node-count {
             margin-left: auto;
             color: var(--text-secondary);
-            font-size: 10px;
+            font-size: 9px;
+            font-weight: 600;
         }
 
         .graph-container {
@@ -144,17 +150,21 @@
         .control-btn {
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            border-radius: 4px;
+            color: var(--text-secondary);
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 12px;
-            transition: all 0.2s;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            transition: all 0.12s;
         }
 
         .control-btn:hover {
-            background: var(--accent-dim);
+            background: rgba(69, 137, 255, 0.15);
             border-color: var(--accent);
+            color: var(--accent);
         }
 
         .right-panel {
@@ -168,18 +178,19 @@
         }
 
         .panel-section h3 {
-            font-size: 11px;
+            font-size: 10px;
+            font-weight: 700;
             text-transform: uppercase;
-            letter-spacing: 1px;
-            color: var(--text-secondary);
+            letter-spacing: 0.08em;
+            color: var(--accent);
             margin-bottom: 10px;
         }
 
         .node-details {
             background: var(--bg-tertiary);
-            border-radius: 6px;
+            border: 1px solid var(--border);
             padding: 12px;
-            font-size: 12px;
+            font-size: 11px;
         }
 
         .detail-row {
@@ -199,7 +210,7 @@
 
         .detail-value {
             color: var(--accent);
-            font-weight: 500;
+            font-weight: 600;
             text-align: right;
             max-width: 60%;
             word-break: break-all;
@@ -216,8 +227,7 @@
             border: 1px solid var(--border);
             color: var(--text-primary);
             padding: 10px;
-            border-radius: 4px;
-            font-family: inherit;
+            font-family: 'IBM Plex Mono', monospace;
             font-size: 11px;
             resize: vertical;
             min-height: 100px;
@@ -227,20 +237,23 @@
             background: var(--bg-tertiary);
             border: 1px solid var(--border);
             color: var(--text-primary);
-            padding: 8px 12px;
-            border-radius: 4px;
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
         }
 
         .ingest-form button {
-            background: var(--accent-dim);
+            background: var(--accent);
             border-color: var(--accent);
+            color: #fff;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .ingest-form button:hover {
-            background: var(--accent);
-            color: var(--bg-primary);
+            filter: brightness(1.15);
         }
 
         .finding-form {
@@ -254,39 +267,42 @@
             border: 1px solid var(--border);
             color: var(--text-primary);
             padding: 8px;
-            border-radius: 4px;
-            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 11px;
         }
 
         .finding-form button {
-            background: var(--accent-dim);
+            background: var(--accent);
             border: 1px solid var(--accent);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            border-radius: 4px;
+            color: #fff;
+            padding: 6px 12px;
             cursor: pointer;
-            font-size: 12px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
         }
 
         .finding-form button:hover {
-            background: var(--accent);
-            color: var(--bg-primary);
+            filter: brightness(1.15);
         }
 
         .finding-output {
             background: var(--bg-tertiary);
-            border-radius: 6px;
+            border: 1px solid var(--border);
             padding: 10px;
             font-size: 11px;
             white-space: pre-wrap;
             color: var(--text-secondary);
             max-height: 200px;
             overflow: auto;
+            margin-top: 8px;
         }
 
         .query-results {
             background: var(--bg-tertiary);
-            border-radius: 6px;
+            border: 1px solid var(--border);
             padding: 12px;
             font-size: 11px;
             max-height: 200px;
@@ -306,10 +322,10 @@
         }
 
         .ws-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: #ff4444;
+            width: 6px;
+            height: 6px;
+            border-radius: 0;
+            background: #fa4d56;
         }
 
         .ws-dot.connected {
@@ -327,7 +343,8 @@
         }
 
         .node text {
-            font-size: 10px;
+            font-size: 9px;
+            font-family: 'IBM Plex Mono', monospace;
             fill: var(--text-primary);
             pointer-events: none;
         }
@@ -352,6 +369,9 @@
 <body>
     <div class="container">
         <header>
+            <a href="/" title="Home" style="display:flex;align-items:center;text-decoration:none;margin-right:12px;">
+                <img src="/static/img/ibm-logo-official.svg" alt="IBM" style="height:18px;width:auto;opacity:0.7;">
+            </a>
             <h1>Mainframe Trust Graph</h1>
             <div class="stats">
                 <div class="stat">
@@ -449,16 +469,16 @@
     <script>
         // Node type colors
         const nodeColors = {
-            'EntryPoint': '#ff6b6b',
-            'Panel': '#4ecdc4',
-            'CICSRegion': '#45b7d1',
-            'Transaction': '#96ceb4',
-            'Job': '#ffeaa7',
-            'Proc': '#dfe6e9',
-            'Program': '#a29bfe',
-            'Dataset': '#fd79a8',
-            'Loadlib': '#00b894',
-            'ReturnCode': '#e17055'
+            'EntryPoint': '#fa4d56',
+            'Panel': '#08bdba',
+            'CICSRegion': '#33b1ff',
+            'Transaction': '#42be65',
+            'Job': '#f1c21b',
+            'Proc': '#a8a8a8',
+            'Program': '#be95ff',
+            'Dataset': '#ff7eb6',
+            'Loadlib': '#4589ff',
+            'ReturnCode': '#ff832b'
         };
 
         // Graph state

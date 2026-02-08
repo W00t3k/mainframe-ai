@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}IBM z/OS AI Assistant{% endblock %}
+{% block title %}IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/index.css?v=311">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=413">
 {% endblock %}
 
 {% block head_extra %}
@@ -15,18 +15,20 @@
 <div class="idx-main-col">
 
     <!-- ── Unified Toolbar ── -->
-    <div class="idx-toolbar">
-        <div class="idx-toolbar-center">
-            <a href="/walkthrough" class="idx-pill idx-pill-accent">[F1] LEARN</a>
-            <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()">[C] CONNECT</button>
-            <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()">[D] DEMO</button>
-            <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()">[R] RESTART</button>
-        </div>
-        <div class="idx-toolbar-status" id="toolbarStatus">
-            <span class="ts-item"><span class="ts-led" id="tsOllamaLed"></span><span class="ts-label">LLM</span><span class="ts-val" id="tsModel">—</span></span>
-            <span class="ts-item"><span class="ts-led" id="tsMVSLed"></span><span class="ts-label">MVS</span></span>
-            <span class="ts-item"><span class="ts-label">MEM</span><span class="ts-val" id="tsMem">—</span></span>
-            <span class="ts-clock" id="tsClock">--:--</span>
+    <div class="idx-toolbar" id="idxToolbar">
+        <div class="idx-toolbar-items">
+            <div class="idx-toolbar-center">
+                <a href="/walkthrough" class="idx-pill idx-pill-accent" data-hint="Interactive walkthrough — learn mainframe concepts, control planes, and security fundamentals step by step.">[F1] LEARN</a>
+                <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()" data-hint="Connect to the TN3270 terminal — opens a live session to the MVS 3.8j mainframe via Hercules emulator.">[C] CONNECT</button>
+                <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()" data-hint="Run a guided demo — automatically walks through mainframe screens with AI narration explaining each step.">[D] DEMO</button>
+                <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()" data-hint="Restart the Hercules mainframe emulator — performs an IPL to reset the MVS system to a clean state.">[R] RESTART</button>
+            </div>
+            <div class="idx-toolbar-status" id="toolbarStatus">
+                <span class="ts-item"><span class="ts-led" id="tsOllamaLed"></span><span class="ts-label">LLM</span><span class="ts-val" id="tsModel">—</span></span>
+                <span class="ts-item"><span class="ts-led" id="tsMVSLed"></span><span class="ts-label">MVS</span></span>
+                <span class="ts-item"><span class="ts-label">MEM</span><span class="ts-val" id="tsMem">—</span></span>
+                <span class="ts-clock" id="tsClock">--:--</span>
+            </div>
         </div>
         <button class="idx-hamburger" onclick="togglePanel()" title="Menu">☰</button>
     </div>
@@ -41,28 +43,32 @@
     <span id="llmStatus" style="display:none;"></span>
     <span id="modelName" style="display:none;"></span>
 
-    <!-- ── Hero Section ── -->
-    <div class="hero">
-        <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="hero-logo" title="Natural language interface for mainframe operations, powered by Hercules Hyperion — an open-source System/370, ESA/390 & z/Architecture emulator running MVS 3.8j TK5 locally. No mainframe hardware required.">
-        <div class="hero-text">
+    <!-- ── Desk Hero with CRT Terminal Overlay ── -->
+    <div class="desk-hero">
+        <div class="desk-hero-title">
+            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="hero-logo">
             <h2><span style="color:#78a9ff;">AI-Powered</span> <strong>Mainframe</strong> <span style="color:#78a9ff;">Operations</span></h2>
         </div>
-    </div>
-
-    <!-- ── Live Terminal ── -->
-    <div class="idx-terminal-section" id="terminalSection">
-        <div class="idx-term-header">
-            <span class="idx-term-title">[>_] LIVE TERMINAL</span>
-            <span class="idx-demo-badge" id="demoBadge" style="display:none;">DEMO</span>
-            <div class="idx-term-controls">
-                <button class="idx-term-btn" id="wtPauseBtn" onclick="pauseWalkthrough()" title="Pause" style="display:none;">&#9646;&#9646;</button>
-                <button class="idx-term-btn" id="wtStopBtn" onclick="stopWalkthrough()" title="Stop" style="display:none;">&#9632;</button>
-                <button class="idx-term-btn idx-term-btn-x" id="wtCloseBtn" onclick="closeTerminal()" title="Close">&#10005;</button>
-                <a href="/terminal" class="idx-fullscreen-link">Full Screen &rarr;</a>
+        <!-- Image frame: terminal is positioned relative to THIS -->
+        <div class="desk-hero-frame">
+            <img src="/static/img/ibm-retro-desk.png" alt="Retro IBM Terminal" class="desk-hero-img">
+            <div class="desk-hero-overlay"></div>
+            <!-- Terminal overlaid on the CRT screen -->
+            <div class="crt-terminal" id="terminalSection">
+                <div class="idx-term-header">
+                    <span class="idx-term-title">[>_] LIVE TERMINAL</span>
+                    <span class="idx-demo-badge" id="demoBadge" style="display:none;">DEMO</span>
+                    <div class="idx-term-controls">
+                        <button class="idx-term-btn" id="wtPauseBtn" onclick="pauseWalkthrough()" title="Pause" style="display:none;">&#9646;&#9646;</button>
+                        <button class="idx-term-btn" id="wtStopBtn" onclick="stopWalkthrough()" title="Stop" style="display:none;">&#9632;</button>
+                        <button class="idx-term-btn idx-term-btn-x" id="wtCloseBtn" onclick="restartMainframe()" title="Restart">&#10005;</button>
+                        <a href="/terminal" class="idx-fullscreen-link">Full Screen &rarr;</a>
+                    </div>
+                </div>
+                <div class="idx-term-screen" id="terminalScreen" tabindex="0">
+                    <pre id="terminalText">Connecting...</pre>
+                </div>
             </div>
-        </div>
-        <div class="idx-term-screen" id="terminalScreen" tabindex="0">
-            <pre id="terminalText">Connecting...</pre>
         </div>
     </div>
 
@@ -73,23 +79,23 @@
         <!-- ── Control Planes (collapsible) ── -->
         <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9654;</span> CONTROL PLANES</div>
         <div class="cp-grid collapsed" id="cpGrid">
-            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam" style="background:#1a2a4a !important;">
+            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam" style="background:#1a2a4a !important;" data-hint="VTAM — the session fabric. Controls all terminal sessions and network routing on the mainframe. Every logon flows through VTAM first.">
                 <span class="cp-name">VTAM</span>
                 <span class="cp-desc">Session Fabric</span>
             </a>
-            <a href="/walkthrough?plane=tso" class="cp-card cp-tso" style="background:#1a2a4a !important;">
+            <a href="/walkthrough?plane=tso" class="cp-card cp-tso" style="background:#1a2a4a !important;" data-hint="TSO — interactive command shell. The mainframe equivalent of SSH. Users submit commands, edit datasets, and manage jobs from here.">
                 <span class="cp-name">TSO</span>
                 <span class="cp-desc">Interactive</span>
             </a>
-            <a href="/walkthrough?plane=racf" class="cp-card cp-racf" style="background:#1a2a4a !important;">
+            <a href="/walkthrough?plane=racf" class="cp-card cp-racf" style="background:#1a2a4a !important;" data-hint="RACF — the authorization engine. Controls who can access what. Manages users, groups, profiles, and resource access rules.">
                 <span class="cp-name">RACF</span>
                 <span class="cp-desc">Authorization</span>
             </a>
-            <a href="/walkthrough?plane=jes" class="cp-card cp-jes" style="background:#1a2a4a !important;">
+            <a href="/walkthrough?plane=jes" class="cp-card cp-jes" style="background:#1a2a4a !important;" data-hint="JES — batch execution subsystem. Manages job queues, scheduling, and output. All batch work on the mainframe flows through JES.">
                 <span class="cp-name">JES</span>
                 <span class="cp-desc">Batch Execution</span>
             </a>
-            <a href="/walkthrough?plane=cics" class="cp-card cp-cics" style="background:#1a2a4a !important;">
+            <a href="/walkthrough?plane=cics" class="cp-card cp-cics" style="background:#1a2a4a !important;" data-hint="CICS/KICKS — transaction processing. Handles real-time interactive applications. Think of it as the mainframe's application server.">
                 <span class="cp-name">CICS/KICKS</span>
                 <span class="cp-desc">Transactions</span>
             </a>
@@ -98,18 +104,18 @@
         <!-- ── More Tools (collapsible, collapsed by default) ── -->
         <div class="cp-heading cp-toggle" onclick="toggleSection('toolsGrid', this)" style="margin-top:1.5rem;"><span class="cp-arrow">&#9654;</span> MORE TOOLS</div>
         <nav class="idx-nav collapsed" id="toolsGrid">
-            <a href="/terminal" class="idx-nav-item"><span class="idx-nav-icon">[>_]</span><span class="idx-nav-label">Terminal</span></a>
-            <a href="/chat" class="idx-nav-item"><span class="idx-nav-icon">[AI]</span><span class="idx-nav-label">AI Chat</span></a>
-            <a href="/walkthrough" class="idx-nav-item"><span class="idx-nav-icon">[>>]</span><span class="idx-nav-label">Walkthrough</span></a>
-            <a href="/scanner" class="idx-nav-item"><span class="idx-nav-icon">[?]</span><span class="idx-nav-label">Scanner</span></a>
-            <a href="/tutor" class="idx-nav-item"><span class="idx-nav-icon">[F1]</span><span class="idx-nav-label">Tutor</span></a>
-            <a href="/labs" class="idx-nav-item"><span class="idx-nav-icon">[LAB]</span><span class="idx-nav-label">Labs</span></a>
-            <a href="/recon" class="idx-nav-item"><span class="idx-nav-icon">[*]</span><span class="idx-nav-label">Recon</span></a>
-            <a href="/graph" class="idx-nav-item"><span class="idx-nav-icon">[#]</span><span class="idx-nav-label">Graph</span></a>
-            <a href="/abstract-models" class="idx-nav-item"><span class="idx-nav-icon">[M]</span><span class="idx-nav-label">Models</span></a>
-            <a href="/rag" class="idx-nav-item"><span class="idx-nav-icon">[KB]</span><span class="idx-nav-label">Knowledge</span></a>
-            <a href="/architecture" class="idx-nav-item"><span class="idx-nav-icon">[A]</span><span class="idx-nav-label">Architecture</span></a>
-            <a href="/docs" class="idx-nav-item"><span class="idx-nav-icon">[DOC]</span><span class="idx-nav-label">API Docs</span></a>
+            <a href="/terminal" class="idx-nav-item" data-hint="Full-screen TN3270 terminal — direct mainframe access with AI-powered screen analysis and command assistance."><span class="idx-nav-icon">[>_]</span><span class="idx-nav-label">Terminal</span></a>
+            <a href="/chat" class="idx-nav-item" data-hint="AI Chat — ask questions about mainframe operations, security, JCL, COBOL, and get instant expert answers."><span class="idx-nav-icon">[AI]</span><span class="idx-nav-label">AI Chat</span></a>
+            <a href="/walkthrough" class="idx-nav-item" data-hint="Guided walkthrough — step-by-step tour of mainframe subsystems with AI narration and live terminal demos."><span class="idx-nav-icon">[>>]</span><span class="idx-nav-label">Walkthrough</span></a>
+            <a href="/scanner" class="idx-nav-item" data-hint="Screen scanner — analyze TN3270 screens for security issues, hidden fields, and configuration weaknesses."><span class="idx-nav-icon">[?]</span><span class="idx-nav-label">Scanner</span></a>
+            <a href="/tutor" class="idx-nav-item" data-hint="Red Team Tutor — interactive learning environment for mainframe penetration testing techniques and methodology."><span class="idx-nav-icon">[F1]</span><span class="idx-nav-label">Tutor</span></a>
+            <a href="/labs" class="idx-nav-item" data-hint="Hands-on labs — practice mainframe skills with guided exercises covering JCL, TSO, RACF, and more."><span class="idx-nav-icon">[LAB]</span><span class="idx-nav-label">Labs</span></a>
+            <a href="/recon" class="idx-nav-item" data-hint="Test & Report — run security assessments, enumerate subsystems, and generate professional pentest reports."><span class="idx-nav-icon">[*]</span><span class="idx-nav-label">Test & Report</span></a>
+            <a href="/graph" class="idx-nav-item" data-hint="Trust graph — visualize relationships between mainframe subsystems, users, and security controls."><span class="idx-nav-icon">[#]</span><span class="idx-nav-label">Graph</span></a>
+            <a href="/abstract-models" class="idx-nav-item" data-hint="Abstract models — mental models for understanding mainframe security architecture and attack surfaces."><span class="idx-nav-icon">[M]</span><span class="idx-nav-label">Models</span></a>
+            <a href="/rag" class="idx-nav-item" data-hint="Knowledge base — RAG-powered document manager. Upload and query mainframe documentation and manuals."><span class="idx-nav-icon">[KB]</span><span class="idx-nav-label">Knowledge</span></a>
+            <a href="/architecture" class="idx-nav-item" data-hint="Architecture view — explore the system design, API endpoints, and component relationships of this application."><span class="idx-nav-icon">[A]</span><span class="idx-nav-label">Architecture</span></a>
+            <a href="/docs" class="idx-nav-item" data-hint="API documentation — full reference for all REST endpoints, request/response formats, and integration guides."><span class="idx-nav-icon">[DOC]</span><span class="idx-nav-label">API Docs</span></a>
         </nav>
     </main>
 
@@ -152,7 +158,7 @@
     </a>
     <a href="/recon" class="idx-cp-item cp-recon">
         <span class="idx-cp-icon">▣</span>
-        <span>Recon</span>
+        <span>Test & Report</span>
     </a>
     <a href="/rag" class="idx-cp-item cp-rag">
         <span class="idx-cp-icon">▤</span>
@@ -412,6 +418,48 @@ document.getElementById('terminalScreen').addEventListener('keydown', function(e
         if (n >= 1 && n <= 24) sendKey('pf', e.shiftKey ? n + 12 : n);
     }
     else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) sendKey('string', e.key);
+});
+
+// ── Terminal text selection → AI analysis ──
+document.getElementById('terminalScreen').addEventListener('mouseup', function(e) {
+    const pre = document.getElementById('terminalText');
+    const explainBox = document.getElementById('termExplain');
+    if (!pre || !explainBox) return;
+
+    const rect = this.getBoundingClientRect();
+    const style = getComputedStyle(pre);
+    const lineH = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.15;
+    const padTop = parseFloat(style.paddingTop) || 0;
+    const padLeft = parseFloat(style.paddingLeft) || 0;
+
+    const y = e.clientY - rect.top - padTop + this.scrollTop;
+    const row = Math.max(0, Math.floor(y / lineH));
+    const lines = pre.textContent.split('\n');
+    const lineText = (lines[row] || '').trimEnd();
+    if (!lineText) return;
+
+    // Show selection info immediately
+    explainBox.innerHTML = `<span style="color:#5a6a7a;">Row ${row + 1}:</span> <code style="color:#42be65;">${lineText.substring(0, 80)}</code><br><span class="idx-explain-thinking">Analyzing...</span>`;
+
+    // Ask AI to analyze
+    fetch('/api/tutor/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            question: `User selected row ${row + 1} on a TN3270 mainframe screen. The line reads: "${lineText}". Explain what this line means in the context of mainframe operations. Be concise (2-3 sentences). Cover what subsystem or component it relates to and any security relevance.`,
+            goal: 'screen-analysis',
+            tutor_id: 'mentor'
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.answer) {
+            explainBox.innerHTML = `<span style="color:#5a6a7a;">Row ${row + 1}:</span> <code style="color:#42be65;">${lineText.substring(0, 60)}</code><br>${data.answer}`;
+        }
+    })
+    .catch(() => {
+        explainBox.innerHTML = `<span style="color:#5a6a7a;">Row ${row + 1}:</span> <code style="color:#42be65;">${lineText.substring(0, 80)}</code>`;
+    });
 });
 
 // ── Walkthrough ──
@@ -762,5 +810,40 @@ async function installKicks() {
         btn.disabled = false;
     }
 }
+
+/* ── Hover hints → AI explanation box ── */
+(function() {
+    const explainBox = document.getElementById('termExplain');
+    let hintTimeout;
+    document.addEventListener('mouseover', function(e) {
+        const el = e.target.closest('[data-hint]');
+        if (el && explainBox) {
+            clearTimeout(hintTimeout);
+            explainBox.textContent = el.getAttribute('data-hint');
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        const el = e.target.closest('[data-hint]');
+        if (el && explainBox) {
+            hintTimeout = setTimeout(() => { explainBox.textContent = ''; }, 300);
+        }
+    });
+})();
+
+/* ── Toolbar scroll-up reveal ── */
+(function() {
+    let lastY = 0;
+    const toolbar = document.getElementById('idxToolbar');
+    const mainCol = document.querySelector('.idx-main-col');
+    (mainCol || window).addEventListener('scroll', function() {
+        const y = this.scrollTop || window.scrollY;
+        if (y < lastY && y > 50) {
+            toolbar.classList.add('toolbar-revealed');
+        } else {
+            toolbar.classList.remove('toolbar-revealed');
+        }
+        lastY = y;
+    });
+})();
 </script>
 {% endblock %}

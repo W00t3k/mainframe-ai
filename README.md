@@ -1,6 +1,6 @@
 # Mainframe AI Assistant
 
-**A reference implementation for trust-boundary assessment on z/OS.**
+**A reference implementation for trust-boundary assessment on mainframe systems.**
 
 This tool operationalizes a mental model I've been applying since 2018 — first to Active Directory and enterprise Windows environments, now to mainframe systems. The model isn't new. The tool is.
 
@@ -8,8 +8,8 @@ This tool operationalizes a mental model I've been applying since 2018 — first
 
 Most offensive security methodologies import assumptions from Unix, Windows, and cloud environments. These assumptions fail on mainframe operating systems:
 
-| Assumption | Reality on z/OS |
-|------------|-----------------|
+| Assumption | Reality on Mainframe |
+|------------|----------------------|
 | "Ports define exposure" | VTAM session fabric exists independently of TCP/IP. Sessions outlive connections. |
 | "There is a root user" | RACF distributes authority across profiles. No omnipotent account exists. |
 | "Processes are short-lived" | Address spaces persist for weeks or months. Identity is bound at startup. |
@@ -32,15 +32,23 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 
 ## What This Tool Does
 
+- **Retro IBM Home Screen** — A Lumon-style CRT terminal image with a live TN3270 overlay. Click any line on the terminal for instant AI analysis. Hover over any UI element for contextual descriptions. Invisible toolbar reveals on hover or scroll-up.
+
 - **Autonomous Walkthroughs** — Watch the tool connect, navigate, and narrate VTAM, TSO, ISPF, JES, and RACF. No keyboard needed. Educational narration explains what's happening at each control plane boundary.
 
 - **Trust Graph** — BloodHound-style visualization of mainframe trust relationships. Map identities, datasets, jobs, and their connections.
 
 - **Red Team Tutor** — AI-guided learning paths for mainframe security assessment. Ask questions, get contextual help on the current screen.
 
-- **Recon Engine** — TSO/CICS/VTAM enumeration, hidden field detection, application mapping.
+- **Test & Report** — TSO/CICS/VTAM enumeration, hidden field detection, application mapping, and professional pentest report generation with findings-based methodology.
+
+- **Abstract Models** — Interactive mental model explorer. Click terminal lines to map them against six abstract security models (Session Stack, Control Planes, Artifacts & Evidence, Trust Boundaries, Batch vs Interactive, Graph Thinking).
 
 - **Security Labs** — Deterministic walkthroughs you can run offline. Replay VTAM → TSO → ISPF flows and batch execution patterns.
+
+- **RAG Knowledge Base** — Upload and query mainframe documentation with retrieval-augmented generation.
+
+- **Network Scanner** — Discover TN3270 services on target networks.
 
 - **COBOL Development** — Complete compile-link-go walkthrough demonstrating the batch-oriented development lifecycle.
 
@@ -109,13 +117,20 @@ Open in browser:
 
 | URL | Feature |
 |-----|---------|
-| `http://localhost:8080/` | Dashboard |
+| `http://localhost:8080/` | Home — retro CRT terminal with live overlay |
+| `http://localhost:8080/terminal` | Full-screen TN3270 terminal |
 | `http://localhost:8080/walkthrough` | Autonomous walkthroughs |
-| `http://localhost:8080/tutor` | Red team tutor |
-| `http://localhost:8080/graph` | Trust graph |
-| `http://localhost:8080/terminal` | 3270 terminal (requires TK5) |
-| `http://localhost:8080/recon` | Recon engine |
+| `http://localhost:8080/tutor` | Red Team Tutor |
+| `http://localhost:8080/graph` | Trust graph visualization |
+| `http://localhost:8080/recon` | Test & Report (pentest findings) |
 | `http://localhost:8080/labs` | Security labs |
+| `http://localhost:8080/chat` | AI Chat |
+| `http://localhost:8080/abstract-models` | Abstract mental models |
+| `http://localhost:8080/scanner` | Network scanner |
+| `http://localhost:8080/rag` | RAG Knowledge Base |
+| `http://localhost:8080/architecture` | System architecture |
+| `http://localhost:8080/docs` | API documentation |
+| `http://localhost:8080/slides` | Presentation slides |
 
 ## Walkthroughs
 
@@ -131,19 +146,19 @@ Seven autonomous walkthroughs demonstrate mainframe control planes:
 | **Address Spaces** | SDSF, active jobs, persistent address spaces |
 | **COBOL Development** | Compile-link-go lifecycle, batch-oriented programming |
 
-Each walkthrough narrates five assessment questions:
+Each walkthrough maps to five core findings areas:
 
-- **Q1:** Where is identity bound?
-- **Q2:** When is authority evaluated?
-- **Q3:** What executes later than expected?
-- **Q4:** Which subsystem enforces policy?
-- **Q5:** What assumptions are you importing?
+- **F1:** Identity Binding — where is identity bound?
+- **F2:** Authority Evaluation — when is authority evaluated?
+- **F3:** Deferred Execution — what executes later than expected?
+- **F4:** Policy Enforcement — which subsystem enforces policy?
+- **F5:** Imported Assumptions — what assumptions are you importing?
 
 ## The Mental Model
 
 This tool didn't invent the trust-boundary assessment model. It **operationalizes** it.
 
-The same mental model that exposed ADCS abuse, Kerberos delegation attacks, and service account sprawl in Active Directory applies directly to mainframes — but mainframes make the boundaries *explicit*. On z/OS, you can literally watch identity cross from VTAM to TSO to RACF.
+The same mental model that exposed ADCS abuse, Kerberos delegation attacks, and service account sprawl in Active Directory applies directly to mainframes — but mainframes make the boundaries *explicit*. On a mainframe, you can literally watch identity cross from VTAM to TSO to RACF.
 
 **What changed isn't the model. What changed is that I now have a platform where the same failure modes are even more visible.**
 
@@ -154,25 +169,37 @@ The walkthroughs don't just show you how to navigate ISPF. They show you *where 
 ```
 ┌──────────────────────────────────────────────────────────┐
 │                     Web Interface                         │
-│         FastAPI + HTMX + IBM Plex typography              │
+│     FastAPI + Jinja2 + IBM Plex Mono + Retro IBM UI      │
 └─────────────────────────┬────────────────────────────────┘
                           │
 ┌─────────────────────────▼────────────────────────────────┐
 │                    app/ (modular)                         │
-│  routes/     - API endpoints                              │
+│  routes/     - API endpoints (14 route modules)           │
 │  services/   - Business logic (chat, walkthrough, LLM)    │
 │  constants/  - Prompts, paths, walkthrough scripts        │
 │  models/     - Pydantic schemas                           │
-│  websocket/  - Real-time handlers                         │
 └──────────┬───────────────────────────┬───────────────────┘
            │                           │
 ┌──────────▼──────────┐  ┌────────────▼────────────────────┐
 │    Ollama (LLM)     │  │   TN3270 Layer (py3270)          │
 │  - Q&A              │  │   - Screen reading              │
 │  - Narration        │  │   - Command execution           │
-│  - Code analysis    │  │   - Session management          │
+│  - Screen analysis  │  │   - Session management          │
+│  - Code analysis    │  │   - Click-to-analyze            │
 └─────────────────────┘  └─────────────────────────────────┘
 ```
+
+## Home Screen Features
+
+The home page features a retro IBM Lumon-style CRT terminal with:
+
+- **Live TN3270 overlay** — terminal output rendered directly on the CRT screen image
+- **Click-to-analyze** — click any terminal line for instant AI explanation
+- **Hover hints** — hover over any button, nav item, or control plane card for contextual descriptions
+- **Invisible toolbar** — clean look by default, reveals on hover or scroll-up
+- **AI explanation box** — contextual information displayed below the terminal image
+- **Collapsible sections** — Control Planes and More Tools expand on click
+- **Right panel menu** — hamburger button reveals full navigation
 
 ## Configuration
 
@@ -187,20 +214,32 @@ The walkthroughs don't just show you how to navigate ISPF. They show you *where 
 ```
 mainframe_ai_assistant/
 ├── app/                    # Modular FastAPI application
-│   ├── routes/             # API endpoints by feature
+│   ├── routes/             # API endpoints (14 modules)
 │   ├── services/           # Business logic
 │   ├── constants/          # Prompts, walkthroughs, paths
 │   └── models/             # Pydantic schemas
-├── templates/              # Jinja2 HTML templates
-├── static/                 # CSS, JS, fonts
-├── lab_data/               # Lab exercise definitions
+├── templates/              # Jinja2 HTML templates (16 pages)
+├── static/                 # CSS, JS, fonts, images
+│   ├── css/pages/          # Per-page stylesheets
+│   ├── img/                # IBM logos, retro terminal image
+│   └── fonts/              # IBM Plex Mono, IBM Plex Sans
+├── slides/                 # Presentation assets
+│   ├── screenshots/        # Slide images
+│   └── ocr/                # OCR text from slides
+├── lab_data/               # Lab exercise definitions (JSON)
 ├── trust_graph_data/       # Graph persistence
-├── tk5/                    # TK5 MVS 3.8j emulator (not included)
+├── kicks/                  # CICS/KICKS BMS maps, COBOL, JCL
+├── tk5/                    # TK5 MVS 3.8j emulator
 ├── run.py                  # Application entry point
 ├── agent_tools.py          # TN3270 connection tools
 ├── trust_graph.py          # Graph data structures
-├── recon_engine.py         # Enumeration engines
-└── rag_engine.py           # RAG with local embeddings
+├── graph_tools.py          # Graph analysis and parsing
+├── recon_engine.py         # Enumeration and findings engine
+├── rag_engine.py           # RAG with local embeddings
+├── methodology_engine.py   # Assessment methodology
+├── mcp_server.py           # Model Context Protocol server
+├── ai_bridge.py            # CICS AI bridge
+└── graph_automation.py     # Graph automation utilities
 ```
 
 ## CICS AI Assistant

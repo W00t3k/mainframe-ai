@@ -7,9 +7,8 @@ Thank you for your interest in contributing! This document provides guidelines f
 ### Prerequisites
 
 - Python 3.10+
-- x3270 (for TN3270 emulation)
-- Ollama API key (for AI features)
-- Access to a mainframe for integration testing (optional)
+- [Ollama](https://ollama.com) for local LLM inference
+- TK5 MVS 3.8j emulator for integration testing (optional)
 
 ### Development Setup
 
@@ -19,8 +18,8 @@ git clone <repository-url>
 cd mainframe_ai_assistant
 
 # Create virtual environment
-python3 -m venv venv
-source venv/bin/activate  # or `venv\Scripts\activate` on Windows
+python3 -m venv .venv
+source .venv/bin/activate  # or `.venv\Scripts\activate` on Windows
 
 # Install dependencies
 pip install -r requirements.txt
@@ -28,8 +27,9 @@ pip install -r requirements.txt
 # Install development dependencies
 pip install pytest ruff mypy
 
-# Set up environment
-export ANTHROPIC_API_KEY="your-key-here"
+# Start Ollama (for AI features)
+ollama serve
+ollama pull llama3.1:8b
 ```
 
 ## Code Style
@@ -53,7 +53,7 @@ ruff check .
 ruff format .
 
 # Type checking
-mypy src/
+mypy app/
 ```
 
 ### Naming Conventions
@@ -69,20 +69,23 @@ mypy src/
 
 ```
 mainframe_ai_assistant/
-├── mainframe_assistant.py   # CLI entry point
-├── web_app.py               # Web interface
-├── rag_engine.py            # RAG implementation
-├── tn3270v2_modules/          # TN3270 v2 toolkit
-│   ├── core/                # Data models
-│   ├── emulator/            # TN3270 wrapper
-│   ├── security/            # Security tools
-│   ├── io/                  # Export functions
-│   ├── zos/                 # z/OS helpers
-│   └── utils/               # Utilities
-├── templates/               # Web templates
-├── static/                  # Static assets
+├── run.py                   # Application entry point
+├── app/                     # Modular FastAPI application
+│   ├── routes/              # API endpoints (14 modules)
+│   ├── services/            # Business logic
+│   ├── constants/           # Prompts, walkthroughs, paths
+│   └── models/              # Pydantic schemas
+├── agent_tools.py           # TN3270 connection tools
+├── trust_graph.py           # Graph data model
+├── graph_tools.py           # Graph analysis
+├── rag_engine.py            # RAG engine
+├── recon_engine.py          # Enumeration and findings
+├── methodology_engine.py    # Assessment methodology
+├── mcp_server.py            # MCP server
+├── templates/               # Jinja2 HTML templates (16 pages)
+├── static/                  # CSS, JS, fonts, images
 ├── docs/                    # Documentation
-└── tests/                   # Test suite
+└── lab_data/                # Lab exercise definitions
 ```
 
 ## Making Changes

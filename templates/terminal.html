@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Terminal - IBM z/OS AI Assistant{% endblock %}
+{% block title %}Terminal - IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/terminal.css?v=4">
@@ -13,8 +13,10 @@
         <!-- Desktop Icons -->
         <div class="os2-desktop-icons">
             <a href="/" class="os2-icon" title="Home">
-                <div class="os2-icon-img">🖥️</div>
-                <span>System</span>
+                <div class="os2-icon-img" style="display:flex;align-items:center;justify-content:center;">
+                    <img src="/static/img/ibm-logo-official.svg" alt="IBM" style="height:16px;width:auto;filter:brightness(1.5);">
+                </div>
+                <span>Home</span>
             </a>
             <a href="/chat" class="os2-icon" title="AI Chat">
                 <div class="os2-icon-img">💬</div>
@@ -32,9 +34,9 @@
                 <div class="os2-icon-img">🔍</div>
                 <span>Scanner</span>
             </a>
-            <a href="/recon" class="os2-icon" title="Recon">
+            <a href="/recon" class="os2-icon" title="Test & Report">
                 <div class="os2-icon-img">🛰️</div>
-                <span>Recon</span>
+                <span>Test</span>
             </a>
             <a href="/rag" class="os2-icon" title="Knowledge Base">
                 <div class="os2-icon-img">📚</div>
@@ -82,7 +84,7 @@
                 </div>
                 <div class="os2-titlebar-text">
                     <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="os2-title-logo">
-                    TN3270 Terminal — z/OS Mainframe
+                    TN3270 Terminal — IBM Mainframe
                 </div>
                 <div class="os2-titlebar-buttons">
                     <button class="os2-btn-minimize" title="Minimize">▼</button>
@@ -146,7 +148,7 @@
 
             <!-- Window Status Bar -->
             <div class="os2-statusbar">
-                <span class="os2-statusbar-item">OS/2 Warp — z/OS AI Assistant</span>
+                <span class="os2-statusbar-item">OS/2 Warp — Mainframe AI Assistant</span>
                 <span class="os2-statusbar-item os2-statusbar-right" id="termStatusBar">Ready</span>
             </div>
             <div class="os2-window-resizer" id="terminalResizer" aria-hidden="true"></div>

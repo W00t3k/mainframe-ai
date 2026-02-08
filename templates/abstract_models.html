@@ -14,7 +14,9 @@
 <div class="tutor-app abstract-app">
     <aside class="tutor-sidebar">
         <div class="sidebar-header">
-            <a href="/" class="back-link">← Back</a>
+            <a href="/" class="home-btn" title="Home">
+                <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
+            </a>
             <h1>Abstract Models</h1>
         </div>
 
@@ -135,7 +137,65 @@
                     <span class="panel-subtitle">Foundational concepts</span>
                 </div>
                 <div class="abstract-scroll" id="abstractScroll">
-                <div class="abstract-body" id="abstract">
+                    <!-- Walkthrough + Insight + Chat at the top -->
+                    <div class="abstract-body insight-block" id="insightBlock">
+                        <h3 class="abstract-subtitle">Mental Model Walkthrough</h3>
+
+                        <!-- Step card -->
+                        <div class="wk-step-card" id="wkStepCard">
+                            <div class="wk-step-idle" id="wkStepIdle">
+                                <p class="wk-idle-text">Walk through the core mental models step by step.<br>Connect to the terminal first for the best experience.</p>
+                                <button class="send-btn" id="walkStartBtn">Start Walkthrough</button>
+                            </div>
+                            <div class="wk-step-active" id="wkStepActive" style="display:none;">
+                                <div class="wk-step-header">
+                                    <span class="wk-step-num" id="wkStepNum">Step 1 / 5</span>
+                                    <span class="wk-step-models" id="wkStepModels"></span>
+                                </div>
+                                <h4 class="wk-step-title" id="wkStepTitle"></h4>
+                                <div class="wk-step-fields">
+                                    <div class="wk-field">
+                                        <label>What to do</label>
+                                        <p id="wkStepWhat"></p>
+                                    </div>
+                                    <div class="wk-field">
+                                        <label>Why it matters</label>
+                                        <p id="wkStepWhy"></p>
+                                    </div>
+                                    <div class="wk-field">
+                                        <label>Expected result</label>
+                                        <p id="wkStepExpected"></p>
+                                    </div>
+                                </div>
+                                <div class="wk-step-progress" id="wkProgress"></div>
+                                <div class="wk-step-actions">
+                                    <button class="send-btn secondary" id="walkPrevBtn" disabled>&larr; Prev</button>
+                                    <button class="send-btn" id="walkNextBtn">Next &rarr;</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Insight feed -->
+                        <div class="wk-insight-section">
+                            <h3 class="abstract-subtitle">Insight Feed</h3>
+                            <div class="insight-feed" id="insightScroll">
+                                <p class="insight-line"><strong>Tip:</strong> Click a region in the TN3270 panel to map it to a mental model.</p>
+                            </div>
+                        </div>
+
+                        <!-- Chat -->
+                        <div class="chat-box" id="chatBox">
+                            <div class="ask-row">
+                                <input type="text" id="abstractAsk" placeholder="Ask about the current screen or model...">
+                                <button class="send-btn" id="abstractAskBtn">Send</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="abstract-divider"></div>
+
+                    <!-- Abstract thesis -->
+                    <div class="abstract-body" id="abstract">
                     <p>
                         Mainframes reward people who build the right mental model: layered session state,
                         control planes that enforce policy, and artifacts that persist long after commands run.
@@ -156,26 +216,6 @@
                         <li data-model="batch-interactive"><strong>Batch vs Interactive</strong> — Why JCL behaves differently than panels and commands.</li>
                         <li data-model="graph-thinking"><strong>Graph Thinking</strong> — Panels, jobs, programs, datasets as nodes with edges.</li>
                     </ul>
-                    </div>
-
-                    <div class="abstract-divider"></div>
-
-                    <div class="abstract-body insight-block" id="insightBlock">
-                        <h3 class="abstract-subtitle">Ask + Mapping</h3>
-                        <div class="walkthrough-controls">
-                            <button class="send-btn" id="walkStartBtn">Start Walkthrough</button>
-                            <button class="send-btn secondary" id="walkNextBtn" disabled>Next Step</button>
-                        </div>
-                        <div class="insight-feed" id="insightScroll">
-                            <p class="insight-line"><strong>Click Insight:</strong> Click a region in the TN3270 panel to map it to a mental model and get a focused explanation.</p>
-                        </div>
-
-                        <div class="chat-box" id="chatBox">
-                            <div class="ask-row">
-                                <input type="text" id="abstractAsk" placeholder="Ask about the current screen or model...">
-                                <button class="send-btn" id="abstractAskBtn">Send</button>
-                            </div>
-                        </div>
                     </div>
 
                     <div class="abstract-divider"></div>
@@ -262,7 +302,20 @@ const askInput = document.getElementById('abstractAsk');
 const askBtn = document.getElementById('abstractAskBtn');
 const walkStartBtn = document.getElementById('walkStartBtn');
 const walkNextBtn = document.getElementById('walkNextBtn');
+const walkPrevBtn = document.getElementById('walkPrevBtn');
+const wkStepIdle = document.getElementById('wkStepIdle');
+const wkStepActive = document.getElementById('wkStepActive');
 let walkIndex = -1;
+
+const MODEL_LABELS = {
+    'session-stack': 'Session Stack',
+    'control-planes': 'Control Planes',
+    'artifacts-evidence': 'Artifacts',
+    'trust-boundaries': 'Trust Boundaries',
+    'batch-interactive': 'Batch vs Interactive',
+    'graph-thinking': 'Graph Thinking'
+};
+
 const walkthroughSteps = [
     {
         title: 'Start at the TN3270 login',
@@ -272,7 +325,7 @@ const walkthroughSteps = [
         models: ['session-stack']
     },
     {
-        title: 'Panel → Transaction → Job → Dataset',
+        title: 'Panel \u2192 Transaction \u2192 Job \u2192 Dataset',
         what: 'Identify the current panel, the transaction it represents, and what job/dataset it touches.',
         why: 'Panels are UI; transactions trigger work; jobs run programs; datasets persist evidence.',
         expected: 'A clear chain from panel name to job/dataset references.',
@@ -300,6 +353,38 @@ const walkthroughSteps = [
         models: ['session-stack', 'control-planes', 'trust-boundaries']
     }
 ];
+
+function buildProgressDots() {
+    const container = document.getElementById('wkProgress');
+    container.innerHTML = '';
+    walkthroughSteps.forEach((_, i) => {
+        const dot = document.createElement('div');
+        dot.className = 'wk-dot' + (i < walkIndex ? ' done' : '') + (i === walkIndex ? ' current' : '');
+        dot.textContent = i + 1;
+        dot.addEventListener('click', () => { walkIndex = i; renderWalkthroughStep(); });
+        container.appendChild(dot);
+    });
+}
+
+function renderWalkthroughStep() {
+    if (walkIndex < 0 || walkIndex >= walkthroughSteps.length) return;
+    const step = walkthroughSteps[walkIndex];
+
+    document.getElementById('wkStepNum').textContent = `Step ${walkIndex + 1} / ${walkthroughSteps.length}`;
+    document.getElementById('wkStepTitle').textContent = step.title;
+    document.getElementById('wkStepWhat').textContent = step.what;
+    document.getElementById('wkStepWhy').textContent = step.why;
+    document.getElementById('wkStepExpected').textContent = step.expected;
+    document.getElementById('wkStepModels').innerHTML = step.models
+        .map(m => `<span class="wk-model-tag">${MODEL_LABELS[m] || m}</span>`).join('');
+
+    walkPrevBtn.disabled = walkIndex === 0;
+    walkNextBtn.textContent = walkIndex === walkthroughSteps.length - 1 ? 'Done' : 'Next \u2192';
+
+    buildProgressDots();
+    highlightModelsByKeys(step.models);
+    addInsight(`Step ${walkIndex + 1}`, step.title);
+}
 
 function addInsight(title, content) {
     const wrapper = document.createElement('div');
@@ -587,29 +672,35 @@ askInput.addEventListener('keydown', (e) => {
     if (e.key === 'Enter') askLLM();
 });
 
-function renderWalkthroughStep() {
-    if (walkIndex < 0 || walkIndex >= walkthroughSteps.length) return;
-    const step = walkthroughSteps[walkIndex];
-    addInsight(`Step ${walkIndex + 1}: ${step.title}`,
-        `What: ${step.what}<br>Why: ${step.why}<br>Expected: ${step.expected}`);
-    highlightModelsByKeys(step.models);
-}
-
 walkStartBtn.addEventListener('click', () => {
     walkIndex = 0;
-    walkNextBtn.disabled = false;
-    addInsight('Walkthrough', 'Starting the mental model walkthrough.');
+    wkStepIdle.style.display = 'none';
+    wkStepActive.style.display = 'block';
+    walkStartBtn.textContent = 'Start Walkthrough';
+    wkStepIdle.querySelector('.wk-idle-text').innerHTML = 'Walk through the core mental models step by step.<br>Connect to the terminal first for the best experience.';
+    addInsight('Walkthrough', 'Started.');
     renderWalkthroughStep();
 });
 
 walkNextBtn.addEventListener('click', () => {
     if (walkIndex < 0) return;
-    walkIndex += 1;
-    if (walkIndex >= walkthroughSteps.length) {
-        addInsight('Walkthrough', 'Completed. Ask questions or click a screen region to map it.');
-        walkNextBtn.disabled = true;
+    if (walkIndex >= walkthroughSteps.length - 1) {
+        addInsight('Walkthrough', 'Completed. Ask questions or click a screen region.');
+        wkStepActive.style.display = 'none';
+        wkStepIdle.style.display = 'block';
+        wkStepIdle.querySelector('.wk-idle-text').innerHTML = 'Walkthrough complete.<br>Click a screen region or ask a question to continue exploring.';
+        walkStartBtn.textContent = 'Restart Walkthrough';
+        walkIndex = -1;
+        highlightModelsByKeys([]);
         return;
     }
+    walkIndex += 1;
+    renderWalkthroughStep();
+});
+
+walkPrevBtn.addEventListener('click', () => {
+    if (walkIndex <= 0) return;
+    walkIndex -= 1;
     renderWalkthroughStep();
 });
 

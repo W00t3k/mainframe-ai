@@ -3,8 +3,8 @@
    ══════════════════════════════════════════════════════════════════════ */
 
 body {
-    background: var(--ibm-blue);
-    color: var(--ibm-white);
+    background: #0a0d11;
+    color: #e0e4ea;
     min-height: 100vh;
     margin: 0;
 }
@@ -26,22 +26,45 @@ body {
 .idx-toolbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    position: relative;
-    padding: 0 0.5rem;
+    justify-content: flex-end;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    padding: 0;
+    background: #0a0d11;
+    border-bottom: none;
+    gap: 0;
+    height: 36px;
+}
+
+/* Items wrapper — hidden by default, revealed on hover or scroll-up */
+.idx-toolbar-items {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    gap: 12px;
+    padding: 0 16px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+}
+
+.idx-toolbar:hover .idx-toolbar-items,
+.idx-toolbar.toolbar-revealed .idx-toolbar-items {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.idx-toolbar:hover,
+.idx-toolbar.toolbar-revealed {
     background: #0c1a30;
     border-bottom: 1px solid #1a3058;
-    gap: 0.5rem;
-    height: 30px;
 }
 
 .idx-toolbar-center {
     display: flex;
     align-items: center;
-    gap: 0.4rem;
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    gap: 8px;
 }
 
 .idx-toolbar-right {
@@ -53,7 +76,7 @@ body {
 .idx-toolbar-status {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 14px;
     margin-left: auto;
     flex-shrink: 0;
 }
@@ -61,28 +84,28 @@ body {
 .ts-item {
     display: flex;
     align-items: center;
-    gap: 3px;
-    font-size: 10px;
+    gap: 5px;
+    font-size: 12px;
     font-family: 'IBM Plex Mono', monospace;
 }
 
 .ts-label {
     color: #3a5a80;
     font-weight: 700;
-    font-size: 9px;
+    font-size: 11px;
     text-transform: uppercase;
 }
 
 .ts-val {
     color: #6a9ad0;
     font-weight: 700;
-    font-size: 10px;
+    font-size: 12px;
 }
 
 .ts-led {
-    width: 5px;
-    height: 5px;
-    border-radius: 50%;
+    width: 7px;
+    height: 7px;
+    border-radius: 0;
     background: #1a2a48;
     flex-shrink: 0;
 }
@@ -98,7 +121,7 @@ body {
 }
 
 .ts-clock {
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
     color: #2a4a6a;
     font-family: 'IBM Plex Mono', monospace;
@@ -126,15 +149,15 @@ body {
 /* ── Pill Buttons — Cyberpunk IBM ── */
 .idx-pill {
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 10px;
+    font-size: 12px;
     font-weight: 700;
-    padding: 3px 10px;
+    padding: 6px 16px;
     border: 1px solid #1a3058;
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
-    gap: 0.3rem;
+    gap: 6px;
     color: #5a8ab8;
     background: #0f1d35;
     text-transform: uppercase;
@@ -158,13 +181,13 @@ body {
 .idx-pill-success { background: #0f2520; color: #4a8a6a; border-color: #1a3530; }
 
 .idx-hamburger {
-    background: #0c1a30 !important;
+    background: transparent !important;
     border: none !important;
-    border-left: 1px solid #1a3058 !important;
+    border-left: none !important;
     color: #3a5a80;
-    font-size: 13px;
-    width: 30px;
-    height: 30px;
+    font-size: 22px;
+    width: 44px;
+    height: 36px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -176,8 +199,8 @@ body {
     box-shadow: none;
     transition: all 0.15s ease;
 }
-.idx-hamburger:hover { color: #8ab4f0; background: #0f1d35 !important; }
-.idx-hamburger:active { background: #0a1225 !important; }
+.idx-hamburger:hover { color: #5a8ab8; background: rgba(255,255,255,0.04) !important; }
+.idx-hamburger:active { background: rgba(255,255,255,0.08) !important; }
 
 /* ── Main Content ── */
 main {
@@ -188,103 +211,131 @@ main {
     justify-content: flex-start;
     padding: 1rem;
     overflow-y: auto;
-    background: var(--ibm-blue);
+    background: #0a0d11;
 }
 
-/* ── Hero — DOS Title Box ── */
-.hero {
+/* ── Desk Hero — Retro Terminal Image with CRT Overlay ── */
+.desk-hero {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+    flex-shrink: 0;
+    background: #0a0d11;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+}
+
+/* Frame wraps just the image — terminal is positioned relative to this */
+.desk-hero-frame {
+    position: relative;
+    width: 80%;
+    max-width: 1050px;
+    margin: 0 auto;
+}
+
+.desk-hero-img {
+    width: 100%;
+    height: auto;
+    display: block;
+    filter: brightness(0.82) saturate(0.6) contrast(1.1);
+    object-fit: contain;
+    position: relative;
+    z-index: 0;
+}
+
+.desk-hero-overlay {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+        ellipse 70% 65% at center 38%,
+        transparent 25%,
+        rgba(10, 13, 17, 0.35) 50%,
+        rgba(10, 13, 17, 0.92) 80%,
+        #0a0d11 100%
+    );
+    pointer-events: none;
+    z-index: 1;
+}
+
+.desk-hero-title {
+    position: relative;
+    z-index: 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
     text-align: center;
-    gap: 0.2rem;
-    padding: 0.3rem 1rem;
-    background: var(--ibm-blue);
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    margin-bottom: 0.5rem;
+    padding: 20px 0 4px;
 }
 
 .hero-logo {
-    height: 36px;
+    height: 37px;
     width: auto;
-    flex-shrink: 0;
+    opacity: 0.7;
 }
 
-.hero-text {
-    max-width: 560px;
-}
-
-.hero h2 {
-    font-size: 0.9rem;
-    font-weight: 700;
-    line-height: 1.2;
-    margin: 0;
-    margin-bottom: 0.25rem;
-    color: #FFFFFF;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-}
-
-.hero h2 strong {
-    font-weight: 700;
-    color: #FFFFFF;
-}
-
-.hero p {
+.desk-hero-title h2 {
+    font-family: 'IBM Plex Mono', monospace;
     font-size: 14px;
-    color: var(--ibm-white);
-    line-height: 1.4;
-    margin-bottom: 0;
+    font-weight: 700;
+    color: #c6cdd5;
+    text-transform: uppercase;
+    letter-spacing: 5px;
+    margin: 0;
 }
 
-.hero-badges {
+.desk-hero-title h2 strong {
+    font-weight: 700;
+    color: #fff;
+}
+
+/* ── CRT Terminal Overlay — positioned on the monitor screen ── */
+/* Image: 1536x1024. Measured screen area (pixel-sampled):
+   top: 14.75%, left: 19.4%, right: 80.8%, bottom: 63.5%
+   → width: 61.4%, height: 48.7%, horizontally centered.
+   Terminal is inside .desk-hero-frame which matches the image exactly,
+   so these percentages map 1:1 to the image. */
+.crt-terminal {
+    position: absolute;
+    top: 17%;
+    left: 24%;
+    width: 52%;
+    height: 43%;
+    z-index: 2;
     display: flex;
-    justify-content: center;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    flex-direction: column;
+    overflow: hidden;
+    border: none;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.7);
+    background: rgba(8, 12, 18, 0.97);
+    border-radius: 3px;
 }
 
-.badge {
-    display: flex;
-    align-items: center;
-    gap: 0.35rem;
-    background: var(--ibm-gray-100);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    padding: 0.2rem 0.5rem;
-    font-size: 12px;
-    color: #FFFFFF;
+/* Scale frame with viewport — terminal stays locked to image */
+@media (max-width: 1200px) {
+    .desk-hero-frame { width: 80%; }
 }
 
-.badge .dot {
-    width: 8px;
-    height: 8px;
-    background: var(--ibm-green);
+@media (max-width: 900px) {
+    .desk-hero-frame { width: 90%; }
 }
 
-.badge .dot-red {
-    background: var(--ibm-red);
-}
-
-.badge-btn {
-    cursor: pointer;
-}
-
-.badge-btn:hover {
-    background: var(--ibm-red-dark);
-    border-color: var(--ibm-red);
-    color: var(--ibm-white);
+@media (max-width: 600px) {
+    .desk-hero { min-height: auto; }
+    .desk-hero-frame { width: 98%; }
 }
 
 /* ── Navigation Grid — DOS Menu Grid ── */
 .idx-nav {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 2px;
+    gap: 1px;
     max-width: 560px;
     width: 100%;
-    background: rgba(255, 255, 255, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.2);
+    background: #1a2030;
+    border: 1px solid #1e2a36;
     overflow: hidden;
     margin: 0.75rem auto 1rem;
 }
@@ -296,16 +347,17 @@ main {
     justify-content: center;
     gap: 0.25rem;
     padding: 0.75rem 0.5rem;
-    background: var(--ibm-blue);
+    background: #0f1520;
     text-decoration: none;
-    color: var(--ibm-white);
+    color: #8d99a8;
     border: none;
     cursor: pointer;
+    transition: background 0.15s;
 }
 
 .idx-nav-item:hover {
-    background: rgba(255, 255, 255, 0.3);
-    color: var(--ibm-white);
+    background: #1a2535;
+    color: #c6cdd5;
 }
 
 .idx-nav-icon {
@@ -431,22 +483,22 @@ main {
     gap: 0.25rem;
     padding: 0.75rem 0.5rem;
     text-decoration: none;
-    border: 3px solid currentColor;
-    background: none !important;
+    border: 1px solid currentColor;
+    background: rgba(10, 13, 17, 0.8) !important;
+    transition: background 0.15s;
 }
 
 .cp-vtam, .cp-tso, .cp-racf, .cp-jes, .cp-cics {
-    background: none !important;
+    background: rgba(10, 13, 17, 0.8) !important;
 }
 
 .cp-card:hover {
-    background: currentColor;
-    color: var(--ibm-gray-100) !important;
+    background: rgba(255,255,255,0.06) !important;
 }
 
 .cp-card:hover .cp-name,
 .cp-card:hover .cp-desc {
-    color: var(--ibm-gray-100);
+    color: #fff;
 }
 
 .cp-name {
@@ -458,7 +510,7 @@ main {
 
 .cp-desc {
     font-size: 11px;
-    color: var(--ibm-white-dim);
+    color: #5a6a7a;
     text-align: center;
 }
 
@@ -645,7 +697,7 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-dot.on  { background: #22c55e; box-shadow: 0 0 6px rgba(34,197,94,0.5); }
 .idx-dot.off { background: #ef4444; }
 
-/* ── Collapsible Terminal — DOS Window ── */
+/* ── Collapsible Terminal — DOS Window (legacy, kept for non-hero contexts) ── */
 .idx-terminal-section {
     max-width: 700px;
     width: 700px;
@@ -665,15 +717,18 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    padding: 0.1rem 0.4rem;
-    background: #4178BE;
+    padding: 2px 6px;
+    background: #10141a;
+    border-bottom: 1px solid #1e2a36;
+    flex-shrink: 0;
 }
 
 .idx-term-title {
-    font-size: 11px;
-    color: var(--ibm-gray-100);
+    font-size: 9px;
+    color: #4589ff;
     font-weight: 700;
     text-transform: uppercase;
+    letter-spacing: 0.04em;
 }
 
 .idx-demo-badge {
@@ -724,16 +779,14 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-fullscreen-link:hover { color: #80b0f0; }
 
 .idx-term-screen {
-    background: var(--ibm-gray-100);
-    height: 400px;
-    min-height: 400px;
-    max-height: 400px;
+    background: #0a0d11;
+    flex: 1;
     overflow: auto;
     cursor: text;
     outline: none;
     box-sizing: border-box;
     display: block !important;
-    border: 2px inset var(--ibm-gray-70);
+    border: none;
 }
 
 .idx-term-screen:focus {
@@ -742,16 +795,16 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 
 .idx-term-screen pre {
     font-size: 12px;
-    line-height: 1.2;
-    color: var(--ibm-green);
+    line-height: 1.15;
+    color: #42be65;
     background: transparent;
-    padding: 4px 8px;
+    padding: 3px 6px;
     margin: 0;
     white-space: pre;
     overflow: hidden;
     text-align: left;
     width: 80ch;
-    min-height: calc(24 * 1.3 * 13px);
+    min-height: calc(24 * 1.15 * 12px);
     text-shadow: 0 0 2px currentColor;
 }
 
@@ -766,18 +819,19 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-term-screen pre .c3270-intensified { font-weight: 700; text-shadow: 0 0 4px currentColor; }
 
 .idx-term-explain {
-    font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.65rem;
-    color: var(--ibm-gray-30);
-    padding: 0.3rem 0.8rem;
-    line-height: 1.5;
-    padding: 0.5rem 1rem;
-    margin: 0.5rem auto;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: #a6c8ff;
+    line-height: 1.6;
+    padding: 0.6rem 1.2rem;
+    margin: -3rem auto 0.75rem;
+    background: rgba(10, 13, 17, 0.95);
+    border: 1px solid rgba(69, 137, 255, 0.2);
+    border-radius: 4px;
     max-width: 700px;
     text-align: center;
+    position: relative;
+    z-index: 10;
 }
 .idx-term-explain:empty { display: none; }
 .idx-explain-thinking { color: var(--ibm-gray-50); animation: pulse-dot 1.5s ease infinite; }
@@ -789,8 +843,8 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-control-panel {
     width: 220px;
     flex-shrink: 0;
-    background: #2C4A6E;
-    border-left: 2px solid #4a6a9e;
+    background: #0c1018;
+    border-left: 1px solid #1e2a36;
     display: flex;
     flex-direction: column;
     padding: 0.35rem;
@@ -845,14 +899,11 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     padding: 3px 6px;
     font-size: 11px;
     font-weight: 700;
-    color: #FFFFFF;
+    color: #5a6a7a;
     text-transform: uppercase;
     letter-spacing: 2px;
-    background: #1a3a6a;
-    border-top: 2px solid #1a2a4a;
-    border-left: 2px solid #1a2a4a;
-    border-bottom: 2px solid #6a8aba;
-    border-right: 2px solid #6a8aba;
+    background: #10141a;
+    border: 1px solid #1e2a36;
     margin-bottom: 2px;
     text-align: center;
 }
@@ -861,32 +912,25 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     display: flex;
     align-items: center;
     gap: 6px;
-    padding: 4px 8px;
+    padding: 6px 10px;
     text-decoration: none;
     font-size: 12px;
-    font-weight: 700;
+    font-weight: 600;
     white-space: nowrap;
-    background: #3a5a8a;
-    color: #FFFFFF;
-    border-top: 2px solid #6a8aba;
-    border-left: 2px solid #6a8aba;
-    border-bottom: 2px solid #1a2a4a;
-    border-right: 2px solid #1a2a4a;
+    background: #10141a;
+    color: #8d99a8;
+    border: 1px solid #1e2a36;
     cursor: pointer;
-    transition: none;
+    transition: background 0.15s;
 }
 
 .idx-cp-item:hover {
-    background: #4a6a9e;
-    color: #FFFFFF !important;
+    background: #1a2535;
+    color: #c6cdd5 !important;
 }
 
 .idx-cp-item:active {
-    border-top: 2px solid #1a2a4a;
-    border-left: 2px solid #1a2a4a;
-    border-bottom: 2px solid #6a8aba;
-    border-right: 2px solid #6a8aba;
-    padding: 5px 7px 3px 9px;
+    background: #0a0f16;
 }
 
 .idx-cp-icon {
@@ -912,15 +956,14 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-cp-item.cp-screens     { color: #d0e2ff; }
 .idx-cp-item.cp-rag         { color: #78a9ff; }
 .idx-cp-item.cp-arch        { color: #d0e2ff; }
-.idx-cp-item.cp-demo-prep   { color: #FFFFFF; background: #2a4a7a; cursor: pointer; font-size: 11px; width: 100%; text-align: left; }
-.idx-cp-item.cp-demo-prep:hover { background: #3a5a8a; }
+.idx-cp-item.cp-demo-prep   { color: #8d99a8; background: #10141a; cursor: pointer; font-size: 11px; width: 100%; text-align: left; }
+.idx-cp-item.cp-demo-prep:hover { background: #1a2535; }
 .idx-cp-item.cp-demo-prep:disabled { opacity: 0.6; cursor: wait; }
 
 .idx-cp-divider {
-    height: 2px;
-    background: #1a2a4a;
-    border-bottom: 1px solid #4a6a9e;
-    margin: 3px 0;
+    height: 1px;
+    background: #1e2a36;
+    margin: 4px 0;
 }
 
 .idx-cp-sysinfo {
