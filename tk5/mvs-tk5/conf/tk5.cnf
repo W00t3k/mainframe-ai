@@ -48,7 +48,7 @@ DIAG8CMD ENABLE ECHO
 0298 3390 dasd/tk5001.298
 0299 3390 dasd/tk5002.299
 #
-# CBT DASD
+# CBT DASD (includes KICKS DASD at 0148)
 #
 INCLUDE conf/cbt_dasd.cnf
 #

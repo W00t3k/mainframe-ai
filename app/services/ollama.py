@@ -122,6 +122,18 @@ class OllamaService:
         prompt += "Assistant: "
         
         return await self.generate(prompt)
+    
+    async def quick_explain(self, screen_text: str, context: str = "") -> str:
+        """Fast screen explanation - short response, no history."""
+        first_lines = "\n".join(screen_text.split("\n")[:15])
+        prompt = f"""You are explaining a mainframe terminal screen. Context: {context or 'viewing screen'}.
+
+Screen:
+{first_lines}
+
+In ONE sentence, explain what this shows and what to do next. Be specific (VTAM, TSO, RACF, JES). No markdown."""
+        
+        return await self.generate(prompt, temperature=0.3, num_predict=150, timeout=15.0)
 
 
 # Singleton instance

@@ -745,8 +745,21 @@ WT_QUESTIONS = {
         6: ["Q3", "Q4", "Q5"],  # Logoff summary — mental model shift
     },
     "cics-kicks": {
-        "title": "CICS/KICKS: Transaction Processing",
-        "steps": [
+        0: ["Q1", "Q5"],    # Connect — VTAM session fabric
+        1: ["Q1", "Q2"],    # TSO Login — identity binding
+        2: ["Q5"],          # Exit to READY — preparing for CICS
+        3: ["Q5"],          # Start KICKS — transaction processing intro
+        4: ["Q5"],          # KICKS Banner — CICS concepts
+        5: ["Q5"],          # MENU transaction — pseudo-conversational
+        6: ["Q5"],          # Sign off — CICS exit
+        7: ["Q1", "Q5"],    # Return to TSO — summary
+    },
+}
+
+# CICS/KICKS walkthrough definition (placed in WALKTHROUGH_SCRIPTS above)
+WALKTHROUGH_SCRIPTS["cics-kicks"] = {
+    "title": "CICS/KICKS: Transaction Processing",
+    "steps": [
             {
                 "title": "Connect to Mainframe",
                 "control_plane": "vtam",
@@ -827,6 +840,5 @@ WT_QUESTIONS = {
                 "expect": ["READY"],
                 "display_seconds": 5,
             },
-        ],
-    },
+    ],
 }

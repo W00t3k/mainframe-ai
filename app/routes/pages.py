@@ -4,8 +4,13 @@ Page Routes
 HTML page rendering routes for the web interface.
 """
 
+import os
+import platform
+import psutil
+import httpx
+
 from fastapi import APIRouter, Request
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 
 from app.config import get_config
@@ -117,3 +122,64 @@ async def graph_page(request: Request):
 async def presentation_page(request: Request):
     """Teaching presentation slide deck."""
     return templates.TemplateResponse("presentation.html", {"request": request})
+
+
+@router.get("/api/sysinfo")
+async def sysinfo():
+    """System info for sidebar panel."""
+    # Ollama status
+    ollama_ok = False
+    ollama_model = config.OLLAMA_MODEL
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            r = await client.get(f"{config.OLLAMA_URL}/api/tags")
+            if r.status_code == 200:
+                ollama_ok = True
+    except Exception:
+        pass
+
+    # Mainframe status
+    mf_ok = False
+    try:
+        async with httpx.AsyncClient(timeout=2.0) as client:
+            r = await client.get("http://localhost:8038/")
+            mf_ok = r.status_code == 200
+    except Exception:
+        pass
+
+    # RAG status
+    rag_status = "empty"
+    rag_dir = getattr(config, 'RAG_DIR', None)
+    if rag_dir and os.path.isdir(rag_dir):
+        rag_files = [f for f in os.listdir(rag_dir) if not f.startswith('.')]
+        rag_status = f"{len(rag_files)} docs" if rag_files else "empty"
+
+    # Memory
+    try:
+        proc = psutil.Process()
+        mem_mb = proc.memory_info().rss / (1024 * 1024)
+        memory = f"{mem_mb:.0f}MB"
+    except Exception:
+        memory = "—"
+
+    # Active agents (count background tasks / walkthroughs)
+    agents = 0
+    try:
+        for p in psutil.process_iter(['name', 'cmdline']):
+            cmdline = ' '.join(p.info.get('cmdline') or [])
+            if 's3270' in cmdline or 'walkthrough' in cmdline:
+                agents += 1
+    except Exception:
+        pass
+
+    return JSONResponse({
+        "os": f"{platform.system()} {platform.machine()}",
+        "python": platform.python_version(),
+        "ollama": "online" if ollama_ok else "offline",
+        "model": ollama_model,
+        "mainframe": "online" if mf_ok else "offline",
+        "port": str(config.PORT),
+        "rag": rag_status,
+        "agents": str(agents),
+        "memory": memory,
+    })

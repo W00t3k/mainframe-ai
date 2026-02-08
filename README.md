@@ -203,11 +203,75 @@ mainframe_ai_assistant/
 └── rag_engine.py           # RAG with local embeddings
 ```
 
+## CICS AI Assistant
+
+**"CICS as an interface to modern intelligence"** — not AI on the mainframe, but mainframe as control plane.
+
+A demonstration CICS transaction (`AIMP`) that connects a 3270 terminal to an AI backend:
+
+```
+┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+│ 3270 Screen │ ───▶ │ KICKS/CICS  │ ───▶ │ AI Bridge   │
+│   (BMS)     │      │  (COBOL)    │      │  (Python)   │
+└─────────────┘      └─────────────┘      └─────────────┘
+```
+
+### Quick Start
+
+```bash
+# Start AI Bridge
+python ai_bridge.py --port 5000
+
+# In KICKS
+AIMP
+```
+
+See [CICS_AI_ASSISTANT.md](docs/CICS_AI_ASSISTANT.md) for full documentation.
+
+---
+
+## KICKS (CICS) Installation
+
+KICKS is a CICS-compatible transaction processing system for MVS 3.8j. This project includes complete automation for installing KICKS on TK5.
+
+### Quick Install
+
+```bash
+# Check status and run all steps interactively
+python install_kicks.py all
+
+# Or run individual steps
+python install_kicks.py status    # Check prerequisites
+python install_kicks.py dasd      # Create KICKS0 volume
+python install_kicks.py catalog   # Create user catalog
+python install_kicks.py upload    # Upload XMIT file
+python install_kicks.py unpack    # Unpack 26 datasets
+python install_kicks.py testdata  # Create test VSAM files
+```
+
+### Start KICKS
+
+```
+EXEC 'KICKS.KICKSSYS.V1R5M0.CLIST(KICKS)'
+```
+
+### Included Resources
+
+| Resource | Location |
+|----------|----------|
+| Full installation guide | `docs/KICKS_INSTALLATION.md` |
+| Pre-configured JCL | `jcl/kicks/` |
+| XMIT file | `kicks_install/kicks-master/kicks-tso-v1r5m0/kicks-tso-v1r5m0.xmi` |
+| Automation script | `install_kicks.py` |
+
+See [KICKS_INSTALLATION.md](docs/KICKS_INSTALLATION.md) for the complete step-by-step guide.
+
 ## Related Work
 
 - [py3270](https://pypi.org/project/py3270/) — Python TN3270 library
 - [Mainframed](https://github.com/mainframed) — Mainframe security tools by Soldier of FORTRAN
 - [TK5](https://www.prince-webdesign.nl/tk5) — MVS 3.8j Turnkey distribution
+- [KICKS](http://www.kicksfortso.com/) — CICS-compatible transaction processing for MVS 3.8j
 
 ## Lineage
 

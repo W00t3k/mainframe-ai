@@ -10,11 +10,10 @@
 <div class="labs-page">
     <!-- ── Header ── -->
     <header class="labs-header">
-        <a href="/" class="labs-back">&larr; Home</a>
-        <div class="labs-brand">
-            <h1>Security Labs</h1>
-            <p class="labs-subtitle">Deterministic walkthroughs &mdash; no live mainframe required</p>
-        </div>
+        <a href="/" class="home-btn" title="Home">
+            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
+        </a>
+        <h1 class="header-title">Security Labs</h1>
         <div class="labs-header-actions">
             <button class="labs-btn labs-btn-ghost" id="loadDemoGraph">Load Demo Graph</button>
             <a href="/graph" class="labs-btn labs-btn-outline">Trust Graph &rarr;</a>
@@ -45,15 +44,15 @@ let activeLab = null;
 let stepIdx   = 0;
 
 const catMeta = {
-    fundamentals: { color: '#55FFFF', icon: '[DOC]', label: 'Fundamentals' },
-    security:     { color: '#FF5555', icon: '[SEC]', label: 'Security' },
-    recon:        { color: '#FFFF55', icon: '[RCN]', label: 'Recon' }
+    fundamentals: { color: '#4a7aaa', icon: '[DOC]', label: 'Fundamentals' },
+    security:     { color: '#5a6a8a', icon: '[SEC]', label: 'Security' },
+    recon:        { color: '#3a6a80', icon: '[RCN]', label: 'Recon' }
 };
 
 const diffMeta = {
-    beginner:     { color: '#42be65', label: 'Beginner' },
-    intermediate: { color: '#ffb020', label: 'Intermediate' },
-    advanced:     { color: '#ff6b6b', label: 'Advanced' }
+    beginner:     { color: '#3a6a80', label: 'Beginner' },
+    intermediate: { color: '#5a6a8a', label: 'Intermediate' },
+    advanced:     { color: '#6a5a7a', label: 'Advanced' }
 };
 
 function renderGrid() {

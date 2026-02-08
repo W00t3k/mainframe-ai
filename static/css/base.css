@@ -2,28 +2,37 @@
    IBM PC RETRO THEME — 1980s DOS/BIOS AESTHETIC
    ══════════════════════════════════════════════════════════════════════════ */
 :root {
-    /* Primary blues - DOS/BIOS style */
-    --ibm-blue: #0000AA;
-    --ibm-blue-dark: #000080;
+    /* Primary background - darker retro blue */
+    --ibm-bg: #1a2a4a;
+    --ibm-bg-dark: #0f1a2f;
+    
+    /* Primary blues - darker retro */
+    --ibm-blue: #1a2a4a;
+    --ibm-blue-dark: #0f1a2f;
+    
+    /* IBM logo colors */
+    --ibm-logo-red: #FF3333;
+    --ibm-logo-green: #33CC33;
+    --ibm-logo-blue: #3399FF;
     --ibm-blue-light: #5555FF;
     --ibm-blue-bright: #0055AA;
     
-    /* CGA palette */
-    --ibm-cyan: #55FFFF;
-    --ibm-cyan-dark: #00AAAA;
+    /* Old school IBM palette */
+    --ibm-cyan: #6699FF;
+    --ibm-cyan-dark: #3366CC;
     --ibm-green: #55FF55;
     --ibm-green-dark: #00AA00;
     --ibm-red: #FF5555;
     --ibm-red-dark: #AA0000;
-    --ibm-yellow: #FFFF55;
-    --ibm-yellow-dark: #AA5500;
-    --ibm-magenta: #FF55FF;
-    --ibm-magenta-dark: #AA00AA;
+    --ibm-yellow: #FFFFFF;
+    --ibm-yellow-dark: #AAAAAA;
+    --ibm-magenta: #5B8DEF;
+    --ibm-magenta-dark: #3A6BC5;
     --ibm-white: #FFFFFF;
     --ibm-white-dim: #AAAAAA;
     
-    /* Grayscale - PC style */
-    --ibm-gray-100: #000000;
+    /* Grayscale - PC style (no black) */
+    --ibm-gray-100: #0f1a2f;
     --ibm-gray-90: #0000AA;
     --ibm-gray-80: #000080;
     --ibm-gray-70: #555555;
@@ -35,8 +44,8 @@
     --terminal-green: #55FF55;
     
     /* Box drawing border */
-    --border-color: #5555FF;
-    --border-highlight: #55FFFF;
+    --border-color: #4477CC;
+    --border-highlight: #6699FF;
     
     /* No shadows in retro - flat design */
     --shadow-soft: none;
@@ -47,10 +56,10 @@
 .c3270-green       { color: #55FF55; }
 .c3270-red         { color: #FF5555; }
 .c3270-blue        { color: #5555FF; }
-.c3270-turquoise   { color: #55FFFF; }
-.c3270-yellow      { color: #FFFF55; }
+.c3270-turquoise   { color: #6699FF; }
+.c3270-yellow      { color: #FFFFFF; }
 .c3270-white       { color: #FFFFFF; }
-.c3270-pink        { color: #FF55FF; }
+.c3270-pink        { color: #5B8DEF; }
 .c3270-intensified { font-weight: 700; text-shadow: 0 0 2px currentColor; }
 .c3270-underline   { text-decoration: underline; }
 .c3270-reverse     { background: #AAAAAA; color: #000000; }
@@ -94,8 +103,38 @@ a {
     text-decoration: none;
 }
 
+/* IBM Logo Home Button */
+.home-btn {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.home-btn:hover {
+    text-decoration: none;
+}
+
+.ibm-logo {
+    height: 28px;
+    width: auto;
+    transition: transform 0.15s, filter 0.15s;
+}
+
+.ibm-logo:hover {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+}
+
+.header-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--ibm-white);
+}
+
 a:hover {
-    color: var(--ibm-yellow);
+    color: #FFFFFF;
     text-decoration: underline;
 }
 
@@ -106,7 +145,7 @@ img {
 
 code {
     font-family: 'IBM Plex Mono', monospace;
-    background: var(--ibm-blue-dark);
+    background: var(--ibm-blue);
     color: var(--ibm-cyan);
     padding: 0.1rem 0.3rem;
     border: 1px solid var(--border-color);
@@ -131,7 +170,7 @@ code {
 
 .page-title {
     font-size: 1.25rem;
-    color: var(--ibm-yellow);
+    color: #FFFFFF;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
@@ -141,61 +180,83 @@ code {
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
-   APP HEADER — DOS Menu Bar Style
+   APP HEADER — IBM Style
    ══════════════════════════════════════════════════════════════════════════ */
 .app-header {
-    background: var(--ibm-gray-70);
-    border-bottom: 2px solid var(--ibm-white);
-    padding: 0 1rem;
-    height: 28px;
+    background: #2C4A6E;
+    border-bottom: 2px solid #1a2a4a;
+    border-top: 1px solid #4a6a9e;
+    padding: 0.35rem 0.75rem;
     display: flex;
     align-items: center;
-    gap: 0;
+    gap: 0.75rem;
 }
 
-.app-header .brand {
+.app-header .home-btn {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    flex-shrink: 0;
+}
+
+.app-header .ibm-logo {
+    height: 24px;
+    width: auto;
+}
+
+.app-header .header-title {
+    font-size: 14px;
     font-weight: 700;
-    font-size: 14px;
-    color: var(--ibm-gray-100);
-    background: var(--ibm-cyan);
-    padding: 0 0.75rem;
-    height: 100%;
+    color: #FFFFFF;
+    text-transform: uppercase;
+    letter-spacing: 1px;
 }
 
-.app-header .brand img {
-    width: 16px;
-    height: 16px;
-}
-
-.app-header .brand span {
-    color: var(--ibm-gray-100);
-}
-
-.nav-links {
+.header-nav {
     display: flex;
     align-items: center;
-    gap: 0;
-    font-size: 14px;
-    height: 100%;
+    gap: 3px;
+    margin-left: auto;
 }
 
-.nav-links a {
-    color: var(--ibm-gray-100);
-    padding: 0 1rem;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    border: none;
-}
-
-.nav-links a:hover,
-.nav-links a.active {
-    background: var(--ibm-blue);
-    color: var(--ibm-white);
+.header-nav a {
+    color: #FFFFFF;
+    padding: 3px 12px;
+    font-size: 12px;
+    font-weight: 700;
     text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    background: #3a5a8a;
+    border-top: 2px solid #6a8aba;
+    border-left: 2px solid #6a8aba;
+    border-bottom: 2px solid #1a2a4a;
+    border-right: 2px solid #1a2a4a;
+    transition: none;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.header-nav a:hover {
+    background: #4a6a9e;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+.header-nav a:active {
+    border-top: 2px solid #1a2a4a;
+    border-left: 2px solid #1a2a4a;
+    border-bottom: 2px solid #6a8aba;
+    border-right: 2px solid #6a8aba;
+    padding: 4px 11px 2px 13px;
+}
+
+.header-nav a.active {
+    background: #1a3a6a;
+    color: #6699FF;
+    border-top: 2px solid #1a2a4a;
+    border-left: 2px solid #1a2a4a;
+    border-bottom: 2px solid #6a8aba;
+    border-right: 2px solid #6a8aba;
 }
 
 /* ══════════════════════════════════════════════════════════════════════════
@@ -276,8 +337,8 @@ input[type="number"]:focus,
 input[type="password"]:focus,
 input[type="email"]:focus {
     outline: none;
-    background: var(--ibm-blue-dark);
-    color: var(--ibm-yellow);
+    background: var(--ibm-blue);
+    color: #FFFFFF;
 }
 
 select {
@@ -432,7 +493,7 @@ select {
 /* ══════════════════════════════════════════════════════════════════════════
    UTILITY CLASSES
    ══════════════════════════════════════════════════════════════════════════ */
-.text-yellow { color: var(--ibm-yellow); }
+.text-yellow { color: #FFFFFF; }
 .text-cyan { color: var(--ibm-cyan); }
 .text-green { color: var(--ibm-green); }
 .text-red { color: var(--ibm-red); }

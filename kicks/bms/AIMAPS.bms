@@ -1,0 +1,118 @@
+***********************************************************************
+*        AI MAINFRAME ASSISTANT - BMS SCREEN MAP                      *
+*        FOR KICKS (CICS) ON MVS 3.8J                                 *
+***********************************************************************
+         PRINT NOGEN
+AIMAPS   DFHMSD TYPE=&SYSPARM,                                         X
+               LANG=COBOL,                                             X
+               MODE=INOUT,                                             X
+               CTRL=FREEKB,                                            X
+               STORAGE=AUTO,                                           X
+               TIOAPFX=YES
+***********************************************************************
+*        MAIN AI ASSISTANT SCREEN                                     *
+***********************************************************************
+AIMAP1   DFHMDI SIZE=(24,80),                                          X
+               LINE=1,                                                 X
+               COLUMN=1
+*        TITLE LINE
+         DFHMDF POS=(1,1),                                             X
+               LENGTH=32,                                              X
+               ATTRB=(ASKIP,BRT),                                      X
+               INITIAL='AI MAINFRAME ASSISTANT'
+         DFHMDF POS=(1,60),                                            X
+               LENGTH=6,                                               X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='DATE:'
+DATEO    DFHMDF POS=(1,67),                                            X
+               LENGTH=8,                                               X
+               ATTRB=(ASKIP,NORM)
+*        SEPARATOR LINE
+         DFHMDF POS=(2,1),                                             X
+               LENGTH=78,                                              X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='============================================== X
+               ================================'
+*        QUESTION PROMPT
+         DFHMDF POS=(4,1),                                             X
+               LENGTH=20,                                              X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='Enter your question:'
+*        QUESTION INPUT FIELD (72 CHARS MAX)
+         DFHMDF POS=(5,1),                                             X
+               LENGTH=1,                                               X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='>'
+QUESTI   DFHMDF POS=(5,3),                                             X
+               LENGTH=72,                                              X
+               ATTRB=(UNPROT,IC,FSET)
+         DFHMDF POS=(5,76),                                            X
+               LENGTH=1,                                               X
+               ATTRB=ASKIP
+*        RESPONSE HEADER
+         DFHMDF POS=(7,1),                                             X
+               LENGTH=9,                                               X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='Response:'
+*        RESPONSE LINES (10 LINES X 76 CHARS)
+RESP01   DFHMDF POS=(8,2),                                             X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP02   DFHMDF POS=(9,2),                                             X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP03   DFHMDF POS=(10,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP04   DFHMDF POS=(11,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP05   DFHMDF POS=(12,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP06   DFHMDF POS=(13,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP07   DFHMDF POS=(14,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP08   DFHMDF POS=(15,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP09   DFHMDF POS=(16,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+RESP10   DFHMDF POS=(17,2),                                            X
+               LENGTH=76,                                              X
+               ATTRB=(ASKIP,NORM)
+*        STATUS LINE
+         DFHMDF POS=(20,1),                                            X
+               LENGTH=8,                                               X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='Status:'
+STATO    DFHMDF POS=(20,10),                                           X
+               LENGTH=40,                                              X
+               ATTRB=(ASKIP,BRT)
+*        ERROR MESSAGE LINE
+MSGO     DFHMDF POS=(21,1),                                            X
+               LENGTH=78,                                              X
+               ATTRB=(ASKIP,BRT)
+*        SEPARATOR LINE
+         DFHMDF POS=(22,1),                                            X
+               LENGTH=78,                                              X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='============================================== X
+               ================================'
+*        PF KEY LEGEND
+         DFHMDF POS=(23,1),                                            X
+               LENGTH=50,                                              X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='PF3=Exit  PF5=Refresh  PF12=Clear  ENTER=Submit'
+*        VERSION INFO
+         DFHMDF POS=(24,60),                                           X
+               LENGTH=18,                                              X
+               ATTRB=(ASKIP,NORM),                                     X
+               INITIAL='AIMP V1.0 - KICKS'
+***********************************************************************
+         DFHMSD TYPE=FINAL
+         END

@@ -1,2 +1,2 @@
 # KICKS DASD volume for CICS
-0351 3350 dasd/kicks0.350
+# (defined in cbt_dasd.cnf at address 0148)

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Walkthrough - IBM z/OS AI Assistant{% endblock %}
+{% block title %}Walkthrough - IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/walkthrough.css">
@@ -13,11 +13,10 @@
 {% block body %}
     <!-- Header -->
     <header class="wt-page-header">
-        <div class="brand">
-            <img src="/static/logo.svg" alt="IBM z/OS">
-            <h1><span>Walkthrough</span> &mdash; Autonomous Mainframe Demonstration</h1>
-        </div>
-        <a href="/" class="back-link">&larr; Back to Dashboard</a>
+        <a href="/" class="home-btn" title="Home">
+            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
+        </a>
+        <h1 class="header-title">Walkthrough</h1>
     </header>
 
     <!-- Connection bar -->
@@ -50,6 +49,8 @@
                     <option value="quick-demo">Quick Demo: Connect &amp; Login</option>
                     <option value="session-stack">Session Stack (VTAM &rarr; TSO &rarr; ISPF)</option>
                     <option value="deferred-exec">Deferred Execution (JCL &rarr; JES)</option>
+                    <!-- KICKS not installed - use Install KICKS/CICS button on main page first -->
+                    <!-- <option value="cics-kicks">CICS/KICKS: Transaction Processing</option> -->
                     <option value="system-inspection">System Inspection (Procedures &amp; Config)</option>
                     <option value="auth-model">Authorization Model (RACF)</option>
                     <option value="dataset-model">Dataset Model (PDS, Members &amp; Catalogs)</option>
@@ -391,6 +392,12 @@ function addNarrationEntry(data) {
         </div>
         <div class="wt-entry-body ai-markdown">${bodyContent}</div>
     `;
+    // Click to toggle expand/collapse on past entries
+    entry.addEventListener('click', () => {
+        if (entry.classList.contains('past')) {
+            entry.classList.toggle('expanded');
+        }
+    });
     log.appendChild(entry);
 
     const narrationBody = document.getElementById('wtNarration');

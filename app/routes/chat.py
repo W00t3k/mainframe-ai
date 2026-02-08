@@ -22,6 +22,22 @@ async def api_chat(request: ChatRequest):
     return JSONResponse(result)
 
 
+@router.post("/explain-screen")
+async def api_explain_screen(request: ChatRequest):
+    """Fast screen explanation - bypasses chat history for speed."""
+    ollama_service = get_ollama_service()
+    
+    if not await ollama_service.check_available():
+        return JSONResponse({"response": "AI offline - start Ollama: ollama serve"})
+    
+    # Extract screen text and context from message
+    screen_text = request.message
+    context = request.context if hasattr(request, 'context') else ""
+    
+    response = await ollama_service.quick_explain(screen_text, context)
+    return JSONResponse({"response": response})
+
+
 @router.get("/status")
 async def api_status():
     """Get system status."""

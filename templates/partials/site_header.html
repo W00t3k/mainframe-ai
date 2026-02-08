@@ -1,9 +1,9 @@
 <header class="app-header">
-    <a href="/" class="brand">
-        <img src="/static/logo.svg" alt="z/OS">
-        <span>IBM</span> {{ brand_title }}
+    <a href="/" class="home-btn" title="Home">
+        <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
     </a>
-    <nav class="nav-links">
+    <div class="header-title">{{ brand_title }}</div>
+    <nav class="header-nav">
         {% for item in nav_items %}
             <a href="{{ item.href }}" class="{% if item.active %}active{% endif %}">{{ item.label }}</a>
         {% endfor %}

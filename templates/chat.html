@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}IBM z/OS AI Assistant{% endblock %}
+{% block title %}IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/chat.css">
+<link rel="stylesheet" href="/static/css/pages/chat.css?v=2">
 {% endblock %}
 
 {% block body_class %}{% if embed %}embed-mode{% endif %}{% endblock %}
@@ -17,8 +17,8 @@
         <!-- IBM Header -->
         <header class="ibm-header">
             <div class="brand">
-                <img src="/static/logo.svg" alt="IBM z/OS" class="logo">
-                <h1><span>IBM</span> z/OS AI Assistant</h1>
+                <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
+                <h1><span>IBM</span> Mainframe AI Assistant</h1>
             </div>
             <div class="header-tabs">
                 <button class="header-tab active" onclick="showPanel('chat')">
@@ -73,14 +73,14 @@
                             <div class="message assistant">
                                 <div class="message-header">System</div>
                                 <div class="message-content">
-                                    <strong>IBM z/OS AI Assistant Ready</strong><br><br>
+                                    <strong>IBM Mainframe AI Assistant Ready</strong><br><br>
                                     I can help you with:<br>
                                     - ABEND codes and error analysis<br>
                                     - JCL generation and debugging<br>
                                     - COBOL, REXX, and Assembler<br>
                                     - TSO/ISPF and CICS navigation<br>
                                     - Live 3270 terminal control<br><br>
-                                    <strong>Connected RAG Sources:</strong> z/OS Documentation, ABEND Codes, JCL Templates<br><br>
+                                    <strong>Connected RAG Sources:</strong> Mainframe Documentation, ABEND Codes, JCL Templates<br><br>
                                     Type <code>/connect localhost:3270</code> to connect to MVS, or click the <strong>Terminal</strong> tab.
                                 </div>
                             </div>
@@ -88,7 +88,7 @@
 
                         <div class="input-area">
                             <div class="input-wrapper">
-                                <textarea class="chat-input" id="chatInput" placeholder="Ask about z/OS, JCL, ABEND codes..." rows="1"></textarea>
+                                <textarea class="chat-input" id="chatInput" placeholder="Ask about mainframe, JCL, ABEND codes..." rows="1"></textarea>
                                 <button class="send-btn" id="sendBtn" onclick="sendMessage()">SUBMIT</button>
                             </div>
                             <div class="quick-commands">
@@ -143,7 +143,7 @@
                             <div class="sidebar-header">RAG Sources</div>
                             <div class="sidebar-body">
                                 <div class="sidebar-row">
-                                    <span class="key">z/OS Docs</span>
+                                    <span class="key">Mainframe Docs</span>
                                     <span class="val ok">ACTIVE</span>
                                 </div>
                                 <div class="sidebar-row">
@@ -227,7 +227,7 @@ or use /connect command.
                         <div class="agent-card active" onclick="selectAgent(this, 'general')">
                             <div class="agent-icon">[AI]</div>
                             <h3>General Assistant</h3>
-                            <p>All-purpose z/OS assistant. Answers questions about JCL, COBOL, ABEND codes, TSO/ISPF, and more.</p>
+                            <p>All-purpose mainframe assistant. Answers questions about JCL, COBOL, ABEND codes, TSO/ISPF, and more.</p>
                             <div class="agent-status"><span class="dot"></span> Active</div>
                         </div>
                         <div class="agent-card" onclick="selectAgent(this, 'jcl')">
@@ -257,7 +257,7 @@ or use /connect command.
                         <div class="agent-card" onclick="selectAgent(this, 'security')">
                             <div class="agent-icon">[SEC]</div>
                             <h3>RACF Security</h3>
-                            <p>Specializes in RACF commands, permissions, and security best practices for z/OS environments.</p>
+                            <p>Specializes in RACF commands, permissions, and security best practices for mainframe environments.</p>
                             <div class="agent-status"><span class="dot"></span> Available</div>
                         </div>
                     </div>
@@ -275,8 +275,8 @@ or use /connect command.
                         <div class="rag-source connected">
                             <div class="rag-icon">[DOC]</div>
                             <div class="rag-info">
-                                <h3>z/OS Documentation</h3>
-                                <p class="rag-desc">IBM z/OS documentation including MVS, JES2/JES3, DFSMS, and system programming guides.</p>
+                                <h3>Mainframe Documentation</h3>
+                                <p class="rag-desc">IBM mainframe documentation including MVS, JES2/JES3, DFSMS, and system programming guides.</p>
                                 <div class="rag-stats">15,432 documents | Last updated: 2024-01</div>
                             </div>
                             <button class="rag-toggle">Connected</button>
@@ -312,7 +312,7 @@ or use /connect command.
                             <div class="rag-icon">[SEC]</div>
                             <div class="rag-info">
                                 <h3>RACF Commands</h3>
-                                <p class="rag-desc">RACF security commands, profiles, and best practices for z/OS security administration.</p>
+                                <p class="rag-desc">RACF security commands, profiles, and best practices for mainframe security administration.</p>
                                 <div class="rag-stats">523 commands | Security policies</div>
                             </div>
                             <button class="rag-toggle">Connect</button>
@@ -403,7 +403,7 @@ or use /connect command.
             const div = document.createElement('div');
             div.className = `message ${isUser ? 'user' : 'assistant'}`;
             div.innerHTML = `
-                <div class="message-header">${isUser ? 'You' : 'z/OS Assistant'}</div>
+                <div class="message-header">${isUser ? 'You' : 'Mainframe Assistant'}</div>
                 <div class="message-content">${isUser ? content : marked.parse(content)}</div>
             `;
             chatMessages.appendChild(div);
@@ -415,7 +415,7 @@ or use /connect command.
             div.className = 'message assistant';
             div.id = 'typingIndicator';
             div.innerHTML = `
-                <div class="message-header">z/OS Assistant</div>
+                <div class="message-header">Mainframe Assistant</div>
                 <div class="typing"><span></span><span></span><span></span></div>
             `;
             chatMessages.appendChild(div);

@@ -19,6 +19,7 @@ from .tutor import router as tutor_router
 from .walkthrough import router as walkthrough_router
 from .system import router as system_router
 from .methodology import router as methodology_router
+from .kicks import router as kicks_router
 
 
 def register_routes(app):
@@ -36,3 +37,4 @@ def register_routes(app):
     app.include_router(walkthrough_router, prefix="/api/walkthrough")
     app.include_router(system_router, prefix="/api/system")
     app.include_router(methodology_router)
+    app.include_router(kicks_router, prefix="/api")

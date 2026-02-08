@@ -3,7 +3,7 @@
 {% block title %}IBM z/OS AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/index.css">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=311">
 {% endblock %}
 
 {% block head_extra %}
@@ -17,11 +17,16 @@
     <!-- ── Unified Toolbar ── -->
     <div class="idx-toolbar">
         <div class="idx-toolbar-center">
-       
-            <a href="/tutor" class="idx-pill idx-pill-accent">[F1] LEARN</a>
+            <a href="/walkthrough" class="idx-pill idx-pill-accent">[F1] LEARN</a>
             <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()">[C] CONNECT</button>
             <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()">[D] DEMO</button>
             <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()">[R] RESTART</button>
+        </div>
+        <div class="idx-toolbar-status" id="toolbarStatus">
+            <span class="ts-item"><span class="ts-led" id="tsOllamaLed"></span><span class="ts-label">LLM</span><span class="ts-val" id="tsModel">—</span></span>
+            <span class="ts-item"><span class="ts-led" id="tsMVSLed"></span><span class="ts-label">MVS</span></span>
+            <span class="ts-item"><span class="ts-label">MEM</span><span class="ts-val" id="tsMem">—</span></span>
+            <span class="ts-clock" id="tsClock">--:--</span>
         </div>
         <button class="idx-hamburger" onclick="togglePanel()" title="Menu">☰</button>
     </div>
@@ -38,10 +43,9 @@
 
     <!-- ── Hero Section ── -->
     <div class="hero">
-        <img src="/static/img/ibm-old.png" alt="IBM" class="hero-logo">
+        <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="hero-logo" title="Natural language interface for mainframe operations, powered by Hercules Hyperion — an open-source System/370, ESA/390 & z/Architecture emulator running MVS 3.8j TK5 locally. No mainframe hardware required.">
         <div class="hero-text">
-            <h2>AI-Powered <strong>z/OS</strong> Operations</h2>
-            <p>Natural language interface for mainframe operations, powered by <strong>Hercules Hyperion</strong> &mdash; an open-source System/370, ESA/390 &amp; z/Architecture emulator running <strong>MVS 3.8j TK5</strong> locally. No mainframe hardware required.</p>
+            <h2><span style="color:#78a9ff;">AI-Powered</span> <strong>Mainframe</strong> <span style="color:#78a9ff;">Operations</span></h2>
         </div>
     </div>
 
@@ -67,25 +71,25 @@
 
     <main>
         <!-- ── Control Planes (collapsible) ── -->
-        <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9660;</span> CONTROL PLANES</div>
-        <div class="cp-grid" id="cpGrid">
-            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam">
+        <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9654;</span> CONTROL PLANES</div>
+        <div class="cp-grid collapsed" id="cpGrid">
+            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam" style="background:#1a2a4a !important;">
                 <span class="cp-name">VTAM</span>
                 <span class="cp-desc">Session Fabric</span>
             </a>
-            <a href="/walkthrough?plane=tso" class="cp-card cp-tso">
+            <a href="/walkthrough?plane=tso" class="cp-card cp-tso" style="background:#1a2a4a !important;">
                 <span class="cp-name">TSO</span>
                 <span class="cp-desc">Interactive</span>
             </a>
-            <a href="/walkthrough?plane=racf" class="cp-card cp-racf">
+            <a href="/walkthrough?plane=racf" class="cp-card cp-racf" style="background:#1a2a4a !important;">
                 <span class="cp-name">RACF</span>
                 <span class="cp-desc">Authorization</span>
             </a>
-            <a href="/walkthrough?plane=jes" class="cp-card cp-jes">
+            <a href="/walkthrough?plane=jes" class="cp-card cp-jes" style="background:#1a2a4a !important;">
                 <span class="cp-name">JES</span>
                 <span class="cp-desc">Batch Execution</span>
             </a>
-            <a href="/walkthrough?plane=cics" class="cp-card cp-cics">
+            <a href="/walkthrough?plane=cics" class="cp-card cp-cics" style="background:#1a2a4a !important;">
                 <span class="cp-name">CICS/KICKS</span>
                 <span class="cp-desc">Transactions</span>
             </a>
@@ -109,65 +113,59 @@
         </nav>
     </main>
 
-    <footer>
-        <p>Ollama + TK5 | <a href="https://github.com">Documentation</a> | <a href="/docs">API</a></p>
-    </footer>
 </div><!-- /.idx-main-col -->
-
-<!-- ── Control Panel Toggle ── -->
-<button class="idx-cp-toggle panel-closed" id="cpToggle" onclick="togglePanel()" title="Toggle Control Panel">&#9654;</button>
 
 <!-- ── Right Control Panel ── -->
 <aside class="idx-control-panel collapsed" id="controlPanel">
-    <div class="idx-cp-title">═══ MENU ═══</div>
+    <div class="idx-cp-title">▓ MENU ▓</div>
     <a href="/walkthrough" class="idx-cp-item cp-walkthrough">
-        <span class="idx-cp-icon">[>>]</span>
+        <span class="idx-cp-icon">▶</span>
         <span>Walkthrough</span>
     </a>
     <a href="/abstract-models" class="idx-cp-item cp-models">
-        <span class="idx-cp-icon">[M]</span>
-        <span>Abstract Models</span>
+        <span class="idx-cp-icon">◈</span>
+        <span>Models</span>
     </a>
     <a href="/tutor" class="idx-cp-item cp-tutor">
-        <span class="idx-cp-icon">[F1]</span>
-        <span>Red Team Tutor</span>
+        <span class="idx-cp-icon">⚑</span>
+        <span>Red Team</span>
     </a>
     <a href="/labs" class="idx-cp-item cp-labs">
-        <span class="idx-cp-icon">[LAB]</span>
-        <span>Security Labs</span>
+        <span class="idx-cp-icon">⬡</span>
+        <span>Labs</span>
     </a>
     <a href="/terminal" class="idx-cp-item cp-terminal">
-        <span class="idx-cp-icon">[>_]</span>
+        <span class="idx-cp-icon">█</span>
         <span>Terminal</span>
     </a>
     <a href="/chat" class="idx-cp-item cp-chat">
-        <span class="idx-cp-icon">[AI]</span>
+        <span class="idx-cp-icon">◉</span>
         <span>AI Chat</span>
     </a>
     <a href="/graph" class="idx-cp-item cp-graph">
-        <span class="idx-cp-icon">[#]</span>
-        <span>Trust Graph</span>
+        <span class="idx-cp-icon">◆</span>
+        <span>Graph</span>
     </a>
     <a href="/scanner" class="idx-cp-item cp-scanner">
-        <span class="idx-cp-icon">[?]</span>
+        <span class="idx-cp-icon">◧</span>
         <span>Scanner</span>
     </a>
     <a href="/recon" class="idx-cp-item cp-recon">
-        <span class="idx-cp-icon">[*]</span>
-        <span>Recon & Captures</span>
+        <span class="idx-cp-icon">▣</span>
+        <span>Recon</span>
     </a>
     <a href="/rag" class="idx-cp-item cp-rag">
-        <span class="idx-cp-icon">[KB]</span>
-        <span>Knowledge Base</span>
+        <span class="idx-cp-icon">▤</span>
+        <span>KB</span>
     </a>
     <a href="/architecture" class="idx-cp-item cp-arch">
-        <span class="idx-cp-icon">[A]</span>
-        <span>Architecture</span>
+        <span class="idx-cp-icon">▦</span>
+        <span>Arch</span>
     </a>
     <div class="idx-cp-divider"></div>
     <button class="idx-cp-item cp-demo-prep" id="demoPrepBtn" onclick="prepareDemo()">
-        <span class="idx-cp-icon">[!]</span>
-        <span>Prepare for Demo</span>
+        <span class="idx-cp-icon">⚙</span>
+        <span>Demo Prep</span>
     </button>
 </aside>
 </div><!-- /.idx-layout -->
@@ -179,6 +177,31 @@ let isConnected = false;
 let wtRunning = false;
 let wtPollingInterval = null;
 let wtLastLogLen = 0;
+
+// ── Toolbar Status ──
+function setLed(id, online) {
+    const el = document.getElementById(id);
+    if (el) el.className = 'ts-led ' + (online ? 'on' : 'off');
+}
+function tsClock() {
+    const el = document.getElementById('tsClock');
+    if (el) el.textContent = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
+}
+tsClock(); setInterval(tsClock, 30000);
+
+async function loadSysInfo() {
+    try {
+        const r = await fetch('/api/sysinfo');
+        const d = await r.json();
+        const el = id => document.getElementById(id);
+        if (el('tsModel')) el('tsModel').textContent = d.model;
+        setLed('tsOllamaLed', d.ollama === 'online');
+        setLed('tsMVSLed', d.mainframe === 'online');
+        if (el('tsMem')) el('tsMem').textContent = d.memory || '—';
+    } catch(e) {}
+}
+loadSysInfo();
+setInterval(loadSysInfo, 10000);
 
 // ── UI helpers ──
 function updateMfStatus(state) {
@@ -334,10 +357,17 @@ function closeTerminal() {
 function updateTerminal(data) {
     if (!data) return;
     const pre = document.getElementById('terminalText');
+    let screenText = '';
     if (data.screen_html) {
         pre.innerHTML = data.screen_html;
+        screenText = pre.textContent;
     } else if (data.screen || data.connected) {
-        pre.textContent = data.screen || '';
+        screenText = data.screen || '';
+        pre.textContent = screenText;
+    }
+    // Update explanation when screen changes
+    if (screenText && screenText !== lastScreenText) {
+        aiExplainScreen(screenText, 'screen-update');
     }
 }
 
@@ -495,36 +525,91 @@ async function restartMainframe() {
     await checkStatus();
 }
 
+let aiAutoRefreshInterval = null;
+let lastScreenText = '';
+
+// Instant screen detection - no LLM needed for demos
+const SCREEN_PATTERNS = [
+    { match: /VTAM.*ENTER LOGON|ENTER LOGON.*VTAM/i, text: "VTAM login screen. Type LOGON followed by your userid (e.g., LOGON IBMUSER) and press Enter." },
+    { match: /TSO\/E LOGON/i, text: "TSO logon panel. Enter your password and press Enter to access Time Sharing Option." },
+    { match: /ISPF PRIMARY OPTION MENU|ISPF\/PDF/i, text: "ISPF main menu. Select an option (0-11) or type a command. Option 3 for utilities, 6 for commands." },
+    { match: /READY\s*$/m, text: "TSO READY prompt. You can enter TSO commands like LISTCAT, LISTDS, or type ISPF to launch panels." },
+    { match: /IKJ56/i, text: "TSO system message. Check the message ID for details - IKJ messages relate to TSO operations." },
+    { match: /RACF.*LOGON|ICH70/i, text: "RACF security check. Verify your userid and password are correct for this system." },
+    { match: /JES2.*\$D|HASP/i, text: "JES2 spool display. Shows batch job status. Use $DA for active jobs, $DQ for queued." },
+    { match: /EDIT.*DATA SET|BROWSE.*DATA SET/i, text: "Dataset editor/browser. Use PF3 to exit, PF7/8 to scroll, or enter line commands." },
+    { match: /DATA SET LIST|DSLIST/i, text: "Dataset list panel. Enter S to select, D to delete, or I for info on a dataset." },
+    { match: /MEMBER LIST/i, text: "PDS member list. Enter S to select/edit, B to browse, or D to delete members." },
+    { match: /MVS.*3\.8|TK[45]/i, text: "MVS 3.8j Turnkey system. This is a free, open-source mainframe OS running on Hercules emulator." },
+    { match: /CICS.*SIGN|DFHCE/i, text: "CICS region. Use CESN to sign on, CEMT for master terminal, CEDA for resource definitions." },
+    { match: /INPUT NOT RECOGNIZED/i, text: "Invalid command entered. Check spelling and syntax, or press PF1/HELP for assistance." },
+    { match: /NOT AUTHORIZED|ICH408I/i, text: "RACF authorization failure. You lack permission for this resource. Contact security admin." },
+    { match: /ABEND|S0C[147B]|S222|S322|S806/i, text: "Program abend detected. Check the abend code - S0C7 is data exception, S806 is load failure." },
+    { match: /LOGOFF|LOGGED OFF/i, text: "Session ended. The user has logged off from the system." },
+];
+
 let aiExplainPending = false;
+
 async function aiExplainScreen(screenText, context) {
     const el = document.getElementById('termExplain');
-    if (!el || aiExplainPending) return;
+    if (!el) return;
+    
+    lastScreenText = screenText || '';
+    const text = screenText || '';
+    
+    // Try instant pattern matching first
+    for (const pattern of SCREEN_PATTERNS) {
+        if (pattern.match.test(text)) {
+            el.textContent = pattern.text;
+            return;
+        }
+    }
+    
+    // No pattern matched - fallback to LLM
+    if (aiExplainPending) return;
     aiExplainPending = true;
-    el.innerHTML = '<span class="idx-explain-thinking">Analyzing screen...</span>';
-
-    const fallback = 'This is the TK5 MVS 3.8j VTAM entry screen running on Hercules. At the "Logon ===>" prompt, type your userid (HERC01) and press Enter. Then enter password CUL8TR when prompted. This binds your identity to a TSO session.';
-
-    const first20 = (screenText || '').split('\n').slice(0, 20).join('\n');
-    const prompt = `You are an AI assistant explaining a mainframe terminal to a beginner. The user is looking at a TN3270 terminal connected to an MVS 3.8j (TK5) system via Hercules emulator. Context: "${context || 'viewing screen'}". Here is the current screen content:\n\n${first20}\n\nIn 1-2 concise sentences, explain what this screen shows and what the user should do next. Be specific about the mainframe concepts shown (VTAM, TSO, RACF, JES, etc). Do not use markdown.`;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 8000);
-
+    el.innerHTML = '<span class="idx-explain-thinking">Analyzing...</span>';
+    
+    const first10 = text.split('\n').slice(0, 10).join('\n');
     try {
         const res = await fetch('/api/chat', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({message: prompt, context: 'screen-explain'}),
-            signal: controller.signal
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: `In ONE short sentence, explain this mainframe screen:\n${first10}`})
         });
-        clearTimeout(timeout);
-        const data = await res.json();
-        el.textContent = data.response || data.message || fallback;
+        if (res.ok) {
+            const data = await res.json();
+            el.textContent = data.response || 'Mainframe terminal active.';
+        } else {
+            el.textContent = 'Mainframe terminal active. Enter commands or use PF keys.';
+        }
     } catch(e) {
-        clearTimeout(timeout);
-        el.textContent = fallback;
+        el.textContent = 'Mainframe terminal active. Enter commands or use PF keys.';
     }
     aiExplainPending = false;
 }
+
+// Auto-refresh AI explanation every 20 seconds when idle
+function startAiAutoRefresh() {
+    if (aiAutoRefreshInterval) return;
+    aiAutoRefreshInterval = setInterval(() => {
+        const pre = document.getElementById('terminalText');
+        const screenText = pre ? pre.textContent : lastScreenText;
+        if (screenText) {
+            aiExplainScreen(screenText, 'auto-refresh');
+        }
+    }, 20000);
+}
+
+function stopAiAutoRefresh() {
+    if (aiAutoRefreshInterval) {
+        clearInterval(aiAutoRefreshInterval);
+        aiAutoRefreshInterval = null;
+    }
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', startAiAutoRefresh);
 
 // ── Collapsible Sections ──
 function toggleSection(id, heading) {
@@ -541,17 +626,7 @@ function toggleSection(id, heading) {
 // ── Control Panel Toggle ──
 function togglePanel() {
     const panel = document.getElementById('controlPanel');
-    const btn = document.getElementById('cpToggle');
-    const isCollapsed = panel.classList.toggle('collapsed');
-    if (isCollapsed) {
-        btn.classList.remove('panel-open');
-        btn.classList.add('panel-closed');
-        btn.innerHTML = '&#9654;';
-    } else {
-        btn.classList.remove('panel-closed');
-        btn.classList.add('panel-open');
-        btn.innerHTML = '&#9664;';
-    }
+    if (panel) panel.classList.toggle('collapsed');
 }
 
 function resetWtControls() {
@@ -621,6 +696,68 @@ async function prepareDemo() {
         }, 3000);
     } catch (e) {
         showToast('Failed to start demo prep: ' + e.message, { type: 'error', title: 'Demo Prep' });
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+}
+
+// ── Install KICKS/CICS ──
+async function installKicks() {
+    const btn = document.getElementById('kicksInstallBtn');
+    const origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="idx-cp-icon">&#9203;</span><span>Checking...</span>';
+
+    try {
+        // First check status
+        const statusRes = await fetch('/api/kicks/status');
+        const status = await statusRes.json();
+        
+        if (status.kicks_installed && status.prerequisites.kicks_dasd) {
+            // Show commands needed
+            let msg = "KICKS files are ready!\\n\\n";
+            msg += "=== Hercules Console Commands ===\\n";
+            status.hercules_commands.forEach(cmd => { msg += cmd + "\\n"; });
+            msg += "\\n=== MVS Commands ===\\n";
+            status.mvs_commands.forEach(cmd => { msg += cmd + "\\n"; });
+            
+            alert(msg);
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            return;
+        }
+        
+        // Start installation
+        btn.innerHTML = '<span class="idx-cp-icon">&#9203;</span><span>Installing...</span>';
+        const installRes = await fetch('/api/kicks/install', { method: 'POST' });
+        const result = await installRes.json();
+        
+        if (result.error) {
+            showToast(result.error, { type: 'error', title: 'KICKS Install' });
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            return;
+        }
+        
+        // Show results
+        let msg = "KICKS Installation Status: " + result.status + "\\n\\n";
+        if (result.log) {
+            result.log.forEach(line => { msg += line + "\\n"; });
+        }
+        msg += "\\n=== Hercules Commands (run at console) ===\\n";
+        result.hercules_commands.forEach(cmd => { msg += cmd + "\\n"; });
+        
+        alert(msg);
+        showToast('KICKS config updated. Restart TK5 to apply.', { type: 'info', title: 'KICKS Install' });
+        
+        btn.innerHTML = '<span class="idx-cp-icon">&#9989;</span><span>Config Ready</span>';
+        setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+        }, 3000);
+        
+    } catch (e) {
+        showToast('KICKS install failed: ' + e.message, { type: 'error', title: 'KICKS Install' });
         btn.innerHTML = origHTML;
         btn.disabled = false;
     }

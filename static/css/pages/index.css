@@ -22,30 +22,86 @@ body {
     flex-direction: column;
 }
 
-/* ── Unified Toolbar — DOS Menu Style ── */
+/* ── Unified Toolbar — Cyberpunk IBM ── */
 .idx-toolbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
+    position: relative;
     padding: 0 0.5rem;
-    background: var(--ibm-gray-70);
-    border-bottom: 2px solid var(--ibm-white);
+    background: #0c1a30;
+    border-bottom: 1px solid #1a3058;
     gap: 0.5rem;
-    height: 28px;
+    height: 30px;
 }
 
 .idx-toolbar-center {
     display: flex;
     align-items: center;
     gap: 0.4rem;
-    flex: 1;
-    justify-content: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
 }
 
 .idx-toolbar-right {
     display: flex;
     align-items: center;
     gap: 0.4rem;
+}
+
+.idx-toolbar-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-left: auto;
+    flex-shrink: 0;
+}
+
+.ts-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+.ts-label {
+    color: #3a5a80;
+    font-weight: 700;
+    font-size: 9px;
+    text-transform: uppercase;
+}
+
+.ts-val {
+    color: #6a9ad0;
+    font-weight: 700;
+    font-size: 10px;
+}
+
+.ts-led {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: #1a2a48;
+    flex-shrink: 0;
+}
+
+.ts-led.on {
+    background: #3a8a5a;
+    box-shadow: 0 0 4px rgba(58, 138, 90, 0.6);
+}
+
+.ts-led.off {
+    background: #8a3a3a;
+    box-shadow: 0 0 3px rgba(138, 58, 58, 0.4);
+}
+
+.ts-clock {
+    font-size: 10px;
+    font-weight: 700;
+    color: #2a4a6a;
+    font-family: 'IBM Plex Mono', monospace;
 }
 
 .idx-dot {
@@ -61,57 +117,67 @@ body {
     font-size: 14px;
     background: var(--ibm-gray-100);
     border: 2px inset var(--ibm-white);
-    color: var(--ibm-cyan);
+    color: #FFFFFF;
     padding: 0.15rem 0.5rem;
     width: 140px;
 }
-.idx-host-input:focus { background: var(--ibm-blue-dark); outline: none; color: var(--ibm-yellow); }
+.idx-host-input:focus { background: var(--ibm-blue); outline: none; color: #FFFFFF; }
 
-/* ── Pill Buttons — DOS Style ── */
+/* ── Pill Buttons — Cyberpunk IBM ── */
 .idx-pill {
-    font-size: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
     font-weight: 700;
-    padding: 0.2rem 0.75rem;
-    border: 2px outset var(--ibm-white);
+    padding: 3px 10px;
+    border: 1px solid #1a3058;
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
     align-items: center;
     gap: 0.3rem;
-    color: var(--ibm-white);
-    background: var(--ibm-green-dark);
+    color: #5a8ab8;
+    background: #0f1d35;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.15s ease;
 }
-.idx-pill:hover { background: var(--ibm-green); color: var(--ibm-gray-100); }
-.idx-pill:active { border-style: inset; }
-.idx-pill:disabled { opacity: 0.5; cursor: not-allowed; }
+.idx-pill:hover { background: #1a3058; color: #8ab4f0; border-color: #2a4a78; }
+.idx-pill:active { background: #0a1225; }
+.idx-pill:disabled { opacity: 0.35; cursor: not-allowed; }
 
 .idx-pill-outline {
-    background: var(--ibm-gray-70);
-    border: 2px outset var(--ibm-white);
-    color: var(--ibm-gray-100);
+    background: transparent;
+    border: 1px solid #1a3058;
+    color: #3a5a80;
 }
-.idx-pill-outline:hover { background: var(--ibm-white-dim); }
+.idx-pill-outline:hover { background: #0f1d35; color: #6a9ad0; }
 
-.idx-pill-primary { background: var(--ibm-cyan-dark); }
-.idx-pill-accent { background: var(--ibm-magenta-dark); }
-.idx-pill-danger { background: var(--ibm-red-dark); }
-.idx-pill-success { background: var(--ibm-green-dark); }
+.idx-pill-primary { background: #12243f; color: #5a8ab8; }
+.idx-pill-accent { background: #0f1d35; color: #6a9ad0; border-color: #2a4a78; }
+.idx-pill-danger { background: #1a1525; color: #7a5a6a; border-color: #2a1a35; }
+.idx-pill-success { background: #0f2520; color: #4a8a6a; border-color: #1a3530; }
 
 .idx-hamburger {
-    background: var(--ibm-gray-70);
-    border: 2px outset var(--ibm-white);
-    color: var(--ibm-gray-100);
-    font-size: 14px;
-    width: 24px;
-    height: 20px;
+    background: #0c1a30 !important;
+    border: none !important;
+    border-left: 1px solid #1a3058 !important;
+    color: #3a5a80;
+    font-size: 13px;
+    width: 30px;
+    height: 30px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
+    flex-shrink: 0;
+    padding: 0;
+    margin: 0;
+    outline: none;
+    box-shadow: none;
+    transition: all 0.15s ease;
 }
-.idx-hamburger:hover { background: var(--ibm-cyan); }
-.idx-hamburger:active { border-style: inset; }
+.idx-hamburger:hover { color: #8ab4f0; background: #0f1d35 !important; }
+.idx-hamburger:active { background: #0a1225 !important; }
 
 /* ── Main Content ── */
 main {
@@ -130,16 +196,17 @@ main {
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     text-align: center;
-    gap: 0.35rem;
-    padding: 0.5rem 1rem;
-    background: var(--ibm-blue-dark);
-    border: 2px solid var(--ibm-cyan);
+    gap: 0.2rem;
+    padding: 0.3rem 1rem;
+    background: var(--ibm-blue);
+    border: 2px solid rgba(255, 255, 255, 0.15);
     margin-bottom: 0.5rem;
 }
 
 .hero-logo {
-    height: 40px;
+    height: 36px;
     width: auto;
     flex-shrink: 0;
 }
@@ -149,18 +216,19 @@ main {
 }
 
 .hero h2 {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    line-height: 1.3;
+    line-height: 1.2;
+    margin: 0;
     margin-bottom: 0.25rem;
-    color: var(--ibm-yellow);
+    color: #FFFFFF;
     text-transform: uppercase;
     letter-spacing: 2px;
 }
 
 .hero h2 strong {
     font-weight: 700;
-    color: var(--ibm-cyan);
+    color: #FFFFFF;
 }
 
 .hero p {
@@ -182,10 +250,10 @@ main {
     align-items: center;
     gap: 0.35rem;
     background: var(--ibm-gray-100);
-    border: 1px solid var(--ibm-cyan);
+    border: 1px solid rgba(255, 255, 255, 0.3);
     padding: 0.2rem 0.5rem;
     font-size: 12px;
-    color: var(--ibm-cyan);
+    color: #FFFFFF;
 }
 
 .badge .dot {
@@ -215,8 +283,8 @@ main {
     gap: 2px;
     max-width: 560px;
     width: 100%;
-    background: var(--ibm-cyan);
-    border: 2px solid var(--ibm-cyan);
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
     margin: 0.75rem auto 1rem;
 }
@@ -236,8 +304,8 @@ main {
 }
 
 .idx-nav-item:hover {
-    background: var(--ibm-cyan);
-    color: var(--ibm-gray-100);
+    background: rgba(255, 255, 255, 0.3);
+    color: var(--ibm-white);
 }
 
 .idx-nav-icon {
@@ -306,7 +374,7 @@ main {
     font-size: 14px;
     font-weight: 700;
     letter-spacing: 2px;
-    color: var(--ibm-yellow);
+    color: #FFFFFF;
     margin-bottom: 0.5rem;
     text-align: center;
     width: 100%;
@@ -363,8 +431,12 @@ main {
     gap: 0.25rem;
     padding: 0.75rem 0.5rem;
     text-decoration: none;
-    border: 2px solid currentColor;
-    background: var(--ibm-blue-dark);
+    border: 3px solid currentColor;
+    background: none !important;
+}
+
+.cp-vtam, .cp-tso, .cp-racf, .cp-jes, .cp-cics {
+    background: none !important;
 }
 
 .cp-card:hover {
@@ -390,11 +462,11 @@ main {
     text-align: center;
 }
 
-.cp-vtam { color: #FF55FF; }
-.cp-tso  { color: #55FFFF; }
-.cp-racf { color: #FFFF55; }
-.cp-jes  { color: #FF5555; }
-.cp-cics { color: #55FF55; }
+.cp-vtam { color: #7EB8DA; border-color: #7EB8DA; }
+.cp-tso  { color: #5A9BD4; border-color: #5A9BD4; }
+.cp-racf { color: #A8C8E8; border-color: #A8C8E8; }
+.cp-jes  { color: #4178BE; border-color: #4178BE; }
+.cp-cics { color: #B8D4E8; border-color: #B8D4E8; }
 
 @media (max-width: 600px) {
     .cp-grid { grid-template-columns: repeat(3, 1fr); }
@@ -490,17 +562,17 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.6rem 1.5rem;
+    gap: 0.4rem;
+    padding: 0.25rem 1rem;
     flex-wrap: wrap;
 }
 
 .idx-btn {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.4rem 1rem;
-    font-size: 0.75rem;
+    gap: 0.3rem;
+    padding: 0.2rem 0.6rem;
+    font-size: 0.65rem;
     font-weight: 600;
     border: none;
     border-radius: 20px;
@@ -531,8 +603,8 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 0.5rem;
-    padding: 0.3rem 1.5rem 0.6rem;
+    gap: 0.4rem;
+    padding: 0.2rem 1rem 0.3rem;
     flex-wrap: wrap;
 }
 
@@ -540,11 +612,11 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,255,255,0.1);
     color: #e0e0e8;
-    padding: 0.35rem 0.7rem;
+    padding: 0.25rem 0.6rem;
     font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.72rem;
+    font-size: 0.65rem;
     border-radius: 20px;
-    width: 150px;
+    width: 130px;
     outline: none;
 }
 
@@ -581,7 +653,7 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     min-height: 440px;
     max-height: 440px;
     margin: 0 auto;
-    border: 2px solid var(--ibm-cyan);
+    border: 2px solid rgba(255, 255, 255, 0.2);
     overflow: hidden;
     background: var(--ibm-gray-100);
     flex-shrink: 0;
@@ -592,13 +664,13 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-term-header {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.15rem 0.5rem;
-    background: var(--ibm-cyan);
+    gap: 0.4rem;
+    padding: 0.1rem 0.4rem;
+    background: #4178BE;
 }
 
 .idx-term-title {
-    font-size: 14px;
+    font-size: 11px;
     color: var(--ibm-gray-100);
     font-weight: 700;
     text-transform: uppercase;
@@ -665,12 +737,12 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 }
 
 .idx-term-screen:focus {
-    border-color: var(--ibm-cyan);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .idx-term-screen pre {
-    font-size: 14px;
-    line-height: 1.3;
+    font-size: 12px;
+    line-height: 1.2;
     color: var(--ibm-green);
     background: transparent;
     padding: 4px 8px;
@@ -679,7 +751,7 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
     overflow: hidden;
     text-align: left;
     width: 80ch;
-    min-height: calc(24 * 1.3 * 14px);
+    min-height: calc(24 * 1.3 * 13px);
     text-shadow: 0 0 2px currentColor;
 }
 
@@ -687,16 +759,17 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 .idx-term-screen pre .c3270-green       { color: #55FF55; }
 .idx-term-screen pre .c3270-red         { color: #FF5555; }
 .idx-term-screen pre .c3270-blue        { color: #5555FF; }
-.idx-term-screen pre .c3270-turquoise   { color: #55FFFF; }
-.idx-term-screen pre .c3270-yellow      { color: #FFFF55; }
+.idx-term-screen pre .c3270-turquoise   { color: #6699FF; }
+.idx-term-screen pre .c3270-yellow      { color: #FFFFFF; }
 .idx-term-screen pre .c3270-white       { color: #FFFFFF; }
-.idx-term-screen pre .c3270-pink        { color: #FF55FF; }
+.idx-term-screen pre .c3270-pink        { color: #5B8DEF; }
 .idx-term-screen pre .c3270-intensified { font-weight: 700; text-shadow: 0 0 4px currentColor; }
 
 .idx-term-explain {
     font-family: 'IBM Plex Sans', sans-serif;
-    font-size: 0.7rem;
+    font-size: 0.65rem;
     color: var(--ibm-gray-30);
+    padding: 0.3rem 0.8rem;
     line-height: 1.5;
     padding: 0.5rem 1rem;
     margin: 0.5rem auto;
@@ -714,13 +787,14 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
    ══════════════════════════════════════════════════════════════════════ */
 
 .idx-control-panel {
-    width: 180px;
+    width: 220px;
     flex-shrink: 0;
-    background: var(--ibm-blue-dark);
-    border-left: 2px solid var(--ibm-cyan);
+    background: #2C4A6E;
+    border-left: 2px solid #4a6a9e;
     display: flex;
     flex-direction: column;
-    padding-top: 0.5rem;
+    padding: 0.35rem;
+    gap: 2px;
     overflow-y: auto;
 }
 
@@ -760,7 +834,7 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 }
 
 .idx-cp-toggle.panel-open {
-    right: 190px;
+    right: 220px;
 }
 
 .idx-cp-toggle.panel-closed {
@@ -768,61 +842,125 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 }
 
 .idx-cp-title {
-    padding: 0.25rem 0.5rem;
-    font-size: 12px;
+    padding: 3px 6px;
+    font-size: 11px;
     font-weight: 700;
-    color: var(--ibm-yellow);
+    color: #FFFFFF;
     text-transform: uppercase;
-    letter-spacing: 1px;
-    background: var(--ibm-blue);
-    border-bottom: 1px solid var(--ibm-cyan);
+    letter-spacing: 2px;
+    background: #1a3a6a;
+    border-top: 2px solid #1a2a4a;
+    border-left: 2px solid #1a2a4a;
+    border-bottom: 2px solid #6a8aba;
+    border-right: 2px solid #6a8aba;
+    margin-bottom: 2px;
+    text-align: center;
 }
 
 .idx-cp-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.35rem 0.5rem;
+    gap: 6px;
+    padding: 4px 8px;
     text-decoration: none;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 700;
-    border-left: 3px solid transparent;
+    white-space: nowrap;
+    background: #3a5a8a;
+    color: #FFFFFF;
+    border-top: 2px solid #6a8aba;
+    border-left: 2px solid #6a8aba;
+    border-bottom: 2px solid #1a2a4a;
+    border-right: 2px solid #1a2a4a;
+    cursor: pointer;
+    transition: none;
 }
 
 .idx-cp-item:hover {
-    background: var(--ibm-cyan);
-    color: var(--ibm-gray-100) !important;
+    background: #4a6a9e;
+    color: #FFFFFF !important;
+}
+
+.idx-cp-item:active {
+    border-top: 2px solid #1a2a4a;
+    border-left: 2px solid #1a2a4a;
+    border-bottom: 2px solid #6a8aba;
+    border-right: 2px solid #6a8aba;
+    padding: 5px 7px 3px 9px;
 }
 
 .idx-cp-icon {
-    font-size: 1rem;
-    width: 20px;
+    font-size: 14px;
+    min-width: 22px;
     text-align: center;
     flex-shrink: 0;
+    font-weight: 700;
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 1;
 }
 
-/* Per-section accent colors — always visible */
-.idx-cp-item.cp-walkthrough { color: #63a7ff; border-left-color: #63a7ff; }
-.idx-cp-item.cp-models      { color: #42be65; border-left-color: #42be65; }
-.idx-cp-item.cp-tutor       { color: #ff6b6b; border-left-color: #ff6b6b; }
-.idx-cp-item.cp-labs        { color: #ffb020; border-left-color: #ffb020; }
-.idx-cp-item.cp-terminal    { color: #66e88a; border-left-color: #66e88a; }
-.idx-cp-item.cp-chat        { color: #4589ff; border-left-color: #4589ff; }
-.idx-cp-item.cp-graph       { color: #00ff88; border-left-color: #00ff88; }
-.idx-cp-item.cp-scanner     { color: #a56eff; border-left-color: #a56eff; }
-.idx-cp-item.cp-recon       { color: #ff6b6b; border-left-color: #ff6b6b; }
-.idx-cp-item.cp-screens     { color: #08bdba; border-left-color: #08bdba; }
-.idx-cp-item.cp-rag         { color: #42be65; border-left-color: #42be65; }
-.idx-cp-item.cp-arch        { color: #009d9a; border-left-color: #009d9a; }
-.idx-cp-item.cp-demo-prep   { color: #ffb020; border-left-color: #ffb020; border: none; background: rgba(255,176,32,0.06); cursor: pointer; font-size: 0.62rem; width: 100%; text-align: left; }
-.idx-cp-item.cp-demo-prep:hover { background: rgba(255,176,32,0.15); }
+/* Per-section accent colors — all IBM blue family */
+.idx-cp-item.cp-walkthrough { color: #d0e2ff; }
+.idx-cp-item.cp-models      { color: #a6c8ff; }
+.idx-cp-item.cp-tutor       { color: #d0e2ff; }
+.idx-cp-item.cp-labs        { color: #a6c8ff; }
+.idx-cp-item.cp-terminal    { color: #78a9ff; }
+.idx-cp-item.cp-chat        { color: #d0e2ff; }
+.idx-cp-item.cp-graph       { color: #a6c8ff; }
+.idx-cp-item.cp-scanner     { color: #d0e2ff; }
+.idx-cp-item.cp-recon       { color: #a6c8ff; }
+.idx-cp-item.cp-screens     { color: #d0e2ff; }
+.idx-cp-item.cp-rag         { color: #78a9ff; }
+.idx-cp-item.cp-arch        { color: #d0e2ff; }
+.idx-cp-item.cp-demo-prep   { color: #FFFFFF; background: #2a4a7a; cursor: pointer; font-size: 11px; width: 100%; text-align: left; }
+.idx-cp-item.cp-demo-prep:hover { background: #3a5a8a; }
 .idx-cp-item.cp-demo-prep:disabled { opacity: 0.6; cursor: wait; }
 
 .idx-cp-divider {
-    height: 1px;
-    background: rgba(255,255,255,0.06);
-    margin: 0.3rem 0.6rem;
+    height: 2px;
+    background: #1a2a4a;
+    border-bottom: 1px solid #4a6a9e;
+    margin: 3px 0;
 }
+
+.idx-cp-sysinfo {
+    margin-top: auto;
+}
+
+.idx-cp-sysinfo .idx-cp-title {
+    font-size: 10px;
+    padding: 2px 6px;
+    letter-spacing: 1px;
+}
+
+.sysinfo-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 6px;
+    font-size: 11px;
+    background: #1a2a4a;
+    border-bottom: 1px solid #0f1a2f;
+}
+
+.sysinfo-key {
+    color: #6a8aba;
+    font-weight: 700;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    min-width: 50px;
+}
+
+.sysinfo-val {
+    color: #a6c8ff;
+    font-weight: 700;
+    font-size: 11px;
+    text-align: right;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+.sysinfo-val.online { color: #55FF55; }
+.sysinfo-val.offline { color: #FF5555; }
 
 .idx-cp-section {
     padding: 0.3rem 0.8rem;
@@ -872,19 +1010,112 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 }
 .idx-cp-link:hover { color: #a0c8ff; text-decoration: underline; }
 
-/* Hover glow background per section */
-.idx-cp-item.cp-walkthrough:hover { background: rgba(99,167,255,0.1); }
-.idx-cp-item.cp-models:hover     { background: rgba(66,190,101,0.1); }
-.idx-cp-item.cp-tutor:hover      { background: rgba(255,107,107,0.1); }
-.idx-cp-item.cp-labs:hover       { background: rgba(255,176,32,0.1); }
-.idx-cp-item.cp-terminal:hover   { background: rgba(102,232,138,0.1); }
-.idx-cp-item.cp-chat:hover       { background: rgba(69,137,255,0.1); }
-.idx-cp-item.cp-graph:hover      { background: rgba(0,255,136,0.1); }
-.idx-cp-item.cp-scanner:hover    { background: rgba(165,110,255,0.1); }
-.idx-cp-item.cp-recon:hover      { background: rgba(255,107,107,0.1); }
-.idx-cp-item.cp-screens:hover    { background: rgba(8,189,186,0.1); }
-.idx-cp-item.cp-rag:hover        { background: rgba(66,190,101,0.1); }
-.idx-cp-item.cp-arch:hover       { background: rgba(0,157,154,0.1); }
+/* Hover glow background — IBM Blue */
+.idx-cp-item.cp-walkthrough:hover { background: rgba(120,169,255,0.15); }
+.idx-cp-item.cp-models:hover     { background: rgba(69,137,255,0.15); }
+.idx-cp-item.cp-tutor:hover      { background: rgba(15,98,254,0.15); }
+.idx-cp-item.cp-labs:hover       { background: rgba(120,169,255,0.15); }
+.idx-cp-item.cp-terminal:hover   { background: rgba(166,200,255,0.15); }
+.idx-cp-item.cp-chat:hover       { background: rgba(69,137,255,0.15); }
+.idx-cp-item.cp-graph:hover      { background: rgba(0,67,206,0.15); }
+.idx-cp-item.cp-scanner:hover    { background: rgba(120,169,255,0.15); }
+.idx-cp-item.cp-recon:hover      { background: rgba(69,137,255,0.15); }
+.idx-cp-item.cp-screens:hover    { background: rgba(15,98,254,0.15); }
+.idx-cp-item.cp-rag:hover        { background: rgba(166,200,255,0.15); }
+.idx-cp-item.cp-arch:hover       { background: rgba(0,67,206,0.15); }
+
+/* ══════════════════════════════════════════════════════════════════════
+   OS/2 Status Bar
+   ══════════════════════════════════════════════════════════════════════ */
+
+.idx-statusbar {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    background: #555555;
+    border-top: 2px solid #FFFFFF;
+    padding: 0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    flex-shrink: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+}
+
+.idx-sb-group {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: #555555;
+    border-right: 1px solid #3a3a3a;
+    border-left: 1px solid #6a6a6a;
+}
+
+.idx-sb-sep {
+    color: #3a3a3a;
+    font-size: 10px;
+    padding: 0;
+    line-height: 1;
+    display: none;
+}
+
+.idx-sb-label {
+    color: #1a1a1a;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.idx-sb-val {
+    color: #e0e0e0;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.idx-sb-led-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.idx-sb-led {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: #3a3a3a;
+    border: 1px solid #2a2a2a;
+    flex-shrink: 0;
+}
+
+.idx-sb-led.on {
+    background: #55FF55;
+    border-color: #33aa33;
+    box-shadow: 0 0 3px #55FF55;
+}
+
+.idx-sb-led.off {
+    background: #FF5555;
+    border-color: #aa3333;
+    box-shadow: 0 0 2px #FF5555;
+}
+
+.idx-sb-right {
+    margin-left: auto;
+    padding: 2px 10px;
+    background: #4a4a4a;
+    border-left: 2px solid #3a3a3a;
+    border-top: 1px solid #3a3a3a;
+    border-right: 1px solid #6a6a6a;
+    border-bottom: 1px solid #6a6a6a;
+}
+
+.idx-sb-right .idx-sb-val {
+    color: #55FF55;
+    font-size: 11px;
+    letter-spacing: 1px;
+}
 
 /* ══════════════════════════════════════════════════════════════════════
    Responsive

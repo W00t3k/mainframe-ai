@@ -57,8 +57,8 @@ body {
 
 .toolbar input:focus {
     outline: none;
-    background: var(--ibm-blue-dark);
-    color: var(--ibm-yellow);
+    background: var(--ibm-blue);
+    color: #FFFFFF;
 }
 
 .toolbar button {
@@ -312,9 +312,9 @@ body {
 .terminal pre .c3270-red         { color: #FF5555; }
 .terminal pre .c3270-blue        { color: #5555FF; }
 .terminal pre .c3270-turquoise   { color: #55FFFF; }
-.terminal pre .c3270-yellow      { color: #FFFF55; }
+.terminal pre .c3270-yellow      { color: #FFFFFF; }
 .terminal pre .c3270-white       { color: #FFFFFF; }
-.terminal pre .c3270-pink        { color: #FF55FF; }
+.terminal pre .c3270-pink        { color: #5B8DEF; }
 .terminal pre .c3270-intensified { font-weight: bold; text-shadow: 0 0 4px currentColor; }
 .terminal pre .c3270-protected   { color: #5555FF; }
 .terminal pre .c3270-field       { color: #55FF55; }

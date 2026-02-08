@@ -1,24 +1,29 @@
 :root {
+            /* IBM Blue Palette */
+            --ibm-blue-100: #001d6c;
+            --ibm-blue-90: #002d9c;
+            --ibm-blue-80: #0043ce;
+            --ibm-blue-70: #0f62fe;
+            --ibm-blue-60: #4589ff;
+            --ibm-blue-50: #78a9ff;
+            --ibm-blue-40: #a6c8ff;
+            --ibm-blue-30: #d0e2ff;
+            --ibm-blue-20: #edf5ff;
+            /* Functional colors */
             --ibm-blue: #0f62fe;
-            --ibm-blue-dark: #0043ce;
+            --ibm-blue-dark: #001d6c;
             --ibm-blue-light: #4589ff;
-            --ibm-cyan: #08bdba;
-            --ibm-teal: #009d9a;
             --ibm-green: #42be65;
             --ibm-red: #da1e28;
-            --ibm-yellow: #f1c21b;
-            --ibm-purple: #8a3ffc;
-            --ibm-magenta: #ee5396;
-            --ibm-gray-100: #161616;
-            --ibm-gray-90: #262626;
-            --ibm-gray-80: #393939;
-            --ibm-gray-70: #525252;
-            --ibm-gray-50: #8d8d8d;
-            --ibm-gray-30: #c6c6c6;
-            --ibm-gray-10: #f4f4f4;
             --ibm-white: #ffffff;
+            /* Background blues */
+            --bg-primary: #0a1628;
+            --bg-secondary: #0f2744;
+            --bg-tertiary: #1a3a5c;
+            --bg-card: #152238;
+            --border-color: rgba(120, 169, 255, 0.2);
+            --border-light: rgba(255, 255, 255, 0.1);
             --terminal-green: #33ff33;
-            --terminal-amber: #ffb000;
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -29,8 +34,8 @@
 
         body {
             font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-            background: var(--ibm-gray-100);
-            color: var(--ibm-gray-10);
+            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+            color: var(--ibm-white);
             min-height: 100vh;
             overflow: hidden;
         }
@@ -82,14 +87,15 @@
 
         /* IBM Header */
         .ibm-header {
-            background: var(--ibm-gray-90);
-            border-bottom: 1px solid var(--ibm-gray-80);
-            padding: 0 1rem;
-            height: 48px;
+            background: linear-gradient(90deg, var(--ibm-blue-100) 0%, var(--ibm-blue-90) 100%);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0 1.5rem;
+            height: 56px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
         }
 
         .ibm-header .brand {
@@ -131,8 +137,8 @@
             border-right: none;
         }
 
-        .header-tab:hover { color: var(--ibm-white); background: var(--ibm-gray-80); }
-        .header-tab.active { color: var(--ibm-white); border-bottom-color: var(--ibm-blue); }
+        .header-tab:hover { color: var(--ibm-white); background: rgba(255, 255, 255, 0.1); }
+        .header-tab.active { color: var(--ibm-white); border-bottom-color: var(--ibm-blue-50); background: rgba(255, 255, 255, 0.05); }
         .header-tab .dot {
             width: 8px;
             height: 8px;
@@ -143,9 +149,9 @@
 
         /* Status Bar */
         .status-bar {
-            background: var(--ibm-gray-100);
-            border-bottom: 1px solid var(--ibm-gray-80);
-            padding: 0.5rem 1rem;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 0.5rem 1.5rem;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.7rem;
             display: flex;
@@ -167,7 +173,7 @@
         .status-item .value { color: var(--ibm-gray-30); }
         .status-item .value.ok { color: var(--ibm-green); }
         .status-item .value.err { color: var(--ibm-red); }
-        .status-item .value.warn { color: var(--ibm-yellow); }
+        .status-item .value.warn { color: #AAAAAA; }
 
         /* Main Layout */
         .main-content {
@@ -208,10 +214,10 @@
             min-height: 0;
             width: min(820px, 92vw);
             height: min(720px, calc(100vh - 220px));
-            background: var(--ibm-gray-90);
-            border: 1px solid var(--ibm-gray-80);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-            border-radius: 6px;
+            background: linear-gradient(180deg, var(--bg-card) 0%, var(--bg-secondary) 100%);
+            border: 1px solid var(--border-color);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5), 0 0 40px rgba(15, 98, 254, 0.1);
+            border-radius: 12px;
             overflow: hidden;
         }
 
@@ -261,33 +267,34 @@
         }
 
         .message.assistant .message-content {
-            background: var(--ibm-gray-90);
-            border-left: 3px solid var(--ibm-blue-light);
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--ibm-blue-50);
         }
 
         .message-content pre {
-            background: var(--ibm-gray-100);
+            background: var(--bg-primary);
             padding: 1rem;
             border-radius: 4px;
             overflow-x: auto;
             margin: 0.75rem 0;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.8rem;
-            border: 1px solid var(--ibm-gray-80);
+            border: 1px solid var(--border-color);
         }
 
         .message-content code {
             font-family: 'IBM Plex Mono', monospace;
-            background: var(--ibm-gray-80);
+            background: rgba(120, 169, 255, 0.2);
             padding: 0.15rem 0.4rem;
             border-radius: 2px;
             font-size: 0.85em;
+            color: var(--ibm-blue-40);
         }
 
         .message-content pre code { background: none; padding: 0; }
         .message-content h1, .message-content h2, .message-content h3 { color: var(--ibm-blue-light); margin: 1rem 0 0.5rem 0; }
         .message-content ul, .message-content ol { margin-left: 1.25rem; margin-bottom: 0.75rem; }
-        .message-content strong { color: var(--ibm-cyan); }
+        .message-content strong { color: var(--ibm-blue-40); }
         .message-content table { width: 100%; border-collapse: collapse; margin: 0.75rem 0; font-size: 0.85rem; }
         .message-content th, .message-content td { border: 1px solid var(--ibm-gray-70); padding: 0.5rem; text-align: left; }
         .message-content th { background: var(--ibm-gray-80); }
@@ -295,31 +302,31 @@
         /* Chat Sidebar */
         .chat-sidebar {
             width: 280px;
-            background: var(--ibm-gray-90);
-            border-left: 1px solid var(--ibm-gray-80);
+            background: var(--bg-card);
+            border-left: 1px solid var(--border-color);
             display: flex;
             flex-direction: column;
             font-size: 0.75rem;
         }
 
         .sidebar-section {
-            border-bottom: 1px solid var(--ibm-gray-80);
+            border-bottom: 1px solid var(--border-color);
         }
 
         .sidebar-header {
-            background: var(--ibm-gray-80);
+            background: linear-gradient(90deg, var(--ibm-blue-100) 0%, var(--bg-tertiary) 100%);
             padding: 0.75rem 1rem;
             font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
-            color: var(--ibm-gray-30);
+            color: var(--ibm-white);
             display: flex;
             align-items: center;
             gap: 0.5rem;
             cursor: pointer;
         }
 
-        .sidebar-header::before { content: '>'; color: var(--ibm-blue-light); }
+        .sidebar-header::before { content: '>'; color: var(--ibm-blue-50); }
 
         .sidebar-body { padding: 0.75rem 1rem; }
 
@@ -355,8 +362,8 @@
 
         /* Input Area */
         .input-area {
-            background: var(--ibm-gray-90);
-            border-top: 1px solid var(--ibm-gray-80);
+            background: var(--bg-card);
+            border-top: 1px solid var(--border-color);
             padding: 1rem;
             flex-shrink: 0;
         }
@@ -368,21 +375,22 @@
 
         .chat-input {
             flex: 1;
-            background: var(--ibm-gray-100);
-            border: 1px solid var(--ibm-gray-70);
-            color: var(--ibm-gray-10);
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            color: var(--ibm-white);
             padding: 0.875rem 1rem;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.9rem;
             resize: none;
             min-height: 48px;
             max-height: 120px;
+            border-radius: 8px;
         }
 
         .chat-input:focus {
             outline: none;
-            border-color: var(--ibm-blue);
-            box-shadow: 0 0 0 1px var(--ibm-blue);
+            border-color: var(--ibm-blue-60);
+            box-shadow: 0 0 0 2px rgba(69, 137, 255, 0.3);
         }
 
         .chat-input::placeholder { color: var(--ibm-gray-50); }
@@ -399,7 +407,8 @@
             transition: background 0.15s;
         }
 
-        .send-btn:hover { background: var(--ibm-blue-dark); }
+        .send-btn:hover { background: var(--ibm-blue-80); }
+        .send-btn { border-radius: 8px; }
         .send-btn:disabled { background: var(--ibm-gray-70); cursor: not-allowed; }
 
         .quick-commands {
@@ -410,19 +419,21 @@
         }
 
         .quick-cmd {
-            background: var(--ibm-gray-80);
-            border: 1px solid var(--ibm-gray-70);
-            color: var(--ibm-gray-30);
+            background: rgba(120, 169, 255, 0.1);
+            border: 1px solid var(--border-color);
+            color: var(--ibm-blue-40);
             padding: 0.35rem 0.75rem;
             font-family: 'IBM Plex Mono', monospace;
             font-size: 0.75rem;
             cursor: pointer;
             transition: all 0.15s;
+            border-radius: 4px;
         }
 
         .quick-cmd:hover {
-            border-color: var(--ibm-blue);
-            color: var(--ibm-blue-light);
+            border-color: var(--ibm-blue-60);
+            background: rgba(120, 169, 255, 0.2);
+            color: var(--ibm-white);
         }
 
         /* Typing indicator */
@@ -430,8 +441,8 @@
             display: flex;
             gap: 4px;
             padding: 1rem;
-            background: var(--ibm-gray-90);
-            border-left: 3px solid var(--ibm-blue-light);
+            background: var(--bg-tertiary);
+            border-left: 3px solid var(--ibm-blue-50);
             width: fit-content;
             border-radius: 4px;
         }
@@ -460,8 +471,8 @@
         }
 
         .terminal-toolbar {
-            background: var(--ibm-gray-90);
-            border-bottom: 1px solid var(--ibm-gray-80);
+            background: var(--bg-card);
+            border-bottom: 1px solid var(--border-color);
             padding: 0.5rem 1rem;
             display: flex;
             gap: 1rem;
@@ -764,7 +775,7 @@
         #terminalScreen .c3270-turquoise   { color: #4dd8b0; }
         #terminalScreen .c3270-yellow      { color: #e8c84a; }
         #terminalScreen .c3270-white       { color: #d8d8e0; }
-        #terminalScreen .c3270-pink        { color: #e888bb; }
+        #terminalScreen .c3270-pink        { color: #5B8DEF; }
         #terminalScreen .c3270-intensified { font-weight: bold; }
         #terminalScreen .c3270-protected   { color: #6ea8ff; }
         #terminalScreen .c3270-field       { color: #66e88a; }

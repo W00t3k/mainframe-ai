@@ -1,11 +1,11 @@
 /* ══════════════════════════════════════
-   Security Labs — IBM PC Retro Theme
+   Security Labs — Cyberpunk IBM Theme
    ══════════════════════════════════════ */
 
 .labs-page {
     min-height: 100vh;
-    background: var(--ibm-blue);
-    color: var(--ibm-white);
+    background: #0a1628;
+    color: #c0cce0;
     display: flex;
     flex-direction: column;
 }
@@ -16,25 +16,26 @@
     align-items: center;
     gap: 1rem;
     padding: 0 1rem;
-    height: 28px;
-    background: var(--ibm-gray-70);
-    border-bottom: 2px solid var(--ibm-white);
+    height: 32px;
+    background: #0f1d35;
+    border-bottom: 1px solid #1a3058;
 }
 
 .labs-back {
-    font-size: 14px;
-    color: var(--ibm-gray-100);
+    font-size: 12px;
+    color: #5a7aa0;
     white-space: nowrap;
     padding: 0 0.5rem;
 }
-.labs-back:hover { background: var(--ibm-blue); color: var(--ibm-white); }
+.labs-back:hover { color: #8ab4f0; }
 
 .labs-brand { flex: 1; }
 .labs-brand h1 {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
-    color: var(--ibm-gray-100);
+    color: #6a8ab8;
     text-transform: uppercase;
+    letter-spacing: 1px;
 }
 .labs-subtitle {
     display: none;
@@ -47,10 +48,10 @@
 
 /* ── Buttons ── */
 .labs-btn {
-    font-size: 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
     font-weight: 700;
-    padding: 0.15rem 0.75rem;
-    border: 2px outset var(--ibm-white);
+    padding: 3px 10px;
     cursor: pointer;
     text-decoration: none;
     display: inline-flex;
@@ -58,35 +59,39 @@
     gap: 0.35rem;
     white-space: nowrap;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.15s ease;
 }
 
 .labs-btn-primary {
-    background: var(--ibm-cyan-dark);
-    color: var(--ibm-white);
+    background: #1a3058;
+    color: #8ab4f0;
+    border: 1px solid #2a4a78;
 }
-.labs-btn-primary:hover { background: var(--ibm-cyan); color: var(--ibm-gray-100); }
-.labs-btn-primary:active { border-style: inset; }
-.labs-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+.labs-btn-primary:hover { background: #2a4a78; color: #c0d8ff; }
+.labs-btn-primary:active { background: #0f1d35; }
+.labs-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .labs-btn-outline {
-    background: var(--ibm-gray-70);
-    color: var(--ibm-gray-100);
+    background: transparent;
+    color: #5a7aa0;
+    border: 1px solid #1a3058;
 }
-.labs-btn-outline:hover { background: var(--ibm-white-dim); }
-.labs-btn-outline:disabled { opacity: 0.5; cursor: not-allowed; }
+.labs-btn-outline:hover { background: #1a3058; color: #8ab4f0; }
+.labs-btn-outline:disabled { opacity: 0.4; cursor: not-allowed; }
 
 .labs-btn-ghost {
     background: transparent;
-    color: var(--ibm-cyan);
-    border: 1px solid var(--ibm-cyan);
+    color: #4a6a90;
+    border: 1px solid #1a3058;
 }
-.labs-btn-ghost:hover { background: var(--ibm-cyan); color: var(--ibm-gray-100); }
+.labs-btn-ghost:hover { background: #1a3058; color: #8ab4f0; }
 
 /* ── Card Grid ── */
 .labs-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 0.75rem;
+    gap: 10px;
     padding: 1rem;
     max-width: 1100px;
     margin: 0 auto;
@@ -97,28 +102,46 @@
 .labs-empty {
     grid-column: 1 / -1;
     text-align: center;
-    color: var(--ibm-white-dim);
-    font-size: 14px;
+    color: #4a6a90;
+    font-size: 12px;
     padding: 3rem 0;
 }
 
 /* ── Lab Card ── */
 .lab-card {
     text-align: left;
-    background: var(--ibm-blue-dark);
-    border: 2px solid var(--accent, var(--ibm-cyan));
-    padding: 1rem;
-    color: inherit;
+    background: #0f1d35;
+    border: 1px solid #1a3058;
+    padding: 0.85rem;
+    color: #8a9ab8;
     cursor: pointer;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
-    min-height: 160px;
+    gap: 0.4rem;
+    min-height: 140px;
+    transition: all 0.15s ease;
+    position: relative;
+}
+
+.lab-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--accent, #1a3058);
+    opacity: 0.4;
 }
 
 .lab-card:hover {
-    background: var(--accent, var(--ibm-cyan));
-    color: var(--ibm-gray-100);
+    background: #142240;
+    border-color: #2a4a78;
+    box-shadow: 0 0 12px rgba(30, 60, 120, 0.3);
+}
+
+.lab-card:hover::before {
+    opacity: 0.8;
 }
 
 .lab-card-top {
@@ -127,35 +150,42 @@
     justify-content: space-between;
 }
 
-.lab-card-icon { font-size: 1.4rem; }
+.lab-card-icon {
+    font-size: 11px;
+    font-weight: 700;
+    color: #3a5a80;
+    font-family: 'IBM Plex Mono', monospace;
+}
 
 .lab-card-cat {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
+    color: var(--accent, #4a6a90) !important;
+    opacity: 0.7;
 }
 
 .lab-card-title {
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 700;
     line-height: 1.3;
-    color: var(--ibm-yellow);
+    color: #c0d0e8;
 }
 
 .lab-card:hover .lab-card-title {
-    color: var(--ibm-gray-100);
+    color: #e0e8f4;
 }
 
 .lab-card-desc {
-    font-size: 14px;
-    color: var(--ibm-white);
-    line-height: 1.4;
+    font-size: 11px;
+    color: #5a7aa0;
+    line-height: 1.5;
     flex: 1;
 }
 
 .lab-card:hover .lab-card-desc {
-    color: var(--ibm-gray-100);
+    color: #7a9ac0;
 }
 
 .lab-card-footer {
@@ -163,25 +193,26 @@
     align-items: center;
     justify-content: space-between;
     margin-top: auto;
-    padding-top: 0.5rem;
-    border-top: 1px solid currentColor;
+    padding-top: 0.4rem;
+    border-top: 1px solid #1a2a48;
 }
 
 .lab-card-diff {
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 700;
-    color: var(--dc, var(--ibm-green));
-    padding: 0px 4px;
+    color: var(--dc, #4a6a90) !important;
+    padding: 1px 5px;
     border: 1px solid currentColor;
+    opacity: 0.7;
 }
 
 .lab-card-steps {
-    font-size: 11px;
-    color: var(--ibm-white-dim);
+    font-size: 10px;
+    color: #3a5a80;
 }
 
 .lab-card:hover .lab-card-steps {
-    color: var(--ibm-gray-100);
+    color: #5a7aa0;
 }
 
 /* ── Detail View ── */
@@ -195,37 +226,37 @@
 .detail-inner {
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 0.75rem;
 }
 
 .detail-header {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    background: var(--ibm-blue-dark);
-    border: 2px solid var(--ibm-cyan);
+    background: #0f1d35;
+    border: 1px solid #1a3058;
     padding: 0.75rem;
 }
 
 .detail-title-row { display: flex; flex-direction: column; gap: 0.25rem; }
 
 .detail-cat {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
-    color: var(--ibm-cyan);
+    color: #4a6a90 !important;
 }
 
 .detail-title-row h2 {
-    font-size: 1.25rem;
+    font-size: 1.1rem;
     font-weight: 700;
-    color: var(--ibm-yellow);
+    color: #c0d0e8;
 }
 
 .detail-desc {
-    font-size: 14px;
-    color: var(--ibm-white);
+    font-size: 12px;
+    color: #5a7aa0;
 }
 
 /* ── Progress Dots ── */
@@ -233,91 +264,95 @@
     display: flex;
     align-items: center;
     gap: 0.35rem;
-    padding: 0.5rem;
-    background: var(--ibm-gray-100);
-    border: 2px inset var(--ibm-white);
+    padding: 0.4rem 0.5rem;
+    background: #0a1225;
+    border: 1px solid #1a2a48;
 }
 
 .prog-dot {
-    width: 12px;
-    height: 12px;
-    background: var(--ibm-gray-70);
-    border: 1px solid var(--ibm-white-dim);
+    width: 10px;
+    height: 10px;
+    background: #1a2a48;
+    border: 1px solid #2a3a58;
+    border-radius: 1px;
 }
 
 .prog-dot.done {
-    background: var(--ibm-green);
-    border-color: var(--ibm-green);
+    background: #2a4a78;
+    border-color: #3a5a88;
+    box-shadow: 0 0 3px rgba(42, 74, 120, 0.5);
 }
 
 .prog-dot.active {
-    background: var(--ibm-cyan);
-    border-color: var(--ibm-cyan);
+    background: #3a6aaa;
+    border-color: #4a7aba;
+    box-shadow: 0 0 5px rgba(58, 106, 170, 0.5);
 }
 
 .prog-label {
     margin-left: auto;
-    font-size: 12px;
-    color: var(--ibm-white-dim);
+    font-size: 11px;
+    color: #4a6a90;
 }
 
 /* ── Step Content ── */
 .detail-step {
     display: flex;
     flex-direction: column;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
 .step-title {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 700;
-    color: var(--ibm-yellow);
+    color: #8ab4f0;
     text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
 .step-screen {
-    background: var(--ibm-gray-100);
-    border: 2px solid var(--ibm-cyan);
+    background: #060e1c;
+    border: 1px solid #1a2a48;
     overflow: hidden;
 }
 
 .step-screen pre {
     padding: 0.75rem;
-    font-size: 14px;
+    font-size: 13px;
     line-height: 1.4;
-    color: var(--ibm-green);
+    color: #4a8a5a;
     white-space: pre-wrap;
     margin: 0;
-    text-shadow: 0 0 2px currentColor;
+    text-shadow: 0 0 2px rgba(74, 138, 90, 0.3);
 }
 
 .step-info {
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 0.75rem;
+    gap: 0.6rem;
 }
 
 .step-block {
-    background: var(--ibm-blue-dark);
-    border: 2px solid var(--ibm-cyan);
-    padding: 0.75rem;
+    background: #0f1d35;
+    border: 1px solid #1a3058;
+    padding: 0.65rem;
 }
 
 .step-block-label {
-    font-size: 12px;
+    font-size: 11px;
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
-    margin-bottom: 0.35rem;
+    margin-bottom: 0.3rem;
 }
 
-.step-expected .step-block-label { color: var(--ibm-cyan); }
-.step-hint .step-block-label     { color: var(--ibm-yellow); }
+.step-expected .step-block-label { color: #4a6a90; }
+.step-hint .step-block-label     { color: #3a5070; }
 
 .step-block-text {
-    font-size: 14px;
-    color: var(--ibm-white);
-    line-height: 1.4;
+    font-size: 12px;
+    color: #7a9ab8;
+    line-height: 1.5;
 }
 
 /* ── Nav Buttons ── */
