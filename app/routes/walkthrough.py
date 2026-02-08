@@ -9,7 +9,7 @@ import threading
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS, WT_QUESTIONS
+from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS
 
 router = APIRouter(tags=["walkthrough"])
 
@@ -43,7 +43,6 @@ class WalkthroughRunner:
         self.finished = False
         self.error: str | None = None
         self.display_seconds = 4.0
-        self.questions_answered: set = set()
         self._thread: threading.Thread | None = None
 
     def start(self, name: str, target: str, speed: float = 4.0):
@@ -67,7 +66,6 @@ class WalkthroughRunner:
         self.current_step = 0
         self.current_screen = ""
         self.log = []
-        self.questions_answered = set()
         self.display_seconds = speed
         self._thread = threading.Thread(
             target=self._run, args=(name, target), daemon=True
@@ -104,7 +102,6 @@ class WalkthroughRunner:
             "finished": self.finished,
             "error": self.error,
             "log": list(self.log),
-            "questions_answered": sorted(self.questions_answered),
         }
 
     def _run(self, name: str, target: str):
@@ -117,8 +114,6 @@ class WalkthroughRunner:
         self.walkthrough_name = script["title"]
         steps = script["steps"]
         self.total_steps = len(steps)
-        step_qs_map = WT_QUESTIONS.get(name, {})
-        
         # Connect to mainframe (logoff any existing session first)
         try:
             self.current_narration = "Connecting to mainframe..."
@@ -156,15 +151,12 @@ class WalkthroughRunner:
             self.current_control_plane = step.get("control_plane", "")
             self.current_narration = ""
 
-            step_qs = step_qs_map.get(idx, [])
-
             log_entry = {
                 "step": idx,
                 "title": step["title"],
                 "control_plane": step.get("control_plane", ""),
                 "narration": "",
                 "executing": True,
-                "questions": step_qs,
             }
             self.log.append(log_entry)
 
@@ -195,9 +187,6 @@ class WalkthroughRunner:
             log_entry["narration"] = step["narration"]
             log_entry["executing"] = False
             self.current_narration = step["narration"]
-
-            for q in step_qs:
-                self.questions_answered.add(q)
 
             step_display = step.get("display_seconds", self.display_seconds)
             wait_end = _time.time() + step_display
@@ -665,7 +654,6 @@ async def api_walkthrough_reset():
     _walkthrough_runner.error = None
     _walkthrough_runner.current_step = 0
     _walkthrough_runner.log = []
-    _walkthrough_runner.questions_answered = set()
     
     # Force disconnect from mainframe
     disconnected = False

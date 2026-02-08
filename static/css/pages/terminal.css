@@ -1,156 +1,381 @@
-/* Terminal Page — IBM PC Retro Theme */
+/* ══════════════════════════════════════════════════════════════════════════
+   OS/2 WARP 4 THEME — Terminal Page
+   Authentic IBM OS/2 Warp desktop aesthetic
+   ══════════════════════════════════════════════════════════════════════════ */
+
+/* ── OS/2 Warp Color Palette ── */
+:root {
+    --os2-desktop: #008080;
+    --os2-desktop-dark: #006868;
+    --os2-win-bg: #c0c0c0;
+    --os2-win-light: #ffffff;
+    --os2-win-dark: #808080;
+    --os2-win-darker: #404040;
+    --os2-title-bg: #00007b;
+    --os2-title-bg2: #1084d0;
+    --os2-title-text: #ffffff;
+    --os2-title-inactive: #7f7f7f;
+    --os2-menu-bg: #d4d0c8;
+    --os2-menu-text: #000000;
+    --os2-btn-face: #c0c0c0;
+    --os2-btn-highlight: #ffffff;
+    --os2-btn-shadow: #808080;
+    --os2-btn-darkshadow: #404040;
+    --os2-field-bg: #ffffff;
+    --os2-field-text: #000000;
+    --os2-taskbar-bg: #c0c0c0;
+    --os2-selection: #00007b;
+}
+
 body {
-    background: var(--ibm-blue);
-    color: var(--ibm-green);
+    background: var(--os2-desktop);
+    color: #000;
     min-height: 100vh;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 12px;
 }
 
-.toolbar {
-    background: var(--ibm-gray-70);
-    border-bottom: 2px solid var(--ibm-white);
-    padding: 0 0.5rem;
-    height: 28px;
+/* ── OS/2 Desktop ── */
+.os2-desktop {
+    flex: 1;
+    position: relative;
+    background:
+        radial-gradient(ellipse at 30% 40%, rgba(0,180,180,0.15) 0%, transparent 60%),
+        linear-gradient(135deg, #006868 0%, #008080 30%, #009090 60%, #007878 100%);
     display: flex;
+    padding: 8px;
+    overflow: hidden;
+    justify-content: center;
     align-items: center;
-    gap: 0.5rem;
+}
+
+/* ── Desktop Icons ── */
+.os2-desktop-icons {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    bottom: 4px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 4px;
+    padding: 4px;
+    z-index: 5;
+    overflow-y: auto;
+    max-width: 140px;
+}
+
+.os2-icon {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    text-decoration: none;
+    color: #fff;
+    font-size: 10px;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+    border: 1px solid transparent;
+    border-radius: 2px;
+    cursor: pointer;
+    min-width: 56px;
+    text-align: center;
+}
+
+.os2-icon:hover {
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.3);
+    color: #fff;
+    text-decoration: none;
+}
+
+.os2-icon-active {
+    background: rgba(255,255,255,0.18);
+    border-color: rgba(255,255,255,0.35);
+}
+
+.os2-icon-img {
+    font-size: 28px;
+    line-height: 1;
+    filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.4));
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   OS/2 WINDOW CHROME
+   ══════════════════════════════════════════════════════════════════════════ */
+.os2-window {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: var(--os2-win-bg);
+    border-top: 2px solid var(--os2-win-light);
+    border-left: 2px solid var(--os2-win-light);
+    border-right: 2px solid var(--os2-win-darker);
+    border-bottom: 2px solid var(--os2-win-darker);
+    box-shadow:
+        1px 1px 0 var(--os2-win-darker),
+        inset 1px 1px 0 var(--os2-win-light);
+}
+
+.terminal-window {
+    width: 38vw;
+    min-width: 380px;
+    max-width: 560px;
+    height: 46vh;
+    min-height: 320px;
+    max-height: 440px;
+    z-index: 10;
     flex-shrink: 0;
 }
 
-.toolbar a {
-    color: var(--ibm-gray-100);
-    text-decoration: none;
-    font-size: 14px;
-    padding: 0 0.5rem;
-}
-
-.toolbar a:hover {
-    background: var(--ibm-blue);
-    color: var(--ibm-white);
-}
-
-.toolbar .brand {
+/* ── Title Bar ── */
+.os2-titlebar {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    margin-right: 1rem;
-    background: var(--ibm-cyan);
-    padding: 0 0.5rem;
-    height: 100%;
+    height: 22px;
+    background: linear-gradient(90deg, var(--os2-title-bg) 0%, var(--os2-title-bg2) 100%);
+    padding: 0 2px;
+    gap: 2px;
+    flex-shrink: 0;
+    cursor: default;
+    user-select: none;
 }
 
-.toolbar .brand img {
-    width: 16px;
-    height: 16px;
-}
-
-.toolbar input {
-    background: var(--ibm-gray-100);
-    border: 2px inset var(--ibm-white);
-    color: var(--ibm-cyan);
-    padding: 0.15rem 0.5rem;
-    font-size: 14px;
-    width: 180px;
-}
-
-.toolbar input:focus {
-    outline: none;
-    background: var(--ibm-blue);
-    color: #FFFFFF;
-}
-
-.toolbar button {
-    background: var(--ibm-green-dark);
-    color: var(--ibm-white);
-    border: 2px outset var(--ibm-white);
-    padding: 0.15rem 0.75rem;
-    font-size: 14px;
-    font-weight: 700;
+.os2-sysmenu {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
-    text-transform: uppercase;
 }
 
-.toolbar button:hover {
-    background: var(--ibm-green);
-    color: var(--ibm-gray-100);
+.os2-sysmenu-icon {
+    color: var(--os2-title-text);
+    font-size: 10px;
+    line-height: 1;
 }
 
-.toolbar button:active {
-    border-style: inset;
-}
-
-.toolbar button.secondary {
-    background: var(--ibm-gray-70);
-    color: var(--ibm-gray-100);
-}
-
-.toolbar button.secondary:hover {
-    background: var(--ibm-white-dim);
-}
-
-.toolbar button.danger {
-    background: var(--ibm-red-dark);
-    color: var(--ibm-white);
-}
-
-.toolbar .status {
+.os2-titlebar-text {
+    flex: 1;
+    color: var(--os2-title-text);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    font-size: 14px;
-    color: var(--ibm-gray-100);
+    gap: 6px;
+    padding: 0 4px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.3);
 }
 
-.toolbar .status .dot {
-    width: 10px;
-    height: 10px;
-    background: var(--ibm-red);
+.os2-title-logo {
+    height: 14px;
+    width: auto;
+    filter: brightness(10);
 }
 
-.toolbar .status .dot.connected {
-    background: var(--ibm-green);
+.os2-titlebar-buttons {
+    display: flex;
+    gap: 2px;
 }
 
-.terminal-container {
-    position: fixed;
-    left: 16px;
-    top: 60px;
-    width: min(80vw, 760px);
-    height: min(75vh, 580px);
+.os2-btn-minimize,
+.os2-btn-maximize {
+    width: 18px;
+    height: 18px;
+    background: var(--os2-btn-face);
+    border-top: 1px solid var(--os2-btn-highlight);
+    border-left: 1px solid var(--os2-btn-highlight);
+    border-right: 1px solid var(--os2-btn-shadow);
+    border-bottom: 1px solid var(--os2-btn-shadow);
+    color: #000;
+    font-size: 8px;
+    line-height: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
     padding: 0;
-    background: transparent;
-    z-index: 2;
+    font-family: inherit;
+}
+
+.os2-btn-minimize:active,
+.os2-btn-maximize:active {
+    border-top: 1px solid var(--os2-btn-shadow);
+    border-left: 1px solid var(--os2-btn-shadow);
+    border-right: 1px solid var(--os2-btn-highlight);
+    border-bottom: 1px solid var(--os2-btn-highlight);
+}
+
+/* ── Menu Bar ── */
+.os2-menubar {
+    display: flex;
+    align-items: center;
+    background: var(--os2-menu-bg);
+    border-bottom: 1px solid var(--os2-win-dark);
+    padding: 0 2px;
+    height: 24px;
+    gap: 0;
+    flex-shrink: 0;
+}
+
+.os2-menu-items {
+    display: flex;
+    gap: 0;
+}
+
+.os2-menu-item {
+    padding: 2px 10px;
+    font-size: 11px;
+    color: var(--os2-menu-text);
+    cursor: pointer;
+    user-select: none;
+}
+
+.os2-menu-item:hover {
+    background: var(--os2-selection);
+    color: #fff;
+}
+
+.os2-connection-bar {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: auto;
+    padding-right: 4px;
+}
+
+.os2-label {
+    font-size: 11px;
+    color: var(--os2-menu-text);
+    font-weight: 700;
+}
+
+.os2-input {
+    background: var(--os2-field-bg);
+    border-top: 1px solid var(--os2-btn-shadow);
+    border-left: 1px solid var(--os2-btn-shadow);
+    border-right: 1px solid var(--os2-btn-highlight);
+    border-bottom: 1px solid var(--os2-btn-highlight);
+    color: var(--os2-field-text);
+    padding: 1px 4px;
+    font-size: 11px;
+    font-family: inherit;
+    width: 130px;
+    height: 18px;
+}
+
+.os2-input:focus {
+    outline: 1px dotted var(--os2-selection);
+    outline-offset: -1px;
+}
+
+/* ── OS/2 Buttons ── */
+.os2-btn {
+    background: var(--os2-btn-face);
+    border-top: 2px solid var(--os2-btn-highlight);
+    border-left: 2px solid var(--os2-btn-highlight);
+    border-right: 2px solid var(--os2-btn-darkshadow);
+    border-bottom: 2px solid var(--os2-btn-darkshadow);
+    color: #000;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: inherit;
+    padding: 1px 10px;
+    cursor: pointer;
+    height: 18px;
+    display: inline-flex;
+    align-items: center;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.os2-btn:active {
+    border-top: 2px solid var(--os2-btn-darkshadow);
+    border-left: 2px solid var(--os2-btn-darkshadow);
+    border-right: 2px solid var(--os2-btn-highlight);
+    border-bottom: 2px solid var(--os2-btn-highlight);
+    padding: 2px 9px 0 11px;
+}
+
+.os2-btn-connect {
+    background: #a0c0a0;
+}
+
+.os2-btn-disconnect {
+    background: #c0a0a0;
+}
+
+/* ── Status LED ── */
+.os2-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 6px;
+}
+
+.os2-status-led {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #aa0000;
+    border: 1px solid var(--os2-btn-shadow);
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3);
+}
+
+.os2-status-led.connected {
+    background: #00aa00;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.3), 0 0 4px rgba(0,170,0,0.4);
+}
+
+.os2-status-text {
+    font-size: 10px;
+    color: var(--os2-menu-text);
+}
+
+/* ── Client Area (Terminal) ── */
+.os2-client-area {
+    flex: 1;
+    background: #000;
+    border-top: 2px solid var(--os2-win-dark);
+    border-left: 2px solid var(--os2-win-dark);
+    border-right: 2px solid var(--os2-win-light);
+    border-bottom: 2px solid var(--os2-win-light);
+    margin: 2px;
+    overflow: hidden;
+    display: flex;
 }
 
 .terminal {
-    background: var(--ibm-gray-100);
-    border: 2px solid var(--ibm-cyan);
-    padding: 8px;
-    font-size: 14px;
+    flex: 1;
+    background: #000810;
+    padding: 6px 8px;
+    font-size: 13px;
     line-height: 1.3;
     white-space: pre;
-    width: 80ch;
-    min-height: calc(24 * 1.3 * 14px);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    min-height: calc(24 * 1.3 * 13px);
     position: relative;
     outline: none;
-    color: var(--ibm-green);
+    color: #33ff33;
     overflow: hidden;
-    text-shadow: 0 0 2px currentColor;
 }
 
 .terminal::before {
     content: '';
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: 0; left: 0; right: 0; bottom: 0;
     background: repeating-linear-gradient(
         0deg,
-        rgba(0, 0, 0, 0.1) 0px,
-        rgba(0, 0, 0, 0.1) 1px,
+        rgba(0,0,0,0.06) 0px,
+        rgba(0,0,0,0.06) 1px,
         transparent 1px,
         transparent 2px
     );
@@ -158,7 +383,7 @@ body {
 }
 
 .terminal.disconnected {
-    color: var(--ibm-white-dim);
+    color: #6699cc;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -167,128 +392,155 @@ body {
 }
 
 .terminal.disconnected h2 {
-    font-size: 1.25rem;
-    color: var(--ibm-cyan);
+    font-size: 1.1rem;
+    color: #88bbee;
     margin-bottom: 0.75rem;
 }
 
-.pf-bar {
-    position: fixed;
-    left: 16px;
-    top: calc(60px + min(75vh, 580px) + 8px);
-    width: min(80vw, 760px);
-    background: var(--ibm-gray-70);
-    border: 2px solid var(--ibm-cyan);
-    padding: 0.35rem 0.5rem;
+/* ── PF Key Bar ── */
+.os2-pfbar {
     display: flex;
-    gap: 0.25rem;
+    align-items: center;
+    gap: 2px;
+    padding: 3px 4px;
+    background: var(--os2-win-bg);
+    border-top: 1px solid var(--os2-win-dark);
+    flex-shrink: 0;
     flex-wrap: wrap;
     justify-content: center;
-    z-index: 2;
 }
 
-.pf-key {
-    background: var(--ibm-gray-70);
-    border: 2px outset var(--ibm-white);
-    color: var(--ibm-gray-100);
-    padding: 0.2rem 0.5rem;
-    font-size: 12px;
+.os2-pfbar-group {
+    display: flex;
+    gap: 2px;
+}
+
+.os2-pfbar-sep {
+    width: 8px;
+}
+
+.os2-pfkey {
+    background: var(--os2-btn-face);
+    border-top: 2px solid var(--os2-btn-highlight);
+    border-left: 2px solid var(--os2-btn-highlight);
+    border-right: 2px solid var(--os2-btn-darkshadow);
+    border-bottom: 2px solid var(--os2-btn-darkshadow);
+    color: #000;
+    padding: 2px 6px;
+    font-size: 10px;
     font-weight: 700;
+    font-family: inherit;
     cursor: pointer;
-    min-width: 44px;
+    min-width: 32px;
     text-align: center;
 }
 
-.pf-key:hover {
-    background: var(--ibm-cyan);
+.os2-pfkey:hover {
+    background: #d0d0d0;
 }
 
-.pf-key:active {
-    border-style: inset;
+.os2-pfkey:active {
+    border-top: 2px solid var(--os2-btn-darkshadow);
+    border-left: 2px solid var(--os2-btn-darkshadow);
+    border-right: 2px solid var(--os2-btn-highlight);
+    border-bottom: 2px solid var(--os2-btn-highlight);
+    padding: 3px 5px 1px 7px;
 }
 
-.pf-key.special {
-    background: var(--ibm-cyan-dark);
-    color: var(--ibm-white);
+.os2-pfkey-special {
+    background: #b0b8c0;
+    font-weight: 700;
 }
 
-.chat-float {
-    position: fixed;
-    right: 24px;
-    top: 96px;
-    width: 520px;
-    height: 640px;
-    max-width: calc(100vw - 48px);
-    max-height: calc(100vh - 120px);
-    background: var(--ibm-gray-90);
-    border: 1px solid var(--ibm-gray-70);
-    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
-    display: flex;
-    flex-direction: column;
-    z-index: 50;
-    resize: both;
-    overflow: hidden;
-    min-width: 360px;
-    min-height: 280px;
-}
-
-.chat-float.hidden {
-    display: none;
-}
-
-.chat-float.minimized {
-    height: 44px;
-    min-height: 44px;
-    resize: horizontal;
-}
-
-.chat-float-header {
-    height: 44px;
-    background: var(--ibm-gray-80);
-    border-bottom: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-30);
+/* ── Window Status Bar ── */
+.os2-statusbar {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0 0.75rem;
-    font-size: 0.75rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
+    height: 18px;
+    padding: 0 6px;
+    background: var(--os2-win-bg);
+    border-top: 1px solid var(--os2-win-dark);
+    font-size: 10px;
+    color: #333;
     flex-shrink: 0;
-    cursor: move;
 }
 
-.chat-float-actions {
-    display: flex;
-    gap: 0.5rem;
+.os2-statusbar-item {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.chat-float-btn {
-    background: var(--ibm-gray-70);
-    border: 1px solid var(--ibm-gray-70);
-    color: var(--ibm-gray-30);
-    width: 26px;
+.os2-statusbar-right {
+    text-align: right;
+}
+
+/* ── Window Resize Handle ── */
+.os2-window-resizer {
+    position: absolute;
+    right: 2px;
+    bottom: 2px;
+    width: 14px;
+    height: 14px;
+    cursor: se-resize;
+    background:
+        linear-gradient(135deg,
+            transparent 30%,
+            var(--os2-btn-shadow) 30%, var(--os2-btn-shadow) 40%,
+            transparent 40%, transparent 50%,
+            var(--os2-btn-shadow) 50%, var(--os2-btn-shadow) 60%,
+            transparent 60%, transparent 70%,
+            var(--os2-btn-shadow) 70%, var(--os2-btn-shadow) 80%,
+            transparent 80%
+        );
+    z-index: 20;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   CHAT FLOAT WINDOW (OS/2 style)
+   ══════════════════════════════════════════════════════════════════════════ */
+.chat-window {
+    position: fixed;
+    right: 24px;
+    top: 60px;
+    width: 480px;
+    height: 580px;
+    max-width: calc(100vw - 48px);
+    max-height: calc(100vh - 100px);
+    z-index: 50;
+    resize: both;
+    overflow: hidden;
+    min-width: 320px;
+    min-height: 200px;
+}
+
+.chat-window.hidden {
+    display: none;
+}
+
+.chat-window.minimized {
     height: 22px;
-    font-size: 0.9rem;
-    line-height: 1;
-    cursor: pointer;
+    min-height: 22px;
+    resize: horizontal;
+    overflow: hidden;
 }
 
-.chat-float-btn:hover {
-    border-color: var(--ibm-blue);
-    color: var(--ibm-gray-10);
+.chat-window .os2-titlebar {
+    cursor: move;
 }
 
 .chat-float-body {
     flex: 1;
-    background: var(--ibm-gray-100);
+    background: #000;
+    overflow: hidden;
 }
 
-.chat-float.minimized .chat-float-body {
+.chat-window.minimized .chat-float-body {
     display: none;
 }
 
-.chat-float iframe {
+.chat-float-body iframe {
     width: 100%;
     height: 100%;
     border: 0;
@@ -296,40 +548,171 @@ body {
 
 .chat-float-resizer {
     position: absolute;
-    right: 6px;
-    bottom: 6px;
-    width: 16px;
-    height: 16px;
+    right: 2px;
+    bottom: 2px;
+    width: 14px;
+    height: 14px;
     cursor: se-resize;
-    background: linear-gradient(135deg, transparent 0%, transparent 45%, rgba(255, 255, 255, 0.25) 50%, rgba(255, 255, 255, 0.25) 60%, transparent 65%, transparent 100%);
+    background:
+        linear-gradient(135deg,
+            transparent 30%,
+            var(--os2-btn-shadow) 30%, var(--os2-btn-shadow) 40%,
+            transparent 40%, transparent 50%,
+            var(--os2-btn-shadow) 50%, var(--os2-btn-shadow) 60%,
+            transparent 60%, transparent 70%,
+            var(--os2-btn-shadow) 70%, var(--os2-btn-shadow) 80%,
+            transparent 80%
+        );
     pointer-events: auto;
 }
 
-/* TN3270 color classes - CGA Palette */
+/* ══════════════════════════════════════════════════════════════════════════
+   OS/2 WARP TASKBAR
+   ══════════════════════════════════════════════════════════════════════════ */
+.os2-taskbar {
+    display: flex;
+    align-items: center;
+    height: 32px;
+    background: var(--os2-taskbar-bg);
+    border-top: 2px solid var(--os2-btn-highlight);
+    padding: 0 4px;
+    gap: 2px;
+    flex-shrink: 0;
+    z-index: 100;
+}
+
+.os2-taskbar-start {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--os2-btn-face);
+    border-top: 2px solid var(--os2-btn-highlight);
+    border-left: 2px solid var(--os2-btn-highlight);
+    border-right: 2px solid var(--os2-btn-darkshadow);
+    border-bottom: 2px solid var(--os2-btn-darkshadow);
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    height: 24px;
+    color: #000;
+}
+
+.os2-taskbar-start:active {
+    border-top: 2px solid var(--os2-btn-darkshadow);
+    border-left: 2px solid var(--os2-btn-darkshadow);
+    border-right: 2px solid var(--os2-btn-highlight);
+    border-bottom: 2px solid var(--os2-btn-highlight);
+}
+
+.os2-taskbar-logo {
+    height: 14px;
+    width: auto;
+}
+
+.os2-taskbar-divider {
+    width: 2px;
+    height: 20px;
+    border-left: 1px solid var(--os2-btn-shadow);
+    border-right: 1px solid var(--os2-btn-highlight);
+    margin: 0 2px;
+}
+
+.os2-taskbar-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--os2-btn-face);
+    border-top: 2px solid var(--os2-btn-highlight);
+    border-left: 2px solid var(--os2-btn-highlight);
+    border-right: 2px solid var(--os2-btn-darkshadow);
+    border-bottom: 2px solid var(--os2-btn-darkshadow);
+    padding: 2px 8px;
+    font-size: 10px;
+    font-weight: 700;
+    font-family: inherit;
+    cursor: pointer;
+    height: 24px;
+    color: #000;
+    white-space: nowrap;
+}
+
+.os2-taskbar-item.active {
+    border-top: 2px solid var(--os2-btn-darkshadow);
+    border-left: 2px solid var(--os2-btn-darkshadow);
+    border-right: 2px solid var(--os2-btn-highlight);
+    border-bottom: 2px solid var(--os2-btn-highlight);
+    background: #b0b0b0;
+}
+
+.os2-taskbar-icon {
+    font-size: 12px;
+}
+
+.os2-taskbar-spacer {
+    flex: 1;
+}
+
+.os2-taskbar-clock {
+    background: var(--os2-field-bg);
+    border-top: 1px solid var(--os2-btn-shadow);
+    border-left: 1px solid var(--os2-btn-shadow);
+    border-right: 1px solid var(--os2-btn-highlight);
+    border-bottom: 1px solid var(--os2-btn-highlight);
+    padding: 2px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #000;
+    min-width: 48px;
+    text-align: center;
+}
+
+/* ══════════════════════════════════════════════════════════════════════════
+   TN3270 COLOR CLASSES — Vivid CRT on dark background
+   ══════════════════════════════════════════════════════════════════════════ */
 .terminal pre { margin: 0; }
 .terminal pre span { color: inherit; }
-.terminal pre .c3270-green       { color: #55FF55; }
-.terminal pre .c3270-red         { color: #FF5555; }
-.terminal pre .c3270-blue        { color: #5555FF; }
-.terminal pre .c3270-turquoise   { color: #55FFFF; }
-.terminal pre .c3270-yellow      { color: #FFFFFF; }
-.terminal pre .c3270-white       { color: #FFFFFF; }
-.terminal pre .c3270-pink        { color: #5B8DEF; }
+.terminal pre .c3270-green       { color: #33ff33; }
+.terminal pre .c3270-red         { color: #ff4444; }
+.terminal pre .c3270-blue        { color: #5599ff; }
+.terminal pre .c3270-turquoise   { color: #44dddd; }
+.terminal pre .c3270-yellow      { color: #ffff44; }
+.terminal pre .c3270-white       { color: #ffffff; }
+.terminal pre .c3270-pink        { color: #ff88cc; }
 .terminal pre .c3270-intensified { font-weight: bold; text-shadow: 0 0 4px currentColor; }
-.terminal pre .c3270-protected   { color: #5555FF; }
-.terminal pre .c3270-field       { color: #55FF55; }
+.terminal pre .c3270-protected   { color: #5599ff; }
+.terminal pre .c3270-field       { color: #33ff33; }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════════════════════════════════════ */
 @media (max-width: 900px) {
+    .os2-desktop-icons {
+        display: none;
+    }
+
     .terminal {
         min-width: auto;
         width: 100%;
+        font-size: 11px;
     }
 
-    .chat-float {
-        right: 12px;
-        left: 12px;
+    .chat-window {
+        right: 8px;
+        left: 8px;
         width: auto;
-        height: 55vh;
-        bottom: 100px;
+        height: 50vh;
+        bottom: 40px;
+    }
+
+    .os2-pfbar {
+        gap: 1px;
+    }
+
+    .os2-pfkey {
+        padding: 2px 4px;
+        font-size: 9px;
+        min-width: 26px;
     }
 }

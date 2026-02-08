@@ -3,72 +3,190 @@
 {% block title %}Terminal - IBM z/OS AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/terminal.css">
+<link rel="stylesheet" href="/static/css/pages/terminal.css?v=4">
 {% endblock %}
 
 {% block body %}
-    <div class="toolbar">
-        <a href="/" class="back-link">← Back</a>
-        <a href="/" class="brand">
-            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
-            <span>z/OS Terminal</span>
-        </a>
-        <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port">
-        <button id="connectBtn" onclick="connect()">Connect</button>
-        <button class="danger" id="disconnectBtn" onclick="disconnect()" style="display:none;">Disconnect</button>
-        <button onclick="capture()">Capture</button>
-        <button class="secondary" onclick="toggleChatPanel()">Chat Panel</button>
-        <span style="flex:1;"></span>
-        <div class="status">
-            <span class="dot" id="statusDot"></span>
-            <span id="statusText">Disconnected</span>
+    <!-- OS/2 Warp Desktop -->
+    <div class="os2-desktop">
+
+        <!-- Desktop Icons -->
+        <div class="os2-desktop-icons">
+            <a href="/" class="os2-icon" title="Home">
+                <div class="os2-icon-img">🖥️</div>
+                <span>System</span>
+            </a>
+            <a href="/chat" class="os2-icon" title="AI Chat">
+                <div class="os2-icon-img">💬</div>
+                <span>AI Chat</span>
+            </a>
+            <a href="/terminal" class="os2-icon os2-icon-active" title="Terminal">
+                <div class="os2-icon-img">🖳</div>
+                <span>Terminal</span>
+            </a>
+            <a href="/labs" class="os2-icon" title="Labs">
+                <div class="os2-icon-img">🧪</div>
+                <span>Labs</span>
+            </a>
+            <a href="/scanner" class="os2-icon" title="Scanner">
+                <div class="os2-icon-img">🔍</div>
+                <span>Scanner</span>
+            </a>
+            <a href="/recon" class="os2-icon" title="Recon">
+                <div class="os2-icon-img">🛰️</div>
+                <span>Recon</span>
+            </a>
+            <a href="/rag" class="os2-icon" title="Knowledge Base">
+                <div class="os2-icon-img">📚</div>
+                <span>RAG</span>
+            </a>
+            <a href="/tutor" class="os2-icon" title="Red Team Tutor">
+                <div class="os2-icon-img">🎓</div>
+                <span>Tutor</span>
+            </a>
+            <a href="/walkthrough" class="os2-icon" title="Walkthrough">
+                <div class="os2-icon-img">🤖</div>
+                <span>Walkthru</span>
+            </a>
+            <a href="/graph" class="os2-icon" title="Trust Graph">
+                <div class="os2-icon-img">🕸️</div>
+                <span>Graph</span>
+            </a>
+            <a href="/architecture" class="os2-icon" title="Architecture">
+                <div class="os2-icon-img">📐</div>
+                <span>Arch</span>
+            </a>
+            <a href="/docs" class="os2-icon" title="Documentation">
+                <div class="os2-icon-img">📄</div>
+                <span>Docs</span>
+            </a>
+            <a href="/slides" class="os2-icon" title="Slides">
+                <div class="os2-icon-img">📊</div>
+                <span>Slides</span>
+            </a>
+            <a href="/abstract-models" class="os2-icon" title="Abstract Models">
+                <div class="os2-icon-img">🧠</div>
+                <span>Models</span>
+            </a>
+            <a href="/presentation" class="os2-icon" title="Presentation">
+                <div class="os2-icon-img">🎬</div>
+                <span>Present</span>
+            </a>
         </div>
-        <a href="/">Home</a>
-        <a href="/chat">AI Chat</a>
-    </div>
 
-    <div class="terminal-container">
-        <div class="terminal disconnected" id="terminal" tabindex="0">
-            <h2>TN3270 Terminal</h2>
-            <p>Enter host:port above and click Connect</p>
-            <p style="margin-top: 1rem; font-size: 0.85rem;">
-                Keyboard: Click to focus, then type. Enter, Tab, PF1-F12, Esc=Clear
-            </p>
-        </div>
-    </div>
-
-    <div class="pf-bar">
-        <button class="pf-key special" onclick="sendKey('enter')">Enter</button>
-        <button class="pf-key special" onclick="sendKey('clear')">Clear</button>
-        <button class="pf-key special" onclick="sendKey('tab')">Tab</button>
-        <button class="pf-key special" onclick="sendKey('reset')">Reset</button>
-        <span style="width:1rem;"></span>
-        <button class="pf-key" onclick="sendKey('pf', 1)">PF1</button>
-        <button class="pf-key" onclick="sendKey('pf', 2)">PF2</button>
-        <button class="pf-key" onclick="sendKey('pf', 3)">PF3</button>
-        <button class="pf-key" onclick="sendKey('pf', 4)">PF4</button>
-        <button class="pf-key" onclick="sendKey('pf', 5)">PF5</button>
-        <button class="pf-key" onclick="sendKey('pf', 6)">PF6</button>
-        <button class="pf-key" onclick="sendKey('pf', 7)">PF7</button>
-        <button class="pf-key" onclick="sendKey('pf', 8)">PF8</button>
-        <button class="pf-key" onclick="sendKey('pf', 9)">PF9</button>
-        <button class="pf-key" onclick="sendKey('pf', 10)">PF10</button>
-        <button class="pf-key" onclick="sendKey('pf', 11)">PF11</button>
-        <button class="pf-key" onclick="sendKey('pf', 12)">PF12</button>
-    </div>
-
-    <div class="chat-float" id="chatFloat">
-        <div class="chat-float-header" id="chatFloatHeader">
-            <span>AI Chat</span>
-            <div class="chat-float-actions">
-                <button class="chat-float-btn" onclick="toggleChatMinimize()" title="Minimize">_</button>
-                <button class="chat-float-btn" onclick="toggleChatPanel(false)" title="Close">×</button>
+        <!-- ═══ MAIN TERMINAL WINDOW ═══ -->
+        <div class="os2-window terminal-window" id="terminalWindow">
+            <div class="os2-titlebar">
+                <div class="os2-sysmenu" title="System Menu">
+                    <span class="os2-sysmenu-icon">■</span>
+                </div>
+                <div class="os2-titlebar-text">
+                    <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="os2-title-logo">
+                    TN3270 Terminal — z/OS Mainframe
+                </div>
+                <div class="os2-titlebar-buttons">
+                    <button class="os2-btn-minimize" title="Minimize">▼</button>
+                    <button class="os2-btn-maximize" title="Maximize">▲</button>
+                </div>
             </div>
+
+            <!-- Menu Bar -->
+            <div class="os2-menubar">
+                <div class="os2-menu-items">
+                    <span class="os2-menu-item" onclick="toggleChatPanel()">Chat</span>
+                    <span class="os2-menu-item" onclick="capture()">Capture</span>
+                </div>
+                <div class="os2-connection-bar">
+                    <label class="os2-label">Host:</label>
+                    <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port" class="os2-input">
+                    <button id="connectBtn" class="os2-btn os2-btn-connect" onclick="connect()">Connect</button>
+                    <button id="disconnectBtn" class="os2-btn os2-btn-disconnect" onclick="disconnect()" style="display:none;">Disconnect</button>
+                    <div class="os2-status">
+                        <span class="os2-status-led" id="statusDot"></span>
+                        <span id="statusText" class="os2-status-text">Disconnected</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Terminal Client Area -->
+            <div class="os2-client-area">
+                <div class="terminal disconnected" id="terminal" tabindex="0">
+                    <h2>TN3270 Terminal Emulator</h2>
+                    <p>Enter host:port above and click <b>Connect</b></p>
+                    <p style="margin-top: 0.75rem; font-size: 0.8rem; opacity: 0.7;">
+                        Keyboard: Click to focus, then type. Enter, Tab, PF1-F12, Esc=Clear
+                    </p>
+                </div>
+            </div>
+
+            <!-- PF Key Bar (inside window, bottom) -->
+            <div class="os2-pfbar">
+                <div class="os2-pfbar-group">
+                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('enter')">Enter</button>
+                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('clear')">Clear</button>
+                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('tab')">Tab</button>
+                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('reset')">Reset</button>
+                </div>
+                <div class="os2-pfbar-sep"></div>
+                <div class="os2-pfbar-group">
+                    <button class="os2-pfkey" onclick="sendKey('pf', 1)">F1</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 2)">F2</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 3)">F3</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 4)">F4</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 5)">F5</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 6)">F6</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 7)">F7</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 8)">F8</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 9)">F9</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 10)">F10</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 11)">F11</button>
+                    <button class="os2-pfkey" onclick="sendKey('pf', 12)">F12</button>
+                </div>
+            </div>
+
+            <!-- Window Status Bar -->
+            <div class="os2-statusbar">
+                <span class="os2-statusbar-item">OS/2 Warp — z/OS AI Assistant</span>
+                <span class="os2-statusbar-item os2-statusbar-right" id="termStatusBar">Ready</span>
+            </div>
+            <div class="os2-window-resizer" id="terminalResizer" aria-hidden="true"></div>
         </div>
-        <div class="chat-float-body">
-            <iframe src="/chat?embed=1" title="AI Chat"></iframe>
+
+        <!-- ═══ CHAT FLOAT WINDOW ═══ -->
+        <div class="os2-window chat-window hidden" id="chatFloat">
+            <div class="os2-titlebar" id="chatFloatHeader">
+                <div class="os2-sysmenu">
+                    <span class="os2-sysmenu-icon">■</span>
+                </div>
+                <div class="os2-titlebar-text">AI Chat — Mainframe Assistant</div>
+                <div class="os2-titlebar-buttons">
+                    <button class="os2-btn-minimize" onclick="toggleChatMinimize()" title="Minimize">▼</button>
+                    <button class="os2-btn-maximize" onclick="toggleChatPanel(false)" title="Close">✕</button>
+                </div>
+            </div>
+            <div class="chat-float-body">
+                <iframe src="/chat?embed=1" title="AI Chat"></iframe>
+            </div>
+            <div class="chat-float-resizer" id="chatFloatResizer" aria-hidden="true"></div>
         </div>
-        <div class="chat-float-resizer" id="chatFloatResizer" aria-hidden="true"></div>
+
+    </div>
+
+    <!-- OS/2 Warp Taskbar -->
+    <div class="os2-taskbar">
+        <button class="os2-taskbar-start" title="OS/2 LaunchPad">
+            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="os2-taskbar-logo">
+            <span>WarpCenter</span>
+        </button>
+        <div class="os2-taskbar-divider"></div>
+        <button class="os2-taskbar-item active" onclick="document.getElementById('terminalWindow').scrollIntoView()">
+            <span class="os2-taskbar-icon">🖥</span> TN3270 Terminal
+        </button>
+        <button class="os2-taskbar-item" id="chatTaskbarBtn" onclick="toggleChatPanel()" style="display:none;">
+            <span class="os2-taskbar-icon">💬</span> AI Chat
+        </button>
+        <div class="os2-taskbar-spacer"></div>
+        <div class="os2-taskbar-clock" id="taskbarClock"></div>
     </div>
 {% endblock %}
 
@@ -120,10 +238,12 @@
         }
 
         function updateStatus(isConnected, host = '') {
-            document.getElementById('statusDot').className = 'dot ' + (isConnected ? 'connected' : '');
+            document.getElementById('statusDot').className = 'os2-status-led ' + (isConnected ? 'connected' : '');
             document.getElementById('statusText').textContent = isConnected ? 'Connected: ' + host : 'Disconnected';
             document.getElementById('connectBtn').style.display = isConnected ? 'none' : '';
             document.getElementById('disconnectBtn').style.display = isConnected ? '' : 'none';
+            const sb = document.getElementById('termStatusBar');
+            if (sb) sb.textContent = isConnected ? 'Connected — ' + host : 'Ready';
         }
 
         function updateScreen(data) {
@@ -259,7 +379,7 @@
             };
 
             chatFloatHeader.addEventListener('mousedown', (e) => {
-                if (e.target && e.target.closest('.chat-float-actions')) return;
+                if (e.target && e.target.closest('.os2-titlebar-buttons')) return;
                 dragging = true;
                 startX = e.clientX;
                 startY = e.clientY;
@@ -316,5 +436,107 @@
 
         makeChatDraggable();
         makeChatResizable();
+
+        // ── Make Terminal Window Draggable ──
+        (function() {
+            const win = document.getElementById('terminalWindow');
+            const titlebar = win.querySelector('.os2-titlebar');
+            if (!win || !titlebar) return;
+
+            // Switch to absolute positioning so it can move freely
+            const rect = win.getBoundingClientRect();
+            win.style.position = 'absolute';
+            win.style.left = rect.left + 'px';
+            win.style.top = rect.top + 'px';
+            win.style.margin = '0';
+
+            let dragging = false, startX, startY, startLeft, startTop;
+
+            titlebar.style.cursor = 'move';
+
+            titlebar.addEventListener('mousedown', (e) => {
+                if (e.target.closest('.os2-titlebar-buttons') || e.target.closest('.os2-sysmenu')) return;
+                dragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const r = win.getBoundingClientRect();
+                startLeft = r.left;
+                startTop = r.top;
+                document.body.style.userSelect = 'none';
+                window.addEventListener('mousemove', onDragMove);
+                window.addEventListener('mouseup', onDragUp);
+            });
+
+            function onDragMove(e) {
+                if (!dragging) return;
+                win.style.left = (startLeft + e.clientX - startX) + 'px';
+                win.style.top = (startTop + e.clientY - startY) + 'px';
+            }
+
+            function onDragUp() {
+                dragging = false;
+                document.body.style.userSelect = '';
+                window.removeEventListener('mousemove', onDragMove);
+                window.removeEventListener('mouseup', onDragUp);
+            }
+        })();
+
+        // ── Make Terminal Window Resizable ──
+        (function() {
+            const win = document.getElementById('terminalWindow');
+            const handle = document.getElementById('terminalResizer');
+            if (!win || !handle) return;
+
+            let resizing = false, startX, startY, startW, startH;
+
+            handle.addEventListener('mousedown', (e) => {
+                e.preventDefault();
+                resizing = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const r = win.getBoundingClientRect();
+                startW = r.width;
+                startH = r.height;
+                document.body.style.userSelect = 'none';
+                window.addEventListener('mousemove', onResizeMove);
+                window.addEventListener('mouseup', onResizeUp);
+            });
+
+            function onResizeMove(e) {
+                if (!resizing) return;
+                const w = Math.max(320, startW + e.clientX - startX);
+                const h = Math.max(240, startH + e.clientY - startY);
+                win.style.width = w + 'px';
+                win.style.height = h + 'px';
+                win.style.maxWidth = 'none';
+                win.style.maxHeight = 'none';
+            }
+
+            function onResizeUp() {
+                resizing = false;
+                document.body.style.userSelect = '';
+                window.removeEventListener('mousemove', onResizeMove);
+                window.removeEventListener('mouseup', onResizeUp);
+            }
+        })();
+
+        // Taskbar clock
+        function updateClock() {
+            const now = new Date();
+            const h = now.getHours().toString().padStart(2, '0');
+            const m = now.getMinutes().toString().padStart(2, '0');
+            const el = document.getElementById('taskbarClock');
+            if (el) el.textContent = h + ':' + m;
+        }
+        updateClock();
+        setInterval(updateClock, 30000);
+
+        // Show/hide chat taskbar button
+        const _origToggle = toggleChatPanel;
+        toggleChatPanel = function(forceOpen) {
+            _origToggle(forceOpen);
+            const btn = document.getElementById('chatTaskbarBtn');
+            if (btn) btn.style.display = chatFloat && !chatFloat.classList.contains('hidden') ? '' : 'none';
+        };
     </script>
 {% endblock %}

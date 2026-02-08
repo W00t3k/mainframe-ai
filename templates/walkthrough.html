@@ -77,15 +77,6 @@
         </div>
         <div class="wt-progress-label" id="wtProgressLabel"></div>
 
-        <!-- Assessment question tracker -->
-        <div class="wt-question-tracker" id="wtQuestionTracker" style="display:none;">
-            <span class="wt-qt-label">Assessment:</span>
-            <span class="wt-qt-badge" id="wtQ1" title="Where is identity bound?">Q1</span>
-            <span class="wt-qt-badge" id="wtQ2" title="When is authority evaluated?">Q2</span>
-            <span class="wt-qt-badge" id="wtQ3" title="What executes later than expected?">Q3</span>
-            <span class="wt-qt-badge" id="wtQ4" title="Which subsystem enforces policy?">Q4</span>
-            <span class="wt-qt-badge" id="wtQ5" title="What assumptions are you importing?">Q5</span>
-        </div>
 
         <div class="walkthrough-layout">
             <!-- Left: Terminal -->
@@ -103,12 +94,12 @@
             <div class="wt-narration-panel">
                 <div class="wt-narration-header">
                     <span>Methodology Narration</span>
-                    <div class="wt-planes-legend">
-                        <span class="cp-tag cp-vtam">VTAM</span>
-                        <span class="cp-tag cp-tso">TSO</span>
-                        <span class="cp-tag cp-racf">RACF</span>
-                        <span class="cp-tag cp-cics">CICS/KICKS</span>
-                        <span class="cp-tag cp-jes">JES</span>
+                    <div class="wt-planes-legend" id="wtPlanesLegend">
+                        <span class="cp-tag cp-vtam dim" data-plane="vtam">VTAM</span>
+                        <span class="cp-tag cp-tso dim" data-plane="tso">TSO</span>
+                        <span class="cp-tag cp-racf dim" data-plane="racf">RACF</span>
+                        <span class="cp-tag cp-cics dim" data-plane="cics">CICS/KICKS</span>
+                        <span class="cp-tag cp-jes dim" data-plane="jes">JES</span>
                     </div>
                 </div>
                 <div class="wt-narration-body" id="wtNarration">
@@ -123,10 +114,6 @@
                             <strong>Deferred Execution</strong> &mdash; JES queues, active jobs, output history<br>
                             <strong>System Inspection</strong> &mdash; TSO sessions, system procedures, configuration model<br>
                             <strong>Authorization Model</strong> &mdash; RACF profiles, dataset protection, profile discovery
-                        </p>
-                        <p style="margin-top:1rem; color:var(--ibm-gray-50); font-size:0.8rem;">
-                            Each walkthrough addresses the <strong>5 assessment questions</strong>. Watch the Q1&ndash;Q5 tracker
-                            above to see which questions are covered as the demonstration progresses.
                         </p>
                     </div>
                     <!-- Narration log entries inserted here -->
@@ -237,10 +224,6 @@ async function startAutonomousWalkthrough() {
     wtLastLogLen = 0;
     wtRenderedNarrations = new Set();
 
-    // Show and reset Q tracker
-    document.getElementById('wtQuestionTracker').style.display = 'flex';
-    document.querySelectorAll('.wt-qt-badge').forEach(b => b.classList.remove('answered'));
-
     try {
         const res = await fetch('/api/walkthrough/start', {
             method: 'POST',
@@ -303,6 +286,11 @@ async function pollWalkthroughStatus() {
             tagEl.style.display = 'none';
         }
 
+        // Highlight only the active control plane in the legend
+        document.querySelectorAll('#wtPlanesLegend .cp-tag').forEach(t => {
+            t.classList.toggle('dim', t.dataset.plane !== data.control_plane);
+        });
+
         // --- Two-phase narration sync ---
         // Phase 1: New log entries appear with executing=true, no narration
         //          -> show header with "Executing..." indicator
@@ -323,14 +311,6 @@ async function pollWalkthroughStatus() {
                     updateNarrationEntry(logEntry);
                     wtRenderedNarrations.add(i);
                 }
-            });
-        }
-
-        // Update Q1-Q5 tracker badges
-        if (data.questions_answered) {
-            data.questions_answered.forEach(q => {
-                const badge = document.getElementById('wt' + q);
-                if (badge) badge.classList.add('answered');
             });
         }
 
@@ -415,19 +395,6 @@ function updateNarrationEntry(data) {
         body.innerHTML = rendered;
     }
 
-    // Add question badges to entry header
-    if (data.questions && data.questions.length > 0) {
-        const header = entry.querySelector('.wt-entry-header');
-        if (header && !header.querySelector('.wt-entry-q-tags')) {
-            const qTags = document.createElement('span');
-            qTags.className = 'wt-entry-q-tags';
-            qTags.innerHTML = data.questions.map(q =>
-                '<span class="wt-q-tag">' + q + '</span>'
-            ).join('');
-            header.appendChild(qTags);
-        }
-    }
-
     const narrationBody = document.getElementById('wtNarration');
     narrationBody.scrollTop = narrationBody.scrollHeight;
 }
@@ -436,14 +403,6 @@ function addCompletionEntry(data) {
     const log = document.getElementById('wtNarrationLog');
     const entry = document.createElement('div');
     entry.className = 'wt-narration-entry wt-completion';
-
-    // Build Q summary
-    const allQs = ['Q1', 'Q2', 'Q3', 'Q4', 'Q5'];
-    const answered = data.questions_answered || [];
-    const qSummary = allQs.map(q => {
-        const done = answered.includes(q);
-        return '<span class="wt-q-tag ' + (done ? 'answered' : 'unanswered') + '">' + q + (done ? ' &#10003;' : '') + '</span>';
-    }).join(' ');
 
     entry.innerHTML = `
         <div class="wt-entry-header">
@@ -455,12 +414,6 @@ function addCompletionEntry(data) {
             <p>Control planes traversed: ${[...new Set(data.log.map(l => l.control_plane))].filter(Boolean).map(cp =>
                 '<span class="cp-tag cp-' + cp + '">' + cp.toUpperCase() + '</span>'
             ).join(' ')}</p>
-            <p style="margin-top:0.75rem;"><strong>Assessment Questions:</strong></p>
-            <p>${qSummary}</p>
-            <p style="margin-top:0.5rem;color:var(--ibm-gray-50);">${answered.length < 5
-                ? 'Run additional walkthroughs to address remaining questions.'
-                : 'All 5 assessment questions addressed.'
-            }</p>
         </div>
     `;
     log.appendChild(entry);

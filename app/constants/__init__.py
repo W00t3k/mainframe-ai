@@ -13,5 +13,5 @@ from .prompts import (
     TUTOR_PERSONAS,
     build_tutor_prompt,
 )
-from .walkthrough_scripts import WALKTHROUGH_SCRIPTS, WT_QUESTIONS
+from .walkthrough_scripts import WALKTHROUGH_SCRIPTS
 from .paths import PATH_CATALOG

@@ -2221,7 +2221,7 @@ async def api_terminal_reset_session():
 # ============================================================================
 
 import time as _time
-from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS, WT_QUESTIONS as _WT_QUESTIONS
+from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS
 from app.routes.walkthrough import WalkthroughRunner
 
 # Singleton runner

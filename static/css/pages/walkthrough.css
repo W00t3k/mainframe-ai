@@ -262,6 +262,10 @@ body {
 .cp-tag.cp-cics { background: transparent; color: var(--cp-cics); border-color: var(--cp-cics); }
 .cp-tag.cp-jes  { background: transparent; color: var(--cp-jes); border-color: var(--cp-jes); }
 
+.cp-tag.dim {
+    opacity: 0.25;
+}
+
 /* ============================================================
    WALKTHROUGH CONTROLS BAR — OS/2 Toolbar
    ============================================================ */
@@ -331,43 +335,6 @@ body {
     background: var(--os2-panel);
     border-bottom: 1px solid var(--os2-border);
     font-family: 'IBM Plex Mono', monospace;
-}
-
-/* ============================================================
-   ASSESSMENT QUESTION TRACKER
-   ============================================================ */
-.wt-question-tracker {
-    display: flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.15rem 0.5rem;
-    margin-bottom: 0;
-    background: var(--os2-panel);
-    border-bottom: 1px solid var(--os2-border);
-}
-
-.wt-qt-label {
-    color: #3a5a80;
-    font-size: 10px;
-    text-transform: uppercase;
-    font-weight: 700;
-}
-
-.wt-qt-badge {
-    font-size: 10px;
-    font-weight: 700;
-    padding: 1px 4px;
-    border: 1px solid #1a2a48;
-    color: #2a3a58;
-    cursor: default;
-    font-family: 'IBM Plex Mono', monospace;
-}
-
-.wt-qt-badge.answered {
-    border-color: var(--wt-valid);
-    color: var(--wt-valid);
-    background: transparent;
-    box-shadow: 0 0 3px rgba(58, 138, 90, 0.3);
 }
 
 /* ============================================================
@@ -629,34 +596,6 @@ body {
 @keyframes wt-blink {
     0%, 100% { opacity: 1; }
     50% { opacity: 0; }
-}
-
-/* ============================================================
-   QUESTION TAGS IN NARRATION ENTRIES
-   ============================================================ */
-.wt-entry-q-tags {
-    display: flex;
-    gap: 0.2rem;
-    margin-left: auto;
-}
-
-.wt-q-tag {
-    font-size: 9px;
-    font-weight: 700;
-    padding: 0px 3px;
-    border: 1px solid #2a4a78;
-    color: #4a7aaa;
-    font-family: 'IBM Plex Mono', monospace;
-}
-
-.wt-q-tag.answered {
-    border-color: var(--wt-valid);
-    color: var(--wt-valid);
-}
-
-.wt-q-tag.unanswered {
-    border-color: #1a2a48;
-    color: #2a3a58;
 }
 
 /* ============================================================
