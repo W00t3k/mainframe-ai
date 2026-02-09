@@ -89,6 +89,20 @@ async def deck_download():
     return RedirectResponse(url="/static/Mainframe-Talk-WIP.pptx", status_code=302)
 
 
+@router.get("/video", response_class=HTMLResponse)
+async def video_page(request: Request):
+    """Video demo page."""
+    return templates.TemplateResponse("video.html", {"request": request})
+
+
+@router.get("/video/file")
+async def video_file():
+    """Serve the IBM-AI demo video file."""
+    from fastapi.responses import FileResponse
+    video_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "IBM-AI.mp4")
+    return FileResponse(video_path, media_type="video/mp4", filename="IBM-AI.mp4")
+
+
 @router.get("/abstract", response_class=HTMLResponse)
 async def abstract_page(request: Request):
     """Conference abstract page."""

@@ -75,7 +75,7 @@
     <!-- ── AI Explanation (separate from terminal) ── -->
     <div class="idx-term-explain" id="termExplain"></div>
 
-    <main>
+    <main class="idx-bottom-nav" id="bottomNav">
         <!-- ── Control Planes (collapsible) ── -->
         <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9654;</span> CONTROL PLANES</div>
         <div class="cp-grid collapsed" id="cpGrid">
@@ -116,6 +116,9 @@
             <a href="/rag" class="idx-nav-item" data-hint="Knowledge base — RAG-powered document manager. Upload and query mainframe documentation and manuals."><span class="idx-nav-icon">[KB]</span><span class="idx-nav-label">Knowledge</span></a>
             <a href="/architecture" class="idx-nav-item" data-hint="Architecture view — explore the system design, API endpoints, and component relationships of this application."><span class="idx-nav-icon">[A]</span><span class="idx-nav-label">Architecture</span></a>
             <a href="/docs" class="idx-nav-item" data-hint="API documentation — full reference for all REST endpoints, request/response formats, and integration guides."><span class="idx-nav-icon">[DOC]</span><span class="idx-nav-label">API Docs</span></a>
+            <a href="#" onclick="event.preventDefault();toggleSection('videoSection', document.querySelector('[onclick*=videoSection]'));document.getElementById('videoSection').scrollIntoView({behavior:'smooth'});" class="idx-nav-item" data-hint="Watch the AI-powered mainframe demo video."><span class="idx-nav-icon">[&#9654;]</span><span class="idx-nav-label">Video</span></a>
+            <a href="/deck" class="idx-nav-item" data-hint="Download the conference PowerPoint deck."><span class="idx-nav-icon">[PPT]</span><span class="idx-nav-label">Deck</span></a>
+            <a href="/abstract" class="idx-nav-item" data-hint="Conference abstract — Hacking Big Iron with AI."><span class="idx-nav-icon">[ABS]</span><span class="idx-nav-label">Abstract</span></a>
         </nav>
     </main>
 
@@ -673,6 +676,29 @@ function stopAiAutoRefresh() {
 
 // Start auto-refresh when page loads
 document.addEventListener('DOMContentLoaded', startAiAutoRefresh);
+
+// ── Bottom Nav: reveal on any scroll, hide after 3s idle ──
+(function() {
+    const nav = document.getElementById('bottomNav');
+    if (!nav) return;
+    let hideTimer = null;
+    let hovering = false;
+    function reveal() {
+        nav.classList.add('revealed');
+        clearTimeout(hideTimer);
+        if (!hovering) {
+            hideTimer = setTimeout(function() { nav.classList.remove('revealed'); }, 3000);
+        }
+    }
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 20) { reveal(); } else { nav.classList.remove('revealed'); }
+    }, { passive: true });
+    window.addEventListener('wheel', function(e) {
+        if (e.deltaY > 0) reveal();
+    }, { passive: true });
+    nav.addEventListener('mouseenter', function() { hovering = true; clearTimeout(hideTimer); nav.classList.add('revealed'); });
+    nav.addEventListener('mouseleave', function() { hovering = false; hideTimer = setTimeout(function() { nav.classList.remove('revealed'); }, 3000); });
+})();
 
 // ── Collapsible Sections ──
 function toggleSection(id, heading) {

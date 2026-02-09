@@ -449,7 +449,8 @@ main {
 }
 
 .cp-grid.collapsed,
-.idx-nav.collapsed {
+.idx-nav.collapsed,
+.idx-video-panel.collapsed {
     max-height: 0;
     overflow: hidden;
     opacity: 0;
@@ -460,10 +461,29 @@ main {
 }
 
 .cp-grid:not(.collapsed),
-.idx-nav:not(.collapsed) {
+.idx-nav:not(.collapsed),
+.idx-video-panel:not(.collapsed) {
     max-height: 600px;
     opacity: 1;
     transition: max-height 0.3s ease, opacity 0.2s ease;
+}
+
+.idx-video-panel {
+    padding: 0.75rem 0;
+}
+
+/* ── Bottom nav: hidden, reveal on scroll ── */
+.idx-bottom-nav {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, max-height 0.4s ease;
+}
+
+.idx-bottom-nav.revealed {
+    opacity: 1;
+    max-height: 800px;
+    overflow: visible;
 }
 
 .cp-grid {

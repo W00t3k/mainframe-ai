@@ -1,0 +1,240 @@
+{% extends "base.html" %}
+
+{% block title %}Video — Hacking Big Iron with AI{% endblock %}
+
+{% block page_styles %}
+<style>
+:root {
+    --vid-bg: #0a0d11;
+    --vid-fg: #e0e0e0;
+    --vid-muted: #6f6f6f;
+    --vid-accent: #4589ff;
+    --vid-border: #262626;
+    --vid-panel: #141414;
+}
+
+.video-page {
+    min-height: 100vh;
+    background: var(--vid-bg);
+    color: var(--vid-fg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem 2rem 4rem;
+}
+
+.video-container {
+    max-width: 960px;
+    width: 100%;
+}
+
+/* ── Header ── */
+.vid-header {
+    text-align: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid var(--vid-border);
+}
+
+.vid-logo {
+    height: 28px;
+    width: auto;
+    opacity: 0.5;
+    margin-bottom: 1.5rem;
+}
+
+.vid-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 0.4rem;
+}
+
+.vid-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--vid-accent);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+
+.vid-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--vid-muted);
+    margin-top: 1rem;
+}
+
+.vid-meta span {
+    margin: 0 0.5rem;
+}
+
+/* ── Video Player ── */
+.vid-player-wrap {
+    background: #000;
+    border: 1px solid var(--vid-border);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 2rem;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+}
+
+.vid-player-wrap video {
+    display: block;
+    width: 100%;
+    max-height: 540px;
+    background: #000;
+}
+
+/* ── Scanline overlay ── */
+.vid-player-wrap {
+    position: relative;
+}
+
+.vid-scanlines {
+    pointer-events: none;
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.03) 2px,
+        rgba(0,0,0,0.03) 4px
+    );
+    z-index: 1;
+}
+
+/* ── Description ── */
+.vid-description {
+    background: var(--vid-panel);
+    border: 1px solid var(--vid-border);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+    border-left: 3px solid var(--vid-accent);
+}
+
+.vid-description p {
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #c6c6c6;
+    margin: 0;
+}
+
+/* ── Quick links ── */
+.vid-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+    margin-bottom: 2rem;
+}
+
+.vid-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    background: rgba(69, 137, 255, 0.08);
+    color: var(--vid-accent);
+    border: 1px solid rgba(69, 137, 255, 0.25);
+    border-radius: 3px;
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.vid-link:hover {
+    background: rgba(69, 137, 255, 0.18);
+    color: #a6c8ff;
+}
+
+/* ── Footer nav ── */
+.vid-footer {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--vid-border);
+}
+
+.vid-footer a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--vid-muted);
+    text-decoration: none;
+    margin: 0 0.75rem;
+    transition: color 0.15s;
+}
+
+.vid-footer a:hover {
+    color: var(--vid-accent);
+}
+
+@media (max-width: 640px) {
+    .vid-title { font-size: 1.5rem; }
+    .video-container { max-width: 100%; }
+    .vid-player-wrap video { max-height: 300px; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="video-page">
+    <div class="video-container">
+
+        <!-- Header -->
+        <div class="vid-header">
+            <a href="/"><img src="/static/img/ibm-logo-official.svg" alt="IBM" class="vid-logo"></a>
+            <h1 class="vid-title">Hacking Big Iron with AI</h1>
+            <p class="vid-subtitle">When Modern Security Assumptions Fail on Mainframes</p>
+            <p class="vid-meta">
+                <span>Adam Toscher</span>
+                <span>&middot;</span>
+                <span>2025</span>
+            </p>
+        </div>
+
+        <!-- Video Player -->
+        <div class="vid-player-wrap">
+            <div class="vid-scanlines"></div>
+            <video controls preload="metadata" autoplay>
+                <source src="/video/file" type="video/mp4">
+                Your browser does not support the video tag.
+            </video>
+        </div>
+
+        <!-- Description -->
+        <div class="vid-description">
+            <p>
+                This demo shows the AI-powered mainframe security assistant in action &mdash;
+                connecting to a live TN3270 terminal, interpreting screens with a local LLM,
+                running autonomous walkthroughs with AI narration, and assessing mainframe
+                environments using the five findings areas methodology. Everything runs
+                100% locally with no cloud APIs.
+            </p>
+        </div>
+
+        <!-- Quick links -->
+        <div class="vid-links">
+            <a href="/abstract" class="vid-link">Read Abstract</a>
+            <a href="/deck" class="vid-link">Download Deck</a>
+            <a href="/slides" class="vid-link">Slide Deck</a>
+            <a href="/" class="vid-link">Live Demo</a>
+            <a href="/terminal" class="vid-link">Terminal</a>
+        </div>
+
+        <!-- Footer nav -->
+        <div class="vid-footer">
+            <a href="/">Home</a>
+            <a href="/abstract">Abstract</a>
+            <a href="/deck">PowerPoint</a>
+            <a href="/slides">Slides</a>
+            <a href="/architecture">Architecture</a>
+            <a href="/docs">Docs</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}
