@@ -85,8 +85,15 @@ class WalkthroughRunner:
         if self.running and (self._thread is None or not self._thread.is_alive()):
             self.running = False
         
-        # Get colored screen for display - always colorize
-        screen_html = self._read_screen_with_color_safe()
+        # Colorize the cached screen instead of doing a live read
+        # (live reads race with the walkthrough thread's connect/disconnect)
+        screen_html = ""
+        if self.current_screen and not self.current_screen.startswith("["):
+            try:
+                from agent_tools import colorize_3270_screen
+                screen_html = colorize_3270_screen(self.current_screen)
+            except Exception:
+                screen_html = self.current_screen
         
         return {
             "running": self.running,

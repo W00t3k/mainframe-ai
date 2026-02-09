@@ -83,6 +83,11 @@ cd tk5/mvs-tk5 && ./mvs
 # Run the web app
 python run.py
 # Or: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
+
+# Or use the all-in-one startup script
+./start.sh          # Ollama + Web App
+./start.sh --mvs    # Ollama + TK5 + Web App
+./start.sh --kill   # Stop everything
 ```
 
 ### Linux
@@ -131,6 +136,8 @@ Open in browser:
 | `http://localhost:8080/architecture` | System architecture |
 | `http://localhost:8080/docs` | API documentation |
 | `http://localhost:8080/slides` | Presentation slides |
+| `http://localhost:8080/presentation` | Teaching presentation |
+| `http://localhost:8080/abstract` | Conference abstract |
 
 ## Walkthroughs
 

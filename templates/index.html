@@ -252,17 +252,20 @@ async function checkStatus() {
     try {
         const res = await fetch('/api/status');
         const data = await res.json();
-        isConnected = data.connected;
 
-        if (data.connected && !wtRunning) refreshScreen();
+        // Don't update connection state during walkthrough — it disconnects/reconnects
+        if (!wtRunning) {
+            isConnected = data.connected;
+            if (data.connected) refreshScreen();
+        }
 
-        updateMfStatus(data.connected ? 'online' : 'offline');
+        updateMfStatus(data.connected || wtRunning ? 'online' : 'offline');
         updateOllamaStatus(data.ollama_running);
-        updateConnBtn();
+        if (!wtRunning) updateConnBtn();
 
         if (data.connected && data.host) document.getElementById('connTarget').value = data.host;
     } catch (e) {
-        updateMfStatus('offline');
+        if (!wtRunning) updateMfStatus('offline');
         updateOllamaStatus(false);
     }
 }
@@ -369,6 +372,8 @@ function updateTerminal(data) {
         screenText = pre.textContent;
     } else if (data.screen || data.connected) {
         screenText = data.screen || '';
+        // Don't show [Not connected] during walkthrough — it's a transient state
+        if (wtRunning && screenText.startsWith('[Not connected')) return;
         pre.textContent = screenText;
     }
     // Update explanation when screen changes
@@ -488,13 +493,21 @@ async function startWalkthrough() {
     try { document.getElementById('wtRunLabel').textContent = 'Running Demo...'; } catch(_) {}
 
     if (wtPollingInterval) clearInterval(wtPollingInterval);
-    wtPollingInterval = setInterval(pollWalkthrough, 500);
-    pollWalkthrough();
+    wtPollCount = 0;
+    wtSeenRunning = false;
+    // Delay first poll to let backend thread start
+    setTimeout(() => {
+        wtPollingInterval = setInterval(pollWalkthrough, 500);
+        pollWalkthrough();
+    }, 1000);
 }
 
 let lastExplainScreen = '';
+let wtPollCount = 0;
+let wtSeenRunning = false;
 async function pollWalkthrough() {
     try {
+        wtPollCount++;
         const res = await fetch('/api/walkthrough/status');
         const data = await res.json();
         if (data.screen_html) {
@@ -503,6 +516,7 @@ async function pollWalkthrough() {
             updateTerminal({screen: data.screen});
         }
         if (data.running) {
+            wtSeenRunning = true;
             const demoBtn = document.getElementById('wtStartBtn2');
             const p = data.paused ? ' (Paused)' : '';
             const stepText = data.title ? data.title + p : 'Running...';
@@ -514,12 +528,13 @@ async function pollWalkthrough() {
                 aiExplainScreen(data.screen || '', data.title);
             }
         }
-        if (!data.running) {
+        // Only stop polling if we've seen it running first, or after 20 polls (10s grace)
+        if (!data.running && (wtSeenRunning || wtPollCount > 20)) {
             clearInterval(wtPollingInterval);
             wtPollingInterval = null;
             wtRunning = false;
             resetWtControls();
-            aiExplainScreen(data.screen || '', 'Demo complete');
+            if (wtSeenRunning) aiExplainScreen(data.screen || '', 'Demo complete');
         }
     } catch(e) {}
 }

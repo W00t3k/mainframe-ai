@@ -11,6 +11,8 @@ from .prompts import (
     RECON_AI_PROMPT,
     EXPLAIN_SCREEN_PROMPT,
     TUTOR_PERSONAS,
+    ABSTRACT,
+    SLIDES_PROMPT,
     build_tutor_prompt,
 )
 from .walkthrough_scripts import WALKTHROUGH_SCRIPTS

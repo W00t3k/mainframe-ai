@@ -2,10 +2,10 @@
 """
 Methodology Engine - Control Plane Assessment Framework
 
-Implements the "Screen → Control Plane → Assessment Question → Evidence → Next Action" workflow.
+Implements the "Screen → Control Plane → Findings Area → Evidence → Next Action" workflow.
 
-This is the core differentiator: a formalized assessment methodology that maps z/OS security
-to five control planes, five broken assumptions, and five assessment questions.
+This is the core differentiator: a formalized assessment methodology that maps mainframe security
+to five control planes, five broken assumptions, and five findings areas.
 """
 
 import re
@@ -111,7 +111,7 @@ BROKEN_ASSUMPTIONS = {
 
 
 # =============================================================================
-# The 5 Assessment Questions
+# The 5 Findings Areas (F1–F5)
 # =============================================================================
 
 ASSESSMENT_QUESTIONS = {
@@ -170,7 +170,7 @@ class ScreenAnalysis:
     broken_assumption: Optional[str]
     assumption_evidence: List[str]
     
-    # Step 3: Assessment Question
+    # Step 3: Findings Area
     primary_question: str
     question_context: str
     

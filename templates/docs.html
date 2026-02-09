@@ -363,13 +363,13 @@ python web_app.py</code></pre>
             security professionals approaching mainframes from a Linux/Unix background. Key principles:
         </p>
 
-        <h3>The 5 Assessment Questions</h3>
+        <h3>The 5 Findings Areas</h3>
         <ol>
-            <li><strong>Q1: Where is identity bound?</strong> — Identity binds at TSO logon, not VTAM entry</li>
-            <li><strong>Q2: When is authority evaluated?</strong> — At command execution, not session start</li>
-            <li><strong>Q3: What executes later than expected?</strong> — JCL submits now, runs later under submitter's identity</li>
-            <li><strong>Q4: Which subsystem enforces policy?</strong> — RACF, not the application or menu</li>
-            <li><strong>Q5: What assumptions are you importing?</strong> — Datasets ≠ files, address spaces ≠ processes</li>
+            <li><strong>F1: Identity Binding</strong> — Where is identity bound? At TSO logon, not VTAM entry</li>
+            <li><strong>F2: Authority Evaluation</strong> — When is authority evaluated? At command execution, not session start</li>
+            <li><strong>F3: Deferred Execution</strong> — What executes later than expected? JCL submits now, runs later under submitter's identity</li>
+            <li><strong>F4: Policy Enforcement</strong> — Which subsystem enforces policy? RACF, not the application or menu</li>
+            <li><strong>F5: Imported Assumptions</strong> — What assumptions are you importing? Datasets ≠ files, address spaces ≠ processes</li>
         </ol>
 
         <h3>Control Planes</h3>

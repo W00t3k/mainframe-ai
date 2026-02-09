@@ -1,0 +1,429 @@
+{% extends "base.html" %}
+
+{% block title %}Abstract — Hacking Big Iron with AI{% endblock %}
+
+{% block page_styles %}
+<style>
+:root {
+    --abs-bg: #0a0d11;
+    --abs-fg: #e0e0e0;
+    --abs-muted: #6f6f6f;
+    --abs-accent: #4589ff;
+    --abs-border: #262626;
+    --abs-panel: #141414;
+}
+
+.abstract-page {
+    min-height: 100vh;
+    background: var(--abs-bg);
+    color: var(--abs-fg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem 4rem;
+}
+
+.abstract-container {
+    max-width: 720px;
+    width: 100%;
+}
+
+/* ── Header ── */
+.abs-header {
+    text-align: center;
+    margin-bottom: 3rem;
+    padding-bottom: 2rem;
+    border-bottom: 1px solid var(--abs-border);
+}
+
+.abs-logo {
+    height: 28px;
+    width: auto;
+    opacity: 0.5;
+    margin-bottom: 2rem;
+}
+
+.abs-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+    line-height: 1.15;
+    margin-bottom: 0.5rem;
+}
+
+.abs-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    color: var(--abs-accent);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+}
+
+.abs-meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--abs-muted);
+    margin-top: 1.2rem;
+}
+
+.abs-meta span {
+    margin: 0 0.5rem;
+}
+
+/* ── Abstract body ── */
+.abs-body {
+    margin-bottom: 2.5rem;
+}
+
+.abs-body p {
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.05rem;
+    line-height: 1.8;
+    color: #c6c6c6;
+    margin-bottom: 1.2rem;
+}
+
+.abs-body p:last-child {
+    margin-bottom: 0;
+}
+
+/* ── Key themes ── */
+.abs-themes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 2.5rem;
+}
+
+.abs-theme {
+    background: var(--abs-panel);
+    border: 1px solid var(--abs-border);
+    border-left: 3px solid var(--abs-accent);
+    padding: 1rem 1.2rem;
+}
+
+.abs-theme h4 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--abs-accent);
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+}
+
+.abs-theme p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--abs-muted);
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ── Broken assumptions ── */
+.abs-assumptions {
+    margin-bottom: 2.5rem;
+    padding: 1.5rem;
+    background: var(--abs-panel);
+    border: 1px solid var(--abs-border);
+}
+
+.abs-assumptions h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1rem;
+    letter-spacing: 0.03em;
+}
+
+.assumption-row {
+    display: flex;
+    align-items: baseline;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid #1a1a1a;
+}
+
+.assumption-row:last-child {
+    border-bottom: none;
+}
+
+.assumption-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+    min-width: 48px;
+    text-align: center;
+}
+
+.tag-vtam { background: rgba(167,139,250,.18); color: #a78bfa; border: 1px solid rgba(167,139,250,.35); }
+.tag-racf { background: rgba(245,158,11,.18); color: #f59e0b; border: 1px solid rgba(245,158,11,.35); }
+.tag-tso  { background: rgba(99,167,255,.18); color: #63a7ff; border: 1px solid rgba(99,167,255,.35); }
+.tag-jes  { background: rgba(251,113,133,.18); color: #fb7185; border: 1px solid rgba(251,113,133,.35); }
+
+.assumption-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: #c6c6c6;
+}
+
+.assumption-text strong {
+    color: #fff;
+}
+
+/* ── Audience ── */
+.abs-audience {
+    background: rgba(69, 137, 255, 0.06);
+    border: 1px solid rgba(69, 137, 255, 0.2);
+    padding: 1.2rem 1.5rem;
+    margin-bottom: 2.5rem;
+    border-radius: 4px;
+}
+
+.abs-audience p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    color: #a6c8ff;
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ── Tool release ── */
+.abs-tool {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--abs-panel);
+    border: 1px solid var(--abs-border);
+    margin-bottom: 2.5rem;
+}
+
+.abs-tool h3 {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.5rem;
+}
+
+.abs-tool p {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.8rem;
+    color: var(--abs-muted);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.tool-features {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.tool-feat {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 3px 10px;
+    background: rgba(52, 211, 153, 0.1);
+    color: #34d399;
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    border-radius: 3px;
+}
+
+/* ── Footer nav ── */
+.abs-footer {
+    text-align: center;
+    padding-top: 2rem;
+    border-top: 1px solid var(--abs-border);
+}
+
+.abs-footer a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--abs-muted);
+    text-decoration: none;
+    margin: 0 0.75rem;
+    transition: color 0.15s;
+}
+
+.abs-footer a:hover {
+    color: var(--abs-accent);
+}
+
+/* ── Print styles ── */
+@media print {
+    .abstract-page { background: #fff; color: #000; padding: 1rem; }
+    .abs-title { color: #000; }
+    .abs-subtitle { color: #333; }
+    .abs-body p { color: #333; }
+    .abs-theme { border-color: #ccc; background: #f9f9f9; }
+    .abs-theme h4 { color: #333; }
+    .abs-theme p { color: #666; }
+    .abs-assumptions { background: #f9f9f9; border-color: #ccc; }
+    .assumption-text { color: #333; }
+    .abs-audience { background: #f0f4ff; border-color: #ccc; }
+    .abs-audience p { color: #333; }
+    .abs-footer { display: none; }
+}
+
+@media (max-width: 640px) {
+    .abs-themes { grid-template-columns: 1fr; }
+    .abs-title { font-size: 1.8rem; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="abstract-page">
+    <div class="abstract-container">
+
+        <!-- Header -->
+        <div class="abs-header">
+            <a href="/"><img src="/static/img/ibm-logo-official.svg" alt="IBM" class="abs-logo"></a>
+            <h1 class="abs-title">Hacking Big Iron with AI</h1>
+            <p class="abs-subtitle">When Modern Security Assumptions Fail on Mainframes</p>
+            <p class="abs-meta">
+                <span>Adam Toscher</span>
+                <span>·</span>
+                <span>2025</span>
+            </p>
+        </div>
+
+        <!-- Abstract body -->
+        <div class="abs-body">
+            <p>
+                Mainframes still run, to this day, critical infrastructure such as banking,
+                airlines, and government systems, yet most modern security teams approach them
+                using assumptions formed around Unix, Windows, and other enterprise platforms.
+                These assumptions often fail on z/OS and its predecessors, creating blind spots
+                that are difficult to detect and easy to underestimate.
+            </p>
+            <p>
+                This talk explains how mainframe security actually works and why familiar concepts
+                such as "root," shells, ports, and lateral movement do not translate cleanly.
+                Focusing on components like JES, JCL, RACF, CICS, VTAM, and PR/SM, we explore
+                where attackers and defenders truly operate today: transactions, security managers,
+                and management boundaries.
+            </p>
+            <p>
+                Using real TN3270 terminal screens and practical examples, attendees will learn a
+                repeatable methodology for assessing mainframe environments and identifying
+                misconfigurations that appear harmless but can have severe impact.
+            </p>
+            <p>
+                From an offensive perspective, the talk reframes how attackers actually move inside
+                mainframe environments: not through shells or services, but via job submission paths,
+                inherited authority, transaction routing, and security manager behavior. The session
+                highlights concrete failure modes red teams encounter when modern assumptions are
+                applied to z/OS, and how those blind spots are exploited in real assessments.
+            </p>
+            <p>
+                The talk also demonstrates how a locally-hosted AI assistant can accelerate
+                mainframe security work. Using a fully offline LLM running on the tester's
+                machine, the tool interprets live TN3270 terminal screens in real-time,
+                narrates autonomous walkthroughs that teach control plane concepts as they
+                execute, and provides an AI tutor with multiple personas for exploring
+                mainframe security topics interactively. Every AI interaction runs 100% locally
+                &mdash; no cloud APIs, no data exfiltration risk &mdash; making it practical for
+                use in sensitive assessment environments.
+            </p>
+        </div>
+
+        <!-- Broken assumptions -->
+        <div class="abs-assumptions">
+            <h3>Five Broken Assumptions</h3>
+            <div class="assumption-row">
+                <span class="assumption-tag tag-vtam">VTAM</span>
+                <span class="assumption-text"><strong>"Ports define exposure"</strong> — VTAM's session fabric exists independently of TCP/IP</span>
+            </div>
+            <div class="assumption-row">
+                <span class="assumption-tag tag-racf">RACF</span>
+                <span class="assumption-text"><strong>"There is a root user"</strong> — Authority is distributed across profiles, not accounts</span>
+            </div>
+            <div class="assumption-row">
+                <span class="assumption-tag tag-tso">TSO</span>
+                <span class="assumption-text"><strong>"Processes are short-lived"</strong> — Address spaces persist for weeks or months</span>
+            </div>
+            <div class="assumption-row">
+                <span class="assumption-tag tag-jes">JES</span>
+                <span class="assumption-text"><strong>"Work executes immediately"</strong> — JES queues, schedules, and defers execution</span>
+            </div>
+            <div class="assumption-row">
+                <span class="assumption-tag tag-tso">TSO</span>
+                <span class="assumption-text"><strong>"There is a filesystem"</strong> — Datasets, catalogs, PDS members — no hierarchy</span>
+            </div>
+        </div>
+
+        <!-- Key themes -->
+        <div class="abs-themes">
+            <div class="abs-theme">
+                <h4>Exposure Model</h4>
+                <p>VTAM session fabric, CICS transactions, and reachability without ports</p>
+            </div>
+            <div class="abs-theme">
+                <h4>Privilege Model</h4>
+                <p>RACF profiles, inherited authority, and why there is no root</p>
+            </div>
+            <div class="abs-theme">
+                <h4>Execution Model</h4>
+                <p>JES/JCL job submission, deferred execution, and identity preservation</p>
+            </div>
+            <div class="abs-theme">
+                <h4>Offensive Methodology</h4>
+                <p>Repeatable assessment framework with real TN3270 examples</p>
+            </div>
+            <div class="abs-theme">
+                <h4>AI-Assisted Assessment</h4>
+                <p>Local LLM interprets screens, narrates walkthroughs, and tutors in real-time</p>
+            </div>
+            <div class="abs-theme">
+                <h4>100% Offline</h4>
+                <p>No cloud, no API keys &mdash; safe for sensitive assessment environments</p>
+            </div>
+        </div>
+
+        <!-- Audience -->
+        <div class="abs-audience">
+            <p>
+                No prior mainframe experience is required.
+            </p>
+        </div>
+
+        <!-- Tool release -->
+        <div class="abs-tool">
+            <h3>Open-Source Tool Release</h3>
+            <p>AI-powered mainframe security assistant &mdash; local LLM, TN3270 terminal, and offensive methodology in one tool</p>
+            <div class="tool-features">
+                <span class="tool-feat">Local LLM (Ollama)</span>
+                <span class="tool-feat">TN3270 Terminal</span>
+                <span class="tool-feat">AI Screen Analysis</span>
+                <span class="tool-feat">AI-Narrated Walkthroughs</span>
+                <span class="tool-feat">Red Team AI Tutor</span>
+                <span class="tool-feat">Trust Graph</span>
+                <span class="tool-feat">Test & Report (F1–F5)</span>
+                <span class="tool-feat">Security Labs</span>
+                <span class="tool-feat">No Cloud / No API Keys</span>
+            </div>
+        </div>
+
+        <!-- Footer nav -->
+        <div class="abs-footer">
+            <a href="/">Home</a>
+            <a href="/deck">PowerPoint</a>
+            <a href="/slides">Slide Deck</a>
+            <a href="/presentation">Full Presentation</a>
+            <a href="/architecture">Architecture</a>
+            <a href="/docs">Docs</a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -76,7 +76,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "VTAM Entry Screen",
                 "control_plane": "vtam",
-                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nYou are at the VTAM entry screen — the session fabric layer. On TK5, this shows the MVS 3.8j splash.\n\n**Note:** On the first connection, the `Logon ===>` prompt may be missing. Press Enter and it will appear. On subsequent connections, the `Logon ===>` prompt is displayed immediately.\n\n**Broken Assumption:** *\"Ports define exposure.\"* In z/OS, the session fabric outlives TCP connections. What you see here is not a \"service on a port\" — it's the session manager itself.\n\n**Assessment Question Q1:** Identity is not yet bound. You are an anonymous VTAM session. No userid, no authority — just a session handle.",
+                "narration": "**Control Plane: VTAM (Session Fabric)**\n\nYou are at the VTAM entry screen — the session fabric layer. On TK5, this shows the MVS 3.8j splash.\n\n**Note:** On the first connection, the `Logon ===>` prompt may be missing. Press Enter and it will appear. On subsequent connections, the `Logon ===>` prompt is displayed immediately.\n\n**Broken Assumption:** *\"Ports define exposure.\"* On the mainframe, the session fabric outlives TCP connections. What you see here is not a \"service on a port\" — it's the session manager itself.\n\n**Findings Area F1 — Identity Binding:** Identity is not yet bound. You are an anonymous VTAM session. No userid, no authority — just a session handle.",
                 "actions": [{"type": "wait", "seconds": 4}],
                 "expect": ["VTAM", "Logon", "TK5", "MVS"],
                 "display_seconds": 6,
@@ -92,7 +92,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Enter RFE (ISPF)",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (Interactive Desktop)**\n\nAfter login, TK5 shows the TSO Applications Menu. We select option 1 (RFE) — the Review Front End, an ISPF-like productivity tool. RFE shows the Primary Option Menu with options: 1 (BROWSE), 2 (EDIT), R (RPF), 3 (UTILITIES), M (TSOAPPLS), and X (EXIT).\n\n**Broken Assumption:** *\"Processes are short-lived.\"* This TSO address space persists. Your identity context survives across panels, utilities, and program invocations.\n\n**Note:** TK5 uses RFE (not modern z/OS ISPF). There is no SDSF panel. Job output is viewed via TSO commands or the QUEUE spool browser.",
+                "narration": "**Control Plane: TSO/RFE (Interactive Desktop)**\n\nAfter login, TK5 shows the TSO Applications Menu. We select option 1 (RFE) — the Review Front End, an ISPF-like productivity tool. RFE shows the Primary Option Menu with options: 1 (BROWSE), 2 (EDIT), R (RPF), 3 (UTILITIES), M (TSOAPPLS), and X (EXIT).\n\n**Broken Assumption:** *\"Processes are short-lived.\"* This TSO address space persists. Your identity context survives across panels, utilities, and program invocations.\n\n**Note:** TK5 uses RFE (not modern mainframe ISPF). There is no SDSF panel. Job output is viewed via TSO commands or the QUEUE spool browser.",
                 "actions": [
                     {"type": "enter_rfe"}, {"type": "wait", "seconds": 2},
                 ],
@@ -102,7 +102,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "ISPF Utilities — Dataset List (3.4)",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (Dataset Navigation)**\n\nWe use RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) to list datasets. Datasets are the z/OS storage model — not a filesystem.\n\n**Key concept:** z/OS does not have `/etc`, `/var`, or config files in the Unix sense. Everything is stored in datasets: cataloged, named objects with structure (PDS, sequential, VSAM). Access is controlled by RACF profiles, not filesystem permissions.\n\n**Assessment Question Q5:** z/OS uses a flat catalog namespace with profile-based protection — not a filesystem hierarchy.",
+                "narration": "**Control Plane: TSO/ISPF (Dataset Navigation)**\n\nWe use RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) to list datasets. Datasets are the mainframe storage model — not a filesystem.\n\n**Key concept:** The mainframe does not have `/etc`, `/var`, or config files in the Unix sense. Everything is stored in datasets: cataloged, named objects with structure (PDS, sequential, VSAM). Access is controlled by RACF profiles, not filesystem permissions.\n\n**Findings Area F5 — Imported Assumptions:** The mainframe uses a flat catalog namespace with profile-based protection — not a filesystem hierarchy.",
                 "actions": [
                     {"type": "home"}, {"type": "eraseeof"},
                     {"type": "string", "value": "3"},
@@ -119,7 +119,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Browse System Datasets",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe enter `SYS1` as the dataset name level to browse system datasets. `SYS1.PARMLIB`, `SYS1.PROCLIB`, and `SYS1.LINKLIB` are critical system datasets.\n\n**Key concept:** System configuration lives in datasets like `SYS1.PARMLIB` — not in `/etc`. These datasets define system behavior: started tasks, security policy, IPL parameters. Access to them is controlled by RACF dataset profiles.\n\n**Assessment Question Q4:** RACF enforces access to system datasets. Anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior.",
+                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe enter `SYS1` as the dataset name level to browse system datasets. `SYS1.PARMLIB`, `SYS1.PROCLIB`, and `SYS1.LINKLIB` are critical system datasets.\n\n**Key concept:** System configuration lives in datasets like `SYS1.PARMLIB` — not in `/etc`. These datasets define system behavior: started tasks, security policy, IPL parameters. Access to them is controlled by RACF dataset profiles.\n\n**F4 — Policy Enforcement:** RACF enforces access to system datasets. Anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior.",
                 "actions": [{"type": "string", "value": "SYS1"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
                 "expect": ["SYS1", "PARMLIB", "PROCLIB", "LINKLIB"],
                 "display_seconds": 5,
@@ -131,7 +131,8 @@ WALKTHROUGH_SCRIPTS = {
                 "actions": [
                     {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "X"}, {"type": "enter"}, {"type": "wait", "seconds": 3},
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
                 ],
                 "expect": ["READY"],
                 "display_seconds": 5,
@@ -139,7 +140,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "LISTALC — Identity Context",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Identity in Action)**\n\nThe `LISTALC STATUS` command shows every dataset allocated to this TSO session. These allocations reveal the identity context — what resources are bound to HERC01's address space.\n\n**Key concept:** Dataset allocations are the footprint of your identity. STEPLIB, ISPTLIB — these control which programs and panels are available. The allocations were established when you logged in, and they persist for the lifetime of your session.\n\n**Assessment Question Q1:** Identity was bound at TSO logon. Here we see the *resource context* of that identity.",
+                "narration": "**Control Plane: TSO (Identity in Action)**\n\nThe `LISTALC STATUS` command shows every dataset allocated to this TSO session. These allocations reveal the identity context — what resources are bound to HERC01's address space.\n\n**Key concept:** Dataset allocations are the footprint of your identity. STEPLIB, ISPTLIB — these control which programs and panels are available. The allocations were established when you logged in, and they persist for the lifetime of your session.\n\n**F1 — Identity Binding:** Identity was bound at TSO logon. Here we see the *resource context* of that identity.",
                 "actions": [{"type": "string", "value": "LISTALC STATUS"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
                 "expect": ["LISTALC", "HERC01", "SYS1", "KEEP", "STEPLIB"],
                 "display_seconds": 6,
@@ -172,7 +173,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "STATUS — Active Jobs",
                 "control_plane": "jes",
-                "narration": "**Control Plane: JES (Active Address Spaces)**\n\nWe exit the TSO Applications Menu (PF3) to reach the TSO READY prompt, then run `STATUS` to show active jobs and sessions. On TK5 MVS 3.8j, there is no SDSF — we use TSO commands to inspect JES.\n\n**Broken Assumption:** *\"Work executes immediately.\"* On z/OS, work is *declared* via JCL, *queued* by JES, and *scheduled* by the system.\n\n**Key concept:** These address spaces may have been running since IPL. The identity context bound to each one was set at startup and persists for the lifetime of the address space.",
+                "narration": "**Control Plane: JES (Active Address Spaces)**\n\nWe exit the TSO Applications Menu (PF3) to reach the TSO READY prompt, then run `STATUS` to show active jobs and sessions. On TK5 MVS 3.8j, there is no SDSF — we use TSO commands to inspect JES.\n\n**Broken Assumption:** *\"Work executes immediately.\"* On the mainframe, work is *declared* via JCL, *queued* by JES, and *scheduled* by the system.\n\n**Key concept:** These address spaces may have been running since IPL. The identity context bound to each one was set at startup and persists for the lifetime of the address space.",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
@@ -186,7 +187,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Browse JCL — SYS2.JCLLIB",
                 "control_plane": "jes",
-                "narration": "**Control Plane: JES (Job Declaration)**\n\nWe enter RFE to browse `SYS2.JCLLIB` — the JCL library on TK5. JCL (Job Control Language) *declares* work: what programs to run, what datasets to use, what resources to allocate.\n\n**Key concept:** JCL is a declaration, not a script. It tells JES what to do, but JES decides *when* to do it. The gap between submission and execution is a security-relevant window.\n\n**Assessment Question Q3:** Everything in JES executes later than expected.",
+                "narration": "**Control Plane: JES (Job Declaration)**\n\nWe enter RFE to browse `SYS2.JCLLIB` — the JCL library on TK5. JCL (Job Control Language) *declares* work: what programs to run, what datasets to use, what resources to allocate.\n\n**Key concept:** JCL is a declaration, not a script. It tells JES what to do, but JES decides *when* to do it. The gap between submission and execution is a security-relevant window.\n\n**F3 — Deferred Execution:** Everything in JES executes later than expected.",
                 "actions": [
                     {"type": "enter_rfe"},
                     {"type": "wait", "seconds": 2},
@@ -207,7 +208,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "View a JCL Job",
                 "control_plane": "jes",
-                "narration": "**Control Plane: JES (Job Structure)**\n\nEach member in `SYS2.JCLLIB` is a complete JCL job. A job has:\n- **JOB card** — identity, class, priority\n- **EXEC statements** — programs to run\n- **DD statements** — dataset allocations\n\n**Key concept:** The JOB card carries the submitter's identity. When JES executes this job, RACF evaluates every resource access against that identity — even if the submitter has logged off.\n\n**Assessment Question Q3:** The identity bound at submission time governs execution.",
+                "narration": "**Control Plane: JES (Job Structure)**\n\nEach member in `SYS2.JCLLIB` is a complete JCL job. A job has:\n- **JOB card** — identity, class, priority\n- **EXEC statements** — programs to run\n- **DD statements** — dataset allocations\n\n**Key concept:** The JOB card carries the submitter's identity. When JES executes this job, RACF evaluates every resource access against that identity — even if the submitter has logged off.\n\n**F3 — Deferred Execution:** The identity bound at submission time governs execution.",
                 "actions": [
                     {"type": "wait", "seconds": 4},
                 ],
@@ -223,9 +224,10 @@ WALKTHROUGH_SCRIPTS = {
                     {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "X"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
                     {"type": "string", "value": "OUTPUT"},
                     {"type": "enter"},
                     {"type": "wait", "seconds": 3},
@@ -236,7 +238,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff",
                 "control_plane": "vtam",
-                "narration": "**Summary: Deferred Execution**\n\nJES demonstrates that z/OS separates work *declaration* from work *execution*:\n\n1. **Identity persists:** The submitter's identity governs execution\n2. **Authority is evaluated at submission:** RACF checks happen when the job is submitted\n3. **Audit trail exists:** Every job's identity, input, and output are preserved in JES\n\nOn z/OS, you must ask: \"What work was declared but hasn't run yet? Under whose authority will it run?\"\n\n**Warning:** Never disconnect the terminal while logged in \u2014 it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "narration": "**Summary: Deferred Execution**\n\nJES demonstrates that the mainframe separates work *declaration* from work *execution*:\n\n1. **Identity persists:** The submitter's identity governs execution\n2. **Authority is evaluated at submission:** RACF checks happen when the job is submitted\n3. **Audit trail exists:** Every job's identity, input, and output are preserved in JES\n\nOn the mainframe, you must ask: \"What work was declared but hasn't run yet? Under whose authority will it run?\"\n\n**Warning:** Never disconnect the terminal while logged in \u2014 it locks the userid. Recover with `/C U=userid` at the Hercules console.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 6,
@@ -298,7 +300,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Browse SYS1.PROCLIB — System Procedures",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe use RFE option 1 (BROWSE) to examine `SYS1.PROCLIB` — the library of started task procedures. Every address space on the system is defined by a PROC in this library.\n\n**Broken Assumption:** *\"Services are configured in config files.\"* On z/OS, services are defined as JCL procedures in datasets. There is no `/etc/init.d` — there are PROCs.",
+                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe use RFE option 1 (BROWSE) to examine `SYS1.PROCLIB` — the library of started task procedures. Every address space on the system is defined by a PROC in this library.\n\n**Broken Assumption:** *\"Services are configured in config files.\"* On the mainframe, services are defined as JCL procedures in datasets. There is no `/etc/init.d` — there are PROCs.",
                 "actions": [
                     {"type": "string", "value": "1"},
                     {"type": "enter"},
@@ -323,9 +325,10 @@ WALKTHROUGH_SCRIPTS = {
                     {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "X"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
                 ],
                 "expect": ["READY"],
                 "display_seconds": 4,
@@ -421,7 +424,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Enter RFE (ISPF)",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (Dataset Interface)**\n\nWe enter RFE. Unlike a Unix filesystem, z/OS uses a flat catalog namespace. Datasets are named objects — not files in directories.\n\n**Broken Assumption:** *\"There is a filesystem hierarchy.\"* z/OS has no `/home`, `/etc`, `/var`. Datasets are named with dot-separated qualifiers (e.g. `SYS1.PARMLIB`).",
+                "narration": "**Control Plane: TSO/RFE (Dataset Interface)**\n\nWe enter RFE. Unlike a Unix filesystem, the mainframe uses a flat catalog namespace. Datasets are named objects — not files in directories.\n\n**Broken Assumption:** *\"There is a filesystem hierarchy.\"* The mainframe has no `/home`, `/etc`, `/var`. Datasets are named with dot-separated qualifiers (e.g. `SYS1.PARMLIB`).",
                 "actions": [
                     {"type": "enter_rfe"},
                     {"type": "wait", "seconds": 2},
@@ -467,7 +470,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Browse PDS Members — SYS1.PARMLIB",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (PDS Structure)**\n\nWe go back and use RFE option 1 (BROWSE) to open `SYS1.PARMLIB`. A Partitioned Data Set (PDS) is like a directory with members — each member is a named record.\n\n**Broken Assumption:** *\"Config files are in /etc.\"* On z/OS, you must know which PDS contains the configuration and which member is active.",
+                "narration": "**Control Plane: TSO/ISPF (PDS Structure)**\n\nWe go back and use RFE option 1 (BROWSE) to open `SYS1.PARMLIB`. A Partitioned Data Set (PDS) is like a directory with members — each member is a named record.\n\n**Broken Assumption:** *\"Config files are in /etc.\"* On the mainframe, you must know which PDS contains the configuration and which member is active.",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
@@ -498,9 +501,10 @@ WALKTHROUGH_SCRIPTS = {
                     {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "X"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
                     {"type": "string", "value": "LISTCAT ENT('SYS1.LINKLIB')"},
                     {"type": "enter"},
                     {"type": "wait", "seconds": 3},
@@ -511,7 +515,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff",
                 "control_plane": "vtam",
-                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** z/OS uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** The mainframe uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 8,
@@ -569,7 +573,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Submit Compile-Link-Go Job",
                 "control_plane": "jes",
-                "narration": "**Control Plane: JES (Deferred Execution)**\n\nWe submit the job to JES for compilation. The `SUBMIT` command queues the job.\n\n**Compile-Link-Go Workflow:**\n1. **COB step** — COBOL compiler reads source, produces object deck\n2. **LKED step** — Linkage editor binds object with `SYS1.COBLIB` runtime\n3. **GO step** — Executes the linked program\n\n**Broken Assumption:** *\"Code compiles and runs immediately.\"* Not on z/OS. JES **queues** the job. The identity of the submitter (HERC01) governs execution.\n\n**Assessment Question Q3:** This is deferred execution.",
+                "narration": "**Control Plane: JES (Deferred Execution)**\n\nWe submit the job to JES for compilation. The `SUBMIT` command queues the job.\n\n**Compile-Link-Go Workflow:**\n1. **COB step** — COBOL compiler reads source, produces object deck\n2. **LKED step** — Linkage editor binds object with `SYS1.COBLIB` runtime\n3. **GO step** — Executes the linked program\n\n**Broken Assumption:** \"Code compiles and runs immediately.\" Not on the mainframe. JES **queues** the job. The identity of the submitter (HERC01) governs execution.\n\n**F3 — Deferred Execution:** This is deferred execution.",
                 "actions": [
                     {"type": "home"}, {"type": "eraseeof"},
                     {"type": "string", "value": "SUBMIT"}, {"type": "enter"},
@@ -581,15 +585,16 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Check Job Output",
                 "control_plane": "jes",
-                "narration": "**Control Plane: JES (Job Output)**\n\nWe return to TSO and use the `OUTPUT` command to check compilation results. On TK5 MVS 3.8j, there is no SDSF — job output is viewed via TSO commands.\n\n**What to Look For:**\n- **Return Code 0000** — Compilation successful\n- **Compiler listing** — Shows translated COBOL statements\n- **GO step output** — Program execution results\n\n**Assessment Question Q4:** RACF controls every stage: who can read source, execute the compiler, access runtime libraries, and view output. The compiler runs under **your identity**.",
+                "narration": "**Control Plane: JES (Job Output)**\n\nWe return to TSO and use the `OUTPUT` command to check compilation results. On TK5 MVS 3.8j, there is no SDSF — job output is viewed via TSO commands.\n\n**What to Look For:**\n- **Return Code 0000** — Compilation successful\n- **Compiler listing** — Shows translated COBOL statements\n- **GO step output** — Program execution results\n\n**F4 — Policy Enforcement:** RACF controls every stage: who can read source, execute the compiler, access runtime libraries, and view output. The compiler runs under **your identity**.",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
-                    {"type": "string", "value": "X"},
-                    {"type": "enter"},
-                    {"type": "wait", "seconds": 3},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
+                    {"type": "pf", "value": "3"},
+                    {"type": "wait", "seconds": 2},
                     {"type": "string", "value": "OUTPUT"},
                     {"type": "enter"},
                     {"type": "wait", "seconds": 3},

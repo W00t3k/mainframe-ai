@@ -82,6 +82,19 @@ async def docs_page(request: Request):
     return templates.TemplateResponse("docs.html", {"request": request})
 
 
+@router.get("/deck")
+async def deck_download():
+    """Redirect to the PowerPoint deck."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/static/Mainframe-Talk-WIP.pptx", status_code=302)
+
+
+@router.get("/abstract", response_class=HTMLResponse)
+async def abstract_page(request: Request):
+    """Conference abstract page."""
+    return templates.TemplateResponse("abstract.html", {"request": request})
+
+
 @router.get("/abstract-models", response_class=HTMLResponse)
 async def abstract_models_page(request: Request):
     """Abstract models documentation page."""
