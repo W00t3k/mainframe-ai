@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hacking Big Iron with AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0d11;--fg:#e0e0e0;--muted:#6f6f6f;--accent:#4589ff;--border:#262626;--panel:#141414}
+body{background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center}
+.page{max-width:960px;width:100%;padding:2rem 2rem 4rem}
+.header{text-align:center;margin-bottom:2rem;padding-bottom:1.5rem;border-bottom:1px solid var(--border)}
+.logo{height:48px;width:auto;opacity:.6;margin-bottom:1.5rem}
+h1{font-family:'IBM Plex Mono',monospace;font-size:2.2rem;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.15;margin-bottom:.4rem}
+.subtitle{font-family:'IBM Plex Mono',monospace;font-size:.95rem;color:var(--accent);font-weight:400}
+.meta{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:1rem}
+.meta span{margin:0 .5rem}
+.video-wrap{position:relative;background:#000;border:1px solid var(--border);border-radius:4px;overflow:hidden;margin-bottom:2rem;box-shadow:0 4px 24px rgba(0,0,0,.5)}
+.video-wrap video{display:block;width:100%;max-height:540px;background:#000}
+.scanlines{pointer-events:none;position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);z-index:1}
+.desc{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1.5rem;margin-bottom:2rem;font-size:.95rem;line-height:1.7;color:#c6c6c6}
+.links{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2rem}
+.links a{font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:600;padding:6px 16px;background:rgba(69,137,255,.08);color:var(--accent);border:1px solid rgba(69,137,255,.25);border-radius:3px;text-decoration:none;transition:all .15s}
+.links a:hover{background:rgba(69,137,255,.18);color:#a6c8ff}
+.footer{text-align:center;padding-top:2rem;border-top:1px solid var(--border)}
+.footer a{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted);text-decoration:none;margin:0 .75rem;transition:color .15s}
+.footer a:hover{color:var(--accent)}
+@media(max-width:640px){h1{font-size:1.5rem}.page{max-width:100%}.video-wrap video{max-height:300px}}
+</style>
+</head>
+<body>
+<div class="page">
+
+    <div class="header">
+        <svg class="logo" viewBox="0 0 95 36" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h9.6v2.4H0zm0 4.8h9.6v2.4H0zm2.4 4.8h4.8v2.4H2.4zm0 4.8h4.8v2.4H2.4zm-2.4 4.8h9.6v2.4H0zm0 4.8h9.6v2.4H0zM12 0h7.2c4.2 0 6.6 2.1 6.6 5.4 0 2.1-1.2 3.9-3 4.5 2.1.6 3.6 2.7 3.6 5.1 0 3.6-2.7 5.4-6.6 5.4H12zm4.8 9h2.4c1.2 0 1.8-.9 1.8-1.8s-.6-1.8-1.8-1.8h-2.4zm0 9h2.4c1.2 0 2.1-.9 2.1-2.1 0-1.2-.9-2.1-2.1-2.1h-2.4zM28.8 0h5.4l3.6 12L41.4 0h5.4l-6 20.4h-6z"/></svg>
+        <h1>Hacking Big Iron with AI</h1>
+        <p class="subtitle">When Modern Security Assumptions Fail on Mainframes</p>
+        <p class="meta">
+            <span>Adam Toscher</span>
+            <span>&middot;</span>
+            <span>2025</span>
+        </p>
+    </div>
+
+    <div class="video-wrap">
+        <div class="scanlines"></div>
+        <video controls preload="metadata">
+            <source src="IBM-AI.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+
+    <div class="desc">
+        This demo shows the AI-powered mainframe security assistant in action &mdash;
+        connecting to a live TN3270 terminal, interpreting screens with a local LLM,
+        running autonomous walkthroughs with AI narration, and assessing mainframe
+        environments using the five findings areas methodology. Everything runs
+        100% locally with no cloud APIs.
+    </div>
+
+    <div class="links">
+        <a href="https://github.com/W00t3k/mainframe-ai">GitHub Repo</a>
+    </div>
+
+    <div class="footer">
+        <a href="https://github.com/W00t3k/mainframe-ai">Source Code</a>
+    </div>
+
+</div>
+</body>
+</html>
