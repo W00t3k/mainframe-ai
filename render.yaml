@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: mainframe-ai
+    runtime: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: python run.py --host 0.0.0.0 --port 10000
+    envVars:
+      - key: PYTHON_VERSION
+        value: "3.11"
