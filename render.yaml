@@ -2,8 +2,11 @@ services:
   - type: web
     name: mainframe-ai
     runtime: python
+    repo: https://github.com/W00t3k/mainframe-ai.git
+    branch: master
+    plan: free
     buildCommand: pip install -r requirements.txt
-    startCommand: python run.py --host 0.0.0.0 --port 10000
+    startCommand: python run.py --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
-        value: "3.11"
+        value: "3.11.0"
