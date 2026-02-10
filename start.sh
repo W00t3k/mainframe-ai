@@ -12,7 +12,15 @@ DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV="$DIR/.venv/bin/python"
 PORT=8080
 HOST="0.0.0.0"
-MODEL="llama3.1:8b"
+# Auto-detect model based on available RAM
+TOTAL_RAM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}' || echo 16000)
+if [ "$TOTAL_RAM_MB" -ge 16000 ]; then
+  MODEL="llama3.1:8b"
+elif [ "$TOTAL_RAM_MB" -ge 8000 ]; then
+  MODEL="llama3.2:3b"
+else
+  MODEL="tinyllama"
+fi
 
 RED='\033[0;31m'
 GRN='\033[0;32m'
@@ -45,6 +53,11 @@ kill_all() {
 
 # ── Start Ollama ─────────────────────────────────────────
 start_ollama() {
+  # Memory-saving env vars: unload model after 5min idle, single request at a time
+  export OLLAMA_KEEP_ALIVE="5m"
+  export OLLAMA_MAX_LOADED_MODELS=1
+  export OLLAMA_NUM_PARALLEL=1
+
   if pgrep -x "ollama" > /dev/null 2>&1; then
     echo -e "${GRN}[✓] Ollama already running${RST}"
   else
@@ -55,9 +68,12 @@ start_ollama() {
       echo -e "${GRN}[✓] Ollama started${RST}"
     else
       echo -e "${RED}[!] Failed to start Ollama — install from https://ollama.com${RST}"
-      exit 1
+      echo -e "${YEL}[*] Continuing without AI...${RST}"
+      return 1
     fi
   fi
+
+  echo -e "${CYN}[*] RAM: ${TOTAL_RAM_MB}MB — using model: $MODEL${RST}"
 
   # Check model is available
   if ollama list 2>/dev/null | grep -q "$MODEL"; then
