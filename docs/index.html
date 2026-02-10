@@ -21,6 +21,9 @@ h1{font-family:'IBM Plex Mono',monospace;font-size:2.2rem;font-weight:700;color:
 .video-wrap video{display:block;width:100%;max-height:540px;background:#000}
 .scanlines{pointer-events:none;position:absolute;top:0;left:0;right:0;bottom:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.03) 2px,rgba(0,0,0,.03) 4px);z-index:1}
 .desc{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1.5rem;margin-bottom:2rem;font-size:.95rem;line-height:1.7;color:#c6c6c6}
+.topnav{display:flex;justify-content:center;gap:1.5rem;margin-bottom:1.5rem}
+.topnav a{font-family:'IBM Plex Mono',monospace;font-size:.8rem;font-weight:600;color:var(--muted);text-decoration:none;transition:color .15s;display:flex;align-items:center;gap:.35rem}
+.topnav a:hover{color:var(--accent)}
 .links{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2rem}
 .links a{font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:600;padding:6px 16px;background:rgba(69,137,255,.08);color:var(--accent);border:1px solid rgba(69,137,255,.25);border-radius:3px;text-decoration:none;transition:all .15s}
 .links a:hover{background:rgba(69,137,255,.18);color:#a6c8ff}
@@ -40,15 +43,15 @@ h1{font-family:'IBM Plex Mono',monospace;font-size:2.2rem;font-weight:700;color:
         <p class="meta">
             <span>Adam Toscher</span>
             <span>&middot;</span>
-            <span>2025</span>
+            <span>2026</span>
         </p>
     </div>
 
-    <div class="links">
-        <a href="abstract.html">Abstract</a>
-        <a href="IBM-MF-A.pdf">Download PDF</a>
-        <a href="https://github.com/W00t3k/mainframe-ai">GitHub Repo</a>
-    </div>
+    <nav class="topnav">
+        <a href="abstract.html" title="Abstract">&#128196; Abstract</a>
+        <a href="IBM-MF-A.pdf" title="Download PDF">&#128451; PDF</a>
+        <a href="https://github.com/W00t3k/mainframe-ai" title="GitHub">&#128187; GitHub</a>
+    </nav>
 
     <div class="video-wrap">
         <div class="scanlines"></div>
@@ -64,12 +67,6 @@ h1{font-family:'IBM Plex Mono',monospace;font-size:2.2rem;font-weight:700;color:
         running autonomous walkthroughs with AI narration, and assessing mainframe
         environments using the five findings areas methodology. Everything runs
         100% locally with no cloud APIs.
-    </div>
-
-    <div class="links">
-        <a href="abstract.html">Abstract</a>
-        <a href="IBM-MF-A.pdf">Download PDF</a>
-        <a href="https://github.com/W00t3k/mainframe-ai">GitHub Repo</a>
     </div>
 
     <div class="footer">
