@@ -435,12 +435,16 @@ verify() {
   echo -e "    cd $INSTALL_DIR"
   echo -e "    ./start.sh              # Web app + Ollama"
   echo -e "    ./start.sh --mvs        # Web app + Ollama + TK5 mainframe"
+  # Detect server IP for display
+  SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
+  [ -z "$SERVER_IP" ] && SERVER_IP="0.0.0.0"
+
   echo ""
   echo -e "  ${CYN}Then open:${RST}"
-  echo -e "    http://0.0.0.0:8080"
+  echo -e "    http://${SERVER_IP}:8080"
   echo ""
   echo -e "  ${CYN}Default TN3270 login:${RST}"
-  echo -e "    Host: localhost:3270"
+  echo -e "    Host: ${SERVER_IP}:3270"
   echo -e "    User: HERC01  Pass: CUL8TR"
   echo ""
 }
