@@ -260,19 +260,15 @@ case "${1:-}" in
     start_ollama
     start_mvs
     banner mvs
-    launch_webapp
-    echo -e "${GRN}[✓] Web app running — http://$HOST:$PORT  (pid $WEBAPP_PID)${RST}"
-    # Pull model in background AFTER web app is stable
-    ( sleep 5 && ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) &
+    # Model pulls in background AFTER web app is stable (watchdog starts web app)
+    ( sleep 15 && ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) &
     watchdog
     ;;
   *)
     kill_all
     start_ollama
     banner
-    launch_webapp
-    echo -e "${GRN}[✓] Web app running — http://$HOST:$PORT  (pid $WEBAPP_PID)${RST}"
-    ( sleep 5 && ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) &
+    ( sleep 15 && ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) &
     watchdog
     ;;
 esac
