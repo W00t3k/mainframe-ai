@@ -42,6 +42,9 @@ find_hercules() {
   HERC_BIN="$TK5/hercules/$HERC_OS/bin"
   HERC_LIB="$TK5/hercules/$HERC_OS/lib"
 
+  # Ensure binary is executable
+  chmod +x "$HERC_BIN/hercules" 2>/dev/null
+
   if [ ! -f "$HERC_BIN/hercules" ]; then
     if command -v hercules &>/dev/null; then
       HERC_BIN="$(dirname "$(command -v hercules)")"

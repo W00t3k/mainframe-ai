@@ -118,6 +118,9 @@ start_mvs() {
   HERC_BIN="$TK5/hercules/$HERC_OS/bin"
   HERC_LIB="$TK5/hercules/$HERC_OS/lib"
 
+  # Ensure binary is executable
+  chmod +x "$HERC_BIN/hercules" 2>/dev/null
+
   if [ ! -f "$HERC_BIN/hercules" ]; then
     # Fallback: try system-installed hercules
     if command -v hercules &>/dev/null; then

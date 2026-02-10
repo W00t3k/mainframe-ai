@@ -20,6 +20,9 @@ esac
 HERC_BIN="$PWD/hercules/$HERC_OS/bin"
 HERC_LIB="$PWD/hercules/$HERC_OS/lib"
 
+# Ensure binary is executable
+chmod +x "$HERC_BIN/hercules" 2>/dev/null
+
 # Fallback to system hercules if bundled binary not found
 if [ ! -f "$HERC_BIN/hercules" ]; then
   if command -v hercules &>/dev/null; then
