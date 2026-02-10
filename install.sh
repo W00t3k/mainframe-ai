@@ -437,7 +437,7 @@ verify() {
   echo -e "    ./start.sh --mvs        # Web app + Ollama + TK5 mainframe"
   echo ""
   echo -e "  ${CYN}Then open:${RST}"
-  echo -e "    http://127.0.0.1:8080"
+  echo -e "    http://0.0.0.0:8080"
   echo ""
   echo -e "  ${CYN}Default TN3270 login:${RST}"
   echo -e "    Host: localhost:3270"
