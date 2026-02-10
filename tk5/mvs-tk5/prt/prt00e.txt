@@ -30009,4 +30009,1966 @@ TOTAL                             13                                          
 ****A   END   STC  595  MF1                             ROOM        9.11.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
 ****A   END   STC  595  MF1                             ROOM        9.11.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
 ****A   END   STC  595  MF1                             ROOM        9.11.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A  START  STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+                                                 C P U  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11
+
+
+
+
+CPU                WAIT TIME           WAIT TIME           CPU SERIAL
+NUMBER             HH.MM.SS.TTT        PERCENTAGE          NUMBER
+
+
+ 0                 00.17.14.527        99.66               000611
+
+
+AVERAGE                                99.66                                              P A G I N G  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11
+
+
+                                               MAIN STORAGE PAGING RATES
+                                                      PER SECOND
+--------------------------------------------------------------------------------------------------------------------
+
+                                                      PAGE IN                                   PAGE OUT
+                    PAGE RECLAIMS      ------------------------------------       ----------------------------------
+                  ----------------     ----------------    ----------------       --------------    ----------------
+                           PERCENT                                  PERCENT                                  PERCENT
+                           OF                                       OF                                       OF
+                           TOTAL                  NON      TOTAL    TOTAL                  NON      TOTAL    TOTAL
+CATEGORY          RATE     SUM         SWAP       SWAP     RATE     SUM           SWAP     SWAP     RATE     SUM
+
+
+PAGEABLE SYSTEM
+AREAS
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.13       30                   0.00     0.00        0                   0.01     0.01        1
+                  ------   ------                 ------   ------   ------                 ------   ------   ------
+     SUM            0.13       30                   0.00     0.00        0                   0.01     0.01        1
+
+ADDRESS SPACES
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.31       70        1.61       0.01     1.61      100          1.69     0.01     1.70       99
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.31       70        1.61       0.01     1.61      100          1.69     0.01     1.70       99
+
+TOTAL SYSTEM
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.45      100        1.61       0.01     1.61      100          1.69     0.02     1.71      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.45      100        1.61       0.01     1.61      100          1.69     0.02     1.71      100
+
+
+      AUXILIARY STORAGE USER POOL                     PAGEABLE MAIN STORAGE COUNTS               SWAP COUNTS
+-------------------------------------------         --------------------------------          --------------------
+
+                       PAGE                                          PAGE
+                       SLOTS        PERCENT                          FRAMES  PERCENT
+
+
+
+AVAILABLE SLOTS           51,270        99          UNUSED FRAMES    3475        88           SWAPS            334
+
+VIO SLOTS                      0         0          DATA PAGES        469        12           AVERAGE
+                                                                     ----    ------           PAGES PER     5
+NON-VIO SLOTS                730         1          TOTAL FRAMES     3944       100           SWAP OUT
+
+UNAVAILABLE SLOTS              0         0                                                    AVERAGE
+                       ---------    ------                                                    PAGES PER     5
+TOTAL SLOTS               52,000       100                                                    SWAP IN                                           W O R K L O A D   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            IEAIPS00
+
+
+PERFORM        PERFORM        SERVICE           AVERAGE                    AVERAGE        ENDED          AVERAGE TIME OF
+GROUP          GROUP          IN                TRANS.       WORKLOAD      TRANS-         TRANS-         ENDED TRANS.
+NUMBER         PERIOD         INTERVAL          SRV RATE     LEVEL         ACTIONS        ACTIONS        HHH.MM.SS.TTT
+
+
+001            1                  1,006               0        100.00          4.00             0        000.00.00.000
+               2                  1,397               1         98.90          1.00             0        000.00.00.000
+
+001            ALL                2,403               0         99.36          5.00             0        000.00.00.000
+
+
+002 - 004      ZEROS
+
+SYSTEM TOTAL                      2,403               0         99.36          5.00             0        000.00.00.000                                            C H A N N E L   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            CYCLE 0.250 SECONDS
+
+
+
+     CHANNEL            CHANNEL        PERCENT        PERCENT
+     NUMBER             ACTIVITY       CHANNEL        CHAN BUSY
+CPU  AND TYPE           COUNT          BUSY           & CPU WAIT
+
+
+ 0   0  BYTE MPX              9
+     1  BLOCK MPX             0         0.00           0.00
+     2  BLOCK MPX           787         0.00           0.00
+     3  BLOCK MPX            34         0.00           0.00
+
+     4  BLOCK MPX             0         0.00           0.00
+     6  BLOCK MPX             0         0.00           0.00
+
+TOTAL                       830                               M A G N E T I C   T A P E   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+480                                0         0.00           0.00
+
+TOTAL                              0                            C O M M U N I C A T I O N   E Q U I P M E N T   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+660                                0         0.00           0.00
+661                                0         0.00           0.00
+662                                0         0.00           0.00
+663                                0         0.00           0.00
+
+664                                0         0.00           0.00
+665                                0         0.00           0.00
+666                                0         0.00           0.00
+667                                0         0.00           0.00
+
+668                                0         0.00           0.00
+669                                0         0.00           0.00
+66A                                0         0.00           0.00
+66B                                0         0.00           0.00
+
+670                                0        100.0           0.00
+671                                0        100.0           0.00
+672                                0        100.0           0.00
+673                                0        100.0           0.00
+
+680                                0        100.0           0.00
+681                                0        100.0           0.00
+682                                0        100.0           0.00
+683                                0        100.0           0.00
+
+688                                0        100.0           0.00
+689                                0        100.0           0.00
+68A                                0        100.0           0.00
+68B                                0        100.0           0.00
+
+68C                                0        100.0           0.00
+68D                                0        100.0           0.00
+68E                                0        100.0           0.00
+68F                                0        100.0           0.00
+
+TOTAL                              0                               D I R E C T   A C C E S S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+148           111111               0         0.00           0.00
+190           TSO001               0         0.00           0.00
+191           TSO002               0         0.00           0.00
+192           TSO003               0         0.00           0.00
+
+248           PAGE00             753         0.00           0.00
+249           SPOOL0              34         0.00           0.00
+290           WORK01               0         0.00           0.00
+291           WORK02               0         0.00           0.00
+
+292           WORK03               0         0.00           0.00
+293           WORK04               0         0.00           0.00
+298           TK5001               0         0.00           0.00
+299           TK5002               0         0.00           0.00
+
+380           INT001               0         0.00           0.00
+390           TK5RES              31         0.00           0.00
+391           TK5CAT               0         0.00           0.00
+392           TK5DLB               0         0.00           0.00
+
+TOTAL                            818                                    G R A P H I C S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+0C0                                0         0.00           0.00
+0C1                                0         0.00           0.00
+0C2                                0         0.00           0.00
+0C3                                0         0.00           0.00
+
+0C4                                0         0.00           0.00
+0C5                                0         0.00           0.00
+0C6                                0         0.00           0.00
+0C7                                0         0.00           0.00
+
+3C0                                0         0.00           0.00
+3C1                                0         0.00           0.00
+3C2                                0         0.00           0.00
+3C3                                0         0.00           0.00
+
+3C4                                0         0.00           0.00
+3C5                                0         0.00           0.00
+3C6                                0         0.00           0.00
+3C7                                0         0.00           0.00
+
+TOTAL                              0                                 U N I T   R E C O R D   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.17.965
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.11.11            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+002                                0         0.00           0.00
+009                                3         0.00           0.00
+00C                                0         0.00           0.00
+00D                                0         0.00           0.00
+
+00E                                6         0.00           0.00
+00F                                0         0.00           0.00
+10C                                0         0.00           0.00
+10D                                0         0.00           0.00
+
+30E                                3         0.00           0.00
+
+TOTAL                             12                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A   END   STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM        9.28.29 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A  START  STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+                                                 C P U  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29
+
+
+
+
+CPU                WAIT TIME           WAIT TIME           CPU SERIAL
+NUMBER             HH.MM.SS.TTT        PERCENTAGE          NUMBER
+
+
+ 0                 00.16.39.817        99.97               000611
+
+
+AVERAGE                                99.97                                              P A G I N G  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29
+
+
+                                               MAIN STORAGE PAGING RATES
+                                                      PER SECOND
+--------------------------------------------------------------------------------------------------------------------
+
+                                                      PAGE IN                                   PAGE OUT
+                    PAGE RECLAIMS      ------------------------------------       ----------------------------------
+                  ----------------     ----------------    ----------------       --------------    ----------------
+                           PERCENT                                  PERCENT                                  PERCENT
+                           OF                                       OF                                       OF
+                           TOTAL                  NON      TOTAL    TOTAL                  NON      TOTAL    TOTAL
+CATEGORY          RATE     SUM         SWAP       SWAP     RATE     SUM           SWAP     SWAP     RATE     SUM
+
+
+PAGEABLE SYSTEM
+AREAS
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.14       80                   0.00     0.00        0                   0.00     0.00        0
+                  ------   ------                 ------   ------   ------                 ------   ------   ------
+     SUM            0.14       80                   0.00     0.00        0                   0.00     0.00        0
+
+ADDRESS SPACES
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.03       20        0.07       0.00     0.07      100          0.09     0.00     0.09      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.03       20        0.07       0.00     0.07      100          0.09     0.00     0.09      100
+
+TOTAL SYSTEM
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.17      100        0.07       0.00     0.07      100          0.09     0.00     0.09      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.17      100        0.07       0.00     0.07      100          0.09     0.00     0.09      100
+
+
+      AUXILIARY STORAGE USER POOL                     PAGEABLE MAIN STORAGE COUNTS               SWAP COUNTS
+-------------------------------------------         --------------------------------          --------------------
+
+                       PAGE                                          PAGE
+                       SLOTS        PERCENT                          FRAMES  PERCENT
+
+
+
+AVAILABLE SLOTS           51,270        99          UNUSED FRAMES    3321        84           SWAPS             14
+
+VIO SLOTS                      0         0          DATA PAGES        623        16           AVERAGE
+                                                                     ----    ------           PAGES PER     7
+NON-VIO SLOTS                730         1          TOTAL FRAMES     3944       100           SWAP OUT
+
+UNAVAILABLE SLOTS              0         0                                                    AVERAGE
+                       ---------    ------                                                    PAGES PER     5
+TOTAL SLOTS               52,000       100                                                    SWAP IN                                           W O R K L O A D   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            IEAIPS00
+
+
+PERFORM        PERFORM        SERVICE           AVERAGE                    AVERAGE        ENDED          AVERAGE TIME OF
+GROUP          GROUP          IN                TRANS.       WORKLOAD      TRANS-         TRANS-         ENDED TRANS.
+NUMBER         PERIOD         INTERVAL          SRV RATE     LEVEL         ACTIONS        ACTIONS        HHH.MM.SS.TTT
+
+
+001            1                    116               0        100.00          4.00             0        000.00.00.000
+               2                     54               0         99.00          1.00             0        000.00.00.000
+
+001            ALL                  170               0         99.68          5.00             0        000.00.00.000
+
+
+002 - 004      ZEROS
+
+SYSTEM TOTAL                        170               0         99.68          5.00             0        000.00.00.000                                            C H A N N E L   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            CYCLE 0.250 SECONDS
+
+
+
+     CHANNEL            CHANNEL        PERCENT        PERCENT
+     NUMBER             ACTIVITY       CHANNEL        CHAN BUSY
+CPU  AND TYPE           COUNT          BUSY           & CPU WAIT
+
+
+ 0   0  BYTE MPX             11
+     1  BLOCK MPX             0         0.00           0.00
+     2  BLOCK MPX            63         0.00           0.00
+     3  BLOCK MPX            31         0.00           0.00
+
+     4  BLOCK MPX             0         0.00           0.00
+     6  BLOCK MPX             0         0.00           0.00
+
+TOTAL                       105                               M A G N E T I C   T A P E   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+480                                0         0.00           0.00
+
+TOTAL                              0                            C O M M U N I C A T I O N   E Q U I P M E N T   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+660                                0         0.00           0.00
+661                                0         0.00           0.00
+662                                0         0.00           0.00
+663                                0         0.00           0.00
+
+664                                0         0.00           0.00
+665                                0         0.00           0.00
+666                                0         0.00           0.00
+667                                0         0.00           0.00
+
+668                                0         0.00           0.00
+669                                0         0.00           0.00
+66A                                0         0.00           0.00
+66B                                0         0.00           0.00
+
+670                                0        100.0           0.00
+671                                0        100.0           0.00
+672                                0        100.0           0.00
+673                                0        100.0           0.00
+
+680                                0        100.0           0.00
+681                                0        100.0           0.00
+682                                0        100.0           0.00
+683                                0        100.0           0.00
+
+688                                0        100.0           0.00
+689                                0        100.0           0.00
+68A                                0        100.0           0.00
+68B                                0        100.0           0.00
+
+68C                                0        100.0           0.00
+68D                                0        100.0           0.00
+68E                                0        100.0           0.00
+68F                                0        100.0           0.00
+
+TOTAL                              0                               D I R E C T   A C C E S S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+148           111111               0         0.00           0.00
+190           TSO001               0         0.00           0.00
+191           TSO002               0         0.00           0.00
+192           TSO003               0         0.00           0.00
+
+248           PAGE00              38         0.00           0.00
+249           SPOOL0              25         0.00           0.00
+290           WORK01               0         0.00           0.00
+291           WORK02               0         0.00           0.00
+
+292           WORK03               0         0.00           0.00
+293           WORK04               0         0.00           0.00
+298           TK5001               0         0.00           0.00
+299           TK5002               0         0.00           0.00
+
+380           INT001               0         0.00           0.00
+390           TK5RES              27         0.00           0.00
+391           TK5CAT               0         0.00           0.00
+392           TK5DLB               0         0.00           0.00
+
+TOTAL                             90                                    G R A P H I C S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+0C0                                0         0.00           0.00
+0C1                                0         0.00           0.00
+0C2                                0         0.00           0.00
+0C3                                0         0.00           0.00
+
+0C4                                0         0.00           0.00
+0C5                                0         0.00           0.00
+0C6                                0         0.00           0.00
+0C7                                0         0.00           0.00
+
+3C0                                0         0.00           0.00
+3C1                                0         0.00           0.00
+3C2                                0         0.00           0.00
+3C3                                0         0.00           0.00
+
+3C4                                0         0.00           0.00
+3C5                                0         0.00           0.00
+3C6                                0         0.00           0.00
+3C7                                0         0.00           0.00
+
+TOTAL                              0                                 U N I T   R E C O R D   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 16.40.020
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.28.29            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+002                                0         0.00           0.00
+009                                4         0.00           0.00
+00C                                0         0.00           0.00
+00D                                0         0.00           0.00
+
+00E                                7         0.00           0.00
+00F                                0         0.00           0.00
+10C                                0         0.00           0.00
+10D                                0         0.00           0.00
+
+30E                                4         0.00           0.00
+
+TOTAL                             15                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A   END   STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM        9.45.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A  START  STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+                                                 C P U  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09
+
+
+
+
+CPU                WAIT TIME           WAIT TIME           CPU SERIAL
+NUMBER             HH.MM.SS.TTT        PERCENTAGE          NUMBER
+
+
+ 0                 00.17.40.893        99.99               000611
+
+
+AVERAGE                                99.99                                              P A G I N G  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09
+
+
+                                               MAIN STORAGE PAGING RATES
+                                                      PER SECOND
+--------------------------------------------------------------------------------------------------------------------
+
+                                                      PAGE IN                                   PAGE OUT
+                    PAGE RECLAIMS      ------------------------------------       ----------------------------------
+                  ----------------     ----------------    ----------------       --------------    ----------------
+                           PERCENT                                  PERCENT                                  PERCENT
+                           OF                                       OF                                       OF
+                           TOTAL                  NON      TOTAL    TOTAL                  NON      TOTAL    TOTAL
+CATEGORY          RATE     SUM         SWAP       SWAP     RATE     SUM           SWAP     SWAP     RATE     SUM
+
+
+PAGEABLE SYSTEM
+AREAS
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.00        0                   0.00     0.00        0                   0.00     0.00        0
+                  ------   ------                 ------   ------   ------                 ------   ------   ------
+     SUM            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+ADDRESS SPACES
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.00        0        0.03       0.00     0.03      100          0.05     0.00     0.05      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.00        0        0.03       0.00     0.03      100          0.05     0.00     0.05      100
+
+TOTAL SYSTEM
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.00        0        0.03       0.00     0.03      100          0.05     0.00     0.05      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.00        0        0.03       0.00     0.03      100          0.05     0.00     0.05      100
+
+
+      AUXILIARY STORAGE USER POOL                     PAGEABLE MAIN STORAGE COUNTS               SWAP COUNTS
+-------------------------------------------         --------------------------------          --------------------
+
+                       PAGE                                          PAGE
+                       SLOTS        PERCENT                          FRAMES  PERCENT
+
+
+
+AVAILABLE SLOTS           51,270        99          UNUSED FRAMES    3321        84           SWAPS              6
+
+VIO SLOTS                      0         0          DATA PAGES        623        16           AVERAGE
+                                                                     ----    ------           PAGES PER     8
+NON-VIO SLOTS                730         1          TOTAL FRAMES     3944       100           SWAP OUT
+
+UNAVAILABLE SLOTS              0         0                                                    AVERAGE
+                       ---------    ------                                                    PAGES PER     5
+TOTAL SLOTS               52,000       100                                                    SWAP IN                                           W O R K L O A D   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            IEAIPS00
+
+
+PERFORM        PERFORM        SERVICE           AVERAGE                    AVERAGE        ENDED          AVERAGE TIME OF
+GROUP          GROUP          IN                TRANS.       WORKLOAD      TRANS-         TRANS-         ENDED TRANS.
+NUMBER         PERIOD         INTERVAL          SRV RATE     LEVEL         ACTIONS        ACTIONS        HHH.MM.SS.TTT
+
+
+001            1                     28               0        100.00          4.00             0        000.00.00.000
+               2                     21               0         99.00          1.00             0        000.00.00.000
+
+001            ALL                   49               0         99.57          5.00             0        000.00.00.000
+
+
+002 - 004      ZEROS
+
+SYSTEM TOTAL                         49               0         99.57          5.00             0        000.00.00.000                                            C H A N N E L   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            CYCLE 0.250 SECONDS
+
+
+
+     CHANNEL            CHANNEL        PERCENT        PERCENT
+     NUMBER             ACTIVITY       CHANNEL        CHAN BUSY
+CPU  AND TYPE           COUNT          BUSY           & CPU WAIT
+
+
+ 0   0  BYTE MPX              9
+     1  BLOCK MPX             0         0.00           0.00
+     2  BLOCK MPX            40         0.00           0.00
+     3  BLOCK MPX            26         0.00           0.00
+
+     4  BLOCK MPX             0         0.00           0.00
+     6  BLOCK MPX             0         0.00           0.00
+
+TOTAL                        75                               M A G N E T I C   T A P E   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+480                                0         0.00           0.00
+
+TOTAL                              0                            C O M M U N I C A T I O N   E Q U I P M E N T   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+660                                0         0.00           0.00
+661                                0         0.00           0.00
+662                                0         0.00           0.00
+663                                0         0.00           0.00
+
+664                                0         0.00           0.00
+665                                0         0.00           0.00
+666                                0         0.00           0.00
+667                                0         0.00           0.00
+
+668                                0         0.00           0.00
+669                                0         0.00           0.00
+66A                                0         0.00           0.00
+66B                                0         0.00           0.00
+
+670                                0        100.0           0.00
+671                                0        100.0           0.00
+672                                0        100.0           0.00
+673                                0        100.0           0.00
+
+680                                0        100.0           0.00
+681                                0        100.0           0.00
+682                                0        100.0           0.00
+683                                0        100.0           0.00
+
+688                                0        100.0           0.00
+689                                0        100.0           0.00
+68A                                0        100.0           0.00
+68B                                0        100.0           0.00
+
+68C                                0        100.0           0.00
+68D                                0        100.0           0.00
+68E                                0        100.0           0.00
+68F                                0        100.0           0.00
+
+TOTAL                              0                               D I R E C T   A C C E S S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+148           111111               0         0.00           0.00
+190           TSO001               0         0.00           0.00
+191           TSO002               0         0.00           0.00
+192           TSO003               0         0.00           0.00
+
+248           PAGE00              17         0.00           0.00
+249           SPOOL0              23         0.00           0.00
+290           WORK01               0         0.00           0.00
+291           WORK02               0         0.00           0.00
+
+292           WORK03               0         0.00           0.00
+293           WORK04               0         0.00           0.00
+298           TK5001               0         0.00           0.00
+299           TK5002               0         0.00           0.00
+
+380           INT001               0         0.00           0.00
+390           TK5RES              23         0.00           0.00
+391           TK5CAT               0         0.00           0.00
+392           TK5DLB               0         0.00           0.00
+
+TOTAL                             63                                    G R A P H I C S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+0C0                                0         0.00           0.00
+0C1                                0         0.00           0.00
+0C2                                0         0.00           0.00
+0C3                                0         0.00           0.00
+
+0C4                                0         0.00           0.00
+0C5                                0         0.00           0.00
+0C6                                0         0.00           0.00
+0C7                                0         0.00           0.00
+
+3C0                                0         0.00           0.00
+3C1                                0         0.00           0.00
+3C2                                0         0.00           0.00
+3C3                                0         0.00           0.00
+
+3C4                                0         0.00           0.00
+3C5                                0         0.00           0.00
+3C6                                0         0.00           0.00
+3C7                                0         0.00           0.00
+
+TOTAL                              0                                 U N I T   R E C O R D   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 17.40.988
+            RELEASE 03.8             MF/1 VERSION 01            TIME 21.45.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+002                                0         0.00           0.00
+009                                3         0.00           0.00
+00C                                0         0.00           0.00
+00D                                0         0.00           0.00
+
+00E                                6         0.00           0.00
+00F                                0         0.00           0.00
+10C                                0         0.00           0.00
+10D                                0         0.00           0.00
+
+30E                                3         0.00           0.00
+
+TOTAL                             12                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A   END   STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.02.50 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A  START  STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+                                                 C P U  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50
+
+
+
+
+CPU                WAIT TIME           WAIT TIME           CPU SERIAL
+NUMBER             HH.MM.SS.TTT        PERCENTAGE          NUMBER
+
+
+ 0                 00.08.32.116        99.85               000611
+
+
+AVERAGE                                99.85                                              P A G I N G  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50
+
+
+                                               MAIN STORAGE PAGING RATES
+                                                      PER SECOND
+--------------------------------------------------------------------------------------------------------------------
+
+                                                      PAGE IN                                   PAGE OUT
+                    PAGE RECLAIMS      ------------------------------------       ----------------------------------
+                  ----------------     ----------------    ----------------       --------------    ----------------
+                           PERCENT                                  PERCENT                                  PERCENT
+                           OF                                       OF                                       OF
+                           TOTAL                  NON      TOTAL    TOTAL                  NON      TOTAL    TOTAL
+CATEGORY          RATE     SUM         SWAP       SWAP     RATE     SUM           SWAP     SWAP     RATE     SUM
+
+
+PAGEABLE SYSTEM
+AREAS
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.00        0                   0.00     0.00        0                   0.00     0.00        0
+                  ------   ------                 ------   ------   ------                 ------   ------   ------
+     SUM            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+ADDRESS SPACES
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.11      100        0.51       0.01     0.51      100          0.58     0.00     0.58      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.11      100        0.51       0.01     0.51      100          0.58     0.00     0.58      100
+
+TOTAL SYSTEM
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.11      100        0.51       0.01     0.51      100          0.58     0.00     0.58      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.11      100        0.51       0.01     0.51      100          0.58     0.00     0.58      100
+
+
+      AUXILIARY STORAGE USER POOL                     PAGEABLE MAIN STORAGE COUNTS               SWAP COUNTS
+-------------------------------------------         --------------------------------          --------------------
+
+                       PAGE                                          PAGE
+                       SLOTS        PERCENT                          FRAMES  PERCENT
+
+
+
+AVAILABLE SLOTS           51,265        99          UNUSED FRAMES    3326        84           SWAPS             52
+
+VIO SLOTS                      0         0          DATA PAGES        618        16           AVERAGE
+                                                                     ----    ------           PAGES PER     6
+NON-VIO SLOTS                735         1          TOTAL FRAMES     3944       100           SWAP OUT
+
+UNAVAILABLE SLOTS              0         0                                                    AVERAGE
+                       ---------    ------                                                    PAGES PER     5
+TOTAL SLOTS               52,000       100                                                    SWAP IN                                           W O R K L O A D   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            IEAIPS00
+
+
+PERFORM        PERFORM        SERVICE           AVERAGE                    AVERAGE        ENDED          AVERAGE TIME OF
+GROUP          GROUP          IN                TRANS.       WORKLOAD      TRANS-         TRANS-         ENDED TRANS.
+NUMBER         PERIOD         INTERVAL          SRV RATE     LEVEL         ACTIONS        ACTIONS        HHH.MM.SS.TTT
+
+
+001            1                    166               0        100.00          4.01             0        000.00.00.000
+               2                    293               0         99.00          1.00             0        000.00.00.000
+
+001            ALL                  459               0         99.36          5.01             0        000.00.00.000
+
+
+002 - 004      ZEROS
+
+SYSTEM TOTAL                        459               0         99.36          5.01             0        000.00.00.000                                            C H A N N E L   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            CYCLE 0.250 SECONDS
+
+
+
+     CHANNEL            CHANNEL        PERCENT        PERCENT
+     NUMBER             ACTIVITY       CHANNEL        CHAN BUSY
+CPU  AND TYPE           COUNT          BUSY           & CPU WAIT
+
+
+ 0   0  BYTE MPX              9
+     1  BLOCK MPX             0         0.00           0.00
+     2  BLOCK MPX           155         0.00           0.00
+     3  BLOCK MPX            31         0.00           0.00
+
+     4  BLOCK MPX             0         0.00           0.00
+     6  BLOCK MPX             0         0.00           0.00
+
+TOTAL                       195                               M A G N E T I C   T A P E   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+480                                0         0.00           0.00
+
+TOTAL                              0                            C O M M U N I C A T I O N   E Q U I P M E N T   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+660                                0         0.00           0.00
+661                                0         0.00           0.00
+662                                0         0.00           0.00
+663                                0         0.00           0.00
+
+664                                0         0.00           0.00
+665                                0         0.00           0.00
+666                                0         0.00           0.00
+667                                0         0.00           0.00
+
+668                                0         0.00           0.00
+669                                0         0.00           0.00
+66A                                0         0.00           0.00
+66B                                0         0.00           0.00
+
+670                                0        100.0           0.00
+671                                0        100.0           0.00
+672                                0        100.0           0.00
+673                                0        100.0           0.00
+
+680                                0        100.0           0.00
+681                                0        100.0           0.00
+682                                0        100.0           0.00
+683                                0        100.0           0.00
+
+688                                0        100.0           0.00
+689                                0        100.0           0.00
+68A                                0        100.0           0.00
+68B                                0        100.0           0.00
+
+68C                                0        100.0           0.00
+68D                                0        100.0           0.00
+68E                                0        100.0           0.00
+68F                                0        100.0           0.00
+
+TOTAL                              0                               D I R E C T   A C C E S S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+148           111111               0         0.00           0.00
+190           TSO001               0         0.00           0.00
+191           TSO002               0         0.00           0.00
+192           TSO003               0         0.00           0.00
+
+248           PAGE00             126         0.00           0.00
+249           SPOOL0              29         0.00           0.00
+290           WORK01               0         0.00           0.00
+291           WORK02               0         0.00           0.00
+
+292           WORK03               0         0.00           0.00
+293           WORK04               0         0.00           0.00
+298           TK5001               0         0.00           0.00
+299           TK5002               0         0.00           0.00
+
+380           INT001               0         0.00           0.00
+390           TK5RES              28         0.00           0.00
+391           TK5CAT               0         0.00           0.00
+392           TK5DLB               0         0.00           0.00
+
+TOTAL                            183                                    G R A P H I C S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+0C0                                0         0.00           0.00
+0C1                                0         0.00           0.00
+0C2                                0         0.00           0.00
+0C3                                0         0.00           0.00
+
+0C4                                0         0.00           0.00
+0C5                                0         0.00           0.00
+0C6                                0         0.00           0.00
+0C7                                0         0.00           0.00
+
+3C0                                0         0.00           0.00
+3C1                                0         0.00           0.00
+3C2                                0         0.00           0.00
+3C3                                0         0.00           0.00
+
+3C4                                0         0.00           0.00
+3C5                                0         0.00           0.00
+3C6                                0         0.00           0.00
+3C7                                0         0.00           0.00
+
+TOTAL                              0                                 U N I T   R E C O R D   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 08.32.846
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.02.50            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+002                                0         0.00           0.00
+009                                3         0.00           0.00
+00C                                0         0.00           0.00
+00D                                0         0.00           0.00
+
+00E                                6         0.00           0.00
+00F                                0         0.00           0.00
+10C                                0         0.00           0.00
+10D                                0         0.00           0.00
+
+30E                                3         0.00           0.00
+
+TOTAL                             12                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A   END   STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.11.23 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A  START  STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+                                                 C P U  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23
+
+
+
+
+CPU                WAIT TIME           WAIT TIME           CPU SERIAL
+NUMBER             HH.MM.SS.TTT        PERCENTAGE          NUMBER
+
+
+ 0                 00.25.04.478        97.30               000611
+
+
+AVERAGE                                97.30                                              P A G I N G  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23
+
+
+                                               MAIN STORAGE PAGING RATES
+                                                      PER SECOND
+--------------------------------------------------------------------------------------------------------------------
+
+                                                      PAGE IN                                   PAGE OUT
+                    PAGE RECLAIMS      ------------------------------------       ----------------------------------
+                  ----------------     ----------------    ----------------       --------------    ----------------
+                           PERCENT                                  PERCENT                                  PERCENT
+                           OF                                       OF                                       OF
+                           TOTAL                  NON      TOTAL    TOTAL                  NON      TOTAL    TOTAL
+CATEGORY          RATE     SUM         SWAP       SWAP     RATE     SUM           SWAP     SWAP     RATE     SUM
+
+
+PAGEABLE SYSTEM
+AREAS
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.00        1                   0.00     0.00        0                   0.00     0.00        0
+                  ------   ------                 ------   ------   ------                 ------   ------   ------
+     SUM            0.00        1                   0.00     0.00        0                   0.00     0.00        0
+
+ADDRESS SPACES
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.06       99        0.34       0.01     0.34      100          0.37     0.00     0.37      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.06       99        0.34       0.01     0.34      100          0.37     0.00     0.37      100
+
+TOTAL SYSTEM
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.06      100        0.34       0.01     0.34      100          0.37     0.00     0.37      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.06      100        0.34       0.01     0.34      100          0.37     0.00     0.37      100
+
+
+      AUXILIARY STORAGE USER POOL                     PAGEABLE MAIN STORAGE COUNTS               SWAP COUNTS
+-------------------------------------------         --------------------------------          --------------------
+
+                       PAGE                                          PAGE
+                       SLOTS        PERCENT                          FRAMES  PERCENT
+
+
+
+AVAILABLE SLOTS           51,270        99          UNUSED FRAMES    3320        84           SWAPS            105
+
+VIO SLOTS                      0         0          DATA PAGES        624        16           AVERAGE
+                                                                     ----    ------           PAGES PER     5
+NON-VIO SLOTS                730         1          TOTAL FRAMES     3944       100           SWAP OUT
+
+UNAVAILABLE SLOTS              0         0                                                    AVERAGE
+                       ---------    ------                                                    PAGES PER     5
+TOTAL SLOTS               52,000       100                                                    SWAP IN                                           W O R K L O A D   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            IEAIPS00
+
+
+PERFORM        PERFORM        SERVICE           AVERAGE                    AVERAGE        ENDED          AVERAGE TIME OF
+GROUP          GROUP          IN                TRANS.       WORKLOAD      TRANS-         TRANS-         ENDED TRANS.
+NUMBER         PERIOD         INTERVAL          SRV RATE     LEVEL         ACTIONS        ACTIONS        HHH.MM.SS.TTT
+
+
+001            1                    310               0        100.00          4.00             0        000.00.00.000
+               2                    577               0         99.00          1.00             0        000.00.00.000
+
+001            ALL                  887               0         99.35          5.00             0        000.00.00.000
+
+
+002 - 004      ZEROS
+
+SYSTEM TOTAL                        887               0         99.35          5.00             0        000.00.00.000                                            C H A N N E L   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            CYCLE 0.250 SECONDS
+
+
+
+     CHANNEL            CHANNEL        PERCENT        PERCENT
+     NUMBER             ACTIVITY       CHANNEL        CHAN BUSY
+CPU  AND TYPE           COUNT          BUSY           & CPU WAIT
+
+
+ 0   0  BYTE MPX              9
+     1  BLOCK MPX             0         0.00           0.00
+     2  BLOCK MPX           283         0.00           0.00
+     3  BLOCK MPX            32         0.00           0.00
+
+     4  BLOCK MPX             0         0.00           0.00
+     6  BLOCK MPX             0         0.00           0.00
+
+TOTAL                       324                               M A G N E T I C   T A P E   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+480                                0         0.00           0.00
+
+TOTAL                              0                            C O M M U N I C A T I O N   E Q U I P M E N T   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+660                                0         0.00           0.00
+661                                0         0.00           0.00
+662                                0         0.00           0.00
+663                                0         0.00           0.00
+
+664                                0         0.00           0.00
+665                                0         0.00           0.00
+666                                0         0.00           0.00
+667                                0         0.00           0.00
+
+668                                0         0.00           0.00
+669                                0         0.00           0.00
+66A                                0         0.00           0.00
+66B                                0         0.00           0.00
+
+670                                0        100.0           0.00
+671                                0        100.0           0.00
+672                                0        100.0           0.00
+673                                0        100.0           0.00
+
+680                                0        100.0           0.00
+681                                0        100.0           0.00
+682                                0        100.0           0.00
+683                                0        100.0           0.00
+
+688                                0        100.0           0.00
+689                                0        100.0           0.00
+68A                                0        100.0           0.00
+68B                                0        100.0           0.00
+
+68C                                0        100.0           0.00
+68D                                0        100.0           0.00
+68E                                0        100.0           0.00
+68F                                0        100.0           0.00
+
+TOTAL                              0                               D I R E C T   A C C E S S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+148           111111               0         0.00           0.00
+190           TSO001               0         0.00           0.00
+191           TSO002               0         0.00           0.00
+192           TSO003               0         0.00           0.00
+
+248           PAGE00             250         0.00           0.00
+249           SPOOL0              33         0.00           0.00
+290           WORK01               0         0.00           0.00
+291           WORK02               0         0.00           0.00
+
+292           WORK03               0         0.00           0.00
+293           WORK04               0         0.00           0.00
+298           TK5001               0         0.00           0.00
+299           TK5002               0         0.00           0.00
+
+380           INT001               0         0.00           0.00
+390           TK5RES              29         0.00           0.00
+391           TK5CAT               0         0.00           0.00
+392           TK5DLB               0         0.00           0.00
+
+TOTAL                            312                                    G R A P H I C S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+0C0                                0         0.00           0.00
+0C1                                0         0.00           0.00
+0C2                                0         0.00           0.00
+0C3                                0         0.00           0.00
+
+0C4                                0         0.00           0.00
+0C5                                0         0.00           0.00
+0C6                                0         0.00           0.00
+0C7                                0         0.00           0.00
+
+3C0                                0         0.00           0.00
+3C1                                0         0.00           0.00
+3C2                                0         0.00           0.00
+3C3                                0         0.00           0.00
+
+3C4                                0         0.00           0.00
+3C5                                0         0.00           0.00
+3C6                                0         0.00           0.00
+3C7                                0         0.00           0.00
+
+TOTAL                              0                                 U N I T   R E C O R D   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 25.46.103
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.11.23            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+002                                0         0.00           0.00
+009                                3         0.00           0.00
+00C                                0         0.00           0.00
+00D                                0         0.00           0.00
+
+00E                                6         0.00           0.00
+00F                                0         0.00           0.00
+10C                                0         0.00           0.00
+10D                                0         0.00           0.00
+
+30E                                3         0.00           0.00
+
+TOTAL                             12                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A   END   STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.37.09 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A  START  STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+****A  START  STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595  START  A****
+                                                 C P U  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09
+
+
+
+
+CPU                WAIT TIME           WAIT TIME           CPU SERIAL
+NUMBER             HH.MM.SS.TTT        PERCENTAGE          NUMBER
+
+
+ 0                 00.04.00.878        99.50               000611
+
+
+AVERAGE                                99.50                                              P A G I N G  A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09
+
+
+                                               MAIN STORAGE PAGING RATES
+                                                      PER SECOND
+--------------------------------------------------------------------------------------------------------------------
+
+                                                      PAGE IN                                   PAGE OUT
+                    PAGE RECLAIMS      ------------------------------------       ----------------------------------
+                  ----------------     ----------------    ----------------       --------------    ----------------
+                           PERCENT                                  PERCENT                                  PERCENT
+                           OF                                       OF                                       OF
+                           TOTAL                  NON      TOTAL    TOTAL                  NON      TOTAL    TOTAL
+CATEGORY          RATE     SUM         SWAP       SWAP     RATE     SUM           SWAP     SWAP     RATE     SUM
+
+
+PAGEABLE SYSTEM
+AREAS
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.00        0                   0.00     0.00        0                   0.00     0.00        0
+                  ------   ------                 ------   ------   ------                 ------   ------   ------
+     SUM            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+ADDRESS SPACES
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.39      100        2.14       0.01     2.16      100          2.37     0.00     2.37      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.39      100        2.14       0.01     2.16      100          2.37     0.00     2.37      100
+
+TOTAL SYSTEM
+     VIO            0.00        0                   0.00     0.00        0                   0.00     0.00        0
+
+     NON VIO        0.39      100        2.14       0.01     2.16      100          2.37     0.00     2.37      100
+                  ------   ------      ------     ------   ------   ------        ------   ------   ------   ------
+     SUM            0.39      100        2.14       0.01     2.16      100          2.37     0.00     2.37      100
+
+
+      AUXILIARY STORAGE USER POOL                     PAGEABLE MAIN STORAGE COUNTS               SWAP COUNTS
+-------------------------------------------         --------------------------------          --------------------
+
+                       PAGE                                          PAGE
+                       SLOTS        PERCENT                          FRAMES  PERCENT
+
+
+
+AVAILABLE SLOTS           51,260        99          UNUSED FRAMES    3330        84           SWAPS            104
+
+VIO SLOTS                      0         0          DATA PAGES        614        16           AVERAGE
+                                                                     ----    ------           PAGES PER     6
+NON-VIO SLOTS                740         1          TOTAL FRAMES     3944       100           SWAP OUT
+
+UNAVAILABLE SLOTS              0         0                                                    AVERAGE
+                       ---------    ------                                                    PAGES PER     5
+TOTAL SLOTS               52,000       100                                                    SWAP IN                                           W O R K L O A D   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            IEAIPS00
+
+
+PERFORM        PERFORM        SERVICE           AVERAGE                    AVERAGE        ENDED          AVERAGE TIME OF
+GROUP          GROUP          IN                TRANS.       WORKLOAD      TRANS-         TRANS-         ENDED TRANS.
+NUMBER         PERIOD         INTERVAL          SRV RATE     LEVEL         ACTIONS        ACTIONS        HHH.MM.SS.TTT
+
+
+001            1                    335               0        100.00          4.02             0        000.00.00.000
+               2                    474               1         98.90          1.00             0        000.00.00.000
+
+001            ALL                  809               0         99.36          5.02             0        000.00.00.000
+
+
+002 - 004      ZEROS
+
+SYSTEM TOTAL                        809               0         99.36          5.02             0        000.00.00.000                                            C H A N N E L   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            CYCLE 0.250 SECONDS
+
+
+
+     CHANNEL            CHANNEL        PERCENT        PERCENT
+     NUMBER             ACTIVITY       CHANNEL        CHAN BUSY
+CPU  AND TYPE           COUNT          BUSY           & CPU WAIT
+
+
+ 0   0  BYTE MPX             10
+     1  BLOCK MPX             0         0.00           0.00
+     2  BLOCK MPX           268         0.00           0.00
+     3  BLOCK MPX            32         0.00           0.00
+
+     4  BLOCK MPX             0         0.00           0.00
+     6  BLOCK MPX             0         0.00           0.00
+
+TOTAL                       310                               M A G N E T I C   T A P E   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+480                                0         0.00           0.00
+
+TOTAL                              0                            C O M M U N I C A T I O N   E Q U I P M E N T   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+660                                0         0.00           0.00
+661                                0         0.00           0.00
+662                                0         0.00           0.00
+663                                0         0.00           0.00
+
+664                                0         0.00           0.00
+665                                0         0.00           0.00
+666                                0         0.00           0.00
+667                                0         0.00           0.00
+
+668                                0         0.00           0.00
+669                                0         0.00           0.00
+66A                                0         0.00           0.00
+66B                                0         0.00           0.00
+
+670                                0        100.0           0.00
+671                                0        100.0           0.00
+672                                0        100.0           0.00
+673                                0        100.0           0.00
+
+680                                0        100.0           0.00
+681                                0        100.0           0.00
+682                                0        100.0           0.00
+683                                0        100.0           0.00
+
+688                                0        100.0           0.00
+689                                0        100.0           0.00
+68A                                0        100.0           0.00
+68B                                0        100.0           0.00
+
+68C                                0        100.0           0.00
+68D                                0        100.0           0.00
+68E                                0        100.0           0.00
+68F                                0        100.0           0.00
+
+TOTAL                              0                               D I R E C T   A C C E S S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE        VOLUME         ACTIVITY       PERCENT        AVERAGE
+ADDRESS       SERIAL         COUNT          BUSY           QLENGTH
+
+
+
+148           111111               0         0.00           0.00
+190           TSO001               0         0.00           0.00
+191           TSO002               0         0.00           0.00
+192           TSO003               0         0.00           0.00
+
+248           PAGE00             241         0.00           0.00
+249           SPOOL0              27         0.00           0.00
+290           WORK01               0         0.00           0.00
+291           WORK02               0         0.00           0.00
+
+292           WORK03               0         0.00           0.00
+293           WORK04               0         0.00           0.00
+298           TK5001               0         0.00           0.00
+299           TK5002               0         0.00           0.00
+
+380           INT001               0         0.00           0.00
+390           TK5RES              28         0.00           0.00
+391           TK5CAT               0         0.00           0.00
+392           TK5DLB               0         0.00           0.00
+
+TOTAL                            296                                    G R A P H I C S   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+0C0                                0         0.00           0.00
+0C1                                0         0.00           0.00
+0C2                                0         0.00           0.00
+0C3                                0         0.00           0.00
+
+0C4                                0         0.00           0.00
+0C5                                0         0.00           0.00
+0C6                                0         0.00           0.00
+0C7                                0         0.00           0.00
+
+3C0                                0         0.00           0.00
+3C1                                0         0.00           0.00
+3C2                                0         0.00           0.00
+3C3                                0         0.00           0.00
+
+3C4                                0         0.00           0.00
+3C5                                0         0.00           0.00
+3C6                                0         0.00           0.00
+3C7                                0         0.00           0.00
+
+TOTAL                              0                                 U N I T   R E C O R D   D E V I C E   A C T I V I T Y
+                                                                                                               PAGE    1
+            OS/VS2                   SYSTEM ID TK5R             DATE  2/10/26            INTERVAL 04.02.066
+            RELEASE 03.8             MF/1 VERSION 01            TIME 22.37.09            CYCLE 0.250 SECONDS
+
+
+                             DEVICE
+DEVICE                       ACTIVITY       PERCENT        AVERAGE
+ADDRESS                      COUNT          BUSY           QLENGTH
+
+
+
+002                                0         0.00           0.00
+009                                4         0.00           0.00
+00C                                0         0.00           0.00
+00D                                0         0.00           0.00
+
+00E                                6         0.00           0.00
+00F                                0         0.00           0.00
+10C                                0         0.00           0.00
+10D                                0         0.00           0.00
+
+30E                                4         0.00           0.00
+
+TOTAL                             14                                                    MM        MM  FFFFFFFFFFFF       11
+                                                   MMM      MMM  FFFFFFFFFFFF      111
+                                                  MMMM    MMMM  FF               1111
+                                                 MM MM  MM MM  FF                 11
+                                                MM  MMMM  MM  FF                 11
+                                               MM   MM   MM  FFFFFFFF           11
+                                              MM        MM  FFFFFFFF           11
+                                             MM        MM  FF                 11
+                                            MM        MM  FF                 11
+                                           MM        MM  FF                 11
+                                          MM        MM  FF             1111111111
+                                         MM        MM  FF             1111111111
+
+
+
+                   SSSSSSSSSS   555555555555   9999999999   555555555555                               AAAAAAAAAA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AAAAAAAAAAAA
+                  SS        SS  55            99        99  55                                        AA        AA
+                  SS            55            99        99  55                                        AA        AA
+                  SSS           55            99        99  55                                        AA        AA
+                   SSSSSSSSS    555555555     999999999999  555555555                                 AAAAAAAAAAAA
+                    SSSSSSSSS   5555555555    999999999999  5555555555                                AAAAAAAAAAAA
+                           SSS           55             99           55                               AA        AA
+                            SS            55            99            55                              AA        AA
+                  SS        SS            55  99        99            55                              AA        AA
+                  SSSSSSSSSSSS  555555555555  999999999999  555555555555                              AA        AA
+                   SSSSSSSSSS   55555555555    9999999999   55555555555                               AA        AA
+
+
+****A   END   STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
+****A   END   STC  595  MF1                             ROOM       10.41.11 PM 10 FEB 26  PRINTER1  SYS TK5R  STC  595   END   A****
 
