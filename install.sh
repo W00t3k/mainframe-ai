@@ -221,6 +221,41 @@ install_ollama() {
   fi
 }
 
+# ── GitHub Auth ────────────────────────────────────────────
+setup_gh_auth() {
+  if ! command -v gh &>/dev/null; then
+    warn "GitHub CLI not available — you'll need to authenticate manually for git clone."
+    return
+  fi
+
+  # Check if already authenticated
+  if gh auth status &>/dev/null 2>&1; then
+    ok "GitHub CLI already authenticated"
+    return
+  fi
+
+  echo ""
+  echo -e "${CYN}┌──────────────────────────────────────────────────┐${RST}"
+  echo -e "${CYN}│  GitHub Authentication Required                  │${RST}"
+  echo -e "${CYN}│                                                  │${RST}"
+  echo -e "${CYN}│  This is a private repo. You need to log in      │${RST}"
+  echo -e "${CYN}│  to GitHub to clone it.                          │${RST}"
+  echo -e "${CYN}│                                                  │${RST}"
+  echo -e "${CYN}│  Choose HTTPS when prompted.                     │${RST}"
+  echo -e "${CYN}│  Choose 'Login with a web browser' or paste      │${RST}"
+  echo -e "${CYN}│  a Personal Access Token.                        │${RST}"
+  echo -e "${CYN}└──────────────────────────────────────────────────┘${RST}"
+  echo ""
+
+  gh auth login --hostname github.com
+
+  if gh auth status &>/dev/null 2>&1; then
+    ok "GitHub authentication successful"
+  else
+    warn "GitHub auth may have failed — clone might prompt for credentials"
+  fi
+}
+
 # ── Clone Repo ────────────────────────────────────────────
 setup_repo() {
   # Check if we're already inside the repo
@@ -240,7 +275,11 @@ setup_repo() {
   fi
 
   info "Cloning repository..."
-  git clone "$REPO_URL" mainframe-ai
+  if command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1; then
+    gh repo clone W00t3k/mainframe-ai
+  else
+    git clone "$REPO_URL" mainframe-ai
+  fi
   INSTALL_DIR="$(pwd)/mainframe-ai"
   cd "$INSTALL_DIR"
   ok "Cloned to $INSTALL_DIR"
@@ -430,6 +469,7 @@ detect_distro
 install_system_deps
 check_python
 install_ollama
+setup_gh_auth
 setup_repo
 setup_venv
 install_tk5

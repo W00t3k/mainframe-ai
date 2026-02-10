@@ -11,7 +11,7 @@
 DIR="$(cd "$(dirname "$0")" && pwd)"
 VENV="$DIR/.venv/bin/python"
 PORT=8080
-HOST="127.0.0.1"
+HOST="0.0.0.0"
 MODEL="llama3.1:8b"
 
 RED='\033[0;31m'
@@ -84,13 +84,45 @@ start_mvs() {
 
   echo -e "${YEL}[*] Starting TK5 MVS mainframe...${RST}"
 
+  # Detect OS and architecture for Hercules binaries
+  HERC_OS=""
+  case "$(uname -s)" in
+    Darwin) HERC_OS="darwin" ;;
+    Linux)
+      case "$(uname -m)" in
+        x86_64)  HERC_OS="linux/64" ;;
+        aarch64) HERC_OS="linux/aarch64" ;;
+        armv7*)  HERC_OS="linux/arm" ;;
+        i686)    HERC_OS="linux/32" ;;
+        *)       HERC_OS="linux/64" ;;
+      esac
+      ;;
+  esac
+
+  HERC_BIN="$TK5/hercules/$HERC_OS/bin"
+  HERC_LIB="$TK5/hercules/$HERC_OS/lib"
+
+  if [ ! -f "$HERC_BIN/hercules" ]; then
+    # Fallback: try system-installed hercules
+    if command -v hercules &>/dev/null; then
+      echo -e "${YEL}[*] Using system Hercules${RST}"
+      HERC_BIN="$(dirname "$(command -v hercules)")"
+      HERC_LIB=""
+    else
+      echo -e "${RED}[!] No Hercules binary found for $(uname -s)/$(uname -m)${RST}"
+      echo -e "    Install hercules: sudo apt install hercules  (or equivalent)"
+      return 1
+    fi
+  fi
+
   nohup bash -c "
     cd \"$TK5\"
-    export PATH=\"\$PWD/hercules/darwin/bin:\$PATH\"
-    export DYLD_LIBRARY_PATH=\"\$PWD/hercules/darwin/lib:\$DYLD_LIBRARY_PATH\"
-    export HERCULES_LIB=\"\$PWD/hercules/darwin/lib/hercules\"
-    export HERCULES_PATH=\"\$PWD/hercules/darwin/lib/hercules\"
-    tail -f /dev/null | ./hercules/darwin/bin/hercules -f conf/tk5.cnf -r scripts/ipl.rc -p \"\$HERCULES_LIB\" -d
+    export PATH=\"$HERC_BIN:\$PATH\"
+    export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
+    export DYLD_LIBRARY_PATH=\"$HERC_LIB:\$DYLD_LIBRARY_PATH\"
+    export HERCULES_LIB=\"$HERC_LIB/hercules\"
+    export HERCULES_PATH=\"$HERC_LIB/hercules\"
+    tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5.cnf -r scripts/ipl.rc -d
   " > "$DIR/tk5_hercules.log" 2>&1 &
   MVS_PID=$!
 
@@ -99,7 +131,8 @@ start_mvs() {
     echo -e "${GRN}[✓] TK5 started — TN3270 at localhost:3270${RST}"
     echo -e "    ${CYN}Login: HERC01 / CUL8TR${RST}"
   else
-    echo -e "${RED}[!] TK5 failed to start${RST}"
+    echo -e "${RED}[!] TK5 failed to start — check $DIR/tk5_hercules.log${RST}"
+    tail -5 "$DIR/tk5_hercules.log" 2>/dev/null
   fi
 }
 
