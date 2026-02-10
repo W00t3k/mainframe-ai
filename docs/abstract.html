@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Abstract — Hacking Big Iron with AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0d11;--fg:#e0e0e0;--muted:#6f6f6f;--accent:#4589ff;--border:#262626;--panel:#141414}
+body{background:var(--bg);color:var(--fg);font-family:'IBM Plex Sans','Helvetica Neue',Arial,sans-serif;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:3rem 2rem 4rem}
+.page{max-width:720px;width:100%}
+.header{text-align:center;margin-bottom:3rem;padding-bottom:2rem;border-bottom:1px solid var(--border)}
+.logo{height:48px;width:auto;opacity:.6;margin-bottom:2rem}
+h1{font-family:'IBM Plex Mono',monospace;font-size:2.2rem;font-weight:700;color:#fff;letter-spacing:-.02em;line-height:1.15;margin-bottom:.5rem}
+.subtitle{font-family:'IBM Plex Mono',monospace;font-size:1rem;color:var(--accent);font-weight:400}
+.meta{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted);margin-top:1.2rem}
+.meta span{margin:0 .5rem}
+.body p{font-size:1.05rem;line-height:1.8;color:#c6c6c6;margin-bottom:1.2rem}
+.body p:last-child{margin-bottom:0}
+.section{margin-bottom:2.5rem}
+.section-title{font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:700;color:#fff;margin-bottom:1rem;letter-spacing:.03em;text-transform:uppercase}
+.assumptions{padding:1.5rem;background:var(--panel);border:1px solid var(--border);margin-bottom:2.5rem}
+.assumptions h3{font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:700;color:#fff;margin-bottom:1rem;letter-spacing:.03em}
+.row{display:flex;align-items:baseline;padding:.6rem 0;border-bottom:1px solid #1a1a1a}
+.row:last-child{border-bottom:none}
+.tag{font-family:'IBM Plex Mono',monospace;font-size:.65rem;font-weight:600;padding:2px 6px;border-radius:3px;margin-right:.75rem;flex-shrink:0;min-width:48px;text-align:center}
+.tag-vtam{background:rgba(167,139,250,.18);color:#a78bfa;border:1px solid rgba(167,139,250,.35)}
+.tag-racf{background:rgba(245,158,11,.18);color:#f59e0b;border:1px solid rgba(245,158,11,.35)}
+.tag-tso{background:rgba(99,167,255,.18);color:#63a7ff;border:1px solid rgba(99,167,255,.35)}
+.tag-jes{background:rgba(251,113,133,.18);color:#fb7185;border:1px solid rgba(251,113,133,.35)}
+.row-text{font-family:'IBM Plex Mono',monospace;font-size:.85rem;color:#c6c6c6}
+.row-text strong{color:#fff}
+.themes{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:2.5rem}
+.theme{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);padding:1rem 1.2rem}
+.theme h4{font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:700;color:var(--accent);letter-spacing:.05em;text-transform:uppercase;margin-bottom:.4rem}
+.theme p{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted);line-height:1.5;margin:0}
+.audience{background:rgba(69,137,255,.06);border:1px solid rgba(69,137,255,.2);padding:1.2rem 1.5rem;margin-bottom:2.5rem;border-radius:4px}
+.audience p{font-family:'IBM Plex Mono',monospace;font-size:.85rem;color:#a6c8ff;line-height:1.6;margin:0}
+.tool{text-align:center;padding:1.5rem;background:var(--panel);border:1px solid var(--border);margin-bottom:2.5rem}
+.tool h3{font-family:'IBM Plex Mono',monospace;font-size:.85rem;font-weight:700;color:#fff;margin-bottom:.5rem}
+.tool>p{font-family:'IBM Plex Mono',monospace;font-size:.8rem;color:var(--muted);margin:0;line-height:1.5}
+.feats{display:flex;flex-wrap:wrap;justify-content:center;gap:.5rem;margin-top:1rem}
+.feat{font-family:'IBM Plex Mono',monospace;font-size:.7rem;font-weight:600;padding:3px 10px;background:rgba(52,211,153,.1);color:#34d399;border:1px solid rgba(52,211,153,.25);border-radius:3px}
+.links{display:flex;flex-wrap:wrap;gap:.75rem;justify-content:center;margin-bottom:2rem}
+.links a{font-family:'IBM Plex Mono',monospace;font-size:.75rem;font-weight:600;padding:6px 16px;background:rgba(69,137,255,.08);color:var(--accent);border:1px solid rgba(69,137,255,.25);border-radius:3px;text-decoration:none;transition:all .15s}
+.links a:hover{background:rgba(69,137,255,.18);color:#a6c8ff}
+.footer{text-align:center;padding-top:2rem;border-top:1px solid var(--border)}
+.footer a{font-family:'IBM Plex Mono',monospace;font-size:.75rem;color:var(--muted);text-decoration:none;margin:0 .75rem;transition:color .15s}
+.footer a:hover{color:var(--accent)}
+@media print{body{background:#fff;color:#000;padding:1rem}h1{color:#000}.subtitle{color:#333}.body p{color:#333}.theme{border-color:#ccc;background:#f9f9f9}.theme h4{color:#333}.theme p{color:#666}.assumptions{background:#f9f9f9;border-color:#ccc}.row-text{color:#333}.audience{background:#f0f4ff;border-color:#ccc}.audience p{color:#333}.footer{display:none}}
+@media(max-width:640px){.themes{grid-template-columns:1fr}h1{font-size:1.8rem}}
+</style>
+</head>
+<body>
+<div class="page">
+
+    <div class="header">
+        <svg class="logo" viewBox="0 0 95 36" fill="#fff" xmlns="http://www.w3.org/2000/svg"><path d="M0 0h9.6v2.4H0zm0 4.8h9.6v2.4H0zm2.4 4.8h4.8v2.4H2.4zm0 4.8h4.8v2.4H2.4zm-2.4 4.8h9.6v2.4H0zm0 4.8h9.6v2.4H0zM12 0h7.2c4.2 0 6.6 2.1 6.6 5.4 0 2.1-1.2 3.9-3 4.5 2.1.6 3.6 2.7 3.6 5.1 0 3.6-2.7 5.4-6.6 5.4H12zm4.8 9h2.4c1.2 0 1.8-.9 1.8-1.8s-.6-1.8-1.8-1.8h-2.4zm0 9h2.4c1.2 0 2.1-.9 2.1-2.1 0-1.2-.9-2.1-2.1-2.1h-2.4zM28.8 0h5.4l3.6 12L41.4 0h5.4l-6 20.4h-6z"/></svg>
+        <h1>Hacking Big Iron</h1>
+        <p class="subtitle">When Modern Security Assumptions Fail on Mainframes</p>
+        <p class="meta">
+            <span>Adam Toscher</span>
+            <span>&middot;</span>
+            <span>2025</span>
+        </p>
+    </div>
+
+    <div class="section body">
+        <p>
+            Mainframes still underpin critical infrastructure such as banking, airlines, and government
+            systems, yet most modern security teams approach them using assumptions formed around Unix,
+            Windows, and enterprise platforms. These assumptions often fail on z/OS, creating blind spots
+            that are difficult to detect and easy to underestimate.
+        </p>
+        <p>
+            This talk explains how mainframe security actually works and why familiar concepts such as
+            &ldquo;root,&rdquo; shells, ports, and lateral movement do not translate cleanly. Focusing on
+            components like JES, JCL, RACF, CICS, VTAM, and PR/SM, we explore where attackers and
+            defenders truly operate today: transactions, security managers, and management boundaries.
+        </p>
+        <p>
+            From an offensive perspective, the talk reframes how attackers actually move inside mainframe
+            environments: not through shells or services, but via job submission paths, inherited authority,
+            transaction routing, and security manager behavior. The session highlights concrete failure modes
+            red teams encounter when modern assumptions are applied to z/OS, and how those blind spots are
+            exploited in real assessments.
+        </p>
+        <p>
+            Using real TN3270 terminal screens and practical examples, attendees will learn a repeatable
+            methodology for assessing mainframe environments and identifying misconfigurations that appear
+            harmless but can have severe impact.
+        </p>
+    </div>
+
+    <div class="assumptions">
+        <h3>Five Broken Assumptions</h3>
+        <div class="row">
+            <span class="tag tag-vtam">VTAM</span>
+            <span class="row-text"><strong>&ldquo;Ports define exposure&rdquo;</strong> &mdash; VTAM&rsquo;s session fabric exists independently of TCP/IP</span>
+        </div>
+        <div class="row">
+            <span class="tag tag-racf">RACF</span>
+            <span class="row-text"><strong>&ldquo;There is a root user&rdquo;</strong> &mdash; Authority is distributed across profiles, not accounts</span>
+        </div>
+        <div class="row">
+            <span class="tag tag-tso">TSO</span>
+            <span class="row-text"><strong>&ldquo;Processes are short-lived&rdquo;</strong> &mdash; Address spaces persist for weeks or months</span>
+        </div>
+        <div class="row">
+            <span class="tag tag-jes">JES</span>
+            <span class="row-text"><strong>&ldquo;Work executes immediately&rdquo;</strong> &mdash; JES queues, schedules, and defers execution</span>
+        </div>
+        <div class="row">
+            <span class="tag tag-tso">TSO</span>
+            <span class="row-text"><strong>&ldquo;There is a filesystem&rdquo;</strong> &mdash; Datasets, catalogs, PDS members &mdash; no hierarchy</span>
+        </div>
+    </div>
+
+    <div class="themes">
+        <div class="theme"><h4>Exposure Model</h4><p>VTAM session fabric, CICS transactions, and reachability without ports</p></div>
+        <div class="theme"><h4>Privilege Model</h4><p>RACF profiles, inherited authority, and why there is no root</p></div>
+        <div class="theme"><h4>Execution Model</h4><p>JES/JCL job submission, deferred execution, and identity preservation</p></div>
+        <div class="theme"><h4>Offensive Methodology</h4><p>Repeatable assessment framework with real TN3270 examples</p></div>
+        <div class="theme"><h4>AI-Assisted Assessment</h4><p>Local LLM interprets screens, narrates walkthroughs, and tutors in real-time</p></div>
+        <div class="theme"><h4>100% Offline</h4><p>No cloud, no API keys &mdash; safe for sensitive assessment environments</p></div>
+    </div>
+
+    <div class="audience">
+        <p>No prior mainframe experience is required.</p>
+    </div>
+
+    <div class="tool">
+        <h3>Open-Source Tool Release</h3>
+        <p>AI-powered mainframe security assistant &mdash; local LLM, TN3270 terminal, and offensive methodology in one tool</p>
+        <div class="feats">
+            <span class="feat">Local LLM (Ollama)</span>
+            <span class="feat">TN3270 Terminal</span>
+            <span class="feat">AI Screen Analysis</span>
+            <span class="feat">AI-Narrated Walkthroughs</span>
+            <span class="feat">Red Team AI Tutor</span>
+            <span class="feat">Trust Graph</span>
+            <span class="feat">Test &amp; Report (F1&ndash;F5)</span>
+            <span class="feat">Security Labs</span>
+            <span class="feat">No Cloud / No API Keys</span>
+        </div>
+    </div>
+
+    <div class="links">
+        <a href="index.html">Watch Video</a>
+        <a href="IBM-MF-A.pdf">Download PDF</a>
+        <a href="https://github.com/W00t3k/mainframe-ai">GitHub Repo</a>
+    </div>
+
+    <div class="footer">
+        <a href="index.html">Video</a>
+        <a href="IBM-MF-A.pdf">PDF</a>
+        <a href="https://github.com/W00t3k/mainframe-ai">Source Code</a>
+    </div>
+
+</div>
+</body>
+</html>
