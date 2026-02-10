@@ -80,7 +80,8 @@ install_system_deps() {
         python3 python3-pip python3-venv python3-dev \
         git curl wget build-essential \
         libffi-dev libssl-dev \
-        x3270 c3270 \
+        x3270 c3270 s3270 3270-common \
+        hercules \
         lsof net-tools unzip
       # GitHub CLI
       if ! command -v gh &>/dev/null; then

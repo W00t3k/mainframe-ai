@@ -58,11 +58,51 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 
 ### Requirements
 
-- Python 3.10+
+- Python 3.11+
 - [Ollama](https://ollama.com) for local LLM
-- TK5 MVS 3.8j emulator (optional, for live terminal)
+- s3270 (for web TN3270 terminal)
+- TK5 MVS 3.8j emulator (optional, for local mainframe)
 
-### macOS
+---
+
+### Linux — One-Line Install
+
+The install script handles everything: system deps, Python, Ollama, GitHub CLI auth, repo clone, venv, and optionally TK5.
+
+```bash
+# If you already have the repo cloned:
+cd mainframe-ai
+chmod +x install.sh
+./install.sh
+
+# If starting fresh on a new server (private repo — requires GitHub access):
+# Option 1: GitHub CLI
+sudo apt install gh -y && gh auth login
+gh repo clone W00t3k/mainframe-ai && cd mainframe-ai
+chmod +x install.sh && ./install.sh
+
+# Option 2: Personal Access Token
+git clone https://<YOUR_TOKEN>@github.com/W00t3k/mainframe-ai.git
+cd mainframe-ai && chmod +x install.sh && ./install.sh
+
+# Option 3: SSH
+git clone git@github.com:W00t3k/mainframe-ai.git
+cd mainframe-ai && chmod +x install.sh && ./install.sh
+```
+
+The install script supports: **Ubuntu, Debian, Kali, Fedora, CentOS/RHEL, Arch, openSUSE**.
+
+It installs:
+- Python 3.11+ with virtual environment
+- Ollama + llama3.1:8b model (~4.7 GB)
+- GitHub CLI (`gh`) with interactive auth
+- x3270/s3270/c3270 (TN3270 clients)
+- Hercules + TK5 MVS emulator (optional)
+- All Python dependencies
+
+---
+
+### macOS — Manual Setup
 
 ```bash
 # Create virtual environment
@@ -77,40 +117,56 @@ brew install ollama
 ollama serve
 ollama pull llama3.1:8b
 
-# Start TK5 (optional)
-cd tk5/mvs-tk5 && ./mvs
+# Install TN3270 client
+brew install x3270
 
 # Run the web app
 python run.py
-# Or: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
-
-# Or use the all-in-one startup script
-./start.sh          # Ollama + Web App
-./start.sh --mvs    # Ollama + TK5 + Web App
-./start.sh --kill   # Stop everything
 ```
 
-### Linux
+---
+
+### Start the App
 
 ```bash
-# Install Python
-sudo apt install python3 python3-venv python3-pip
-
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Install Ollama
-curl -fsSL https://ollama.com/install.sh | sh
-ollama serve &
-ollama pull llama3.1:8b
-
-# Run
-python run.py
+./start.sh              # Ollama + Web App (binds to 0.0.0.0:8080)
+./start.sh --mvs        # Ollama + TK5 Mainframe + Web App
+./start.sh --kill       # Stop everything
 ```
+
+The web app binds to `0.0.0.0:8080` by default, accessible from any machine on the network.
+
+If running on a remote server, make sure port 8080 is open:
+
+```bash
+# Ubuntu/Debian
+sudo ufw allow 8080
+
+# CentOS/RHEL/Fedora
+sudo firewall-cmd --add-port=8080/tcp --permanent && sudo firewall-cmd --reload
+```
+
+---
+
+### MVS TK5 Management
+
+Use `mvs.sh` to manage the TK5 mainframe emulator independently:
+
+```bash
+./mvs.sh start          # Start MVS TK5
+./mvs.sh stop           # Graceful shutdown (SIGTERM, waits 15s)
+./mvs.sh kill           # Force kill all Hercules processes
+./mvs.sh restart        # Stop + Start
+./mvs.sh status         # Show PID, ports, memory, uptime
+./mvs.sh log            # Tail the Hercules log
+```
+
+TK5 defaults:
+- **TN3270:** `localhost:3270`
+- **Login:** `HERC01` / `CUL8TR`
+- **Hercules console:** `http://localhost:8038`
+
+---
 
 ### Verify
 
@@ -238,6 +294,9 @@ mainframe_ai_assistant/
 ├── kicks/                  # CICS/KICKS BMS maps, COBOL, JCL
 ├── tk5/                    # TK5 MVS 3.8j emulator
 ├── run.py                  # Application entry point
+├── start.sh                # All-in-one startup (Ollama + Web App + TK5)
+├── install.sh              # Linux installer (deps, Ollama, venv, TK5)
+├── mvs.sh                  # MVS TK5 management (start/stop/restart/status)
 ├── agent_tools.py          # TN3270 connection tools
 ├── trust_graph.py          # Graph data structures
 ├── graph_tools.py          # Graph analysis and parsing
