@@ -73,15 +73,8 @@ start_ollama() {
     fi
   fi
 
-  echo -e "${CYN}[*] RAM: ${TOTAL_RAM_MB}MB — using model: $MODEL${RST}"
-
-  # Check model is available
-  if ollama list 2>/dev/null | grep -q "$MODEL"; then
-    echo -e "${GRN}[✓] Model $MODEL available${RST}"
-  else
-    echo -e "${YEL}[*] Pulling $MODEL (first time only)...${RST}"
-    ollama pull "$MODEL"
-  fi
+  echo -e "${CYN}[*] RAM: ${TOTAL_RAM_MB}MB — will use model: $MODEL${RST}"
+  echo -e "${CYN}[*] Model will load on first AI request (saves RAM)${RST}"
 }
 
 # ── Start TK5 MVS ───────────────────────────────────────
@@ -267,12 +260,19 @@ case "${1:-}" in
     start_ollama
     start_mvs
     banner mvs
+    launch_webapp
+    echo -e "${GRN}[✓] Web app running — http://$HOST:$PORT  (pid $WEBAPP_PID)${RST}"
+    # Pull model in background AFTER web app is stable
+    ( sleep 5 && ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) &
     watchdog
     ;;
   *)
     kill_all
     start_ollama
     banner
+    launch_webapp
+    echo -e "${GRN}[✓] Web app running — http://$HOST:$PORT  (pid $WEBAPP_PID)${RST}"
+    ( sleep 5 && ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) &
     watchdog
     ;;
 esac
