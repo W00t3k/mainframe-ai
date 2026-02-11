@@ -158,7 +158,13 @@ class WalkthroughRunner:
             try:
                 if connection and connection.connected:
                     screen = self._read_screen_safe()
-                    if self._is_logged_in(screen.upper()):
+                    upper = screen.upper()
+                    # If stuck in error state, escape first
+                    if self._detect_error(screen):
+                        logger.info("Pre-connect: error state detected, escaping")
+                        screen = self._escape_to_ready()
+                        upper = screen.upper()
+                    if self._is_logged_in(upper):
                         self._tso_logoff()
                     disconnect_mainframe()
                     _time.sleep(1)
@@ -526,6 +532,13 @@ Reply with just the command word."""
         upper = screen.upper()
         if "LOGON" in upper or "VTAM" in upper or "USS" in upper:
             return
+        # If stuck in error state, escape first
+        if self._detect_error(screen):
+            logger.info("Logoff: error state detected, escaping first")
+            screen = self._escape_to_ready()
+            upper = screen.upper()
+            if "LOGON" in upper or "VTAM" in upper or "USS" in upper:
+                return
         if not self._is_logged_in(upper):
             return
         
@@ -584,6 +597,40 @@ Reply with just the command word."""
             return True
         return False
 
+    def _escape_to_ready(self) -> str:
+        """Try to get back to TSO READY from any stuck state.
+        Uses PF3, END, CLEAR in sequence. Returns final screen."""
+        for attempt in range(8):
+            screen = self._read_screen_safe()
+            upper = screen.upper()
+            if self._is_logged_in(upper):
+                return screen
+            if "LOGON" in upper and "===>" in screen:
+                return screen
+            # In editor — type END
+            if "REENTER" in upper or "ENTER FILE NAME" in upper or "DATA SET NAME" in upper:
+                send_terminal_key("home")
+                _time.sleep(0.2)
+                send_terminal_key("eraseeof")
+                _time.sleep(0.2)
+                send_terminal_key("string", "END")
+                send_terminal_key("enter")
+                _time.sleep(2)
+                continue
+            # INVALID KEYWORD — clear and PF3
+            if "INVALID KEYWORD" in upper or "INVALID" in upper:
+                send_terminal_key("clear")
+                _time.sleep(1)
+                send_terminal_key("pf", "3")
+                _time.sleep(1.5)
+                continue
+            # Try PF3 to back out
+            send_terminal_key("pf", "3")
+            _time.sleep(1.5)
+        screen = self._read_screen_safe()
+        self.current_screen = screen
+        return screen
+
     def _press_through_screens(self) -> str:
         """Press Enter through broadcast/fortune/info screens until we reach
         a usable screen (READY, ISPF/RFE, TSO Apps Menu, or Logon)."""
@@ -598,6 +645,10 @@ Reply with just the command word."""
                 return screen
             if "IKJ56400" in upper and "IKT00300" not in upper:
                 return screen
+            # Error state — escape instead of pressing Enter blindly
+            if self._detect_error(screen):
+                logger.info("_press_through_screens: detected error, escaping to READY")
+                return self._escape_to_ready()
             # Post-login screens (reconnect success, broadcast, fortune) — press Enter
             if self._is_post_login(upper):
                 send_terminal_key("enter")
@@ -692,13 +743,25 @@ Reply with just the command word."""
                     return
                 continue
 
-            # ── "REENTER" / IKJ56703 / IKJ56429 (invalid keyword / reenter) ──
-            if "REENTER" in upper or "IKJ56703" in upper or "IKJ56429" in upper:
-                send_terminal_key("clear")
-                _time.sleep(1)
-                send_terminal_key("string", f"LOGON {userid}")
-                send_terminal_key("enter")
-                _time.sleep(3)
+            # ── "REENTER" / "INVALID KEYWORD" / IKJ56703 / IKJ56429 ──
+            # We might be stuck in an editor or bad command context.
+            # Escape to a known state first, then check if already logged in.
+            if "REENTER" in upper or "INVALID KEYWORD" in upper or "IKJ56703" in upper or "IKJ56429" in upper:
+                logger.info(f"Login attempt {attempt}: error state detected, escaping")
+                screen = self._escape_to_ready()
+                upper = screen.upper()
+                if self._is_logged_in(upper):
+                    return
+                # If we escaped to VTAM/logon, try fresh login
+                if "LOGON" in upper and "===>" in screen:
+                    continue  # will be caught by VTAM handler next iteration
+                # If at IKJ56400 prompt
+                if "IKJ56400" in upper:
+                    continue  # will be caught by IKJ56400 handler
+                # Still stuck — try LLM recovery
+                logger.info("Escape didn't reach known state, trying LLM")
+                dummy_step = {"title": "TSO Login Recovery"}
+                self._llm_recover(screen, dummy_step, target)
                 continue
 
             # ── "TSO COMMAND NOT ACCEPTED DURING LOGON" (IKJ56410) ──
