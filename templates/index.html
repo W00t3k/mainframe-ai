@@ -978,24 +978,54 @@ async function loadIdxModels() {
     }
 }
 
+function fmtBytes(b) {
+    if (b >= 1073741824) return (b/1073741824).toFixed(2) + ' GB';
+    if (b >= 1048576) return (b/1048576).toFixed(1) + ' MB';
+    if (b >= 1024) return (b/1024).toFixed(0) + ' KB';
+    return b + ' B';
+}
+function fmtSpeed(bps) {
+    if (bps >= 1048576) return (bps/1048576).toFixed(1) + ' MB/s';
+    if (bps >= 1024) return (bps/1024).toFixed(0) + ' KB/s';
+    return bps.toFixed(0) + ' B/s';
+}
+
 async function pullIdxModel(name, rowEl) {
     if (idxPulling) return;
     idxPulling = true;
 
-    // Replace row content with progress bar
+    // Build progress UI
     rowEl.innerHTML = '';
-    rowEl.style.flexDirection = 'column';
-    rowEl.style.gap = '4px';
-    const label = document.createElement('div');
-    label.style.cssText = 'color:#f80; font-size:11px;';
+    rowEl.style.cssText = 'padding:8px 12px; display:flex; flex-direction:column; gap:4px;';
+    const topRow = document.createElement('div');
+    topRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:IBM Plex Mono,monospace;';
+    const label = document.createElement('span');
+    label.style.color = '#f80';
     label.textContent = `Pulling ${name}...`;
+    const speedLabel = document.createElement('span');
+    speedLabel.style.cssText = 'color:#888; font-size:10px;';
+    speedLabel.textContent = '';
+    topRow.appendChild(label);
+    topRow.appendChild(speedLabel);
+
     const barOuter = document.createElement('div');
-    barOuter.style.cssText = 'width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden;';
+    barOuter.style.cssText = 'width:100%; height:10px; background:#111; border:1px solid #333; border-radius:5px; overflow:hidden;';
     const barInner = document.createElement('div');
-    barInner.style.cssText = 'height:100%; width:0%; background:#f80; border-radius:3px; transition:width 0.3s;';
+    barInner.style.cssText = 'height:100%; width:0%; background:linear-gradient(90deg,#f80,#fa0); border-radius:5px; transition:width 0.3s;';
     barOuter.appendChild(barInner);
-    rowEl.appendChild(label);
+
+    const bottomRow = document.createElement('div');
+    bottomRow.style.cssText = 'display:flex; justify-content:space-between; font-size:10px; color:#555; font-family:IBM Plex Mono,monospace;';
+    const sizeLabel = document.createElement('span');
+    sizeLabel.textContent = '0 B / ?';
+    const pctLabel = document.createElement('span');
+    pctLabel.textContent = '0%';
+    bottomRow.appendChild(sizeLabel);
+    bottomRow.appendChild(pctLabel);
+
+    rowEl.appendChild(topRow);
     rowEl.appendChild(barOuter);
+    rowEl.appendChild(bottomRow);
 
     try {
         const res = await fetch('/api/models/pull', {
@@ -1017,21 +1047,39 @@ async function pullIdxModel(name, rowEl) {
                 if (!line.startsWith('data: ')) continue;
                 try {
                     const evt = JSON.parse(line.slice(6));
-                    if (evt.pct !== undefined) barInner.style.width = evt.pct + '%';
-                    if (evt.status) label.textContent = `${name}: ${evt.status}${evt.pct ? ' ' + evt.pct + '%' : ''}`;
+                    if (evt.pct !== undefined) {
+                        barInner.style.width = evt.pct + '%';
+                        pctLabel.textContent = evt.pct + '%';
+                    }
+                    if (evt.total && evt.completed !== undefined) {
+                        sizeLabel.textContent = fmtBytes(evt.completed) + ' / ' + fmtBytes(evt.total);
+                    }
+                    if (evt.speed && evt.speed > 0) {
+                        speedLabel.textContent = fmtSpeed(evt.speed);
+                        speedLabel.style.color = '#f80';
+                    }
+                    if (evt.status && evt.status !== 'done' && evt.status !== 'error') {
+                        label.textContent = `${name}: ${evt.status}`;
+                    }
                     if (evt.status === 'done') {
                         label.style.color = '#0f0';
                         label.textContent = `${name} ready!`;
+                        speedLabel.textContent = 'Complete';
+                        speedLabel.style.color = '#0f0';
                         barInner.style.width = '100%';
-                        barInner.style.background = '#0f0';
-                        // Auto-switch to the new model
+                        barInner.style.background = 'linear-gradient(90deg,#0f0,#0a0)';
+                        pctLabel.textContent = '100%';
+                        pctLabel.style.color = '#0f0';
+                        sizeLabel.style.color = '#0f0';
                         await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:name})});
                         document.getElementById('tsModel').textContent = name;
-                        setTimeout(() => loadIdxModels(), 1500);
+                        setTimeout(() => loadIdxModels(), 2000);
                     }
                     if (evt.status === 'error') {
                         label.style.color = '#f44';
                         label.textContent = `Error: ${evt.error || 'pull failed'}`;
+                        speedLabel.textContent = 'Failed';
+                        speedLabel.style.color = '#f44';
                     }
                 } catch(pe) {}
             }

@@ -110,6 +110,10 @@ async def api_pull_model(request: Request):
     config = get_config()
 
     async def stream_pull():
+        import time
+        prev_completed = 0
+        prev_time = time.time()
+        buf = b""
         try:
             async with httpx.AsyncClient(timeout=None) as client:
                 async with client.stream(
@@ -117,21 +121,46 @@ async def api_pull_model(request: Request):
                     f"{config.OLLAMA_URL}/api/pull",
                     json={"name": model, "stream": True},
                 ) as resp:
-                    async for line in resp.aiter_lines():
-                        if not line:
-                            continue
-                        try:
-                            chunk = json.loads(line)
-                            status = chunk.get("status", "")
-                            total = chunk.get("total", 0)
-                            completed = chunk.get("completed", 0)
-                            pct = int(completed / total * 100) if total else 0
-                            evt = json.dumps({"status": status, "pct": pct, "total": total, "completed": completed})
-                            yield f"data: {evt}\n\n"
-                        except Exception:
-                            yield f"data: {json.dumps({'status': line})}\n\n"
+                    async for raw in resp.aiter_bytes():
+                        buf += raw
+                        while b"\n" in buf:
+                            line_bytes, buf = buf.split(b"\n", 1)
+                            line = line_bytes.decode("utf-8", errors="replace").strip()
+                            if not line:
+                                continue
+                            try:
+                                chunk = json.loads(line)
+                                status = chunk.get("status", "")
+                                total = chunk.get("total", 0)
+                                completed = chunk.get("completed", 0)
+                                pct = int(completed / total * 100) if total else 0
+
+                                now = time.time()
+                                dt = now - prev_time
+                                speed_bps = 0
+                                if dt > 0.1 and completed > prev_completed:
+                                    speed_bps = (completed - prev_completed) / dt
+                                    prev_completed = completed
+                                    prev_time = now
+
+                                evt = json.dumps({
+                                    "status": status, "pct": pct,
+                                    "total": total, "completed": completed,
+                                    "speed": speed_bps,
+                                })
+                                yield f"data: {evt}\n\n"
+                            except Exception:
+                                yield f"data: {json.dumps({'status': line})}\n\n"
             yield f"data: {json.dumps({'status': 'done', 'pct': 100, 'model': model})}\n\n"
         except Exception as e:
             yield f"data: {json.dumps({'status': 'error', 'error': str(e)})}\n\n"
 
-    return StreamingResponse(stream_pull(), media_type="text/event-stream")
+    return StreamingResponse(
+        stream_pull(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+            "Connection": "keep-alive",
+        },
+    )
