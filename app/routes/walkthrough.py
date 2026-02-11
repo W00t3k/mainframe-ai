@@ -929,24 +929,13 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
                     return
                 continue
 
-            # ── Unknown screen — try pressing Enter or typing TSO ──
-            if "ENTER USERID" not in upper and "IKJ56700" not in upper and "PASSWORD" not in upper and "LOGON" not in upper:
-                # Could be a blank screen or unrecognized — try Enter first
-                send_terminal_key("enter")
-                _time.sleep(2)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-                upper = screen.upper()
-                if self._is_logged_in(upper):
-                    return
-                # Still unknown — try TSO
-                send_terminal_key("clear")
-                _time.sleep(1)
-                send_terminal_key("string", "TSO")
-                send_terminal_key("enter")
-                _time.sleep(3)
-
-            _time.sleep(2)
+            # ── Unknown screen — use AI to figure out what to do ──
+            logger.info(f"Login attempt {attempt}: unknown screen state, using AI escape")
+            screen = self._escape_to_ready()
+            upper = screen.upper()
+            if self._is_logged_in(upper):
+                return
+            _time.sleep(3)
 
         self.error = f"TSO login failed after {max_attempts} attempts"
         self.running = False
