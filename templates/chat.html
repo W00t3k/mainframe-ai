@@ -719,8 +719,40 @@ or use /connect command.
                         row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
                         row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
                         row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
-                        row.innerHTML = `<span>${isCurrent ? '▸ ' : '  '}${m.name}</span><span style="color:#666; font-size:11px;">${m.params || ''} ${m.size}</span>`;
-                        row.onclick = () => switchModel(m.name);
+
+                        const leftSpan = document.createElement('span');
+                        leftSpan.textContent = `${isCurrent ? '▸ ' : '  '}${m.name}`;
+                        leftSpan.onclick = () => switchModel(m.name);
+
+                        const rightSpan = document.createElement('span');
+                        rightSpan.style.cssText = 'display:flex; align-items:center; gap:6px;';
+                        const infoSpan = document.createElement('span');
+                        infoSpan.style.cssText = 'color:#666; font-size:11px;';
+                        infoSpan.textContent = `${m.params || ''} ${m.size}`;
+                        rightSpan.appendChild(infoSpan);
+
+                        if (!isCurrent) {
+                            const delBtn = document.createElement('span');
+                            delBtn.textContent = '✕';
+                            delBtn.title = `Delete ${m.name}`;
+                            delBtn.style.cssText = 'color:#555; font-size:11px; cursor:pointer; padding:0 2px; border-radius:2px;';
+                            delBtn.onmouseenter = () => { delBtn.style.color = '#f44'; };
+                            delBtn.onmouseleave = () => { delBtn.style.color = '#555'; };
+                            delBtn.onclick = async (e) => {
+                                e.stopPropagation();
+                                if (!confirm(`Delete model ${m.name}? This cannot be undone.`)) return;
+                                try {
+                                    const dr = await fetch('/api/models/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:m.name})});
+                                    const dd = await dr.json();
+                                    if (dd.success) { loadModels(); }
+                                    else { alert(dd.error || 'Delete failed'); }
+                                } catch(e) { alert('Delete failed: ' + e.message); }
+                            };
+                            rightSpan.appendChild(delBtn);
+                        }
+
+                        row.appendChild(leftSpan);
+                        row.appendChild(rightSpan);
                         listEl.appendChild(row);
                     });
                 }

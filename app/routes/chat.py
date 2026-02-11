@@ -100,6 +100,30 @@ async def api_switch_model(request: Request):
     return JSONResponse({"success": True, "old": old_model, "new": model})
 
 
+@router.post("/models/delete")
+async def api_delete_model(request: Request):
+    """Delete an Ollama model."""
+    data = await request.json()
+    model = data.get("model", "").strip()
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+
+    config = get_config()
+    # Don't allow deleting the currently active model
+    if model == config.OLLAMA_MODEL:
+        return JSONResponse({"success": False, "error": "Cannot delete the active model. Switch to another model first."})
+
+    try:
+        async with httpx.AsyncClient(timeout=30.0) as client:
+            r = await client.request("DELETE", f"{config.OLLAMA_URL}/api/delete", json={"name": model})
+            if r.status_code == 200:
+                return JSONResponse({"success": True, "model": model})
+            else:
+                return JSONResponse({"success": False, "error": f"Ollama returned {r.status_code}"})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+
 _pull_state = {
     "active": False,
     "model": "",
