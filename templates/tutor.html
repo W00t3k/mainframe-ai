@@ -109,53 +109,53 @@
 
                 <!-- Welcome (shown when no module) -->
                 <div class="welcome-card" id="welcomeCard">
-                    <h2>Welcome to <span style="color:#fa4d56;">Red Team Tutor</span></h2>
-                    <p>Learn mainframe security through guided exploration.</p>
+                    <h2><span style="color:#fa4d56;">BigIron</span> Control-Plane Assessment</h2>
+                    <p style="color:#888;">Operator guidance for live mainframe engagements. Not a training course.</p>
                     <div class="welcome-highlights">
                         <div class="welcome-panel">
-                            <h3>Red Team Focus</h3>
+                            <h3>Engagement Scope</h3>
                             <ul>
-                                <li>Map the session stack (VTAM → TSO → ISPF)</li>
-                                <li>Spot access controls (RACF, dataset profiles)</li>
-                                <li>Find weak links (permissive datasets, defaults)</li>
-                                <li>Capture evidence (screens, JES output, logs)</li>
+                                <li>Map execution trust: VTAM → TSO → JES → RACF</li>
+                                <li>Trace identity binding through deferred execution</li>
+                                <li>Locate writable libraries in trusted job paths</li>
+                                <li>Demonstrate control-plane privilege paths</li>
                             </ul>
                         </div>
                         <div class="welcome-panel">
-                            <h3>Starter Objectives</h3>
+                            <h3>Immediate Actions</h3>
                             <ul>
-                                <li>Connect to TK5 and reach the TSO logon</li>
-                                <li>List jobs in JES spool and read output</li>
-                                <li>Inspect dataset security metadata</li>
-                                <li>Ask the tutor to explain a screen or error</li>
+                                <li>Connect to TK5 and establish a TN3270 session</li>
+                                <li>Bind identity: LOGON → TSO → RFE</li>
+                                <li>Enumerate datasets and library resolution order</li>
+                                <li>Submit a job and trace the execution path</li>
                             </ul>
                         </div>
                         <div class="welcome-panel">
-                            <h3>Engagement Checklist</h3>
+                            <h3>Rules of Engagement</h3>
                             <ul>
-                                <li>Scope: TK5 lab only, no external targets</li>
-                                <li>Evidence: note steps, panels, timestamps</li>
-                                <li>Minimize: change nothing unless instructed</li>
-                                <li>Exit: document findings and clean up</li>
+                                <li>Scope: TK5 lab environment only</li>
+                                <li>No memory exploits, no external tools</li>
+                                <li>Normal user actions only — no system modification</li>
+                                <li>Document execution paths and trust relationships</li>
                             </ul>
                         </div>
                         <div class="welcome-panel">
-                            <h3>Common Pitfalls</h3>
+                            <h3>Environment Notes</h3>
                             <ul>
-                                <li>PF keys vary; try PF3 to exit, PF7/PF8 to page</li>
-                                <li>Uppercase matters in TSO and dataset names</li>
-                                <li>JES output appears after job completes</li>
-                                <li>ISPF panels may hide commands in line 1</li>
+                                <li>MVS 3.8j — no shell, no processes, no fork</li>
+                                <li>RFE (not ISPF), QUEUE (not SDSF)</li>
+                                <li>PF3 to exit, PF7/PF8 to page</li>
+                                <li>Never disconnect while logged in — locks the userid</li>
                             </ul>
                         </div>
                         <div class="welcome-panel full-width">
-                            <h3>First 5 Commands</h3>
+                            <h3>Quick Start</h3>
                             <ul>
-                                <li>TSO: `LOGON USET` then password `PASS`</li>
-                                <li>ISPF: `3.4` to browse datasets</li>
-                                <li>TSO: `LISTCAT` to enumerate catalogs</li>
-                                <li>JES: `SDSF` then `ST` for job status</li>
-                                <li>ISPF: `6` for command shell</li>
+                                <li><code>LOGON USET</code> → password <code>PASS</code> — bind identity</li>
+                                <li>RFE option <code>3.4</code> — enumerate datasets</li>
+                                <li><code>LISTCAT</code> — catalog namespace inspection</li>
+                                <li><code>LISTALC STATUS</code> — current resource footprint</li>
+                                <li><code>SUBMIT</code> — deferred execution via JES</li>
                             </ul>
                         </div>
                     </div>
@@ -169,15 +169,15 @@
                 <!-- Input Footer -->
                 <div class="tutor-footer">
                     <div class="quick-chips">
-                        <button class="chip" data-q="What am I looking at?">What am I looking at?</button>
-                        <button class="chip" data-q="What do I type?">What do I type?</button>
+                        <button class="chip" data-q="What am I looking at?">What is this?</button>
+                        <button class="chip" data-q="What do I do next?">Next action</button>
                         <button class="chip" data-q="Explain this error">Explain error</button>
-                        <button class="chip" data-q="Show the engagement checklist">Engagement checklist</button>
-                        <button class="chip" data-q="Common pitfalls in TK5/ISPF?">Common pitfalls</button>
-                        <button class="chip" data-q="Give me the first 5 commands">First 5 commands</button>
+                        <button class="chip" data-q="Where is authority checked here?">Authority check</button>
+                        <button class="chip" data-q="What is the trust relationship on this screen?">Trust analysis</button>
+                        <button class="chip" data-q="What runs next in the execution path?">Execution path</button>
                     </div>
                     <div class="ask-row">
-                        <input type="text" id="askInput" placeholder="Ask the tutor...">
+                        <input type="text" id="askInput" placeholder="Ask the operator...">
                         <button class="send-btn" id="sendBtn">Send</button>
                     </div>
                 </div>
@@ -265,7 +265,7 @@ function render() {
     // Breadcrumb
     const currentLabData = labsIndex.find(l => l.id === state.currentLab);
     $('#crumbModule').textContent = currentLabData?.title || 'No lab selected';
-    $('#crumbPersona').innerHTML = '<span style="color:#fa4d56;">Red Team Tutor</span>';
+    $('#crumbPersona').innerHTML = '<span style="color:#fa4d56;">Red Team Operator</span>';
 
     // Connection status
     const connStatus = $('#connStatus');
