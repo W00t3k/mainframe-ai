@@ -344,70 +344,14 @@ class WalkthroughRunner:
         return not self._detect_error(screen)
 
     def _llm_recover(self, screen: str, step: dict, target: str) -> bool:
-        """Use the LLM to analyze the screen and decide recovery action.
+        """Use the LLM to recover from an error state.
         
-        Runs synchronously (called from walkthrough thread).
+        Delegates to _escape_to_ready which uses AI on every iteration.
         Returns True if recovery succeeded.
         """
-        try:
-            config = get_config()
-            first_lines = "\n".join(screen.split("\n")[:20])
-            prompt = f"""You are a mainframe terminal recovery agent. The walkthrough step "{step['title']}" failed.
-
-Current screen:
-{first_lines}
-
-The terminal is in an error state. What single recovery action should we take?
-Reply with EXACTLY one of these commands (nothing else):
-- CLEAR (clear the screen)
-- PF3 (go back / exit)
-- ENTER (press enter to continue)
-- LOGOFF (logoff and reconnect)
-- END (exit editor)
-
-Reply with just the command word."""
-
-            resp = httpx.post(
-                f"{config.OLLAMA_URL}/api/generate",
-                json={
-                    "model": config.OLLAMA_MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {"temperature": 0.1, "num_predict": 20},
-                },
-                timeout=15.0,
-            )
-            if resp.status_code != 200:
-                return False
-
-            answer = resp.json().get("response", "").strip().upper()
-            logger.info(f"LLM recovery suggestion: {answer}")
-
-            if "LOGOFF" in answer:
-                self._tso_logoff()
-                _time.sleep(2)
-                self._tso_login("HERC01", "CUL8TR", target)
-            elif "END" in answer:
-                send_terminal_key("string", "END")
-                send_terminal_key("enter")
-                _time.sleep(2)
-            elif "PF3" in answer:
-                send_terminal_key("pf", "3")
-                _time.sleep(1.5)
-            elif "CLEAR" in answer:
-                send_terminal_key("clear")
-                _time.sleep(1)
-            else:
-                send_terminal_key("enter")
-                _time.sleep(1)
-
-            screen = self._read_screen_safe()
-            self.current_screen = screen
-            return not self._detect_error(screen)
-
-        except Exception as e:
-            logger.error(f"LLM recovery failed: {e}")
-            return False
+        logger.info(f"LLM recover called for step: {step.get('title', 'unknown')}")
+        screen = self._escape_to_ready()
+        return not self._detect_error(screen)
 
     def _exec_action(self, action: dict, target: str):
         atype = action["type"]
@@ -598,17 +542,25 @@ Reply with just the command word."""
         return False
 
     def _escape_to_ready(self) -> str:
-        """Try to get back to TSO READY from any stuck state.
-        Uses PF3, END, CLEAR in sequence. Returns final screen."""
-        for attempt in range(8):
+        """Use AI to escape from any stuck terminal state back to TSO READY.
+        
+        On each iteration: read screen, ask LLM what to do, execute, repeat.
+        Falls back to pattern matching if LLM is unavailable."""
+        for attempt in range(6):
             screen = self._read_screen_safe()
+            self.current_screen = screen
             upper = screen.upper()
+            # Already at a usable state?
             if self._is_logged_in(upper):
                 return screen
             if "LOGON" in upper and "===>" in screen:
                 return screen
-            # In editor — type END
-            if "REENTER" in upper or "ENTER FILE NAME" in upper or "DATA SET NAME" in upper:
+
+            # Ask the LLM what to do
+            action = self._ask_llm_recovery_action(screen)
+            logger.info(f"AI escape attempt {attempt+1}: LLM says '{action}'")
+
+            if action == "END":
                 send_terminal_key("home")
                 _time.sleep(0.2)
                 send_terminal_key("eraseeof")
@@ -616,20 +568,96 @@ Reply with just the command word."""
                 send_terminal_key("string", "END")
                 send_terminal_key("enter")
                 _time.sleep(2)
-                continue
-            # INVALID KEYWORD — clear and PF3
-            if "INVALID KEYWORD" in upper or "INVALID" in upper:
-                send_terminal_key("clear")
-                _time.sleep(1)
+            elif action == "PF3":
                 send_terminal_key("pf", "3")
                 _time.sleep(1.5)
-                continue
-            # Try PF3 to back out
-            send_terminal_key("pf", "3")
-            _time.sleep(1.5)
+            elif action == "CLEAR":
+                send_terminal_key("clear")
+                _time.sleep(1)
+            elif action == "LOGOFF":
+                send_terminal_key("home")
+                _time.sleep(0.2)
+                send_terminal_key("eraseeof")
+                _time.sleep(0.2)
+                send_terminal_key("string", "LOGOFF")
+                send_terminal_key("enter")
+                _time.sleep(3)
+            elif action == "ENTER":
+                send_terminal_key("enter")
+                _time.sleep(1.5)
+            elif action == "CANCEL":
+                send_terminal_key("string", "CANCEL")
+                send_terminal_key("enter")
+                _time.sleep(2)
+            else:
+                # Unknown response — try PF3 as safe default
+                send_terminal_key("pf", "3")
+                _time.sleep(1.5)
+
         screen = self._read_screen_safe()
         self.current_screen = screen
         return screen
+
+    def _ask_llm_recovery_action(self, screen: str) -> str:
+        """Ask the LLM to analyze the screen and return a single recovery action.
+        
+        Returns one of: CLEAR, PF3, ENTER, LOGOFF, END, CANCEL
+        Falls back to pattern matching if LLM is unavailable."""
+        try:
+            config = get_config()
+            first_lines = "\n".join(screen.split("\n")[:24])
+            prompt = f"""You are an IBM MVS 3.8j mainframe terminal recovery agent.
+The terminal is stuck in an error state. Your job is to get back to TSO READY or the VTAM logon screen.
+
+Current terminal screen:
+---
+{first_lines}
+---
+
+Common MVS error states and correct recovery:
+- "REENTER -" or "ENTER FILE NAME -" = stuck in TSO EDIT line mode. Send END to exit.
+- "INVALID KEYWORD" = wrong command for current context. Send CLEAR then PF3.
+- "NOT FOUND" = dataset missing. Send PF3 to go back.
+- "NOT AUTHORIZED" = RACF denied. Send PF3 to go back.
+- "IKJ56" messages = TSO errors. Usually CLEAR or PF3.
+- RFE/ISPF panels = Send PF3 to exit back toward READY.
+- If deeply nested, multiple PF3 presses needed.
+
+What SINGLE action should we take RIGHT NOW?
+Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
+
+            resp = httpx.post(
+                f"{config.OLLAMA_URL}/api/generate",
+                json={
+                    "model": config.OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.1, "num_predict": 10},
+                },
+                timeout=15.0,
+            )
+            if resp.status_code == 200:
+                answer = resp.json().get("response", "").strip().upper()
+                # Extract just the action word
+                for cmd in ["LOGOFF", "CANCEL", "CLEAR", "ENTER", "END", "PF3"]:
+                    if cmd in answer:
+                        return cmd
+            # LLM didn't give a valid answer — fall back to pattern
+            return self._pattern_recovery_action(screen)
+        except Exception as e:
+            logger.warning(f"LLM recovery unavailable: {e}")
+            return self._pattern_recovery_action(screen)
+
+    def _pattern_recovery_action(self, screen: str) -> str:
+        """Fallback pattern-based recovery when LLM is unavailable."""
+        upper = screen.upper()
+        if "REENTER" in upper or "ENTER FILE NAME" in upper:
+            return "END"
+        if "INVALID KEYWORD" in upper or "INVALID" in upper:
+            return "CLEAR"
+        if "NOT FOUND" in upper or "NOT AUTHORIZED" in upper:
+            return "PF3"
+        return "PF3"
 
     def _press_through_screens(self) -> str:
         """Press Enter through broadcast/fortune/info screens until we reach
