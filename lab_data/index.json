@@ -1,121 +1,94 @@
 {
   "labs": [
     {
-      "id": "session-stack",
-      "title": "Session Stack Walkthrough",
-      "description": "Walk the VTAM -> TSO -> ISPF layers and learn where trust boundaries shift.",
+      "id": "quick-demo",
+      "title": "Quick Demo: ISPF Primary Menu",
+      "description": "30-second automated walkthrough. Connect, authenticate, reach ISPF.",
       "category": "fundamentals",
       "difficulty": "beginner",
-      "questions": ["Q1", "Q5"],
-      "steps": 4
-    },
-    {
-      "id": "batch-basics",
-      "title": "Batch Execution Basics",
-      "description": "Submit a simple job and map the JCL -> JES -> program execution chain.",
-      "category": "fundamentals",
-      "difficulty": "beginner",
-      "questions": ["Q2", "Q3"],
-      "steps": 3
-    },
-    {
-      "id": "racf-basics",
-      "title": "RACF Authorization Model",
-      "description": "Understand how RACF enforces access control on datasets, programs, and resources.",
-      "category": "security",
-      "difficulty": "beginner",
-      "questions": ["Q1", "Q4"],
-      "steps": 4
-    },
-    {
-      "id": "dataset-enumeration",
-      "title": "Dataset Enumeration",
-      "description": "Discover and catalog datasets to map the system's data landscape.",
-      "category": "recon",
-      "difficulty": "intermediate",
-      "questions": ["Q5"],
-      "steps": 4
-    },
-    {
-      "id": "tso-enumeration",
-      "title": "TSO User Enumeration",
-      "description": "Discover valid TSO userids through logon response analysis.",
-      "category": "recon",
-      "difficulty": "intermediate",
-      "questions": ["Q1", "Q2"],
-      "steps": 4
-    },
-    {
-      "id": "jcl-analysis",
-      "title": "JCL Security Analysis",
-      "description": "Analyze JCL for security implications and privilege escalation paths.",
-      "category": "security",
-      "difficulty": "intermediate",
-      "questions": ["Q2", "Q3"],
-      "steps": 4
-    },
-    {
-      "id": "hidden-fields",
-      "title": "Hidden Field Detection",
-      "description": "Identify non-display fields that may contain sensitive data or bypass controls.",
-      "category": "recon",
-      "difficulty": "advanced",
-      "questions": ["Q5"],
-      "steps": 4
-    },
-    {
-      "id": "sdsf-inspection",
-      "title": "SDSF Job Inspection",
-      "description": "Use SDSF to examine running jobs, output, and system activity.",
-      "category": "recon",
-      "difficulty": "beginner",
-      "questions": ["Q2", "Q3"],
-      "steps": 4
-    },
-    {
-      "id": "cics-enumeration",
-      "title": "CICS Transaction Enumeration",
-      "description": "Discover valid CICS transactions and understand the transaction security model.",
-      "category": "recon",
-      "difficulty": "advanced",
-      "questions": ["Q1", "Q2", "Q4"],
-      "steps": 4
-    },
-    {
-      "id": "mvs-ipl-operations",
-      "title": "MVS IPL & System Operations",
-      "description": "IPL the MVS system, start VTAM/TSO, submit jobs, manage JES2 queues, display system status, and perform a clean shutdown. Every command documented with mental models.",
-      "category": "fundamentals",
-      "difficulty": "beginner",
-      "questions": ["Q1", "Q5"],
+      "walkthrough": true,
       "steps": 6
     },
     {
-      "id": "cobol-compile-run",
-      "title": "COBOL Compile & Run on MVS",
-      "description": "Create a COBOL program using RPF, write JCL, submit the job, and view output. Every command and JCL parameter documented with mental models.",
+      "id": "session-stack",
+      "title": "Session Stack: Trust Boundary Mapping",
+      "description": "Map the VTAM → TSO → ISPF session layers. Identify where identity is bound and trust shifts.",
       "category": "fundamentals",
       "difficulty": "beginner",
-      "questions": ["Q2", "Q3"],
-      "steps": 4
+      "walkthrough": true,
+      "steps": 9
     },
     {
-      "id": "mvs-command-reference",
-      "title": "MVS 3.8j Command Reference",
-      "description": "Comprehensive reference for Hercules, MVS operator, JES2, TSO, RPF, and JCL commands — with mental models explaining what each command does and why.",
+      "id": "deferred-exec",
+      "title": "Deferred Execution: JCL → JES",
+      "description": "Submit a job and trace the execution chain. Identity binding, JES scheduling, deferred trust.",
       "category": "fundamentals",
       "difficulty": "beginner",
-      "questions": ["Q1", "Q2", "Q3", "Q5"],
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "system-inspection",
+      "title": "System Inspection: Configuration & Procedures",
+      "description": "Inspect system datasets, PROCLIB, and configuration. Map what a normal user can see.",
+      "category": "recon",
+      "difficulty": "intermediate",
+      "walkthrough": true,
       "steps": 7
     },
     {
-      "id": "zos-reverse-shell",
+      "id": "auth-model",
+      "title": "RACF: Authorization Plane Analysis",
+      "description": "Examine how RACF evaluates access. Resource profiles, identity footprint, policy enforcement gaps.",
+      "category": "security",
+      "difficulty": "beginner",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "dataset-model",
+      "title": "Dataset Model: PDS, Members & Catalogs",
+      "description": "Enumerate catalog entries and dataset attributes. Map the storage namespace and trust-sensitive datasets.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "walkthrough": true,
+      "steps": 7
+    },
+    {
+      "id": "cobol-basics",
+      "title": "COBOL Compile & Execute on MVS",
+      "description": "Create a COBOL program, write JCL, submit the compile-link-go job. Trace the deferred execution model.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "walkthrough": true,
+      "steps": 7
+    },
+    {
+      "id": "address-spaces",
+      "title": "Address Space Anatomy",
+      "description": "Inspect address spaces, allocations, and job output. Destroy the process-centric mental model.",
+      "category": "fundamentals",
+      "difficulty": "intermediate",
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "reverse-shell",
       "title": "Z/OS Reverse Shell via JCL (Metasploit)",
-      "description": "Analyze the Metasploit cmd/mainframe/reverse_shell_jcl payload. Understand how JCL-based reverse shells exploit deferred execution, identity binding, and the gap between submission and execution on Z/OS.",
+      "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
       "category": "security",
       "difficulty": "advanced",
-      "questions": ["Q1", "Q2", "Q3", "Q4", "Q5"],
-      "steps": 6
+      "walkthrough": true,
+      "steps": 10
+    },
+    {
+      "id": "cics-kicks",
+      "title": "CICS/KICKS: Transaction Processing",
+      "description": "Map the transaction execution plane. Install and run CICS transactions on the TK5 lab.",
+      "category": "security",
+      "difficulty": "advanced",
+      "walkthrough": true,
+      "steps": 8
     }
   ]
 }
