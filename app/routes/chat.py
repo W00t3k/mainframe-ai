@@ -4,12 +4,14 @@ Chat API Routes
 Endpoints for chat functionality and AI interaction.
 """
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
+import httpx
 
 from app.models.schemas import ChatRequest
 from app.services.chat import get_chat_service
 from app.services.ollama import get_ollama_service
+from app.config import get_config
 
 router = APIRouter(tags=["chat"])
 
@@ -52,3 +54,44 @@ async def api_status():
         "ollama_running": ollama_ok,
         "model": chat_service.config.OLLAMA_MODEL
     })
+
+
+@router.get("/models")
+async def api_list_models():
+    """List available Ollama models."""
+    config = get_config()
+    models = []
+    try:
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            r = await client.get(f"{config.OLLAMA_URL}/api/tags")
+            if r.status_code == 200:
+                data = r.json()
+                for m in data.get("models", []):
+                    name = m.get("name", "")
+                    size_gb = m.get("size", 0) / (1024**3)
+                    models.append({
+                        "name": name,
+                        "size": f"{size_gb:.1f}GB",
+                        "family": m.get("details", {}).get("family", ""),
+                        "params": m.get("details", {}).get("parameter_size", ""),
+                        "quant": m.get("details", {}).get("quantization_level", ""),
+                    })
+    except Exception as e:
+        return JSONResponse({"models": [], "current": config.OLLAMA_MODEL, "error": str(e)})
+    
+    return JSONResponse({"models": models, "current": config.OLLAMA_MODEL})
+
+
+@router.post("/models/switch")
+async def api_switch_model(request: Request):
+    """Switch the active Ollama model."""
+    data = await request.json()
+    model = data.get("model", "").strip()
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+    
+    config = get_config()
+    old_model = config.OLLAMA_MODEL
+    config.OLLAMA_MODEL = model
+    
+    return JSONResponse({"success": True, "old": old_model, "new": model})

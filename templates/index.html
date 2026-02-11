@@ -24,7 +24,12 @@
                 <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()" data-hint="Restart the Hercules mainframe emulator — performs an IPL to reset the MVS system to a clean state.">[R] RESTART</button>
             </div>
             <div class="idx-toolbar-status" id="toolbarStatus">
-                <span class="ts-item"><span class="ts-led" id="tsOllamaLed"></span><span class="ts-label">LLM</span><span class="ts-val" id="tsModel">—</span></span>
+                <span class="ts-item" style="position:relative;"><span class="ts-led" id="tsOllamaLed"></span><span class="ts-label">LLM</span><span class="ts-val" id="tsModel" onclick="toggleIdxModelPicker()" style="cursor:pointer; text-decoration:underline dotted;" title="Click to switch model">—</span>
+                    <div id="idxModelPicker" style="display:none; position:absolute; top:100%; right:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:6px 0; min-width:280px; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-height:300px; overflow-y:auto;">
+                        <div style="padding:4px 12px 6px; color:#888; font-size:11px; border-bottom:1px solid #222;">Available Models (click to switch)</div>
+                        <div id="idxModelList" style="padding:4px 0;"><div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div></div>
+                    </div>
+                </span>
                 <span class="ts-item"><span class="ts-led" id="tsMVSLed"></span><span class="ts-label">MVS</span></span>
                 <span class="ts-item"><span class="ts-label">MEM</span><span class="ts-val" id="tsMem">—</span></span>
                 <span class="ts-clock" id="tsClock">--:--</span>
@@ -870,6 +875,57 @@ async function installKicks() {
         }
     });
 })();
+
+/* ── Model Picker (index page) ── */
+let idxModelPickerOpen = false;
+function toggleIdxModelPicker() {
+    const picker = document.getElementById('idxModelPicker');
+    idxModelPickerOpen = !idxModelPickerOpen;
+    picker.style.display = idxModelPickerOpen ? 'block' : 'none';
+    if (idxModelPickerOpen) loadIdxModels();
+}
+async function loadIdxModels() {
+    const listEl = document.getElementById('idxModelList');
+    listEl.innerHTML = '<div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>';
+    try {
+        const r = await fetch('/api/models');
+        const data = await r.json();
+        if (!data.models || data.models.length === 0) {
+            listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">No models. Run: ollama pull llama3.2:3b</div>';
+            return;
+        }
+        listEl.innerHTML = '';
+        data.models.forEach(m => {
+            const isCurrent = m.name === data.current;
+            const row = document.createElement('div');
+            row.style.cssText = 'padding:6px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
+            row.style.color = isCurrent ? '#0f0' : '#ccc';
+            row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
+            row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
+            row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
+            row.innerHTML = `<span>${isCurrent ? '▸ ' : '  '}${m.name}</span><span style="color:#666; font-size:11px;">${m.params || ''} ${m.size}</span>`;
+            row.onclick = async () => {
+                try {
+                    const sr = await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:m.name})});
+                    const sd = await sr.json();
+                    if (sd.success) {
+                        document.getElementById('tsModel').textContent = m.name;
+                        toggleIdxModelPicker();
+                    }
+                } catch(e) {}
+            };
+            listEl.appendChild(row);
+        });
+    } catch(e) {
+        listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">Ollama offline</div>';
+    }
+}
+document.addEventListener('click', (e) => {
+    if (idxModelPickerOpen && !e.target.closest('#idxModelPicker') && !e.target.closest('#tsModel')) {
+        idxModelPickerOpen = false;
+        document.getElementById('idxModelPicker').style.display = 'none';
+    }
+});
 
 /* ── Toolbar scroll-up reveal ── */
 (function() {

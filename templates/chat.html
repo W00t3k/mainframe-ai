@@ -47,9 +47,15 @@
                 <span class="label">LLM:</span>
                 <span class="value" id="llmStatus">Checking...</span>
             </div>
-            <div class="status-item">
+            <div class="status-item" style="position:relative;">
                 <span class="label">Model:</span>
-                <span class="value" id="modelName">llama3.1:8b</span>
+                <span class="value model-switch" id="modelName" onclick="toggleModelPicker()" style="cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px;" title="Click to switch model">llama3.1:8b</span>
+                <div id="modelPicker" style="display:none; position:absolute; top:100%; left:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:6px 0; min-width:280px; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-height:300px; overflow-y:auto;">
+                    <div style="padding:4px 12px 6px; color:#888; font-size:11px; border-bottom:1px solid #222;">Available Models (click to switch)</div>
+                    <div id="modelList" style="padding:4px 0;">
+                        <div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>
+                    </div>
+                </div>
             </div>
             <div class="status-item">
                 <span class="label">TN3270:</span>
@@ -114,7 +120,7 @@
                                 </div>
                                 <div class="sidebar-row">
                                     <span class="key">Model</span>
-                                    <span class="val" id="sbModel">llama3.1:8b</span>
+                                    <span class="val" id="sbModel" onclick="toggleModelPicker()" style="cursor:pointer; text-decoration:underline dotted;" title="Click to switch">llama3.1:8b</span>
                                 </div>
                                 <div class="sidebar-row">
                                     <span class="key">TN3270</span>
@@ -667,5 +673,70 @@ or use /connect command.
 
         // Set RAG dot active
         document.getElementById('ragDot').classList.add('active');
+
+        // ── Model Picker ──
+        let modelPickerOpen = false;
+
+        async function toggleModelPicker() {
+            const picker = document.getElementById('modelPicker');
+            modelPickerOpen = !modelPickerOpen;
+            picker.style.display = modelPickerOpen ? 'block' : 'none';
+            if (modelPickerOpen) await loadModels();
+        }
+
+        async function loadModels() {
+            const listEl = document.getElementById('modelList');
+            listEl.innerHTML = '<div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>';
+            try {
+                const r = await fetch('/api/models');
+                const data = await r.json();
+                if (!data.models || data.models.length === 0) {
+                    listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">No models found. Run: ollama pull llama3.2:3b</div>';
+                    return;
+                }
+                listEl.innerHTML = '';
+                data.models.forEach(m => {
+                    const isCurrent = m.name === data.current;
+                    const row = document.createElement('div');
+                    row.style.cssText = 'padding:6px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
+                    row.style.color = isCurrent ? '#0f0' : '#ccc';
+                    row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
+                    row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
+                    row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
+                    row.innerHTML = `<span>${isCurrent ? '▸ ' : '  '}${m.name}</span><span style="color:#666; font-size:11px;">${m.params || ''} ${m.size}</span>`;
+                    row.onclick = () => switchModel(m.name);
+                    listEl.appendChild(row);
+                });
+            } catch (e) {
+                listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">Ollama offline</div>';
+            }
+        }
+
+        async function switchModel(name) {
+            try {
+                const r = await fetch('/api/models/switch', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({model: name})
+                });
+                const data = await r.json();
+                if (data.success) {
+                    document.getElementById('modelName').textContent = name;
+                    document.getElementById('sbModel').textContent = name;
+                    toggleModelPicker();
+                    addMessage(`Model switched to **${name}** (was ${data.old})`);
+                }
+            } catch (e) {
+                addMessage('Failed to switch model: ' + e.message);
+            }
+        }
+
+        // Close picker on outside click
+        document.addEventListener('click', (e) => {
+            if (modelPickerOpen && !e.target.closest('#modelPicker') && !e.target.closest('#modelName')) {
+                modelPickerOpen = false;
+                document.getElementById('modelPicker').style.display = 'none';
+            }
+        });
     </script>
 {% endblock %}
