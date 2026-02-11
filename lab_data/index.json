@@ -19,33 +19,6 @@
       "steps": 9
     },
     {
-      "id": "deferred-exec",
-      "title": "Deferred Execution: JCL → JES",
-      "description": "Submit a job and trace the execution chain. Identity binding, JES scheduling, deferred trust.",
-      "category": "fundamentals",
-      "difficulty": "beginner",
-      "walkthrough": true,
-      "steps": 6
-    },
-    {
-      "id": "system-inspection",
-      "title": "System Inspection: Configuration & Procedures",
-      "description": "Inspect system datasets, PROCLIB, and configuration. Map what a normal user can see.",
-      "category": "recon",
-      "difficulty": "intermediate",
-      "walkthrough": true,
-      "steps": 7
-    },
-    {
-      "id": "auth-model",
-      "title": "RACF: Authorization Plane Analysis",
-      "description": "Examine how RACF evaluates access. Resource profiles, identity footprint, policy enforcement gaps.",
-      "category": "security",
-      "difficulty": "beginner",
-      "walkthrough": true,
-      "steps": 5
-    },
-    {
       "id": "dataset-model",
       "title": "Dataset Model: PDS, Members & Catalogs",
       "description": "Enumerate catalog entries and dataset attributes. Map the storage namespace and trust-sensitive datasets.",
@@ -55,11 +28,29 @@
       "steps": 7
     },
     {
-      "id": "cobol-basics",
-      "title": "COBOL Compile & Execute on MVS",
-      "description": "Create a COBOL program, write JCL, submit the compile-link-go job. Trace the deferred execution model.",
+      "id": "deferred-exec",
+      "title": "Deferred Execution: JCL → JES",
+      "description": "Submit a job and trace the execution chain. Identity binding, JES scheduling, deferred trust.",
       "category": "fundamentals",
       "difficulty": "beginner",
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "auth-model",
+      "title": "RACF: Authorization Plane Analysis",
+      "description": "Examine how RACF evaluates access. Resource profiles, identity footprint, policy enforcement gaps.",
+      "category": "security",
+      "difficulty": "intermediate",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "system-inspection",
+      "title": "System Inspection: Configuration & Procedures",
+      "description": "Inspect system datasets, PROCLIB, and configuration. Map what a normal user can see.",
+      "category": "recon",
+      "difficulty": "intermediate",
       "walkthrough": true,
       "steps": 7
     },
@@ -73,13 +64,13 @@
       "steps": 6
     },
     {
-      "id": "reverse-shell",
-      "title": "Z/OS Reverse Shell via JCL (Metasploit)",
-      "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
-      "category": "security",
-      "difficulty": "advanced",
+      "id": "cobol-basics",
+      "title": "COBOL Compile & Execute on MVS",
+      "description": "Create a COBOL program, write JCL, submit the compile-link-go job. Trace the deferred execution model.",
+      "category": "fundamentals",
+      "difficulty": "intermediate",
       "walkthrough": true,
-      "steps": 10
+      "steps": 7
     },
     {
       "id": "cics-kicks",
@@ -89,6 +80,15 @@
       "difficulty": "advanced",
       "walkthrough": true,
       "steps": 8
+    },
+    {
+      "id": "reverse-shell",
+      "title": "Z/OS Reverse Shell via JCL (Metasploit)",
+      "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
+      "category": "security",
+      "difficulty": "advanced",
+      "walkthrough": true,
+      "steps": 10
     }
   ]
 }
