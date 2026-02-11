@@ -5,8 +5,10 @@ Endpoints for chat functionality and AI interaction.
 """
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, StreamingResponse
 import httpx
+import json
+import asyncio
 
 from app.models.schemas import ChatRequest
 from app.services.chat import get_chat_service
@@ -95,3 +97,41 @@ async def api_switch_model(request: Request):
     config.OLLAMA_MODEL = model
     
     return JSONResponse({"success": True, "old": old_model, "new": model})
+
+
+@router.post("/models/pull")
+async def api_pull_model(request: Request):
+    """Pull (download) a model from Ollama. Streams progress as SSE."""
+    data = await request.json()
+    model = data.get("model", "").strip()
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+
+    config = get_config()
+
+    async def stream_pull():
+        try:
+            async with httpx.AsyncClient(timeout=None) as client:
+                async with client.stream(
+                    "POST",
+                    f"{config.OLLAMA_URL}/api/pull",
+                    json={"name": model, "stream": True},
+                ) as resp:
+                    async for line in resp.aiter_lines():
+                        if not line:
+                            continue
+                        try:
+                            chunk = json.loads(line)
+                            status = chunk.get("status", "")
+                            total = chunk.get("total", 0)
+                            completed = chunk.get("completed", 0)
+                            pct = int(completed / total * 100) if total else 0
+                            evt = json.dumps({"status": status, "pct": pct, "total": total, "completed": completed})
+                            yield f"data: {evt}\n\n"
+                        except Exception:
+                            yield f"data: {json.dumps({'status': line})}\n\n"
+            yield f"data: {json.dumps({'status': 'done', 'pct': 100, 'model': model})}\n\n"
+        except Exception as e:
+            yield f"data: {json.dumps({'status': 'error', 'error': str(e)})}\n\n"
+
+    return StreamingResponse(stream_pull(), media_type="text/event-stream")

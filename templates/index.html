@@ -877,51 +877,174 @@ async function installKicks() {
 })();
 
 /* ── Model Picker (index page) ── */
+const SUGGESTED_MODELS = [
+    {name:'tinyllama',      desc:'Tiny & fast',   size:'~637MB'},
+    {name:'llama3.2:3b',    desc:'Good balance',  size:'~2.0GB'},
+    {name:'llama3.1:8b',    desc:'Best quality',  size:'~4.7GB'},
+    {name:'phi3:mini',      desc:'Microsoft Phi-3',size:'~2.3GB'},
+    {name:'mistral:7b',     desc:'Mistral 7B',    size:'~4.1GB'},
+    {name:'gemma2:2b',      desc:'Google Gemma 2B',size:'~1.6GB'},
+];
 let idxModelPickerOpen = false;
+let idxPulling = false;
+
 function toggleIdxModelPicker() {
     const picker = document.getElementById('idxModelPicker');
     idxModelPickerOpen = !idxModelPickerOpen;
     picker.style.display = idxModelPickerOpen ? 'block' : 'none';
     if (idxModelPickerOpen) loadIdxModels();
 }
+
 async function loadIdxModels() {
     const listEl = document.getElementById('idxModelList');
     listEl.innerHTML = '<div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>';
+    let installedNames = [];
+    let currentModel = '';
     try {
         const r = await fetch('/api/models');
         const data = await r.json();
-        if (!data.models || data.models.length === 0) {
-            listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">No models. Run: ollama pull llama3.2:3b</div>';
-            return;
-        }
+        currentModel = data.current || '';
         listEl.innerHTML = '';
-        data.models.forEach(m => {
-            const isCurrent = m.name === data.current;
+
+        if (data.models && data.models.length > 0) {
+            const hdr = document.createElement('div');
+            hdr.style.cssText = 'padding:4px 12px 4px; color:#0f0; font-size:10px; text-transform:uppercase; letter-spacing:1px;';
+            hdr.textContent = 'Installed';
+            listEl.appendChild(hdr);
+
+            data.models.forEach(m => {
+                installedNames.push(m.name);
+                const isCurrent = m.name === currentModel;
+                const row = document.createElement('div');
+                row.style.cssText = 'padding:5px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
+                row.style.color = isCurrent ? '#0f0' : '#ccc';
+                row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
+                row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
+                row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
+                row.innerHTML = `<span>${isCurrent ? '▸ ' : '  '}${m.name}</span><span style="color:#666; font-size:11px;">${m.params || ''} ${m.size}</span>`;
+                row.onclick = async () => {
+                    try {
+                        const sr = await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:m.name})});
+                        const sd = await sr.json();
+                        if (sd.success) {
+                            document.getElementById('tsModel').textContent = m.name;
+                            toggleIdxModelPicker();
+                        }
+                    } catch(e) {}
+                };
+                listEl.appendChild(row);
+            });
+        }
+
+        // Download section
+        const dlHdr = document.createElement('div');
+        dlHdr.style.cssText = 'padding:6px 12px 4px; color:#f80; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px;';
+        dlHdr.textContent = 'Download';
+        listEl.appendChild(dlHdr);
+
+        SUGGESTED_MODELS.forEach(s => {
+            const alreadyInstalled = installedNames.some(n => n.startsWith(s.name.split(':')[0]));
             const row = document.createElement('div');
-            row.style.cssText = 'padding:6px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
-            row.style.color = isCurrent ? '#0f0' : '#ccc';
-            row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
-            row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
-            row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
-            row.innerHTML = `<span>${isCurrent ? '▸ ' : '  '}${m.name}</span><span style="color:#666; font-size:11px;">${m.params || ''} ${m.size}</span>`;
-            row.onclick = async () => {
-                try {
-                    const sr = await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:m.name})});
-                    const sd = await sr.json();
-                    if (sd.success) {
-                        document.getElementById('tsModel').textContent = m.name;
-                        toggleIdxModelPicker();
-                    }
-                } catch(e) {}
-            };
+            row.style.cssText = 'padding:5px 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
+            row.style.color = alreadyInstalled ? '#555' : '#ccc';
+
+            const left = document.createElement('span');
+            left.innerHTML = `${alreadyInstalled ? '✓ ' : '  '}${s.name} <span style="color:#666; font-size:10px;">${s.desc}</span>`;
+
+            const right = document.createElement('span');
+            right.style.cssText = 'display:flex; align-items:center; gap:6px;';
+            const sizeSpan = document.createElement('span');
+            sizeSpan.style.cssText = 'color:#555; font-size:10px;';
+            sizeSpan.textContent = s.size;
+            right.appendChild(sizeSpan);
+
+            if (!alreadyInstalled) {
+                const btn = document.createElement('button');
+                btn.textContent = 'Pull';
+                btn.style.cssText = 'background:#f80; color:#000; border:none; border-radius:3px; padding:1px 8px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold;';
+                btn.onmouseenter = () => btn.style.background = '#fa0';
+                btn.onmouseleave = () => btn.style.background = '#f80';
+                btn.onclick = (e) => { e.stopPropagation(); pullIdxModel(s.name, row); };
+                right.appendChild(btn);
+            }
+
+            row.appendChild(left);
+            row.appendChild(right);
             listEl.appendChild(row);
         });
+
     } catch(e) {
         listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">Ollama offline</div>';
     }
 }
+
+async function pullIdxModel(name, rowEl) {
+    if (idxPulling) return;
+    idxPulling = true;
+
+    // Replace row content with progress bar
+    rowEl.innerHTML = '';
+    rowEl.style.flexDirection = 'column';
+    rowEl.style.gap = '4px';
+    const label = document.createElement('div');
+    label.style.cssText = 'color:#f80; font-size:11px;';
+    label.textContent = `Pulling ${name}...`;
+    const barOuter = document.createElement('div');
+    barOuter.style.cssText = 'width:100%; height:6px; background:#222; border-radius:3px; overflow:hidden;';
+    const barInner = document.createElement('div');
+    barInner.style.cssText = 'height:100%; width:0%; background:#f80; border-radius:3px; transition:width 0.3s;';
+    barOuter.appendChild(barInner);
+    rowEl.appendChild(label);
+    rowEl.appendChild(barOuter);
+
+    try {
+        const res = await fetch('/api/models/pull', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({model: name})
+        });
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buf = '';
+
+        while (true) {
+            const {done, value} = await reader.read();
+            if (done) break;
+            buf += decoder.decode(value, {stream: true});
+            const lines = buf.split('\n');
+            buf = lines.pop();
+            for (const line of lines) {
+                if (!line.startsWith('data: ')) continue;
+                try {
+                    const evt = JSON.parse(line.slice(6));
+                    if (evt.pct !== undefined) barInner.style.width = evt.pct + '%';
+                    if (evt.status) label.textContent = `${name}: ${evt.status}${evt.pct ? ' ' + evt.pct + '%' : ''}`;
+                    if (evt.status === 'done') {
+                        label.style.color = '#0f0';
+                        label.textContent = `${name} ready!`;
+                        barInner.style.width = '100%';
+                        barInner.style.background = '#0f0';
+                        // Auto-switch to the new model
+                        await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:name})});
+                        document.getElementById('tsModel').textContent = name;
+                        setTimeout(() => loadIdxModels(), 1500);
+                    }
+                    if (evt.status === 'error') {
+                        label.style.color = '#f44';
+                        label.textContent = `Error: ${evt.error || 'pull failed'}`;
+                    }
+                } catch(pe) {}
+            }
+        }
+    } catch(e) {
+        label.style.color = '#f44';
+        label.textContent = `Error: ${e.message}`;
+    }
+    idxPulling = false;
+}
+
 document.addEventListener('click', (e) => {
-    if (idxModelPickerOpen && !e.target.closest('#idxModelPicker') && !e.target.closest('#tsModel')) {
+    if (idxModelPickerOpen && !idxPulling && !e.target.closest('#idxModelPicker') && !e.target.closest('#tsModel')) {
         idxModelPickerOpen = false;
         document.getElementById('idxModelPicker').style.display = 'none';
     }
