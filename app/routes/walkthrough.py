@@ -64,7 +64,12 @@ class WalkthroughRunner:
         self.finished = False
         self.error = None
         self.current_step = 0
+        self.total_steps = 0
+        self.current_title = "Starting..."
+        self.current_narration = ""
         self.current_screen = ""
+        self.current_control_plane = ""
+        self.walkthrough_name = ""
         self.log = []
         self.display_seconds = speed
         self.lhost = lhost

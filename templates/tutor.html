@@ -452,8 +452,8 @@ async function startWalkthrough(name) {
         state.connected = true;
         state.host = target;
         render();
-        // Start polling
-        startWalkthroughPoll();
+        // Delay first poll so walkthrough thread can initialize
+        setTimeout(() => startWalkthroughPoll(), 1500);
     } catch (e) {
         addMessage('error', 'Error', e.message);
     }
