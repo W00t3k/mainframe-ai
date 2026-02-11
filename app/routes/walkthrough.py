@@ -220,11 +220,16 @@ class WalkthroughRunner:
                             self.current_screen = connection.current_screen if connection else ""
                         # AI-powered screen recovery
                         if self._detect_error(self.current_screen):
+                            logger.info(f"Error detected at step {idx+1}, starting AI recovery...")
+                            self.current_narration = "AI Recovery: analyzing terminal screen..."
                             recovered = self._recover_from_error(self.current_screen, step, target)
                             if not recovered:
-                                logger.warning(f"Recovery failed at step {idx+1}, attempting LLM fallback")
+                                logger.warning(f"Pattern recovery failed at step {idx+1}, using AI escape")
                                 recovered = self._llm_recover(self.current_screen, step, target)
-                            if not recovered:
+                            if recovered:
+                                logger.info(f"Recovery succeeded at step {idx+1}, waiting before continuing")
+                                _time.sleep(3)  # wait for terminal to settle
+                            else:
                                 logger.error(f"All recovery failed at step {idx+1}")
             except Exception as e:
                 self.error = f"Step {idx + 1} failed: {e}"
@@ -371,19 +376,22 @@ class WalkthroughRunner:
             send_terminal_key("string", action["value"])
         elif atype == "enter":
             send_terminal_key("enter")
-            _time.sleep(0.5)
+            _time.sleep(1.5)
         elif atype == "clear":
             send_terminal_key("clear")
-            _time.sleep(0.3)
+            _time.sleep(1.5)
         elif atype == "pf":
             send_terminal_key("pf", str(action["value"]))
-            _time.sleep(0.5)
+            _time.sleep(1.5)
         elif atype == "tab":
             send_terminal_key("tab")
+            _time.sleep(0.3)
         elif atype == "home":
             send_terminal_key("home")
+            _time.sleep(0.3)
         elif atype == "eraseeof":
             send_terminal_key("eraseeof")
+            _time.sleep(0.3)
         elif atype == "wait":
             _time.sleep(action.get("seconds", 1))
         elif atype == "tso_login":
@@ -544,8 +552,10 @@ class WalkthroughRunner:
     def _escape_to_ready(self) -> str:
         """Use AI to escape from any stuck terminal state back to TSO READY.
         
-        On each iteration: read screen, ask LLM what to do, execute, repeat.
-        Falls back to pattern matching if LLM is unavailable."""
+        For known error patterns (REENTER, INVALID KEYWORD), use CLEAR directly
+        without asking the LLM — the LLM sometimes returns wrong actions.
+        For unknown states, ask the LLM.
+        Waits between each action so the terminal has time to respond."""
         for attempt in range(6):
             screen = self._read_screen_safe()
             self.current_screen = screen
@@ -556,43 +566,70 @@ class WalkthroughRunner:
             if "LOGON" in upper and "===>" in screen:
                 return screen
 
-            # Ask the LLM what to do
+            # ---- KNOWN PATTERNS: handle directly, don't ask LLM ----
+            # REENTER at TSO prompt — CLEAR is the ONLY correct action
+            # END is INVALID here and causes an infinite loop
+            if "REENTER" in upper:
+                logger.info(f"AI escape attempt {attempt+1}: REENTER detected, sending CLEAR (pattern override)")
+                send_terminal_key("clear")
+                _time.sleep(3)
+                continue
+
+            # INVALID KEYWORD — CLEAR dismisses it
+            if "INVALID KEYWORD" in upper or "INVALID COMMAND" in upper:
+                logger.info(f"AI escape attempt {attempt+1}: INVALID KEYWORD detected, sending CLEAR (pattern override)")
+                send_terminal_key("clear")
+                _time.sleep(3)
+                continue
+
+            # ENTER FILE NAME — we're in TSO EDIT, END exits
+            if "ENTER FILE NAME" in upper:
+                logger.info(f"AI escape attempt {attempt+1}: ENTER FILE NAME detected, sending END (pattern override)")
+                send_terminal_key("home")
+                _time.sleep(0.3)
+                send_terminal_key("eraseeof")
+                _time.sleep(0.3)
+                send_terminal_key("string", "END")
+                send_terminal_key("enter")
+                _time.sleep(3)
+                continue
+
+            # ---- UNKNOWN STATE: ask the LLM ----
             action = self._ask_llm_recovery_action(screen)
             logger.info(f"AI escape attempt {attempt+1}: LLM says '{action}'")
 
             if action == "END":
                 send_terminal_key("home")
-                _time.sleep(0.2)
+                _time.sleep(0.3)
                 send_terminal_key("eraseeof")
-                _time.sleep(0.2)
+                _time.sleep(0.3)
                 send_terminal_key("string", "END")
                 send_terminal_key("enter")
-                _time.sleep(2)
+                _time.sleep(3)
             elif action == "PF3":
                 send_terminal_key("pf", "3")
-                _time.sleep(1.5)
+                _time.sleep(3)
             elif action == "CLEAR":
                 send_terminal_key("clear")
-                _time.sleep(1)
+                _time.sleep(3)
             elif action == "LOGOFF":
                 send_terminal_key("home")
-                _time.sleep(0.2)
+                _time.sleep(0.3)
                 send_terminal_key("eraseeof")
-                _time.sleep(0.2)
+                _time.sleep(0.3)
                 send_terminal_key("string", "LOGOFF")
                 send_terminal_key("enter")
-                _time.sleep(3)
+                _time.sleep(4)
             elif action == "ENTER":
                 send_terminal_key("enter")
-                _time.sleep(1.5)
+                _time.sleep(3)
             elif action == "CANCEL":
                 send_terminal_key("string", "CANCEL")
                 send_terminal_key("enter")
-                _time.sleep(2)
+                _time.sleep(3)
             else:
-                # Unknown response — try PF3 as safe default
-                send_terminal_key("pf", "3")
-                _time.sleep(1.5)
+                send_terminal_key("clear")
+                _time.sleep(3)
 
         screen = self._read_screen_safe()
         self.current_screen = screen
