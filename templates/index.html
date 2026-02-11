@@ -1028,67 +1028,71 @@ async function pullIdxModel(name, rowEl) {
     rowEl.appendChild(bottomRow);
 
     try {
-        const res = await fetch('/api/models/pull', {
+        // Start the pull
+        const startRes = await fetch('/api/models/pull', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({model: name})
         });
-        const reader = res.body.getReader();
-        const decoder = new TextDecoder();
-        let buf = '';
-
-        while (true) {
-            const {done, value} = await reader.read();
-            if (done) break;
-            buf += decoder.decode(value, {stream: true});
-            const lines = buf.split('\n');
-            buf = lines.pop();
-            for (const line of lines) {
-                if (!line.startsWith('data: ')) continue;
-                try {
-                    const evt = JSON.parse(line.slice(6));
-                    if (evt.pct !== undefined) {
-                        barInner.style.width = evt.pct + '%';
-                        pctLabel.textContent = evt.pct + '%';
-                    }
-                    if (evt.total && evt.completed !== undefined) {
-                        sizeLabel.textContent = fmtBytes(evt.completed) + ' / ' + fmtBytes(evt.total);
-                    }
-                    if (evt.speed && evt.speed > 0) {
-                        speedLabel.textContent = fmtSpeed(evt.speed);
-                        speedLabel.style.color = '#f80';
-                    }
-                    if (evt.status && evt.status !== 'done' && evt.status !== 'error') {
-                        label.textContent = `${name}: ${evt.status}`;
-                    }
-                    if (evt.status === 'done') {
-                        label.style.color = '#0f0';
-                        label.textContent = `${name} ready!`;
-                        speedLabel.textContent = 'Complete';
-                        speedLabel.style.color = '#0f0';
-                        barInner.style.width = '100%';
-                        barInner.style.background = 'linear-gradient(90deg,#0f0,#0a0)';
-                        pctLabel.textContent = '100%';
-                        pctLabel.style.color = '#0f0';
-                        sizeLabel.style.color = '#0f0';
-                        await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:name})});
-                        document.getElementById('tsModel').textContent = name;
-                        setTimeout(() => loadIdxModels(), 2000);
-                    }
-                    if (evt.status === 'error') {
-                        label.style.color = '#f44';
-                        label.textContent = `Error: ${evt.error || 'pull failed'}`;
-                        speedLabel.textContent = 'Failed';
-                        speedLabel.style.color = '#f44';
-                    }
-                } catch(pe) {}
-            }
+        const startData = await startRes.json();
+        if (!startData.success) {
+            label.style.color = '#f44';
+            label.textContent = `Error: ${startData.error}`;
+            idxPulling = false;
+            return;
         }
+
+        // Poll for progress
+        const poll = setInterval(async () => {
+            try {
+                const r = await fetch('/api/models/pull/status');
+                const s = await r.json();
+
+                if (s.pct !== undefined) {
+                    barInner.style.width = s.pct + '%';
+                    pctLabel.textContent = s.pct + '%';
+                }
+                if (s.total && s.completed !== undefined) {
+                    sizeLabel.textContent = fmtBytes(s.completed) + ' / ' + fmtBytes(s.total);
+                }
+                if (s.speed && s.speed > 0) {
+                    speedLabel.textContent = fmtSpeed(s.speed);
+                    speedLabel.style.color = '#f80';
+                }
+                if (s.status && s.status !== 'done' && s.status !== 'error') {
+                    label.textContent = `${name}: ${s.status}`;
+                }
+                if (s.status === 'done') {
+                    clearInterval(poll);
+                    label.style.color = '#0f0';
+                    label.textContent = `${name} ready!`;
+                    speedLabel.textContent = 'Complete';
+                    speedLabel.style.color = '#0f0';
+                    barInner.style.width = '100%';
+                    barInner.style.background = 'linear-gradient(90deg,#0f0,#0a0)';
+                    pctLabel.textContent = '100%';
+                    pctLabel.style.color = '#0f0';
+                    sizeLabel.style.color = '#0f0';
+                    await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:name})});
+                    document.getElementById('tsModel').textContent = name;
+                    idxPulling = false;
+                    setTimeout(() => loadIdxModels(), 2000);
+                }
+                if (s.status === 'error') {
+                    clearInterval(poll);
+                    label.style.color = '#f44';
+                    label.textContent = `Error: ${s.error || 'pull failed'}`;
+                    speedLabel.textContent = 'Failed';
+                    speedLabel.style.color = '#f44';
+                    idxPulling = false;
+                }
+            } catch(pe) {}
+        }, 500);
     } catch(e) {
         label.style.color = '#f44';
         label.textContent = `Error: ${e.message}`;
+        idxPulling = false;
     }
-    idxPulling = false;
 }
 
 document.addEventListener('click', (e) => {

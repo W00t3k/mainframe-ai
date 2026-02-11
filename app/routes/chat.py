@@ -5,10 +5,11 @@ Endpoints for chat functionality and AI interaction.
 """
 
 from fastapi import APIRouter, Request
-from fastapi.responses import JSONResponse, StreamingResponse
+from fastapi.responses import JSONResponse
 import httpx
 import json
-import asyncio
+import threading
+import time as _time
 
 from app.models.schemas import ChatRequest
 from app.services.chat import get_chat_service
@@ -99,68 +100,80 @@ async def api_switch_model(request: Request):
     return JSONResponse({"success": True, "old": old_model, "new": model})
 
 
+_pull_state = {
+    "active": False,
+    "model": "",
+    "status": "",
+    "pct": 0,
+    "completed": 0,
+    "total": 0,
+    "speed": 0,
+    "error": "",
+}
+
+
+def _pull_worker(model: str, ollama_url: str):
+    """Background thread that pulls a model from Ollama and updates _pull_state."""
+    import requests
+    global _pull_state
+    _pull_state.update(active=True, model=model, status="starting", pct=0,
+                       completed=0, total=0, speed=0, error="")
+    prev_completed = 0
+    prev_time = _time.time()
+    try:
+        resp = requests.post(
+            f"{ollama_url}/api/pull",
+            json={"name": model, "stream": True},
+            stream=True,
+            timeout=None,
+        )
+        for line in resp.iter_lines():
+            if not line:
+                continue
+            try:
+                chunk = json.loads(line)
+                status = chunk.get("status", "")
+                total = chunk.get("total", 0)
+                completed = chunk.get("completed", 0)
+                pct = int(completed / total * 100) if total else 0
+
+                now = _time.time()
+                dt = now - prev_time
+                speed_bps = _pull_state["speed"]
+                if dt > 0.3 and completed > prev_completed:
+                    speed_bps = (completed - prev_completed) / dt
+                    prev_completed = completed
+                    prev_time = now
+
+                _pull_state.update(
+                    status=status, pct=pct, completed=completed,
+                    total=total, speed=speed_bps,
+                )
+            except Exception:
+                pass
+        _pull_state.update(status="done", pct=100, active=False)
+    except Exception as e:
+        _pull_state.update(status="error", error=str(e), active=False)
+
+
 @router.post("/models/pull")
 async def api_pull_model(request: Request):
-    """Pull (download) a model from Ollama. Streams progress as SSE."""
+    """Start pulling (downloading) a model from Ollama in the background."""
     data = await request.json()
     model = data.get("model", "").strip()
     if not model:
         return JSONResponse({"success": False, "error": "No model specified"})
 
+    if _pull_state["active"]:
+        return JSONResponse({"success": False, "error": f"Already pulling {_pull_state['model']}"})
+
     config = get_config()
+    t = threading.Thread(target=_pull_worker, args=(model, config.OLLAMA_URL), daemon=True)
+    t.start()
+    return JSONResponse({"success": True, "model": model})
 
-    async def stream_pull():
-        import time
-        prev_completed = 0
-        prev_time = time.time()
-        buf = b""
-        try:
-            async with httpx.AsyncClient(timeout=None) as client:
-                async with client.stream(
-                    "POST",
-                    f"{config.OLLAMA_URL}/api/pull",
-                    json={"name": model, "stream": True},
-                ) as resp:
-                    async for raw in resp.aiter_bytes():
-                        buf += raw
-                        while b"\n" in buf:
-                            line_bytes, buf = buf.split(b"\n", 1)
-                            line = line_bytes.decode("utf-8", errors="replace").strip()
-                            if not line:
-                                continue
-                            try:
-                                chunk = json.loads(line)
-                                status = chunk.get("status", "")
-                                total = chunk.get("total", 0)
-                                completed = chunk.get("completed", 0)
-                                pct = int(completed / total * 100) if total else 0
 
-                                now = time.time()
-                                dt = now - prev_time
-                                speed_bps = 0
-                                if dt > 0.1 and completed > prev_completed:
-                                    speed_bps = (completed - prev_completed) / dt
-                                    prev_completed = completed
-                                    prev_time = now
-
-                                evt = json.dumps({
-                                    "status": status, "pct": pct,
-                                    "total": total, "completed": completed,
-                                    "speed": speed_bps,
-                                })
-                                yield f"data: {evt}\n\n"
-                            except Exception:
-                                yield f"data: {json.dumps({'status': line})}\n\n"
-            yield f"data: {json.dumps({'status': 'done', 'pct': 100, 'model': model})}\n\n"
-        except Exception as e:
-            yield f"data: {json.dumps({'status': 'error', 'error': str(e)})}\n\n"
-
-    return StreamingResponse(
-        stream_pull(),
-        media_type="text/event-stream",
-        headers={
-            "Cache-Control": "no-cache",
-            "X-Accel-Buffering": "no",
-            "Connection": "keep-alive",
-        },
-    )
+@router.get("/models/pull/status")
+async def api_pull_status():
+    """Poll the current model pull progress."""
+    return JSONResponse(_pull_state)
