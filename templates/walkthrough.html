@@ -57,6 +57,10 @@
                     <option value="address-spaces">Address Space Anatomy (What's Running)</option>
                     <option value="reverse-shell">Z/OS Reverse Shell (Metasploit JCL)</option>
                 </select>
+                <span id="revshellInputs" style="display:none; margin-left:8px;">
+                    <input type="text" id="wtLhost" placeholder="Your IP (LHOST)" style="width:130px; font-size:12px; padding:2px 6px; background:#1a1a2e; color:#0f0; border:1px solid #333; font-family:'IBM Plex Mono',monospace;">
+                    <input type="text" id="wtLport" placeholder="4444" value="4444" style="width:55px; font-size:12px; padding:2px 6px; background:#1a1a2e; color:#0f0; border:1px solid #333; font-family:'IBM Plex Mono',monospace;">
+                </span>
                 <button class="btn btn-primary btn-sm" id="wtStartBtn" onclick="startAutonomousWalkthrough()">Start</button>
                 <button class="btn btn-secondary btn-sm" id="wtPauseBtn" onclick="pauseWalkthrough()" style="display:none;">Pause</button>
                 <button class="btn btn-stop btn-sm" id="wtStopBtn" onclick="stopWalkthrough()" style="display:none;">Stop</button>
@@ -209,10 +213,17 @@ const CP_COLORS = {
     jes: 'var(--cp-jes)',
 };
 
+// Show/hide LHOST/LPORT inputs when reverse-shell is selected
+document.getElementById('walkthroughSelect').addEventListener('change', function() {
+    document.getElementById('revshellInputs').style.display = this.value === 'reverse-shell' ? 'inline' : 'none';
+});
+
 async function startAutonomousWalkthrough() {
     const name = document.getElementById('walkthroughSelect').value;
     const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
     const speed = parseFloat(document.getElementById('wtSpeedSelect').value);
+    const lhost = (document.getElementById('wtLhost').value.trim()) || '10.0.0.1';
+    const lport = (document.getElementById('wtLport').value.trim()) || '4444';
 
     document.getElementById('wtStartBtn').style.display = 'none';
     document.getElementById('wtPauseBtn').style.display = 'inline-flex';
@@ -229,7 +240,7 @@ async function startAutonomousWalkthrough() {
         const res = await fetch('/api/walkthrough/start', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify({ name, target, speed })
+            body: JSON.stringify({ name, target, speed, lhost, lport })
         });
         const data = await res.json();
         if (!data.success) {

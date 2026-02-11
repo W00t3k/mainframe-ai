@@ -45,7 +45,7 @@ class WalkthroughRunner:
         self.display_seconds = 4.0
         self._thread: threading.Thread | None = None
 
-    def start(self, name: str, target: str, speed: float = 4.0):
+    def start(self, name: str, target: str, speed: float = 4.0, lhost: str = "10.0.0.1", lport: str = "4444"):
         if self.running and (self._thread is None or not self._thread.is_alive()):
             self.running = False
         if self.running:
@@ -67,6 +67,8 @@ class WalkthroughRunner:
         self.current_screen = ""
         self.log = []
         self.display_seconds = speed
+        self.lhost = lhost
+        self.lport = lport
         self._thread = threading.Thread(
             target=self._run, args=(name, target), daemon=True
         )
@@ -191,9 +193,11 @@ class WalkthroughRunner:
             except Exception:
                 self.current_screen = connection.current_screen if connection else ""
 
-            log_entry["narration"] = step["narration"]
+            narration = step["narration"]
+            narration = narration.replace("{{LHOST}}", self.lhost).replace("{{LPORT}}", self.lport)
+            log_entry["narration"] = narration
             log_entry["executing"] = False
-            self.current_narration = step["narration"]
+            self.current_narration = narration
 
             step_display = step.get("display_seconds", self.display_seconds)
             wait_end = _time.time() + step_display
@@ -615,6 +619,8 @@ async def api_walkthrough_start(request: Request):
     name = data.get("name", "session-stack")
     target = data.get("target", "localhost:3270")
     speed = float(data.get("speed", 4.0))
+    lhost = data.get("lhost", "10.0.0.1")
+    lport = data.get("lport", "4444")
 
     script = WALKTHROUGH_SCRIPTS.get(name)
     if not script:
@@ -623,7 +629,7 @@ async def api_walkthrough_start(request: Request):
     if _walkthrough_runner.running:
         _walkthrough_runner.stop()
 
-    _walkthrough_runner.start(name, target, speed)
+    _walkthrough_runner.start(name, target, speed, lhost, lport)
     return JSONResponse({"success": True, "walkthrough": script["title"]})
 
 
