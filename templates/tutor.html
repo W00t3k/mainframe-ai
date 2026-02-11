@@ -476,10 +476,10 @@ function startWalkthroughPoll() {
 
             // Update step card
             if (s.running || s.finished) {
-                const stepNum = (s.current_step || 0) + 1;
-                const total = s.total_steps || '?';
+                const stepNum = (s.step || 0) + 1;
+                const total = s.total || '?';
                 $('#stepNumber').textContent = `Step ${stepNum} of ${total}`;
-                $('#stepTitle').textContent = s.current_title || 'Running...';
+                $('#stepTitle').textContent = s.title || 'Running...';
                 $('#stepIndicator').textContent = `${stepNum}/${total}`;
 
                 // Control plane
@@ -491,7 +491,7 @@ function startWalkthroughPoll() {
                 }
 
                 // Narration (render markdown)
-                const narration = s.current_narration || '';
+                const narration = s.narration || '';
                 if (narration && stepNum !== lastStep) {
                     const rendered = window.marked ? marked.parse(narration) : narration;
                     $('#stepNarration').innerHTML = rendered;
@@ -501,8 +501,8 @@ function startWalkthroughPoll() {
                 // Progress dots
                 const dots = [];
                 for (let i = 0; i < total; i++) {
-                    const cls = i < s.current_step ? 'done' : (i === s.current_step ? 'current' : '');
-                    dots.push(`<span class="progress-dot ${cls}">${i < s.current_step ? '✓' : i + 1}</span>`);
+                    const cls = i < s.step ? 'done' : (i === s.step ? 'current' : '');
+                    dots.push(`<span class="progress-dot ${cls}">${i < s.step ? '✓' : i + 1}</span>`);
                 }
                 $('#stepProgress').innerHTML = dots.join('');
             }
@@ -520,7 +520,7 @@ function startWalkthroughPoll() {
                 clearInterval(state.walkthroughPollId);
                 state.walkthroughPollId = null;
                 state.walkthroughActive = false;
-                addMessage('success', 'Walkthrough Complete', s.current_title || 'Done');
+                addMessage('success', 'Walkthrough Complete', s.title || 'Done');
                 // Update sidebar status
                 const labItem = $(`.module-item[data-lab="${state.currentLab}"]`);
                 if (labItem) {
