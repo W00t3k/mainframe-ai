@@ -721,6 +721,22 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
             if self._is_logged_in(upper):
                 return
 
+            # ── ERROR STATE — must check BEFORE post-login ──
+            # After reconnect, screen may show BOTH "IKT00300 RECONNECT SUCCESSFUL"
+            # AND "INVALID KEYWORD" / "REENTER" from the previous broken session.
+            # We must escape the error first, not press Enter into it.
+            if self._detect_error(screen):
+                logger.info(f"Login attempt {attempt}: error on screen, using AI to escape")
+                screen = self._escape_to_ready()
+                upper = screen.upper()
+                if self._is_logged_in(upper):
+                    return
+                if "LOGON" in upper and "===>" in screen:
+                    continue
+                if "IKJ56400" in upper:
+                    continue
+                continue
+
             # ── Post-login screen (reconnect success, broadcast, etc.) ──
             if self._is_post_login(upper):
                 screen = self._press_through_screens()
