@@ -107,6 +107,15 @@
       "difficulty": "beginner",
       "questions": ["Q1", "Q2", "Q3", "Q5"],
       "steps": 7
+    },
+    {
+      "id": "zos-reverse-shell",
+      "title": "Z/OS Reverse Shell via JCL (Metasploit)",
+      "description": "Analyze the Metasploit cmd/mainframe/reverse_shell_jcl payload. Understand how JCL-based reverse shells exploit deferred execution, identity binding, and the gap between submission and execution on Z/OS.",
+      "category": "security",
+      "difficulty": "advanced",
+      "questions": ["Q1", "Q2", "Q3", "Q4", "Q5"],
+      "steps": 6
     }
   ]
 }

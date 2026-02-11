@@ -14,8 +14,10 @@
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 TK5="$DIR/tk5/mvs-tk5"
-LOGFILE="$DIR/tk5_hercules.log"
-PIDFILE="$DIR/tk5_hercules.pid"
+LOGDIR="$DIR/logs"
+mkdir -p "$LOGDIR"
+LOGFILE="$LOGDIR/hercules.log"
+PIDFILE="$LOGDIR/hercules.pid"
 
 RED='\033[0;31m'
 GRN='\033[0;32m'

@@ -198,10 +198,18 @@ sudo firewall-cmd --reload
 
 ### MVS TK5 Management
 
-Use `mvs.sh` to manage the TK5 mainframe emulator independently:
+Three ways to run TK5, depending on your needs:
+
+| Script | Mode | Use Case |
+|--------|------|----------|
+| `./start.sh` | Background (all services) | Production — starts Ollama + TK5 + Web App with watchdog |
+| `./mvs.sh start` | Background (TK5 only) | Manage TK5 independently with start/stop/restart/status |
+| `./start_mvs.sh` | Foreground (interactive) | Debug — see Hercules console output directly |
+
+#### `mvs.sh` — TK5 Management
 
 ```bash
-./mvs.sh start          # Start MVS TK5
+./mvs.sh start          # Start MVS TK5 (background)
 ./mvs.sh stop           # Graceful shutdown (SIGTERM, waits 15s)
 ./mvs.sh kill           # Force kill all Hercules processes
 ./mvs.sh restart        # Stop + Start
@@ -209,10 +217,17 @@ Use `mvs.sh` to manage the TK5 mainframe emulator independently:
 ./mvs.sh log            # Tail the Hercules log
 ```
 
+#### `start_mvs.sh` — Interactive Mode
+
+```bash
+./start_mvs.sh          # Runs Hercules in foreground (Ctrl+C to stop)
+```
+
 TK5 defaults:
 - **TN3270:** `localhost:3270`
 - **Login:** `HERC01` / `CUL8TR`
 - **Hercules console:** `http://localhost:8038`
+- **Logs:** `logs/hercules.log`
 
 ---
 
@@ -317,7 +332,7 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `OLLAMA_URL` | `http://localhost:11434` | Ollama API endpoint |
-| `OLLAMA_MODEL` | `llama3.1:8b` | Model for inference |
+| `OLLAMA_MODEL` | Auto-detected by RAM | `llama3.1:8b` (16GB+), `llama3.2:3b` (8-16GB), `tinyllama` (<8GB) |
 | `MAINFRAME_HOST` | `localhost:3270` | Default TN3270 target |
 
 ## File Structure
@@ -341,8 +356,10 @@ mainframe_ai_assistant/
 ├── trust_graph_data/       # Graph persistence
 ├── kicks/                  # CICS/KICKS BMS maps, COBOL, JCL
 ├── tk5/                    # TK5 MVS 3.8j emulator
+├── logs/                   # Runtime logs (webapp, ollama, hercules)
 ├── run.py                  # Application entry point
-├── start.sh                # All-in-one startup (Ollama + Web App + TK5)
+├── start.sh                # One-script launcher (all services + health checks)
+├── start_mvs.sh            # TK5 foreground/interactive mode
 ├── install.sh              # Linux installer (deps, Ollama, venv, TK5)
 ├── mvs.sh                  # MVS TK5 management (start/stop/restart/status)
 ├── agent_tools.py          # TN3270 connection tools

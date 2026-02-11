@@ -1,0 +1,52 @@
+{
+  "id": "zos-reverse-shell",
+  "title": "Z/OS Reverse Shell via JCL (Metasploit)",
+  "description": "Analyze the Metasploit cmd/mainframe/reverse_shell_jcl payload. Understand how JCL-based reverse shells exploit deferred execution, identity binding, and the gap between submission and execution on Z/OS.",
+  "category": "security",
+  "difficulty": "advanced",
+  "questions": ["Q1", "Q2", "Q3", "Q4", "Q5"],
+  "steps": [
+    {
+      "title": "The Payload: JCL as Attack Vector",
+      "screen": "msf6 > use payload/cmd/mainframe/reverse_shell_jcl\n\n       Name: Z/OS (MVS) Command Shell, Reverse TCP\n     Module: payload/cmd/mainframe/reverse_shell_jcl\n   Platform: Mainframe\n       Arch: cmd\n Needs Admin: No\n Total size: 8993\n       Rank: Normal\n\n Provided by:\n   Bigendian Smalls",
+      "expected": "Recognize that JCL itself is the payload — not a binary, not shellcode. The 'architecture' is 'cmd' because JCL is a command language processed by JES2. This payload generates JCL that, when submitted as a batch job, creates a reverse TCP shell back to the attacker.",
+      "hint": "On mainframes, the equivalent of 'code execution' is 'job submission'. JCL is the attack surface.",
+      "assessment": "Q5: Imported assumption — 'payloads are binaries.' On Z/OS, the payload is JCL text submitted to JES2. The execution model is fundamentally different."
+    },
+    {
+      "title": "JOB Card Identity Binding",
+      "screen": "Module options (payload/cmd/mainframe/reverse_shell_jcl):\n\n   Name      Current Setting       Required  Description\n   ----      ---------------       --------  -----------\n   ACTNUM    MSFUSER-ACCTING-INFO  yes       Accounting info for JCL JOB card\n   JCLASS    A                     yes       Job Class for JCL JOB card\n   LHOST     0.0.0.0               yes       The listen address\n   LPORT     4444                  yes       The listen port\n   MSGCLASS  Z                     yes       Message Class for JCL JOB card\n   MSGLEVEL  (0,0)                 yes       Message Level for JCL JOB card\n   NOTIFY                          no        Notify User for JCL JOB card\n   PGMNAME   programmer name       yes       Programmer name for JCL JOB card",
+      "expected": "Every option except LHOST/LPORT is a JOB card parameter. The JOB card is where identity is bound on a mainframe. ACTNUM ties to accounting. PGMNAME identifies the programmer. MSGCLASS=Z suppresses output. MSGLEVEL=(0,0) minimizes logging. These aren't just metadata — they control how the job is tracked, who it runs as, and what evidence it leaves.",
+      "hint": "MSGCLASS=Z and MSGLEVEL=(0,0) are anti-forensic choices. They minimize the audit trail in JES2 output.",
+      "assessment": "Q1: Identity is bound at the JOB card. The submitter's RACF identity determines what the reverse shell can access. Q4: JES2 enforces job class routing and output handling."
+    },
+    {
+      "title": "Deferred Execution Gap",
+      "screen": "//REVSHELL JOB (MSFUSER-ACCTING-INFO),'programmer name',\n//             CLASS=A,MSGCLASS=Z,MSGLEVEL=(0,0)\n//*\n//* Z/OS Reverse Shell - Metasploit Framework\n//* Submitter identity persists through execution\n//*\n//STEP1 EXEC PGM=BPXBATCH,\n//          PARM='sh /tmp/revshell.sh'\n//STDOUT DD SYSOUT=Z\n//STDERR DD SYSOUT=Z\n\nTimeline:\n  T+0s   Job submitted by HERC01\n  T+???  JES2 schedules job (could be seconds or hours)\n  T+???  BPXBATCH spawns Unix shell under HERC01's identity\n  T+???  Reverse shell connects to attacker on LHOST:LPORT",
+      "expected": "The reverse shell doesn't execute immediately. JES2 queues it. The gap between submission and execution is the deferred execution problem (Finding F3). The job runs under the submitter's RACF identity — if HERC01 submitted it, the shell has HERC01's authority. BPXBATCH bridges z/OS batch to Unix System Services.",
+      "hint": "BPXBATCH is the bridge between MVS batch and USS (Unix System Services). It allows JCL to execute Unix commands — this is how the reverse shell escapes the batch paradigm.",
+      "assessment": "Q3: Deferred execution — the job may run minutes or hours after submission, but the identity and authority are locked at submission time. The attacker doesn't need to be connected when the shell spawns."
+    },
+    {
+      "title": "EBCDIC Translation Gap",
+      "screen": "Description:\n  Provide JCL which creates a reverse shell. This implementation\n  does not include EBCDIC character translation, so a client with\n  translation capabilities is required. MSF handles this\n  automatically.\n\nASCII (attacker):  ls -la    -> 6C 73 20 2D 6C 61\nEBCDIC (z/OS):     ls -la    -> 93 A2 40 60 93 81\n\nWithout translation:\n  Attacker sends: ls -la (ASCII)\n  z/OS receives:  garbled EBCDIC\n  Shell output:   garbled ASCII\n\nMetasploit handles this with automatic EBCDIC<->ASCII translation\nin the session handler.",
+      "expected": "Z/OS uses EBCDIC encoding, not ASCII. A raw TCP reverse shell produces EBCDIC output that looks like garbage to an ASCII terminal. Metasploit's session handler automatically translates between EBCDIC and ASCII. This is a fundamental imported assumption — every Unix/Windows reverse shell assumes ASCII. On z/OS, you must handle the encoding boundary.",
+      "hint": "EBCDIC is not just a different character set — it's a different worldview. Tools that assume ASCII will fail silently or produce corrupted output.",
+      "assessment": "Q5: Imported assumption — 'text is ASCII.' On z/OS, text is EBCDIC. This encoding boundary is invisible to tools designed for Unix/Windows and creates a trust boundary that most pentesters don't even know exists."
+    },
+    {
+      "title": "Detection and RACF Controls",
+      "screen": "Defense layers that apply to this payload:\n\n1. RACF SURROGAT class:\n   - Controls who can submit jobs as other users\n   - ICH408I USER(HERC01) NOT AUTHORIZED TO USE SUBMIT SURROGATE\n\n2. RACF FACILITY class:\n   - BPX.SPAWN controls who can use BPXBATCH\n   - BPX.SUPERUSER controls USS root access\n\n3. JES2 Job Class restrictions:\n   - CLASS=A may be restricted to certain users\n   - JOBCLASS profiles in RACF\n\n4. SMF Records:\n   - Type 30: Job activity (start, end, resources)\n   - Type 80: RACF authorization events\n   - Type 83: RACF audit records\n\n5. Unix System Services:\n   - /tmp write access controlled by USS permissions\n   - BPX.DAEMON controls privileged USS operations",
+      "expected": "The reverse shell payload intersects multiple control planes: RACF (authorization), JES2 (job scheduling), USS (Unix execution). Each is a potential detection point. SMF Type 30 records log job execution. SMF Type 80/83 log RACF decisions. BPX.SPAWN and BPX.SUPERUSER are FACILITY class profiles that control USS access. A properly configured system would block this at multiple layers — but most assessments don't check all of them.",
+      "hint": "The real finding isn't 'reverse shells exist on z/OS.' It's 'which of these five control planes is actually enforcing policy, and which ones are the attacker can bypass?'",
+      "assessment": "Q4: Policy is enforced across RACF, JES2, and USS — but only if all three are configured. The gap between 'RACF exists' and 'RACF is configured to block BPXBATCH abuse' is where the real vulnerability lives. Q2: Authority is evaluated at multiple points: job submission (JES2), program execution (RACF), and USS access (BPX profiles)."
+    },
+    {
+      "title": "Mapping to Trust Boundary Model",
+      "screen": "┌─────────────────────────────────────────────────────┐\n│           Reverse Shell JCL — Trust Flow             │\n├─────────────────────────────────────────────────────┤\n│                                                     │\n│  [Attacker] ──submit──> [JES2 Queue]                │\n│                           │                         │\n│                     (deferred)                      │\n│                           │                         │\n│                     [JES2 Initiator]                │\n│                           │                         │\n│                  identity: submitter                 │\n│                           │                         │\n│                     [BPXBATCH]                      │\n│                           │                         │\n│                  MVS ──> USS boundary                │\n│                           │                         │\n│                     [/bin/sh]                        │\n│                           │                         │\n│                     [TCP connect]                    │\n│                           │                         │\n│  [Attacker] <──shell──  [LHOST:LPORT]               │\n│                                                     │\n│  Findings:                                          │\n│    F1: Identity bound at JOB card (submitter)       │\n│    F2: Authority evaluated by RACF at each step     │\n│    F3: Deferred execution via JES2 queue            │\n│    F4: Policy split across RACF + JES2 + USS        │\n│    F5: Assumes ASCII, assumes immediate execution   │\n└─────────────────────────────────────────────────────┘",
+      "expected": "This single payload crosses every trust boundary in the model. Identity binds at the JOB card (F1). Authority is evaluated by RACF at submission, execution, and USS access (F2). Execution is deferred through JES2 (F3). Policy enforcement is split across three subsystems (F4). And the payload itself imports assumptions about encoding and execution timing that don't hold on z/OS (F5). This is why the trust boundary model matters — a single attack path touches all five findings areas.",
+      "hint": "This is the CFP thesis: mainframes make trust boundaries explicit. You can literally trace identity from submission through deferred execution to shell access. On Unix, these boundaries are implicit and invisible.",
+      "assessment": "All five findings areas are present in a single payload. This is the strongest possible demonstration that the trust boundary assessment model applies to mainframes — and that importing Unix assumptions (F5) causes assessors to miss the real attack surface."
+    }
+  ]
+}
