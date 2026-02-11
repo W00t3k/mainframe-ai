@@ -732,13 +732,12 @@ or use /connect command.
                 listEl.appendChild(dlHdr);
 
                 SUGGESTED_MODELS.forEach(s => {
-                    const alreadyInstalled = installedNames.some(n => n.startsWith(s.name.split(':')[0]));
+                    if (installedNames.some(n => n.startsWith(s.name.split(':')[0]))) return;
                     const row = document.createElement('div');
-                    row.style.cssText = 'padding:5px 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
-                    row.style.color = alreadyInstalled ? '#555' : '#ccc';
+                    row.style.cssText = 'padding:5px 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:#ccc;';
 
                     const left = document.createElement('span');
-                    left.innerHTML = `${alreadyInstalled ? '✓ ' : '  '}${s.name} <span style="color:#666; font-size:10px;">${s.desc}</span>`;
+                    left.innerHTML = `${s.name} <span style="color:#666; font-size:10px;">${s.desc}</span>`;
 
                     const right = document.createElement('span');
                     right.style.cssText = 'display:flex; align-items:center; gap:6px;';
@@ -747,15 +746,13 @@ or use /connect command.
                     sizeSpan.textContent = s.size;
                     right.appendChild(sizeSpan);
 
-                    if (!alreadyInstalled) {
-                        const btn = document.createElement('button');
-                        btn.textContent = 'Pull';
-                        btn.style.cssText = 'background:#f80; color:#000; border:none; border-radius:3px; padding:1px 8px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold;';
-                        btn.onmouseenter = () => btn.style.background = '#fa0';
-                        btn.onmouseleave = () => btn.style.background = '#f80';
-                        btn.onclick = (e) => { e.stopPropagation(); pullChatModel(s.name, row); };
-                        right.appendChild(btn);
-                    }
+                    const btn = document.createElement('button');
+                    btn.textContent = 'Pull';
+                    btn.style.cssText = 'background:#f80; color:#000; border:none; border-radius:3px; padding:1px 8px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold;';
+                    btn.onmouseenter = () => btn.style.background = '#fa0';
+                    btn.onmouseleave = () => btn.style.background = '#f80';
+                    btn.onclick = (e) => { e.stopPropagation(); pullChatModel(s.name, row); };
+                    right.appendChild(btn);
 
                     row.appendChild(left);
                     row.appendChild(right);
