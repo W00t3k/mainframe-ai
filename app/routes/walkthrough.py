@@ -615,13 +615,16 @@ Current terminal screen:
 ---
 
 Common MVS error states and correct recovery:
-- "REENTER -" or "ENTER FILE NAME -" = stuck in TSO EDIT line mode. Send END to exit.
-- "INVALID KEYWORD" = wrong command for current context. Send CLEAR then PF3.
+- "REENTER -" at TSO command prompt = previous command was invalid. Send CLEAR to dismiss and return to READY. Do NOT send END (that is only valid inside EDIT).
+- "ENTER FILE NAME -" = stuck in TSO EDIT line mode. Send END to exit the editor.
+- "INVALID KEYWORD" = wrong command for current context. Send CLEAR to dismiss and return to READY.
 - "NOT FOUND" = dataset missing. Send PF3 to go back.
 - "NOT AUTHORIZED" = RACF denied. Send PF3 to go back.
-- "IKJ56" messages = TSO errors. Usually CLEAR or PF3.
+- "IKJ56" messages = TSO errors. Send CLEAR to dismiss.
 - RFE/ISPF panels = Send PF3 to exit back toward READY.
 - If deeply nested, multiple PF3 presses needed.
+
+IMPORTANT: CLEAR is almost always the safest action for TSO error prompts. It clears the screen and returns to READY.
 
 What SINGLE action should we take RIGHT NOW?
 Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
@@ -651,13 +654,17 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
     def _pattern_recovery_action(self, screen: str) -> str:
         """Fallback pattern-based recovery when LLM is unavailable."""
         upper = screen.upper()
-        if "REENTER" in upper or "ENTER FILE NAME" in upper:
+        # REENTER at TSO prompt — CLEAR dismisses it back to READY
+        if "REENTER" in upper:
+            return "CLEAR"
+        # ENTER FILE NAME — we're inside TSO EDIT, END exits
+        if "ENTER FILE NAME" in upper:
             return "END"
         if "INVALID KEYWORD" in upper or "INVALID" in upper:
             return "CLEAR"
         if "NOT FOUND" in upper or "NOT AUTHORIZED" in upper:
             return "PF3"
-        return "PF3"
+        return "CLEAR"
 
     def _press_through_screens(self) -> str:
         """Press Enter through broadcast/fortune/info screens until we reach
