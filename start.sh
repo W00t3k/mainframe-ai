@@ -9,7 +9,16 @@
 # ─────────────────────────────────────────────────────────
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
-VENV="$DIR/.venv/bin/python"
+# Auto-detect Python: .venv, venv, or system python3
+if [ -f "$DIR/.venv/bin/python" ]; then
+  VENV="$DIR/.venv/bin/python"
+elif [ -f "$DIR/venv/bin/python" ]; then
+  VENV="$DIR/venv/bin/python"
+elif command -v python3 &>/dev/null; then
+  VENV="python3"
+else
+  VENV="python"
+fi
 PORT=8080
 HOST="0.0.0.0"
 # Auto-detect model based on available RAM
