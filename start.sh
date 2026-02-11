@@ -153,6 +153,20 @@ WEBAPP_PID=""
 RESTARTS=0
 
 launch_webapp() {
+  # Ensure venv exists
+  if [ ! -f "$VENV" ]; then
+    echo -e "${YEL}[*] Python venv not found — creating...${RST}"
+    python3 -m venv "$DIR/.venv" 2>/dev/null || python -m venv "$DIR/.venv" 2>/dev/null
+    if [ -f "$VENV" ]; then
+      echo -e "${YEL}[*] Installing dependencies...${RST}"
+      "$DIR/.venv/bin/pip" install -q -r "$DIR/requirements.txt" 2>/dev/null
+      echo -e "${GRN}[✓] Venv created${RST}"
+    else
+      echo -e "${RED}[!] Failed to create venv — install python3: sudo apt install python3 python3-venv${RST}"
+      return 1
+    fi
+  fi
+
   # Wait for port to be free (up to 15s)
   for i in $(seq 1 15); do
     lsof -ti :$PORT > /dev/null 2>&1 || break
