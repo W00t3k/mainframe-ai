@@ -6,10 +6,15 @@ Endpoints for the autonomous guided walkthrough system.
 
 import time as _time
 import threading
+import httpx
+import logging
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS
+from app.config import get_config
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(tags=["walkthrough"])
 
@@ -29,6 +34,22 @@ except ImportError:
 class WalkthroughRunner:
     """Server-side autonomous walkthrough executor."""
 
+    # Error patterns that indicate the terminal is in a bad state
+    ERROR_PATTERNS = [
+        "INVALID KEYWORD",
+        "REENTER",
+        "NOT FOUND",
+        "INVALID OPTION",
+        "COMMAND NOT RECOGNIZED",
+        "NOT AUTHORIZED",
+        "IKJ56703",
+        "IKJ56429",
+        "ENTER FILE NAME",
+        "INVALID COMMAND",
+        "SYNTAX ERROR",
+        "NOT VALID",
+    ]
+
     def __init__(self):
         self.running = False
         self.paused = False
@@ -44,6 +65,8 @@ class WalkthroughRunner:
         self.error: str | None = None
         self.display_seconds = 4.0
         self._thread: threading.Thread | None = None
+        self._recovery_count = 0
+        self._max_recoveries = 3  # max recoveries per step
 
     def start(self, name: str, target: str, speed: float = 4.0, lhost: str = "10.0.0.1", lport: str = "4444"):
         if self.running and (self._thread is None or not self._thread.is_alive()):
@@ -174,6 +197,7 @@ class WalkthroughRunner:
             }
             self.log.append(log_entry)
 
+            self._recovery_count = 0  # reset per step
             try:
                 for action in step.get("actions", []):
                     if not self.running:
@@ -188,6 +212,14 @@ class WalkthroughRunner:
                             self.current_screen = read_screen()
                         except Exception:
                             self.current_screen = connection.current_screen if connection else ""
+                        # AI-powered screen recovery
+                        if self._detect_error(self.current_screen):
+                            recovered = self._recover_from_error(self.current_screen, step, target)
+                            if not recovered:
+                                logger.warning(f"Recovery failed at step {idx+1}, attempting LLM fallback")
+                                recovered = self._llm_recover(self.current_screen, step, target)
+                            if not recovered:
+                                logger.error(f"All recovery failed at step {idx+1}")
             except Exception as e:
                 self.error = f"Step {idx + 1} failed: {e}"
                 self.running = False
@@ -214,6 +246,162 @@ class WalkthroughRunner:
         if self.running:
             self.finished = True
         self.running = False
+
+    def _detect_error(self, screen: str) -> bool:
+        """Check if the screen contains error patterns."""
+        upper = screen.upper()
+        for pattern in self.ERROR_PATTERNS:
+            if pattern in upper:
+                return True
+        return False
+
+    def _recover_from_error(self, screen: str, step: dict, target: str) -> bool:
+        """Pattern-based recovery from known error states.
+        
+        Returns True if recovery succeeded and we're back to a usable state.
+        """
+        if self._recovery_count >= self._max_recoveries:
+            logger.warning("Max recovery attempts reached for this step")
+            return False
+        self._recovery_count += 1
+        upper = screen.upper()
+        logger.info(f"Recovery attempt {self._recovery_count}: screen contains error")
+
+        # "REENTER -" or "ENTER FILE NAME -" — we're in TSO line-mode EDIT
+        # Recovery: type END to exit, then CLEAR
+        if "REENTER" in upper or "ENTER FILE NAME" in upper:
+            send_terminal_key("string", "END")
+            send_terminal_key("enter")
+            _time.sleep(2)
+            screen = self._read_screen_safe()
+            upper = screen.upper()
+            # May need multiple ENDs
+            for _ in range(5):
+                if "REENTER" in upper or "ENTER FILE NAME" in upper:
+                    send_terminal_key("string", "END")
+                    send_terminal_key("enter")
+                    _time.sleep(1)
+                    screen = self._read_screen_safe()
+                    upper = screen.upper()
+                else:
+                    break
+            # If still stuck, try CLEAR
+            if self._detect_error(screen):
+                send_terminal_key("clear")
+                _time.sleep(1)
+                screen = self._read_screen_safe()
+            self.current_screen = screen
+            return not self._detect_error(screen)
+
+        # "INVALID KEYWORD" — wrong command for current context
+        # Recovery: CLEAR screen and try to get to READY or known state
+        if "INVALID KEYWORD" in upper or "INVALID OPTION" in upper or "INVALID COMMAND" in upper:
+            send_terminal_key("clear")
+            _time.sleep(1)
+            screen = self._read_screen_safe()
+            upper = screen.upper()
+            # If at a prompt, try pressing PF3 to back out
+            if not self._is_logged_in(upper) and "LOGON" not in upper:
+                for _ in range(4):
+                    send_terminal_key("pf", "3")
+                    _time.sleep(1.5)
+                    screen = self._read_screen_safe()
+                    upper = screen.upper()
+                    if self._is_logged_in(upper) or "LOGON" in upper:
+                        break
+            self.current_screen = screen
+            return not self._detect_error(screen)
+
+        # "NOT FOUND" — dataset or member doesn't exist
+        if "NOT FOUND" in upper:
+            send_terminal_key("pf", "3")
+            _time.sleep(1)
+            screen = self._read_screen_safe()
+            self.current_screen = screen
+            return not self._detect_error(screen)
+
+        # "NOT AUTHORIZED" — RACF denied access
+        if "NOT AUTHORIZED" in upper:
+            send_terminal_key("pf", "3")
+            _time.sleep(1)
+            screen = self._read_screen_safe()
+            self.current_screen = screen
+            return not self._detect_error(screen)
+
+        # Generic: try CLEAR + PF3
+        send_terminal_key("clear")
+        _time.sleep(1)
+        send_terminal_key("pf", "3")
+        _time.sleep(1)
+        screen = self._read_screen_safe()
+        self.current_screen = screen
+        return not self._detect_error(screen)
+
+    def _llm_recover(self, screen: str, step: dict, target: str) -> bool:
+        """Use the LLM to analyze the screen and decide recovery action.
+        
+        Runs synchronously (called from walkthrough thread).
+        Returns True if recovery succeeded.
+        """
+        try:
+            config = get_config()
+            first_lines = "\n".join(screen.split("\n")[:20])
+            prompt = f"""You are a mainframe terminal recovery agent. The walkthrough step "{step['title']}" failed.
+
+Current screen:
+{first_lines}
+
+The terminal is in an error state. What single recovery action should we take?
+Reply with EXACTLY one of these commands (nothing else):
+- CLEAR (clear the screen)
+- PF3 (go back / exit)
+- ENTER (press enter to continue)
+- LOGOFF (logoff and reconnect)
+- END (exit editor)
+
+Reply with just the command word."""
+
+            resp = httpx.post(
+                f"{config.OLLAMA_URL}/api/generate",
+                json={
+                    "model": config.OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.1, "num_predict": 20},
+                },
+                timeout=15.0,
+            )
+            if resp.status_code != 200:
+                return False
+
+            answer = resp.json().get("response", "").strip().upper()
+            logger.info(f"LLM recovery suggestion: {answer}")
+
+            if "LOGOFF" in answer:
+                self._tso_logoff()
+                _time.sleep(2)
+                self._tso_login("HERC01", "CUL8TR", target)
+            elif "END" in answer:
+                send_terminal_key("string", "END")
+                send_terminal_key("enter")
+                _time.sleep(2)
+            elif "PF3" in answer:
+                send_terminal_key("pf", "3")
+                _time.sleep(1.5)
+            elif "CLEAR" in answer:
+                send_terminal_key("clear")
+                _time.sleep(1)
+            else:
+                send_terminal_key("enter")
+                _time.sleep(1)
+
+            screen = self._read_screen_safe()
+            self.current_screen = screen
+            return not self._detect_error(screen)
+
+        except Exception as e:
+            logger.error(f"LLM recovery failed: {e}")
+            return False
 
     def _exec_action(self, action: dict, target: str):
         atype = action["type"]
