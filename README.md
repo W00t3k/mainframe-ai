@@ -61,43 +61,60 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 - Python 3.11+
 - [Ollama](https://ollama.com) for local LLM
 - s3270 (for web TN3270 terminal)
-- TK5 MVS 3.8j emulator (optional, for local mainframe)
+- TK5 MVS 3.8j emulator (included)
 
 ---
 
-### Linux — One-Line Install
+### Platform Comparison
 
-The install script handles everything: system deps, Python, Ollama, GitHub CLI auth, repo clone, venv, and optionally TK5.
+| | **macOS** | **Linux** |
+|---|---|---|
+| **Install** | Manual (brew + pip) | One-command (`./install.sh`) |
+| **Hercules binary** | `hercules/darwin/bin` | `hercules/linux/64/bin` |
+| **TN3270 client** | `brew install x3270` | `apt install s3270` |
+| **Ollama** | Desktop app or `brew install ollama` | `curl -fsSL https://ollama.com/install.sh \| sh` |
+| **Python** | System python3 or pyenv | `apt install python3 python3-venv` |
+| **RAM model** | 16GB+ → `llama3.1:8b` | Auto-detected by `start.sh` |
+| **Tested on** | macOS 14+ (Apple Silicon) | Ubuntu 24.04, Debian 12, Kali, Fedora, Arch |
+| **Shared lib path** | `DYLD_LIBRARY_PATH` | `LD_LIBRARY_PATH` |
+
+`start.sh` auto-detects the platform and uses the correct Hercules binary, library paths, and Python environment. No manual configuration needed.
+
+---
+
+### Linux — One-Command Install
+
+The install script handles everything: system deps, Python, Ollama, GitHub CLI auth, repo clone, venv, and TK5.
 
 ```bash
 # If you already have the repo cloned:
 cd mainframe-ai
-chmod +x install.sh
+chmod +x install.sh start.sh mvs.sh
 ./install.sh
 
 # If starting fresh on a new server (private repo — requires GitHub access):
 # Option 1: GitHub CLI
 sudo apt install gh -y && gh auth login
 gh repo clone W00t3k/mainframe-ai && cd mainframe-ai
-chmod +x install.sh && ./install.sh
+chmod +x install.sh start.sh mvs.sh && ./install.sh
 
 # Option 2: Personal Access Token
 git clone https://<YOUR_TOKEN>@github.com/W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x install.sh && ./install.sh
+cd mainframe-ai && chmod +x install.sh start.sh mvs.sh && ./install.sh
 
 # Option 3: SSH
 git clone git@github.com:W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x install.sh && ./install.sh
+cd mainframe-ai && chmod +x install.sh start.sh mvs.sh && ./install.sh
 ```
 
-The install script supports: **Ubuntu, Debian, Kali, Fedora, CentOS/RHEL, Arch, openSUSE**.
+Supported distros: **Ubuntu, Debian, Kali, Fedora, CentOS/RHEL, Arch, openSUSE**.
 
-It installs:
+The install script installs:
 - Python 3.11+ with virtual environment
-- Ollama + llama3.1:8b model (~4.7 GB)
+- Ollama + auto-selected model based on RAM
 - GitHub CLI (`gh`) with interactive auth
-- x3270/s3270/c3270 (TN3270 clients)
-- Hercules + TK5 MVS emulator (optional)
+- s3270/x3270/c3270 (TN3270 clients)
+- Hercules + TK5 MVS emulator
 - All Python dependencies
 
 ---
@@ -105,45 +122,76 @@ It installs:
 ### macOS — Manual Setup
 
 ```bash
-# Create virtual environment
-python3 -m venv .venv
-source .venv/bin/activate
-
-# Install dependencies
-pip install -r requirements.txt
-
-# Start Ollama
+# Install Ollama
 brew install ollama
-ollama serve
+ollama serve &
 ollama pull llama3.1:8b
 
 # Install TN3270 client
 brew install x3270
 
-# Run the web app
-python run.py
+# Create virtual environment
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+# Start everything
+./start.sh
 ```
 
 ---
 
-### Start the App
+### Start the App (One Command)
 
 ```bash
-./start.sh              # Ollama + Web App (binds to 0.0.0.0:8080)
-./start.sh --mvs        # Ollama + TK5 Mainframe + Web App
-./start.sh --kill       # Stop everything
+./start.sh                # Start ALL services (Ollama + TK5 + Web App)
+./start.sh --no-mvs       # Start without TK5 mainframe
+./start.sh --no-ollama    # Start without Ollama AI
+./start.sh --kill         # Stop all services
+./start.sh --status       # Health check dashboard
 ```
 
-The web app binds to `0.0.0.0:8080` by default, accessible from any machine on the network.
+`start.sh` does everything:
+1. **Kills** any existing processes
+2. **Starts Ollama** with memory-saving settings (`OLLAMA_KEEP_ALIVE=5m`)
+3. **Starts TK5 Hercules** with correct binary for your OS/arch
+4. **Starts the web app** with auto-detected Python venv
+5. **Health-checks** each service with `curl`
+6. **Shows a status dashboard** with green/red indicators
+7. **Watchdog** monitors the web app and auto-restarts on crash
 
-If running on a remote server, make sure port 8080 is open:
+#### Auto-Detected Model Based on RAM
+
+| Server RAM | Model Selected | VRAM Usage |
+|------------|---------------|------------|
+| 16GB+ | `llama3.1:8b` | ~5 GB |
+| 8–16GB | `llama3.2:3b` | ~2 GB |
+| <8GB | `tinyllama` | ~700 MB |
+
+The model only loads into memory when someone asks an AI question, and unloads after 5 minutes of inactivity.
+
+#### Logs
+
+All logs go to the `logs/` directory:
+- `logs/webapp.log` — Web application
+- `logs/ollama.log` — Ollama AI backend
+- `logs/hercules.log` — TK5 Hercules emulator
+
+---
+
+### Firewall (Remote Servers)
+
+If running on a remote server, open the required ports:
 
 ```bash
 # Ubuntu/Debian
-sudo ufw allow 8080
+sudo ufw allow 8080    # Web app
+sudo ufw allow 3270    # TN3270 (if connecting directly)
 
 # CentOS/RHEL/Fedora
-sudo firewall-cmd --add-port=8080/tcp --permanent && sudo firewall-cmd --reload
+sudo firewall-cmd --add-port=8080/tcp --permanent
+sudo firewall-cmd --add-port=3270/tcp --permanent
+sudo firewall-cmd --reload
 ```
 
 ---
