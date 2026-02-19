@@ -33,6 +33,7 @@ class Config:
     GPU_VRAM_GB: float = 0.0
     GPU_TIER: str = "cpu"
     GPU_OLLAMA_OPTIONS: Dict = field(default_factory=dict)
+    GPU_CODE_MODEL: str = ""  # Dedicated code model for ultra tier dual-model
     
     # Directory paths (computed after BASE_DIR)
     def __post_init__(self):

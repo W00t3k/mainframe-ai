@@ -14,7 +14,7 @@ import time as _time
 from app.models.schemas import ChatRequest
 from app.services.chat import get_chat_service
 from app.services.ollama import get_ollama_service
-from app.config import get_config
+from app.config import get_config, get_gpu_status
 
 router = APIRouter(tags=["chat"])
 
@@ -178,6 +178,91 @@ def _pull_worker(model: str, ollama_url: str):
         _pull_state.update(status="done", pct=100, active=False)
     except Exception as e:
         _pull_state.update(status="error", error=str(e), active=False)
+
+
+@router.get("/models/recommended")
+async def api_recommended_models():
+    """Return GPU-aware model recommendations for the model picker UI."""
+    config = get_config()
+    gpu_status = get_gpu_status()
+
+    gpu_info = gpu_status.get("gpu", {})
+    tier = gpu_status.get("tier", "cpu")
+    recommended = gpu_status.get("recommended_models", [])
+
+    # Build suggested models list based on GPU tier
+    # For ultra tier (H200), include both general and code models with role tags
+    suggested = []
+    for m in recommended:
+        entry = {
+            "name": m["name"],
+            "desc": m["description"],
+            "size": f"~{m['vram_gb']}GB VRAM" if m["vram_gb"] > 0 else "CPU",
+            "use_case": m.get("use_case", "general"),
+            "vram_gb": m["vram_gb"],
+        }
+        suggested.append(entry)
+
+    # Always include small fallback models if not already present
+    fallback_names = {s["name"] for s in suggested}
+    fallbacks = [
+        {"name": "llama3.1:8b", "desc": "Llama 3.1 8B — Fast general model", "size": "~5GB", "use_case": "fast_fallback", "vram_gb": 5},
+        {"name": "llama3.2:3b", "desc": "Llama 3.2 3B — Lightweight", "size": "~2GB", "use_case": "minimal", "vram_gb": 2},
+        {"name": "tinyllama", "desc": "TinyLlama — Minimal", "size": "~637MB", "use_case": "minimal", "vram_gb": 1},
+    ]
+    for fb in fallbacks:
+        if fb["name"] not in fallback_names:
+            suggested.append(fb)
+
+    # Dual-model support for ultra tier
+    dual_model_capable = tier == "ultra"
+    dual_model_config = None
+    if dual_model_capable:
+        dual_model_config = {
+            "enabled": True,
+            "description": "H200 has enough VRAM to keep 2+ models loaded simultaneously",
+            "slots": [
+                {
+                    "role": "general",
+                    "label": "General / Chat",
+                    "current": config.OLLAMA_MODEL,
+                    "recommended": [m["name"] for m in recommended if m.get("use_case") in ("general", "general_expert", "general_fast")],
+                },
+                {
+                    "role": "code",
+                    "label": "Code / Analysis",
+                    "current": getattr(config, "GPU_CODE_MODEL", ""),
+                    "recommended": [m["name"] for m in recommended if "code" in m.get("use_case", "")],
+                },
+            ],
+            "max_loaded": 3,
+        }
+
+    return JSONResponse({
+        "gpu": {
+            "available": gpu_info.get("is_available", False),
+            "name": gpu_info.get("name", "Unknown"),
+            "vram_gb": gpu_info.get("vram_total_gb", 0),
+            "tier": tier,
+        },
+        "current_model": config.OLLAMA_MODEL,
+        "code_model": getattr(config, "GPU_CODE_MODEL", ""),
+        "suggested": suggested,
+        "dual_model": dual_model_config,
+    })
+
+
+@router.post("/models/set-code-model")
+async def api_set_code_model(request: Request):
+    """Set the dedicated code model (ultra tier dual-model feature)."""
+    data = await request.json()
+    model = data.get("model", "").strip()
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+
+    config = get_config()
+    config.GPU_CODE_MODEL = model
+    return JSONResponse({"success": True, "code_model": model, "general_model": config.OLLAMA_MODEL})
 
 
 @router.post("/models/pull")

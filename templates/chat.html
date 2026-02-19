@@ -50,8 +50,10 @@
             <div class="status-item" style="position:relative;">
                 <span class="label">Model:</span>
                 <span class="value model-switch" id="modelName" onclick="toggleModelPicker()" style="cursor:pointer; text-decoration:underline dotted; text-underline-offset:3px;" title="Click to switch model">llama3.1:8b</span>
-                <div id="modelPicker" style="display:none; position:absolute; top:100%; left:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:6px 0; min-width:280px; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-height:300px; overflow-y:auto;">
-                    <div style="padding:4px 12px 6px; color:#888; font-size:11px; border-bottom:1px solid #222;">Available Models (click to switch)</div>
+                <span id="gpuBadge" style="display:none; font-size:9px; background:#f80; color:#000; padding:1px 5px; border-radius:3px; font-weight:bold; margin-left:4px;">GPU</span>
+                <span id="codeModelBadge" style="display:none; font-size:9px; color:#0ff; margin-left:6px;" title="Dedicated code model"></span>
+                <div id="modelPicker" style="display:none; position:absolute; top:100%; left:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:6px 0; min-width:420px; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-height:450px; overflow-y:auto;">
+                    <div id="modelPickerHeader" style="padding:4px 12px 6px; color:#888; font-size:11px; border-bottom:1px solid #222;">Available Models (click to switch)</div>
                     <div id="modelList" style="padding:4px 0;">
                         <div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>
                     </div>
@@ -674,17 +676,10 @@ or use /connect command.
         // Set RAG dot active
         document.getElementById('ragDot').classList.add('active');
 
-        // ── Model Picker ──
-        const SUGGESTED_MODELS = [
-            {name:'tinyllama',      desc:'Tiny & fast',    size:'~637MB'},
-            {name:'llama3.2:3b',    desc:'Good balance',   size:'~2.0GB'},
-            {name:'llama3.1:8b',    desc:'Best quality',   size:'~4.7GB'},
-            {name:'phi3:mini',      desc:'Microsoft Phi-3',size:'~2.3GB'},
-            {name:'mistral:7b',     desc:'Mistral 7B',     size:'~4.1GB'},
-            {name:'gemma2:2b',      desc:'Google Gemma 2B',size:'~1.6GB'},
-        ];
+        // ── Model Picker (GPU-aware) ──
         let modelPickerOpen = false;
         let chatPulling = false;
+        let gpuRecommendations = null;  // cached from /api/models/recommended
 
         async function toggleModelPicker() {
             const picker = document.getElementById('modelPicker');
@@ -693,17 +688,108 @@ or use /connect command.
             if (modelPickerOpen) await loadModels();
         }
 
+        async function fetchGpuRecommendations() {
+            try {
+                const r = await fetch('/api/models/recommended');
+                gpuRecommendations = await r.json();
+                // Update GPU badge
+                const badge = document.getElementById('gpuBadge');
+                if (gpuRecommendations.gpu && gpuRecommendations.gpu.available) {
+                    badge.style.display = 'inline';
+                    badge.textContent = gpuRecommendations.gpu.tier.toUpperCase();
+                    badge.title = `${gpuRecommendations.gpu.name} (${gpuRecommendations.gpu.vram_gb}GB)`;
+                }
+                // Update code model badge
+                if (gpuRecommendations.code_model) {
+                    const cmBadge = document.getElementById('codeModelBadge');
+                    cmBadge.style.display = 'inline';
+                    cmBadge.textContent = `Code: ${gpuRecommendations.code_model}`;
+                }
+            } catch(e) {
+                gpuRecommendations = null;
+            }
+        }
+
+        // Fetch GPU info on page load
+        fetchGpuRecommendations();
+
         async function loadModels() {
             const listEl = document.getElementById('modelList');
+            const headerEl = document.getElementById('modelPickerHeader');
             listEl.innerHTML = '<div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>';
             let installedNames = [];
             let currentModel = '';
+
+            // Refresh GPU recommendations
+            if (!gpuRecommendations) await fetchGpuRecommendations();
+
             try {
                 const r = await fetch('/api/models');
                 const data = await r.json();
                 currentModel = data.current || '';
                 listEl.innerHTML = '';
 
+                // Update header with GPU info
+                if (gpuRecommendations && gpuRecommendations.gpu && gpuRecommendations.gpu.available) {
+                    const g = gpuRecommendations.gpu;
+                    headerEl.innerHTML = `<span style="color:#f80;">⚡ ${g.name}</span> <span style="color:#666;">${g.vram_gb}GB VRAM — ${g.tier.toUpperCase()} tier</span>`;
+                }
+
+                // ── Dual-Model Section (H200/ultra only) ──
+                if (gpuRecommendations && gpuRecommendations.dual_model && gpuRecommendations.dual_model.enabled) {
+                    const dm = gpuRecommendations.dual_model;
+                    const dualHdr = document.createElement('div');
+                    dualHdr.style.cssText = 'padding:6px 12px 4px; color:#0ff; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #222;';
+                    dualHdr.textContent = '⚡ Dual-Model Mode (H200)';
+                    listEl.appendChild(dualHdr);
+
+                    const dualDesc = document.createElement('div');
+                    dualDesc.style.cssText = 'padding:3px 12px 6px; color:#666; font-size:10px;';
+                    dualDesc.textContent = dm.description;
+                    listEl.appendChild(dualDesc);
+
+                    dm.slots.forEach(slot => {
+                        const slotRow = document.createElement('div');
+                        slotRow.style.cssText = 'padding:4px 12px 8px;';
+
+                        const slotLabel = document.createElement('div');
+                        slotLabel.style.cssText = 'font-size:10px; color:#888; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px;';
+                        slotLabel.textContent = slot.label;
+                        slotRow.appendChild(slotLabel);
+
+                        const selectRow = document.createElement('div');
+                        selectRow.style.cssText = 'display:flex; gap:4px; flex-wrap:wrap;';
+
+                        slot.recommended.forEach(modelName => {
+                            const isActive = (slot.role === 'general' && modelName === currentModel) ||
+                                             (slot.role === 'code' && modelName === gpuRecommendations.code_model);
+                            const chip = document.createElement('button');
+                            chip.textContent = modelName;
+                            chip.style.cssText = `font-size:10px; font-family:IBM Plex Mono,monospace; padding:2px 8px; border-radius:3px; cursor:pointer; border:1px solid ${isActive ? '#0ff' : '#333'}; background:${isActive ? 'rgba(0,255,255,0.1)' : 'transparent'}; color:${isActive ? '#0ff' : '#aaa'};`;
+                            chip.onmouseenter = () => { if (!isActive) chip.style.borderColor = '#0ff'; };
+                            chip.onmouseleave = () => { if (!isActive) chip.style.borderColor = '#333'; };
+                            chip.onclick = async (e) => {
+                                e.stopPropagation();
+                                if (slot.role === 'general') {
+                                    await switchModel(modelName);
+                                } else {
+                                    await setCodeModel(modelName);
+                                }
+                                await loadModels();
+                            };
+                            selectRow.appendChild(chip);
+                        });
+
+                        slotRow.appendChild(selectRow);
+                        listEl.appendChild(slotRow);
+                    });
+
+                    const divider = document.createElement('div');
+                    divider.style.cssText = 'border-top:1px solid #222; margin:4px 0;';
+                    listEl.appendChild(divider);
+                }
+
+                // ── Installed Models ──
                 if (data.models && data.models.length > 0) {
                     const hdr = document.createElement('div');
                     hdr.style.cssText = 'padding:4px 12px 4px; color:#0f0; font-size:10px; text-transform:uppercase; letter-spacing:1px;';
@@ -713,15 +799,18 @@ or use /connect command.
                     data.models.forEach(m => {
                         installedNames.push(m.name);
                         const isCurrent = m.name === currentModel;
+                        const isCodeModel = m.name === (gpuRecommendations ? gpuRecommendations.code_model : '');
                         const row = document.createElement('div');
                         row.style.cssText = 'padding:5px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
-                        row.style.color = isCurrent ? '#0f0' : '#ccc';
-                        row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
-                        row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
-                        row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
+                        row.style.color = isCurrent ? '#0f0' : isCodeModel ? '#0ff' : '#ccc';
+                        row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : isCodeModel ? 'rgba(0,255,255,0.05)' : 'transparent';
+                        row.onmouseenter = () => { if (!isCurrent && !isCodeModel) row.style.background = 'rgba(255,255,255,0.05)'; };
+                        row.onmouseleave = () => { if (!isCurrent && !isCodeModel) row.style.background = 'transparent'; };
 
                         const leftSpan = document.createElement('span');
-                        leftSpan.textContent = `${isCurrent ? '▸ ' : '  '}${m.name}`;
+                        const prefix = isCurrent ? '▸ ' : isCodeModel ? '◆ ' : '  ';
+                        const suffix = isCurrent ? ' (chat)' : isCodeModel ? ' (code)' : '';
+                        leftSpan.textContent = `${prefix}${m.name}${suffix}`;
                         leftSpan.onclick = () => switchModel(m.name);
 
                         const rightSpan = document.createElement('span');
@@ -731,7 +820,23 @@ or use /connect command.
                         infoSpan.textContent = `${m.params || ''} ${m.size}`;
                         rightSpan.appendChild(infoSpan);
 
-                        if (!isCurrent) {
+                        // "Set as Code" button for dual-model capable systems
+                        if (gpuRecommendations && gpuRecommendations.dual_model && !isCurrent && !isCodeModel) {
+                            const codeBtn = document.createElement('span');
+                            codeBtn.textContent = '◆';
+                            codeBtn.title = `Set ${m.name} as code model`;
+                            codeBtn.style.cssText = 'color:#555; font-size:11px; cursor:pointer; padding:0 2px;';
+                            codeBtn.onmouseenter = () => { codeBtn.style.color = '#0ff'; };
+                            codeBtn.onmouseleave = () => { codeBtn.style.color = '#555'; };
+                            codeBtn.onclick = async (e) => {
+                                e.stopPropagation();
+                                await setCodeModel(m.name);
+                                await loadModels();
+                            };
+                            rightSpan.appendChild(codeBtn);
+                        }
+
+                        if (!isCurrent && !isCodeModel) {
                             const delBtn = document.createElement('span');
                             delBtn.textContent = '✕';
                             delBtn.title = `Delete ${m.name}`;
@@ -757,25 +862,38 @@ or use /connect command.
                     });
                 }
 
-                // Download section
+                // ── Download Section (GPU-aware) ──
+                const suggestedModels = (gpuRecommendations && gpuRecommendations.suggested)
+                    ? gpuRecommendations.suggested
+                    : [
+                        {name:'tinyllama',   desc:'Tiny & fast',    size:'~637MB'},
+                        {name:'llama3.2:3b', desc:'Good balance',   size:'~2.0GB'},
+                        {name:'llama3.1:8b', desc:'Best quality',   size:'~4.7GB'},
+                    ];
+
                 const dlHdr = document.createElement('div');
                 dlHdr.style.cssText = 'padding:6px 12px 4px; color:#f80; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px;';
-                dlHdr.textContent = 'Download';
+                const gpuAvail = gpuRecommendations && gpuRecommendations.gpu && gpuRecommendations.gpu.available;
+                dlHdr.textContent = gpuAvail ? `⚡ Download (${gpuRecommendations.gpu.tier.toUpperCase()} GPU Models)` : 'Download';
                 listEl.appendChild(dlHdr);
 
-                SUGGESTED_MODELS.forEach(s => {
+                suggestedModels.forEach(s => {
                     if (installedNames.some(n => n.startsWith(s.name.split(':')[0]))) return;
                     const row = document.createElement('div');
                     row.style.cssText = 'padding:5px 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:#ccc;';
 
                     const left = document.createElement('span');
-                    left.innerHTML = `${s.name} <span style="color:#666; font-size:10px;">${s.desc}</span>`;
+                    const useCase = s.use_case || '';
+                    const tagColor = useCase.includes('code') ? '#0ff' : useCase.includes('general') ? '#f80' : '#666';
+                    const tagText = useCase.includes('code') ? 'CODE' : useCase.includes('general') ? 'GEN' : '';
+                    const tag = tagText ? `<span style="color:${tagColor}; font-size:9px; border:1px solid ${tagColor}; padding:0 3px; border-radius:2px; margin-right:4px;">${tagText}</span>` : '';
+                    left.innerHTML = `${tag}${s.name} <span style="color:#666; font-size:10px;">${s.desc || ''}</span>`;
 
                     const right = document.createElement('span');
                     right.style.cssText = 'display:flex; align-items:center; gap:6px;';
                     const sizeSpan = document.createElement('span');
                     sizeSpan.style.cssText = 'color:#555; font-size:10px;';
-                    sizeSpan.textContent = s.size;
+                    sizeSpan.textContent = s.size || '';
                     right.appendChild(sizeSpan);
 
                     const btn = document.createElement('button');
@@ -793,6 +911,26 @@ or use /connect command.
 
             } catch (e) {
                 listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">Ollama offline</div>';
+            }
+        }
+
+        async function setCodeModel(name) {
+            try {
+                const r = await fetch('/api/models/set-code-model', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({model: name})
+                });
+                const data = await r.json();
+                if (data.success) {
+                    const cmBadge = document.getElementById('codeModelBadge');
+                    cmBadge.style.display = 'inline';
+                    cmBadge.textContent = `Code: ${name}`;
+                    if (gpuRecommendations) gpuRecommendations.code_model = name;
+                    addMessage(`Code model set to **${name}** (general: ${data.general_model})`);
+                }
+            } catch(e) {
+                addMessage('Failed to set code model: ' + e.message);
             }
         }
 
