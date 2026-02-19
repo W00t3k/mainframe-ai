@@ -25,6 +25,15 @@ class OllamaService:
     def model(self) -> str:
         return self.config.OLLAMA_MODEL
     
+    @property
+    def gpu_enabled(self) -> bool:
+        return self.config.GPU_ENABLED
+    
+    @property
+    def gpu_options(self) -> dict:
+        """Get GPU-optimized Ollama options merged with defaults."""
+        return dict(self.config.GPU_OLLAMA_OPTIONS) if self.config.GPU_OLLAMA_OPTIONS else {}
+    
     async def check_available(self) -> bool:
         """Check if Ollama is running."""
         try:
@@ -33,6 +42,17 @@ class OllamaService:
                 return response.status_code == 200
         except:
             return False
+    
+    def _build_options(self, temperature: float = 0.7, num_predict: int = 2048) -> dict:
+        """Build Ollama options dict, merging GPU-optimized settings."""
+        options = {}
+        # Start with GPU-optimized base options (num_gpu, num_ctx, num_batch, etc.)
+        if self.gpu_options:
+            options.update(self.gpu_options)
+        # Override with per-request settings
+        options["temperature"] = temperature
+        options["num_predict"] = num_predict
+        return options
     
     async def generate(
         self,
@@ -50,10 +70,7 @@ class OllamaService:
                         "model": self.model,
                         "prompt": prompt,
                         "stream": False,
-                        "options": {
-                            "temperature": temperature,
-                            "num_predict": num_predict,
-                        }
+                        "options": self._build_options(temperature, num_predict),
                     },
                     timeout=timeout
                 )
@@ -83,10 +100,7 @@ class OllamaService:
                 "model": self.model,
                 "messages": messages,
                 "stream": False,
-                "options": {
-                    "temperature": temperature,
-                    "num_predict": num_predict,
-                }
+                "options": self._build_options(temperature, num_predict),
             }
             
             if tools:

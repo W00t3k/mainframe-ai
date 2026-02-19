@@ -12,10 +12,51 @@ from pathlib import Path
 from fastapi import APIRouter, BackgroundTasks
 from fastapi.responses import JSONResponse
 
+from app.config import get_config, get_gpu_status, update_model
+
 router = APIRouter()
 
 # TK5 mainframe paths
 TK5_DIR = Path(__file__).parent.parent.parent / "tk5" / "mvs-tk5"
+
+
+# ============ GPU Status ============
+
+@router.get("/gpu/status")
+async def gpu_status():
+    """
+    Get GPU detection results, current tier, and model recommendations.
+    Returns VRAM, driver info, recommended models, and Ollama options.
+    """
+    config = get_config()
+    status = get_gpu_status()
+    status["current_model"] = config.OLLAMA_MODEL
+    status["gpu_enabled"] = config.GPU_ENABLED
+    return status
+
+
+@router.post("/gpu/switch-model")
+async def switch_model(model: str):
+    """
+    Switch the active Ollama model.
+    Use /api/gpu/status to see recommended models for your GPU.
+    """
+    if not model or not model.strip():
+        return JSONResponse(
+            content={"error": "Model name required"},
+            status_code=400
+        )
+    config = get_config()
+    old_model = config.OLLAMA_MODEL
+    update_model(model.strip())
+    return {
+        "status": "switched",
+        "old_model": old_model,
+        "new_model": model.strip(),
+        "gpu_enabled": config.GPU_ENABLED,
+        "gpu_tier": config.GPU_TIER,
+    }
+
 TK5_START = TK5_DIR / "start_tk5.sh"
 TK5_STOP = TK5_DIR / "stop_tk5.sh"
 

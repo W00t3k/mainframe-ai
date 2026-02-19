@@ -40,8 +40,54 @@ detect_python() {
   fi
 }
 
-# ── Auto-detect RAM & model ────────────────────────────
+# ── Auto-detect GPU, RAM & model ──────────────────────
 detect_model() {
+  GPU_DETECTED=false
+  GPU_VRAM_GB=0
+
+  # Check for NVIDIA GPU first
+  if command -v nvidia-smi &>/dev/null; then
+    GPU_VRAM_MB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
+    if [ -n "$GPU_VRAM_MB" ] && [ "$GPU_VRAM_MB" -gt 0 ] 2>/dev/null; then
+      GPU_DETECTED=true
+      GPU_VRAM_GB=$((GPU_VRAM_MB / 1024))
+      GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)
+      ok "GPU detected: $GPU_NAME (${GPU_VRAM_GB}GB VRAM)"
+
+      if [ "$GPU_VRAM_GB" -ge 80 ]; then
+        MODEL="llama3.1:70b"
+        ok "GPU tier: ULTRA — using $MODEL"
+      elif [ "$GPU_VRAM_GB" -ge 40 ]; then
+        MODEL="llama3.1:70b-instruct-q4_0"
+        ok "GPU tier: HIGH — using $MODEL"
+      elif [ "$GPU_VRAM_GB" -ge 20 ]; then
+        MODEL="deepseek-coder-v2:16b"
+        ok "GPU tier: MEDIUM — using $MODEL"
+      elif [ "$GPU_VRAM_GB" -ge 8 ]; then
+        MODEL="llama3.1:8b"
+        ok "GPU tier: LOW — using $MODEL"
+      else
+        MODEL="llama3.2:3b"
+        ok "GPU tier: MINIMAL — using $MODEL"
+      fi
+
+      # Set GPU-optimized Ollama env vars
+      export CUDA_VISIBLE_DEVICES="0"
+      if [ "$GPU_VRAM_GB" -ge 80 ]; then
+        export OLLAMA_FLASH_ATTENTION="1"
+        export OLLAMA_NUM_PARALLEL="4"
+        export OLLAMA_MAX_LOADED_MODELS="3"
+      elif [ "$GPU_VRAM_GB" -ge 40 ]; then
+        export OLLAMA_FLASH_ATTENTION="1"
+        export OLLAMA_NUM_PARALLEL="2"
+        export OLLAMA_MAX_LOADED_MODELS="2"
+      fi
+
+      return
+    fi
+  fi
+
+  # Fallback: RAM-based model selection (no GPU)
   TOTAL_RAM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')
   # macOS fallback
   [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
@@ -54,6 +100,7 @@ detect_model() {
   else
     MODEL="tinyllama"
   fi
+  info "No GPU detected — CPU mode with $MODEL"
 }
 
 # ── Detect Hercules binary ─────────────────────────────

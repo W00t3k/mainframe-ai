@@ -43,6 +43,9 @@ OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
 MAX_RESPONSE_CHARS = 760  # 10 lines × 76 chars for 3270 screen
 MAX_INPUT_CHARS = 72      # Single line input on 3270
 
+# GPU-optimized Ollama options (populated at startup)
+GPU_OLLAMA_OPTIONS = {}
+
 # System prompt for mainframe context
 SYSTEM_PROMPT = """You are an AI assistant helping mainframe operators and developers.
 You are accessed through a CICS terminal on MVS 3.8j.
@@ -128,15 +131,17 @@ async def query_ollama(question: str, context: str = None) -> str:
     else:
         prompt = question
     
+    # Build options: start with GPU-optimized base, then override per-request
+    options = dict(GPU_OLLAMA_OPTIONS)
+    options["temperature"] = 0.7
+    options["num_predict"] = 256  # Keep responses short for 3270
+    
     payload = {
         "model": OLLAMA_MODEL,
         "prompt": prompt,
         "system": SYSTEM_PROMPT,
         "stream": False,
-        "options": {
-            "temperature": 0.7,
-            "num_predict": 256,  # Keep responses short
-        }
+        "options": options,
     }
     
     try:
@@ -308,7 +313,27 @@ async def process_queue():
 
 @app.on_event("startup")
 async def startup():
-    """Start background queue processor."""
+    """Start background queue processor and detect GPU."""
+    global OLLAMA_MODEL, GPU_OLLAMA_OPTIONS
+    
+    # Detect GPU and auto-configure
+    try:
+        from app.gpu import get_gpu_info, get_recommended_model, get_gpu_ollama_options
+        gpu = get_gpu_info()
+        if gpu.is_available:
+            GPU_OLLAMA_OPTIONS = get_gpu_ollama_options(gpu)
+            # Auto-select model if not explicitly set via env
+            if not os.getenv("OLLAMA_MODEL"):
+                OLLAMA_MODEL = get_recommended_model(gpu)
+            logger.info(
+                f"GPU detected: {gpu.name} ({gpu.vram_total_gb}GB) — "
+                f"Tier: {gpu.tier} — Model: {OLLAMA_MODEL}"
+            )
+        else:
+            logger.info("No GPU detected — using CPU inference")
+    except Exception as e:
+        logger.info(f"GPU detection skipped: {e}")
+    
     asyncio.create_task(process_queue())
     logger.info(f"AI Bridge started - Ollama: {OLLAMA_URL}, Model: {OLLAMA_MODEL}")
 
@@ -327,16 +352,28 @@ def main():
     args = parser.parse_args()
     
     # Use args values
-    ollama_url = args.ollama_url
-    ollama_model = args.model
+    global OLLAMA_URL, OLLAMA_MODEL
+    OLLAMA_URL = args.ollama_url
+    OLLAMA_MODEL = args.model
+    
+    # Detect GPU for banner
+    gpu_line = "GPU: Not detected"
+    try:
+        from app.gpu import get_gpu_info
+        gpu = get_gpu_info()
+        if gpu.is_available:
+            gpu_line = f"GPU: {gpu.name} ({gpu.vram_total_gb}GB VRAM) — Tier: {gpu.tier.upper()}"
+    except Exception:
+        pass
     
     print(f"""
 ╔══════════════════════════════════════════════════════════════╗
 ║           AI Bridge for CICS / MVS 3.8j                      ║
 ╠══════════════════════════════════════════════════════════════╣
 ║  Endpoint:  http://{args.host}:{args.port}/api/ask
-║  Ollama:    {ollama_url}
-║  Model:     {ollama_model}
+║  Ollama:    {OLLAMA_URL}
+║  Model:     {OLLAMA_MODEL}
+║  {gpu_line}
 ╚══════════════════════════════════════════════════════════════╝
     """)
     
