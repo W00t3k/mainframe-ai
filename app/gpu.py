@@ -93,8 +93,7 @@ GPU_MODEL_TIERS = {
             {
                 "name": "deepseek-coder-v2:236b",
                 "vram_gb": 130,
-                "description": "DeepSeek Coder V2 236B — Best coding model available, "
-                               "mixture-of-experts, exceptional at code generation and analysis",
+                "description": "DeepSeek Coder V2 236B — Best coding model, MoE, exceptional at code generation",
                 "use_case": "code_expert",
             },
             {
@@ -128,6 +127,18 @@ GPU_MODEL_TIERS = {
                 "use_case": "general_fast",
             },
             {
+                "name": "deepseek-coder-v2:16b",
+                "vram_gb": 10,
+                "description": "DeepSeek Coder V2 16B — Great coding in smaller footprint",
+                "use_case": "code",
+            },
+            {
+                "name": "mistral:7b",
+                "vram_gb": 4,
+                "description": "Mistral 7B — Fast lightweight general model",
+                "use_case": "general",
+            },
+            {
                 "name": "llama3.1:8b",
                 "vram_gb": 5,
                 "description": "Llama 3.1 8B — Lightweight fallback, blazing fast on GPU",
@@ -135,6 +146,46 @@ GPU_MODEL_TIERS = {
             },
         ],
         "default": "llama3.1:70b",
+        # Pre-calculated combos that fit in 141GB VRAM simultaneously
+        # ~6GB reserved for OS/CUDA overhead → 135GB usable
+        "concurrent_combos": [
+            {
+                "name": "Max Multi-Model",
+                "models": ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "llama3.1:8b"],
+                "total_vram_gb": 95,
+                "description": "General + Code + Fast Code + Fast Chat — 4 models loaded",
+            },
+            {
+                "name": "Best Quality Pair",
+                "models": ["llama3.1:70b", "codellama:70b", "mistral:7b"],
+                "total_vram_gb": 84,
+                "description": "Two 70B models + fast fallback — best quality combo",
+            },
+            {
+                "name": "Diverse Trio",
+                "models": ["llama3.1:70b", "qwen2.5:72b", "llama3.1:8b"],
+                "total_vram_gb": 87,
+                "description": "Two different 70B generals + fast fallback",
+            },
+            {
+                "name": "MoE + Code",
+                "models": ["mixtral:8x22b", "codellama:70b"],
+                "total_vram_gb": 120,
+                "description": "Fast MoE general + dedicated code — fills VRAM",
+            },
+            {
+                "name": "Code Beast (Solo)",
+                "models": ["deepseek-coder-v2:236b"],
+                "total_vram_gb": 130,
+                "description": "Best coding model — uses nearly all VRAM, runs alone",
+            },
+            {
+                "name": "General Beast (Solo)",
+                "models": ["deepseek-v2.5:236b"],
+                "total_vram_gb": 130,
+                "description": "Best general model — uses nearly all VRAM, runs alone",
+            },
+        ],
         "ollama_options": {
             "num_gpu": 99,          # Offload all layers to GPU
             "num_thread": 24,       # Match vCPU count

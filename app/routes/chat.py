@@ -217,10 +217,17 @@ async def api_recommended_models():
     # Dual-model support for ultra tier
     dual_model_capable = tier == "ultra"
     dual_model_config = None
+    concurrent_combos = None
     if dual_model_capable:
+        from app.gpu import GPU_MODEL_TIERS
+        tier_config = GPU_MODEL_TIERS.get(tier, {})
+        concurrent_combos = tier_config.get("concurrent_combos", [])
+
         dual_model_config = {
             "enabled": True,
             "description": "H200 has enough VRAM to keep 2+ models loaded simultaneously",
+            "vram_total_gb": gpu_info.get("vram_total_gb", 0),
+            "vram_usable_gb": max(0, gpu_info.get("vram_total_gb", 0) - 6),  # ~6GB overhead
             "slots": [
                 {
                     "role": "general",
@@ -235,7 +242,8 @@ async def api_recommended_models():
                     "recommended": [m["name"] for m in recommended if "code" in m.get("use_case", "")],
                 },
             ],
-            "max_loaded": 3,
+            "max_loaded": 4,
+            "combos": concurrent_combos,
         }
 
     return JSONResponse({

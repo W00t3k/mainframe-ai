@@ -735,26 +735,147 @@ or use /connect command.
                     headerEl.innerHTML = `<span style="color:#f80;">⚡ ${g.name}</span> <span style="color:#666;">${g.vram_gb}GB VRAM — ${g.tier.toUpperCase()} tier</span>`;
                 }
 
-                // ── Dual-Model Section (H200/ultra only) ──
+                // ── Concurrent Model Combos (H200/ultra only) ──
                 if (gpuRecommendations && gpuRecommendations.dual_model && gpuRecommendations.dual_model.enabled) {
                     const dm = gpuRecommendations.dual_model;
-                    const dualHdr = document.createElement('div');
-                    dualHdr.style.cssText = 'padding:6px 12px 4px; color:#0ff; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-bottom:1px solid #222;';
-                    dualHdr.textContent = '⚡ Dual-Model Mode (H200)';
-                    listEl.appendChild(dualHdr);
+                    const combos = dm.combos || [];
+                    const vramTotal = dm.vram_usable_gb || 135;
 
-                    const dualDesc = document.createElement('div');
-                    dualDesc.style.cssText = 'padding:3px 12px 6px; color:#666; font-size:10px;';
-                    dualDesc.textContent = dm.description;
-                    listEl.appendChild(dualDesc);
+                    const comboHdr = document.createElement('div');
+                    comboHdr.style.cssText = 'padding:6px 12px 2px; color:#0ff; font-size:10px; text-transform:uppercase; letter-spacing:1px;';
+                    comboHdr.textContent = `⚡ Concurrent Model Combos (${dm.vram_total_gb || 141}GB VRAM)`;
+                    listEl.appendChild(comboHdr);
+
+                    const comboDesc = document.createElement('div');
+                    comboDesc.style.cssText = 'padding:2px 12px 6px; color:#666; font-size:10px;';
+                    comboDesc.textContent = 'These models run simultaneously in VRAM. Pick a combo and pull all.';
+                    listEl.appendChild(comboDesc);
+
+                    combos.forEach(combo => {
+                        const row = document.createElement('div');
+                        row.style.cssText = 'padding:6px 12px 8px; border-bottom:1px solid #1a1a2e;';
+
+                        // Combo header: name + VRAM bar
+                        const topRow = document.createElement('div');
+                        topRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;';
+
+                        const nameSpan = document.createElement('span');
+                        nameSpan.style.cssText = 'color:#0ff; font-size:11px; font-weight:bold; font-family:IBM Plex Mono,monospace;';
+                        nameSpan.textContent = combo.name;
+
+                        const vramSpan = document.createElement('span');
+                        const pct = Math.round((combo.total_vram_gb / vramTotal) * 100);
+                        vramSpan.style.cssText = 'color:#888; font-size:10px;';
+                        vramSpan.textContent = `${combo.total_vram_gb}GB / ${vramTotal}GB (${pct}%)`;
+
+                        topRow.appendChild(nameSpan);
+                        topRow.appendChild(vramSpan);
+                        row.appendChild(topRow);
+
+                        // VRAM usage bar
+                        const barOuter = document.createElement('div');
+                        barOuter.style.cssText = 'width:100%; height:6px; background:#111; border-radius:3px; overflow:hidden; margin-bottom:4px;';
+                        const barInner = document.createElement('div');
+                        const barColor = pct > 90 ? '#f44' : pct > 70 ? '#f80' : '#0ff';
+                        barInner.style.cssText = `height:100%; width:${pct}%; background:${barColor}; border-radius:3px;`;
+                        barOuter.appendChild(barInner);
+                        row.appendChild(barOuter);
+
+                        // Description
+                        const descDiv = document.createElement('div');
+                        descDiv.style.cssText = 'color:#666; font-size:10px; margin-bottom:4px;';
+                        descDiv.textContent = combo.description;
+                        row.appendChild(descDiv);
+
+                        // Model chips + Pull All button
+                        const bottomRow = document.createElement('div');
+                        bottomRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:4px;';
+
+                        const chipsDiv = document.createElement('div');
+                        chipsDiv.style.cssText = 'display:flex; gap:3px; flex-wrap:wrap;';
+                        combo.models.forEach(modelName => {
+                            const isInstalled = installedNames.includes(modelName);
+                            const chip = document.createElement('span');
+                            chip.style.cssText = `font-size:9px; font-family:IBM Plex Mono,monospace; padding:1px 6px; border-radius:2px; border:1px solid ${isInstalled ? '#0f0' : '#333'}; color:${isInstalled ? '#0f0' : '#888'}; background:${isInstalled ? 'rgba(0,255,0,0.05)' : 'transparent'};`;
+                            chip.textContent = isInstalled ? `✓ ${modelName}` : modelName;
+                            chipsDiv.appendChild(chip);
+                        });
+                        bottomRow.appendChild(chipsDiv);
+
+                        // Check if all models in combo are installed
+                        const allInstalled = combo.models.every(m => installedNames.includes(m));
+                        const someInstalled = combo.models.some(m => installedNames.includes(m));
+
+                        if (allInstalled) {
+                            const activeBtn = document.createElement('button');
+                            activeBtn.textContent = '✓ Activate';
+                            activeBtn.style.cssText = 'background:#0f0; color:#000; border:none; border-radius:3px; padding:2px 10px; font-size:10px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold;';
+                            activeBtn.onclick = async (e) => {
+                                e.stopPropagation();
+                                // Set first general model as chat, first code model as code
+                                if (combo.models.length > 0) await switchModel(combo.models[0]);
+                                if (combo.models.length > 1) await setCodeModel(combo.models[1]);
+                                addMessage(`Combo **${combo.name}** activated: ${combo.models.join(', ')}`);
+                                await loadModels();
+                            };
+                            bottomRow.appendChild(activeBtn);
+                        } else {
+                            const pullBtn = document.createElement('button');
+                            const missing = combo.models.filter(m => !installedNames.includes(m));
+                            pullBtn.textContent = someInstalled ? `Pull ${missing.length} more` : `Pull All (${combo.models.length})`;
+                            pullBtn.style.cssText = 'background:#f80; color:#000; border:none; border-radius:3px; padding:2px 10px; font-size:10px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; white-space:nowrap;';
+                            pullBtn.onmouseenter = () => pullBtn.style.background = '#fa0';
+                            pullBtn.onmouseleave = () => pullBtn.style.background = '#f80';
+                            pullBtn.onclick = async (e) => {
+                                e.stopPropagation();
+                                // Pull missing models one by one
+                                for (const m of missing) {
+                                    addMessage(`Pulling **${m}** (${missing.indexOf(m)+1}/${missing.length})...`);
+                                    try {
+                                        await fetch('/api/models/pull', {
+                                            method: 'POST',
+                                            headers: {'Content-Type': 'application/json'},
+                                            body: JSON.stringify({model: m})
+                                        });
+                                        // Wait for pull to complete
+                                        let done = false;
+                                        while (!done) {
+                                            await new Promise(r => setTimeout(r, 2000));
+                                            const sr = await fetch('/api/models/pull/status');
+                                            const ss = await sr.json();
+                                            if (ss.pct > 0) addMessage(`↳ ${m}: ${ss.pct}%`);
+                                            if (ss.status === 'done' || ss.status === 'error' || !ss.active) done = true;
+                                        }
+                                    } catch(err) {
+                                        addMessage(`Error pulling ${m}: ${err.message}`);
+                                    }
+                                }
+                                addMessage(`Combo **${combo.name}** ready! Activating...`);
+                                if (combo.models.length > 0) await switchModel(combo.models[0]);
+                                if (combo.models.length > 1) await setCodeModel(combo.models[1]);
+                                await loadModels();
+                            };
+                            bottomRow.appendChild(pullBtn);
+                        }
+
+                        row.appendChild(bottomRow);
+                        listEl.appendChild(row);
+                    });
+
+                    // Slot selectors (General / Code)
+                    const slotHdr = document.createElement('div');
+                    slotHdr.style.cssText = 'padding:6px 12px 2px; color:#888; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:2px;';
+                    slotHdr.textContent = 'Active Model Slots';
+                    listEl.appendChild(slotHdr);
 
                     dm.slots.forEach(slot => {
                         const slotRow = document.createElement('div');
-                        slotRow.style.cssText = 'padding:4px 12px 8px;';
+                        slotRow.style.cssText = 'padding:3px 12px 6px;';
 
                         const slotLabel = document.createElement('div');
                         slotLabel.style.cssText = 'font-size:10px; color:#888; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.5px;';
-                        slotLabel.textContent = slot.label;
+                        const currentVal = slot.role === 'general' ? currentModel : (gpuRecommendations.code_model || 'none');
+                        slotLabel.innerHTML = `${slot.label}: <span style="color:${slot.role === 'code' ? '#0ff' : '#0f0'};">${currentVal}</span>`;
                         slotRow.appendChild(slotLabel);
 
                         const selectRow = document.createElement('div');
@@ -770,11 +891,8 @@ or use /connect command.
                             chip.onmouseleave = () => { if (!isActive) chip.style.borderColor = '#333'; };
                             chip.onclick = async (e) => {
                                 e.stopPropagation();
-                                if (slot.role === 'general') {
-                                    await switchModel(modelName);
-                                } else {
-                                    await setCodeModel(modelName);
-                                }
+                                if (slot.role === 'general') await switchModel(modelName);
+                                else await setCodeModel(modelName);
                                 await loadModels();
                             };
                             selectRow.appendChild(chip);
