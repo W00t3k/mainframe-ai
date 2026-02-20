@@ -743,22 +743,65 @@ or use /connect command.
         async function fetchGpuRecommendations() {
             try {
                 const r = await fetch('/api/models/recommended');
-                gpuRecommendations = await r.json();
-                // Update GPU badge
-                const badge = document.getElementById('gpuBadge');
-                if (gpuRecommendations.gpu && gpuRecommendations.gpu.available) {
-                    badge.style.display = 'inline';
-                    badge.textContent = gpuRecommendations.gpu.tier.toUpperCase();
-                    badge.title = `${gpuRecommendations.gpu.name} (${gpuRecommendations.gpu.vram_gb}GB)`;
-                }
-                // Update code model badge
-                if (gpuRecommendations.code_model) {
-                    const cmBadge = document.getElementById('codeModelBadge');
-                    cmBadge.style.display = 'inline';
-                    cmBadge.textContent = `Code: ${gpuRecommendations.code_model}`;
+                if (r.ok) {
+                    gpuRecommendations = await r.json();
+                } else {
+                    throw new Error('endpoint not available');
                 }
             } catch(e) {
-                gpuRecommendations = null;
+                // Fallback: try /api/system/gpu/status and build recommendations
+                try {
+                    const gr = await fetch('/api/system/gpu/status');
+                    if (gr.ok) {
+                        const gs = await gr.json();
+                        if (gs.gpu && gs.gpu.is_available) {
+                            const tier = gs.tier || 'cpu';
+                            const models = gs.recommended_models || [];
+                            gpuRecommendations = {
+                                gpu: {
+                                    available: true,
+                                    name: gs.gpu.name || 'GPU',
+                                    vram_gb: gs.gpu.vram_total_gb || 0,
+                                    tier: tier,
+                                },
+                                current_model: gs.current_model || '',
+                                code_model: '',
+                                suggested: models.map(m => ({
+                                    name: m.name,
+                                    desc: m.description || '',
+                                    size: m.vram_gb > 0 ? `~${m.vram_gb}GB VRAM` : 'CPU',
+                                    use_case: m.use_case || 'general',
+                                    vram_gb: m.vram_gb || 0,
+                                })),
+                                dual_model: tier === 'ultra' ? {
+                                    enabled: true,
+                                    description: 'GPU has enough VRAM for multiple models simultaneously',
+                                    vram_total_gb: gs.gpu.vram_total_gb || 0,
+                                    vram_usable_gb: Math.max(0, (gs.gpu.vram_total_gb || 0) - 6),
+                                    combos: gs.concurrent_combos || [],
+                                    slots: [],
+                                    max_loaded: 4,
+                                } : null,
+                            };
+                        }
+                    }
+                } catch(e2) {
+                    gpuRecommendations = null;
+                }
+            }
+
+            // Update GPU badge if we got data
+            if (gpuRecommendations && gpuRecommendations.gpu && gpuRecommendations.gpu.available) {
+                const badge = document.getElementById('gpuBadge');
+                badge.style.display = 'inline';
+                badge.textContent = gpuRecommendations.gpu.tier.toUpperCase();
+                badge.title = `${gpuRecommendations.gpu.name} (${gpuRecommendations.gpu.vram_gb}GB)`;
+            }
+            // Update code model badge
+            if (gpuRecommendations && gpuRecommendations.code_model) {
+                const cmBadge = document.getElementById('codeModelBadge');
+                cmBadge.style.display = 'inline';
+                cmBadge.textContent = `Code: ${gpuRecommendations.code_model}`;
             }
         }
 
