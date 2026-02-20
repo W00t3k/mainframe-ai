@@ -11,13 +11,20 @@ from typing import Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 
-# TN3270 emulator - uses py3270 library
+# TN3270 emulator - uses py3270 library (requires s3270 binary on PATH)
 TN3270_AVAILABLE = False
 Emulator = None
+S3270_MISSING = False
 
 try:
     from py3270 import Emulator
-    TN3270_AVAILABLE = True
+    # Verify s3270 binary is actually on PATH — py3270 imports fine without it
+    import shutil as _shutil
+    if _shutil.which("s3270") is None:
+        S3270_MISSING = True
+        TN3270_AVAILABLE = False
+    else:
+        TN3270_AVAILABLE = True
 except ImportError:
     pass
 
@@ -176,6 +183,8 @@ def connect_mainframe(target: str) -> tuple[bool, str]:
     global connection
 
     if not TN3270_AVAILABLE:
+        if S3270_MISSING:
+            return False, "s3270 not found. Install with: sudo apt-get install x3270 (Linux) or brew install x3270 (Mac)"
         return False, "py3270 not available. Install with: pip install py3270"
 
     try:

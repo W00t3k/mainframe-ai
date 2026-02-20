@@ -959,6 +959,15 @@ async def api_walkthrough_start(request: Request):
     if not script:
         return JSONResponse({"success": False, "error": f"Unknown walkthrough: {name}"})
 
+    if not AGENT_TOOLS_AVAILABLE:
+        try:
+            import shutil
+            if shutil.which("s3270") is None:
+                return JSONResponse({"success": False, "error": "s3270 not installed. Run: sudo apt-get install x3270"})
+        except Exception:
+            pass
+        return JSONResponse({"success": False, "error": "TN3270 agent tools not available (py3270 not installed)"})
+
     if _walkthrough_runner.running:
         _walkthrough_runner.stop()
 

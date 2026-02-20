@@ -257,23 +257,23 @@ or use /connect command.
                     </div>
 
                     <div class="terminal-keys">
-                        <button class="pf-key special" onclick="sendKey('enter')">Enter</button>
-                        <button class="pf-key special" onclick="sendKey('clear')">Clear</button>
-                        <button class="pf-key special" onclick="sendKey('tab')">Tab</button>
-                        <button class="pf-key special" onclick="sendKey('reset')">Reset</button>
+                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('enter')">Enter</button>
+                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('clear')">Clear</button>
+                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('tab')">Tab</button>
+                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('reset')">Reset</button>
                         <span style="width:1rem;"></span>
-                        <button class="pf-key" onclick="sendKey('pf', 1)">PF1</button>
-                        <button class="pf-key" onclick="sendKey('pf', 2)">PF2</button>
-                        <button class="pf-key" onclick="sendKey('pf', 3)">PF3</button>
-                        <button class="pf-key" onclick="sendKey('pf', 4)">PF4</button>
-                        <button class="pf-key" onclick="sendKey('pf', 5)">PF5</button>
-                        <button class="pf-key" onclick="sendKey('pf', 6)">PF6</button>
-                        <button class="pf-key" onclick="sendKey('pf', 7)">PF7</button>
-                        <button class="pf-key" onclick="sendKey('pf', 8)">PF8</button>
-                        <button class="pf-key" onclick="sendKey('pf', 9)">PF9</button>
-                        <button class="pf-key" onclick="sendKey('pf', 10)">PF10</button>
-                        <button class="pf-key" onclick="sendKey('pf', 11)">PF11</button>
-                        <button class="pf-key" onclick="sendKey('pf', 12)">PF12</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 1)">PF1</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 2)">PF2</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 3)">PF3</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 4)">PF4</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 5)">PF5</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 6)">PF6</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 7)">PF7</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 8)">PF8</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 9)">PF9</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 10)">PF10</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 11)">PF11</button>
+                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 12)">PF12</button>
                     </div>
                 </div>
             </div>
@@ -412,7 +412,7 @@ or use /connect command.
             document.querySelector(`.header-tab[onclick="showPanel('${name}')"]`).classList.add('active');
 
             if (name === 'terminal') {
-                document.getElementById('terminalScreen').focus();
+                setTimeout(() => document.getElementById('terminalScreen').focus(), 50);
             }
         }
 
