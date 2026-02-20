@@ -57,6 +57,69 @@ async def switch_model(model: str):
         "gpu_tier": config.GPU_TIER,
     }
 
+@router.get("/gpu/live")
+async def gpu_live_metrics():
+    """
+    Real-time GPU metrics for the status indicator.
+    Returns current utilization, VRAM usage, temperature, power.
+    Only returns data if an NVIDIA GPU is detected.
+    """
+    config = get_config()
+    if not config.GPU_ENABLED:
+        return JSONResponse(content={"available": False})
+
+    import shutil
+    if not shutil.which("nvidia-smi"):
+        return JSONResponse(content={"available": False})
+
+    try:
+        result = subprocess.run(
+            [
+                "nvidia-smi",
+                "--query-gpu=utilization.gpu,memory.used,memory.total,memory.free,"
+                "temperature.gpu,power.draw,power.limit,name",
+                "--format=csv,noheader,nounits",
+            ],
+            capture_output=True, text=True, timeout=5,
+        )
+        if result.returncode != 0:
+            return JSONResponse(content={"available": False})
+
+        parts = [p.strip() for p in result.stdout.strip().split(",")]
+        if len(parts) < 8:
+            return JSONResponse(content={"available": False})
+
+        util = int(parts[0])
+        vram_used = int(parts[1])
+        vram_total = int(parts[2])
+        vram_free = int(parts[3])
+        temp = int(parts[4])
+        power_draw = float(parts[5]) if parts[5] not in ("[N/A]", "") else 0
+        power_limit = float(parts[6]) if parts[6] not in ("[N/A]", "") else 0
+        gpu_name = parts[7]
+
+        vram_pct = round(vram_used / vram_total * 100) if vram_total > 0 else 0
+
+        return JSONResponse(content={
+            "available": True,
+            "name": gpu_name,
+            "utilization_pct": util,
+            "vram_used_mb": vram_used,
+            "vram_total_mb": vram_total,
+            "vram_free_mb": vram_free,
+            "vram_used_gb": round(vram_used / 1024, 1),
+            "vram_total_gb": round(vram_total / 1024, 1),
+            "vram_pct": vram_pct,
+            "temperature_c": temp,
+            "power_draw_w": power_draw,
+            "power_limit_w": power_limit,
+            "tier": config.GPU_TIER,
+            "model": config.OLLAMA_MODEL,
+        })
+    except Exception:
+        return JSONResponse(content={"available": False})
+
+
 TK5_START = TK5_DIR / "start_tk5.sh"
 TK5_STOP = TK5_DIR / "stop_tk5.sh"
 

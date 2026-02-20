@@ -71,6 +71,48 @@
                 <span class="label">RAG:</span>
                 <span class="value" id="ragStatus">3 sources</span>
             </div>
+            <!-- GPU Status Indicator — hidden until GPU detected -->
+            <div class="status-item" id="gpuStatusItem" style="display:none; margin-left:auto;">
+                <span id="gpuIndicator" style="display:inline-flex; align-items:center; gap:5px; font-size:11px; font-family:IBM Plex Mono,monospace; cursor:pointer;" title="Click for GPU details" onclick="toggleGpuPanel()">
+                    <span id="gpuDot" style="width:7px; height:7px; border-radius:50%; background:#0f0; display:inline-block; box-shadow:0 0 4px #0f0;"></span>
+                    <span id="gpuUtilText" style="color:#0f0;">GPU 0%</span>
+                    <span style="color:#333;">│</span>
+                    <span id="gpuVramText" style="color:#f80;">VRAM 0%</span>
+                    <span style="color:#333;">│</span>
+                    <span id="gpuTempText" style="color:#888;">0°C</span>
+                </span>
+                <!-- GPU Detail Panel (click to expand) -->
+                <div id="gpuPanel" style="display:none; position:absolute; top:100%; right:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:10px 14px; min-width:300px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                    <div style="color:#0ff; font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:4px;">⚡ GPU Status</div>
+                    <div id="gpuPanelName" style="color:#ccc; font-size:12px; font-family:IBM Plex Mono,monospace; margin-bottom:6px;">—</div>
+                    <!-- Utilization bar -->
+                    <div style="margin-bottom:6px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#888; margin-bottom:2px;">
+                            <span>GPU Utilization</span>
+                            <span id="gpuPanelUtil" style="color:#0f0;">0%</span>
+                        </div>
+                        <div style="width:100%; height:8px; background:#111; border-radius:4px; overflow:hidden;">
+                            <div id="gpuPanelUtilBar" style="height:100%; width:0%; background:#0f0; border-radius:4px; transition:width 0.5s;"></div>
+                        </div>
+                    </div>
+                    <!-- VRAM bar -->
+                    <div style="margin-bottom:6px;">
+                        <div style="display:flex; justify-content:space-between; font-size:10px; color:#888; margin-bottom:2px;">
+                            <span>VRAM</span>
+                            <span id="gpuPanelVram" style="color:#f80;">0 / 0 GB</span>
+                        </div>
+                        <div style="width:100%; height:8px; background:#111; border-radius:4px; overflow:hidden;">
+                            <div id="gpuPanelVramBar" style="height:100%; width:0%; background:#f80; border-radius:4px; transition:width 0.5s;"></div>
+                        </div>
+                    </div>
+                    <!-- Temp + Power -->
+                    <div style="display:flex; justify-content:space-between; font-size:11px; font-family:IBM Plex Mono,monospace; color:#888; margin-top:4px;">
+                        <span>Temp: <span id="gpuPanelTemp" style="color:#ff0;">0°C</span></span>
+                        <span>Power: <span id="gpuPanelPower" style="color:#f80;">0W</span></span>
+                        <span>Tier: <span id="gpuPanelTier" style="color:#0ff;">—</span></span>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Main Content -->
@@ -1208,6 +1250,95 @@ or use /connect command.
                 modelPickerOpen = false;
                 document.getElementById('modelPicker').style.display = 'none';
             }
+            // Close GPU panel on outside click
+            if (gpuPanelOpen && !e.target.closest('#gpuPanel') && !e.target.closest('#gpuIndicator')) {
+                gpuPanelOpen = false;
+                document.getElementById('gpuPanel').style.display = 'none';
+            }
         });
+
+        // ── GPU Live Status Indicator ──
+        let gpuPanelOpen = false;
+        let gpuDetected = false;
+
+        function toggleGpuPanel() {
+            gpuPanelOpen = !gpuPanelOpen;
+            document.getElementById('gpuPanel').style.display = gpuPanelOpen ? 'block' : 'none';
+        }
+
+        function utilColor(pct) {
+            if (pct > 80) return '#0f0';
+            if (pct > 40) return '#ff0';
+            if (pct > 0) return '#f80';
+            return '#666';
+        }
+
+        function tempColor(c) {
+            if (c >= 80) return '#f44';
+            if (c >= 65) return '#f80';
+            if (c >= 45) return '#ff0';
+            return '#0f0';
+        }
+
+        async function pollGpuLive() {
+            try {
+                const r = await fetch('/api/system/gpu/live');
+                const g = await r.json();
+
+                if (!g.available) {
+                    // No GPU — keep indicator hidden
+                    if (!gpuDetected) return;
+                    document.getElementById('gpuStatusItem').style.display = 'none';
+                    gpuDetected = false;
+                    return;
+                }
+
+                // GPU detected — show indicator
+                if (!gpuDetected) {
+                    document.getElementById('gpuStatusItem').style.display = 'flex';
+                    gpuDetected = true;
+                }
+
+                const util = g.utilization_pct || 0;
+                const vramPct = g.vram_pct || 0;
+                const temp = g.temperature_c || 0;
+                const vramUsed = g.vram_used_gb || 0;
+                const vramTotal = g.vram_total_gb || 0;
+                const power = g.power_draw_w || 0;
+                const powerLimit = g.power_limit_w || 0;
+
+                // Status bar: compact indicator
+                const uColor = utilColor(util);
+                document.getElementById('gpuDot').style.background = uColor;
+                document.getElementById('gpuDot').style.boxShadow = `0 0 4px ${uColor}`;
+                document.getElementById('gpuUtilText').style.color = uColor;
+                document.getElementById('gpuUtilText').textContent = `GPU ${util}%`;
+                document.getElementById('gpuVramText').textContent = `VRAM ${vramPct}%`;
+                document.getElementById('gpuVramText').style.color = vramPct > 90 ? '#f44' : vramPct > 70 ? '#f80' : '#0ff';
+                document.getElementById('gpuTempText').textContent = `${temp}°C`;
+                document.getElementById('gpuTempText').style.color = tempColor(temp);
+
+                // Detail panel
+                document.getElementById('gpuPanelName').textContent = `${g.name || 'GPU'} — ${g.tier ? g.tier.toUpperCase() : ''} tier`;
+                document.getElementById('gpuPanelUtil').textContent = `${util}%`;
+                document.getElementById('gpuPanelUtil').style.color = uColor;
+                document.getElementById('gpuPanelUtilBar').style.width = `${util}%`;
+                document.getElementById('gpuPanelUtilBar').style.background = uColor;
+                document.getElementById('gpuPanelVram').textContent = `${vramUsed} / ${vramTotal} GB`;
+                document.getElementById('gpuPanelVramBar').style.width = `${vramPct}%`;
+                document.getElementById('gpuPanelVramBar').style.background = vramPct > 90 ? '#f44' : '#f80';
+                document.getElementById('gpuPanelTemp').textContent = `${temp}°C`;
+                document.getElementById('gpuPanelTemp').style.color = tempColor(temp);
+                document.getElementById('gpuPanelPower').textContent = powerLimit > 0 ? `${Math.round(power)}/${Math.round(powerLimit)}W` : `${Math.round(power)}W`;
+                document.getElementById('gpuPanelTier').textContent = g.tier ? g.tier.toUpperCase() : '—';
+
+            } catch(e) {
+                // Silently ignore — GPU polling is optional
+            }
+        }
+
+        // Initial check, then poll every 3 seconds
+        pollGpuLive();
+        setInterval(pollGpuLive, 3000);
     </script>
 {% endblock %}
