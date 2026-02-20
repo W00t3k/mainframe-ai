@@ -36,8 +36,18 @@
                     <span class="dot" id="ragDot"></span> RAG
                 </button>
             </div>
-            <div style="font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ibm-gray-50);">
-                v2.0 | Local LLM
+            <div style="display:flex; align-items:center; gap:10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ibm-gray-50);">
+                <span>v2.0 | Local LLM</span>
+                <span id="headerGpu" style="display:none; align-items:center; gap:5px; padding:2px 8px; border:1px solid #333; border-radius:4px; background:rgba(0,255,0,0.05);">
+                    <span id="headerGpuDot" style="width:6px; height:6px; border-radius:50%; background:#0f0; display:inline-block; box-shadow:0 0 4px #0f0;"></span>
+                    <span id="headerGpuName" style="color:#0f0; font-size:10px;">GPU</span>
+                    <span style="color:#333;">│</span>
+                    <span id="headerGpuUtil" style="color:#0f0; font-size:10px;">0%</span>
+                    <span style="color:#333;">│</span>
+                    <span id="headerGpuVram" style="color:#f80; font-size:10px;">VRAM 0%</span>
+                    <span style="color:#333;">│</span>
+                    <span id="headerGpuTemp" style="color:#888; font-size:10px;">0°C</span>
+                </span>
             </div>
         </header>
 
@@ -1286,16 +1296,18 @@ or use /connect command.
                 const g = await r.json();
 
                 if (!g.available) {
-                    // No GPU — keep indicator hidden
+                    // No GPU — keep indicators hidden
                     if (!gpuDetected) return;
                     document.getElementById('gpuStatusItem').style.display = 'none';
+                    document.getElementById('headerGpu').style.display = 'none';
                     gpuDetected = false;
                     return;
                 }
 
-                // GPU detected — show indicator
+                // GPU detected — show indicators
                 if (!gpuDetected) {
                     document.getElementById('gpuStatusItem').style.display = 'flex';
+                    document.getElementById('headerGpu').style.display = 'inline-flex';
                     gpuDetected = true;
                 }
 
@@ -1307,8 +1319,21 @@ or use /connect command.
                 const power = g.power_draw_w || 0;
                 const powerLimit = g.power_limit_w || 0;
 
-                // Status bar: compact indicator
+                // Header bar: top-level GPU indicator
                 const uColor = utilColor(util);
+                const shortName = (g.name || 'GPU').replace('NVIDIA ', '');
+                document.getElementById('headerGpuDot').style.background = uColor;
+                document.getElementById('headerGpuDot').style.boxShadow = `0 0 4px ${uColor}`;
+                document.getElementById('headerGpuName').textContent = shortName;
+                document.getElementById('headerGpuName').style.color = '#0f0';
+                document.getElementById('headerGpuUtil').textContent = `${util}%`;
+                document.getElementById('headerGpuUtil').style.color = uColor;
+                document.getElementById('headerGpuVram').textContent = `VRAM ${vramPct}%`;
+                document.getElementById('headerGpuVram').style.color = vramPct > 90 ? '#f44' : vramPct > 70 ? '#f80' : '#0ff';
+                document.getElementById('headerGpuTemp').textContent = `${temp}°C`;
+                document.getElementById('headerGpuTemp').style.color = tempColor(temp);
+
+                // Status bar: compact indicator
                 document.getElementById('gpuDot').style.background = uColor;
                 document.getElementById('gpuDot').style.boxShadow = `0 0 4px ${uColor}`;
                 document.getElementById('gpuUtilText').style.color = uColor;
