@@ -878,7 +878,7 @@ or use /connect command.
                 listEl.appendChild(dlHdr);
 
                 suggestedModels.forEach(s => {
-                    if (installedNames.some(n => n.startsWith(s.name.split(':')[0]))) return;
+                    if (installedNames.includes(s.name)) return;
                     const row = document.createElement('div');
                     row.style.cssText = 'padding:5px 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:#ccc;';
 
