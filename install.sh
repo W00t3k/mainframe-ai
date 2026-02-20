@@ -36,7 +36,10 @@ REPO_URL="https://github.com/W00t3k/mainframe-ai.git"
 #      git clone git@github.com:W00t3k/mainframe-ai.git
 #   3. Use GitHub CLI:
 #      gh auth login && gh repo clone W00t3k/mainframe-ai
-MODEL="llama3.1:8b"
+MODEL="llama3.1:8b"   # Default — overridden by GPU detection
+GPU_DETECTED=0
+GPU_VRAM_GB=0
+GPU_NAME=""
 PYTHON_MIN="3.11"
 INSTALL_DIR=""
 
@@ -67,6 +70,66 @@ detect_distro() {
     DISTRO="unknown"
   fi
   info "Detected distro: $DISTRO"
+}
+
+# ── GPU Detection ────────────────────────────────────────
+detect_gpu() {
+  info "Checking for NVIDIA GPU..."
+
+  if ! command -v nvidia-smi &>/dev/null; then
+    warn "nvidia-smi not found — no NVIDIA GPU detected, using CPU mode"
+    return
+  fi
+
+  GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | head -1)
+  GPU_VRAM_MB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
+
+  if [ -z "$GPU_NAME" ]; then
+    warn "nvidia-smi found but no GPU detected"
+    return
+  fi
+
+  GPU_VRAM_GB=$((GPU_VRAM_MB / 1024))
+  GPU_DETECTED=1
+
+  # Select model based on VRAM tier
+  if [ "$GPU_VRAM_GB" -ge 80 ]; then
+    MODEL="llama3.1:70b"
+    GPU_TIER="ULTRA"
+  elif [ "$GPU_VRAM_GB" -ge 40 ]; then
+    MODEL="llama3.1:70b-instruct-q4_0"
+    GPU_TIER="HIGH"
+  elif [ "$GPU_VRAM_GB" -ge 20 ]; then
+    MODEL="qwen2.5:32b"
+    GPU_TIER="MEDIUM"
+  elif [ "$GPU_VRAM_GB" -ge 8 ]; then
+    MODEL="llama3.1:8b"
+    GPU_TIER="LOW"
+  else
+    MODEL="llama3.2:3b"
+    GPU_TIER="MINIMAL"
+  fi
+
+  ok "GPU detected: ${GPU_NAME} (${GPU_VRAM_GB}GB VRAM) — Tier: ${GPU_TIER}"
+  ok "GPU model selected: ${MODEL}"
+}
+
+# ── CUDA / GPU System Deps ────────────────────────────────
+install_gpu_deps() {
+  [ "$GPU_DETECTED" -eq 0 ] && return
+
+  info "Installing GPU dependencies..."
+
+  case "$DISTRO" in
+    ubuntu|debian|kali|pop|linuxmint)
+      # nvidia-utils for nvidia-smi (usually already present with driver)
+      $SUDO apt-get install -y -qq nvidia-utils-$(nvidia-smi --query-gpu=driver_version --format=csv,noheader | head -1 | cut -d. -f1) 2>/dev/null || true
+      ok "GPU utilities ready"
+      ;;
+    *)
+      info "GPU driver assumed pre-installed (non-Debian distro)"
+      ;;
+  esac
 }
 
 # ── System Dependencies ───────────────────────────────────
@@ -205,6 +268,22 @@ install_ollama() {
     fi
   fi
 
+  # Set GPU env vars before starting Ollama
+  if [ "$GPU_DETECTED" -eq 1 ]; then
+    export CUDA_VISIBLE_DEVICES="0"
+    export OLLAMA_FLASH_ATTENTION="1"
+    if [ "$GPU_VRAM_GB" -ge 80 ]; then
+      export OLLAMA_NUM_PARALLEL="4"
+      export OLLAMA_MAX_LOADED_MODELS="4"
+      export OLLAMA_KEEP_ALIVE="60m"
+    elif [ "$GPU_VRAM_GB" -ge 40 ]; then
+      export OLLAMA_NUM_PARALLEL="2"
+      export OLLAMA_MAX_LOADED_MODELS="2"
+      export OLLAMA_KEEP_ALIVE="30m"
+    fi
+    info "Ollama GPU mode: ${GPU_TIER} tier, ${GPU_VRAM_GB}GB VRAM"
+  fi
+
   # Start Ollama if not running
   if ! pgrep -x "ollama" > /dev/null 2>&1; then
     info "Starting Ollama service..."
@@ -213,10 +292,13 @@ install_ollama() {
   fi
 
   # Pull model
-  if ollama list 2>/dev/null | grep -q "$MODEL"; then
+  if ollama list 2>/dev/null | grep -q "$(echo $MODEL | cut -d: -f1)"; then
     ok "Model $MODEL already available"
   else
-    info "Pulling $MODEL (this may take a few minutes on first run)..."
+    info "Pulling $MODEL — this may take a while on first run..."
+    if [ "$GPU_VRAM_GB" -ge 80 ]; then
+      warn "Large model (~40GB+). This will take 10-30 min depending on network speed."
+    fi
     ollama pull "$MODEL"
     ok "Model $MODEL downloaded"
   fi
@@ -412,11 +494,21 @@ verify() {
     warn "TK5 not installed (optional — can connect to remote mainframe)"
   fi
 
-  # x3270
-  if command -v x3270 &>/dev/null || command -v c3270 &>/dev/null; then
-    ok "TN3270 client available"
+  # s3270 (required for web TN3270 terminal)
+  if command -v s3270 &>/dev/null; then
+    ok "s3270 available (TN3270 web terminal will work)"
   else
-    warn "No TN3270 client found (optional — web terminal works without it)"
+    warn "s3270 not found — TN3270 web terminal won't connect"
+    warn "Fix: sudo apt-get install -y x3270   (installs s3270)"
+    ERRORS=$((ERRORS + 1))
+  fi
+
+  # GPU
+  if [ "$GPU_DETECTED" -eq 1 ]; then
+    ok "GPU: ${GPU_NAME} (${GPU_VRAM_GB}GB) — ${GPU_TIER} tier"
+    ok "GPU model: ${MODEL}"
+  else
+    info "No GPU detected — running in CPU mode with ${MODEL}"
   fi
 
   echo ""
@@ -433,8 +525,13 @@ verify() {
   echo ""
   echo -e "  ${CYN}To start:${RST}"
   echo -e "    cd $INSTALL_DIR"
-  echo -e "    ./start.sh              # Web app + Ollama"
-  echo -e "    ./start.sh --mvs        # Web app + Ollama + TK5 mainframe"
+  if [ "$GPU_DETECTED" -eq 1 ]; then
+    echo -e "    ${GRN}./start_gpu.sh${RST}          # GPU-optimized start (recommended for ${GPU_NAME})"
+    echo -e "    ./start.sh              # Standard start (also GPU-aware)"
+  else
+    echo -e "    ./start.sh              # Web app + Ollama"
+    echo -e "    ./start.sh --mvs        # Web app + Ollama + TK5 mainframe"
+  fi
   # Detect server IP for display
   SERVER_IP=$(hostname -I 2>/dev/null | awk '{print $1}')
   [ -z "$SERVER_IP" ] && SERVER_IP="0.0.0.0"
@@ -471,7 +568,9 @@ banner() {
 banner
 check_root
 detect_distro
+detect_gpu
 install_system_deps
+install_gpu_deps
 check_python
 install_ollama
 setup_gh_auth
