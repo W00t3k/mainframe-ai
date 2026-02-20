@@ -433,22 +433,24 @@ def send_terminal_key(key_type: str, value: str = "") -> dict:
         return {"success": False, "error": "Not connected"}
 
     try:
-        # Wait for keyboard unlock
-        try:
-            exec_emulator_command(b'Wait(1,Unlock)')
-        except Exception:
-            try:
-                exec_emulator_command(b'Reset()')
-            except Exception:
-                pass
-
         # Send the key
+        # NOTE: String() must NOT be preceded by Wait(Unlock) — on Linux s3270
+        # the unlock wait causes each character to be echoed twice through the pipe.
+        # Only wait for unlock before action keys (Enter, PF, Clear) that submit data.
         if key_type == "string":
             if value:
                 exec_emulator_command(f'String("{value}")'.encode())
         elif key_type == "enter":
+            try:
+                exec_emulator_command(b'Wait(1,Unlock)')
+            except Exception:
+                pass
             exec_emulator_command(b'Enter()')
         elif key_type == "pf":
+            try:
+                exec_emulator_command(b'Wait(1,Unlock)')
+            except Exception:
+                pass
             exec_emulator_command(f'PF({value})'.encode())
         elif key_type == "pa":
             exec_emulator_command(f'PA({value})'.encode())
