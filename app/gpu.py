@@ -146,46 +146,118 @@ GPU_MODEL_TIERS = {
             },
         ],
         "default": "llama3.1:70b",
-        # Pre-calculated combos that fit in 141GB VRAM simultaneously
+        # ── Pre-calculated concurrent combos for H200 (141GB VRAM) ──
         # ~6GB reserved for OS/CUDA overhead → 135GB usable
+        # Each combo lists which models run simultaneously and their roles
         "concurrent_combos": [
+            # ── 4-MODEL COMBOS (max simultaneous) ──
             {
-                "name": "Max Multi-Model",
+                "name": "Full Arsenal",
                 "models": ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "llama3.1:8b"],
                 "total_vram_gb": 95,
-                "description": "General + Code + Fast Code + Fast Chat — 4 models loaded",
+                "description": "4 models: 70B general + 70B code + 16B fast code + 8B instant replies",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code", "deepseek-coder-v2:16b": "code_fast", "llama3.1:8b": "fast"},
             },
             {
-                "name": "Best Quality Pair",
+                "name": "Full Arsenal v2",
+                "models": ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b"],
+                "total_vram_gb": 94,
+                "description": "4 models: 70B general + 70B code + 16B fast code + Mistral fast",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code", "deepseek-coder-v2:16b": "code_fast", "mistral:7b": "fast"},
+            },
+            {
+                "name": "Dual General + Code",
+                "models": ["llama3.1:70b", "qwen2.5:72b", "deepseek-coder-v2:16b", "llama3.1:8b"],
+                "total_vram_gb": 97,
+                "description": "4 models: two 70B generals (Llama+Qwen) + code + fast fallback",
+                "roles": {"llama3.1:70b": "general", "qwen2.5:72b": "general_alt", "deepseek-coder-v2:16b": "code", "llama3.1:8b": "fast"},
+            },
+            # ── 3-MODEL COMBOS (balanced) ──
+            {
+                "name": "Triple 70B",
+                "models": ["llama3.1:70b", "codellama:70b", "qwen2.5:72b"],
+                "total_vram_gb": 122,
+                "description": "3 heavyweight 70B models: Llama general + CodeLlama + Qwen — max quality",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code", "qwen2.5:72b": "general_alt"},
+            },
+            {
+                "name": "Best Quality + Fast",
                 "models": ["llama3.1:70b", "codellama:70b", "mistral:7b"],
                 "total_vram_gb": 84,
-                "description": "Two 70B models + fast fallback — best quality combo",
+                "description": "3 models: 70B general + 70B code + Mistral for instant answers",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code", "mistral:7b": "fast"},
             },
             {
-                "name": "Diverse Trio",
-                "models": ["llama3.1:70b", "qwen2.5:72b", "llama3.1:8b"],
-                "total_vram_gb": 87,
-                "description": "Two different 70B generals + fast fallback",
+                "name": "MoE + Code 70B",
+                "models": ["mixtral:8x22b", "codellama:70b", "llama3.1:8b"],
+                "total_vram_gb": 125,
+                "description": "3 models: Mixtral MoE (fast general) + 70B code + 8B instant",
+                "roles": {"mixtral:8x22b": "general", "codellama:70b": "code", "llama3.1:8b": "fast"},
             },
             {
-                "name": "MoE + Code",
+                "name": "Qwen + Code + Fast",
+                "models": ["qwen2.5:72b", "codellama:70b", "mistral:7b"],
+                "total_vram_gb": 86,
+                "description": "3 models: Qwen 72B general + 70B code + Mistral fast",
+                "roles": {"qwen2.5:72b": "general", "codellama:70b": "code", "mistral:7b": "fast"},
+            },
+            {
+                "name": "Llama + DeepSeek Code + Fast",
+                "models": ["llama3.1:70b", "deepseek-coder-v2:16b", "llama3.1:8b"],
+                "total_vram_gb": 55,
+                "description": "3 models: 70B general + DeepSeek code + 8B fast — lots of VRAM headroom",
+                "roles": {"llama3.1:70b": "general", "deepseek-coder-v2:16b": "code", "llama3.1:8b": "fast"},
+            },
+            # ── 2-MODEL COMBOS (focused) ──
+            {
+                "name": "General + Code (70B pair)",
+                "models": ["llama3.1:70b", "codellama:70b"],
+                "total_vram_gb": 80,
+                "description": "2 models: best general + best code — classic dual-model setup",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code"},
+            },
+            {
+                "name": "MoE + Code 70B",
                 "models": ["mixtral:8x22b", "codellama:70b"],
                 "total_vram_gb": 120,
-                "description": "Fast MoE general + dedicated code — fills VRAM",
+                "description": "2 models: fast MoE general + dedicated 70B code",
+                "roles": {"mixtral:8x22b": "general", "codellama:70b": "code"},
             },
             {
-                "name": "Code Beast (Solo)",
+                "name": "Qwen + Code",
+                "models": ["qwen2.5:72b", "codellama:70b"],
+                "total_vram_gb": 82,
+                "description": "2 models: Qwen 72B multilingual + 70B code",
+                "roles": {"qwen2.5:72b": "general", "codellama:70b": "code"},
+            },
+            # ── SOLO (max single-model quality) ──
+            {
+                "name": "DeepSeek Coder 236B (Solo)",
                 "models": ["deepseek-coder-v2:236b"],
                 "total_vram_gb": 130,
-                "description": "Best coding model — uses nearly all VRAM, runs alone",
+                "description": "Solo: best coding model available — 236B MoE, uses nearly all VRAM",
+                "roles": {"deepseek-coder-v2:236b": "code"},
             },
             {
-                "name": "General Beast (Solo)",
+                "name": "DeepSeek V2.5 236B (Solo)",
                 "models": ["deepseek-v2.5:236b"],
                 "total_vram_gb": 130,
-                "description": "Best general model — uses nearly all VRAM, runs alone",
+                "description": "Solo: best general model — 236B MoE, uses nearly all VRAM",
+                "roles": {"deepseek-v2.5:236b": "general"},
             },
         ],
+        # Model compatibility matrix — which models can coexist in 135GB
+        "compatibility": {
+            "deepseek-coder-v2:236b": ["mistral:7b", "llama3.1:8b"],
+            "deepseek-v2.5:236b":     ["mistral:7b", "llama3.1:8b"],
+            "mixtral:8x22b":          ["qwen2.5:72b", "llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b"],
+            "qwen2.5:72b":            ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
+            "llama3.1:70b":           ["qwen2.5:72b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
+            "codellama:70b":          ["llama3.1:70b", "qwen2.5:72b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
+            "deepseek-coder-v2:16b":  ["llama3.1:70b", "qwen2.5:72b", "codellama:70b", "mixtral:8x22b", "mistral:7b", "llama3.1:8b"],
+            "mistral:7b":             ["llama3.1:70b", "qwen2.5:72b", "codellama:70b", "mixtral:8x22b", "deepseek-coder-v2:16b", "llama3.1:8b", "deepseek-coder-v2:236b", "deepseek-v2.5:236b"],
+            "llama3.1:8b":            ["llama3.1:70b", "qwen2.5:72b", "codellama:70b", "mixtral:8x22b", "deepseek-coder-v2:16b", "mistral:7b", "deepseek-coder-v2:236b", "deepseek-v2.5:236b"],
+        },
         "ollama_options": {
             "num_gpu": 99,          # Offload all layers to GPU
             "num_thread": 24,       # Match vCPU count
@@ -469,11 +541,24 @@ def get_gpu_ollama_options(gpu: GPUInfo) -> Dict:
     return dict(tier_config["ollama_options"])
 
 
+def get_compatible_models(model_name: str, gpu: GPUInfo = None) -> List[str]:
+    """
+    Get list of models that can run concurrently with the given model.
+    Based on the compatibility matrix for the GPU tier.
+    """
+    if gpu is None:
+        gpu = get_gpu_info()
+    tier = gpu.tier if gpu.is_available else "cpu"
+    tier_config = GPU_MODEL_TIERS.get(tier, GPU_MODEL_TIERS["cpu"])
+    compat = tier_config.get("compatibility", {})
+    return compat.get(model_name, [])
+
+
 def get_model_recommendations(gpu: GPUInfo) -> Dict:
     """Get full model recommendations for the detected GPU."""
     tier = gpu.tier if gpu.is_available else "cpu"
     tier_config = GPU_MODEL_TIERS.get(tier, GPU_MODEL_TIERS["cpu"])
-    return {
+    result = {
         "gpu": gpu.to_dict(),
         "tier": tier,
         "tier_description": tier_config["description"],
@@ -481,6 +566,12 @@ def get_model_recommendations(gpu: GPUInfo) -> Dict:
         "recommended_models": tier_config["recommended"],
         "ollama_options": tier_config["ollama_options"],
     }
+    # Include concurrent combos and compatibility for ultra/high tiers
+    if "concurrent_combos" in tier_config:
+        result["concurrent_combos"] = tier_config["concurrent_combos"]
+    if "compatibility" in tier_config:
+        result["compatibility"] = tier_config["compatibility"]
+    return result
 
 
 def get_ollama_gpu_env() -> Dict[str, str]:
@@ -498,7 +589,7 @@ def get_ollama_gpu_env() -> Dict[str, str]:
         if gpu.tier == "ultra":
             env["OLLAMA_KEEP_ALIVE"] = "60m"
             env["OLLAMA_NUM_PARALLEL"] = "4"    # Handle 4 concurrent requests
-            env["OLLAMA_MAX_LOADED_MODELS"] = "3"  # Keep 3 models in VRAM simultaneously
+            env["OLLAMA_MAX_LOADED_MODELS"] = "4"  # Keep 4 models in VRAM simultaneously
             env["OLLAMA_FLASH_ATTENTION"] = "1"    # Enable flash attention for H200
         elif gpu.tier == "high":
             env["OLLAMA_KEEP_ALIVE"] = "30m"

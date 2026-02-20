@@ -111,7 +111,7 @@ set_ollama_gpu_env() {
   if [ "$GPU_VRAM_GB" -ge 80 ]; then
     export OLLAMA_KEEP_ALIVE="60m"
     export OLLAMA_NUM_PARALLEL="4"
-    export OLLAMA_MAX_LOADED_MODELS="3"
+    export OLLAMA_MAX_LOADED_MODELS="4"
     export OLLAMA_FLASH_ATTENTION="1"
   elif [ "$GPU_VRAM_GB" -ge 40 ]; then
     export OLLAMA_KEEP_ALIVE="30m"
