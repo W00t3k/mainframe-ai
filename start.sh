@@ -286,6 +286,20 @@ start_webapp_svc() {
     fi
   fi
 
+  # Verify venv has required packages — reinstall if missing
+  if ! "$PYTHON" -c "import fastapi, uvicorn, httpx" 2>/dev/null; then
+    warn "Missing Python packages in $PYTHON — reinstalling requirements..."
+    "$PYTHON" -m pip install -q -r "$DIR/requirements.txt" 2>/dev/null
+    if ! "$PYTHON" -c "import fastapi, uvicorn, httpx" 2>/dev/null; then
+      fail "Cannot import required packages. Check $PYTHON and requirements.txt"
+      return 1
+    fi
+    ok "Packages reinstalled"
+  fi
+
+  PY_VER=$("$PYTHON" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
+  info "Python: $PYTHON (v${PY_VER})"
+
   # Kill anything on the port
   lsof -ti :$PORT 2>/dev/null | xargs kill -9 2>/dev/null
   sleep 1
