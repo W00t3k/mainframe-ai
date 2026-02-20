@@ -505,7 +505,7 @@ async function startWalkthrough() {
     wtSeenRunning = false;
     // Delay first poll to let backend thread start
     setTimeout(() => {
-        wtPollingInterval = setInterval(pollWalkthrough, 500);
+        wtPollingInterval = setInterval(pollWalkthrough, 2000);
         pollWalkthrough();
     }, 1000);
 }
@@ -536,15 +536,21 @@ async function pollWalkthrough() {
                 aiExplainScreen(data.screen || '', data.title);
             }
         }
-        // Only stop polling if we've seen it running first, or after 20 polls (10s grace)
-        if (!data.running && (wtSeenRunning || wtPollCount > 20)) {
+        // Stop polling: walkthrough done, or after 20 polls grace, or hard cap 300 polls (~10min)
+        if (wtPollCount > 300 || (!data.running && (wtSeenRunning || wtPollCount > 20))) {
             clearInterval(wtPollingInterval);
             wtPollingInterval = null;
             wtRunning = false;
             resetWtControls();
             if (wtSeenRunning) aiExplainScreen(data.screen || '', 'Demo complete');
         }
-    } catch(e) {}
+    } catch(e) {
+        // On fetch error, slow down — don't hammer a struggling server
+        if (wtPollingInterval) {
+            clearInterval(wtPollingInterval);
+            wtPollingInterval = setInterval(pollWalkthrough, 5000);
+        }
+    }
 }
 
 async function pauseWalkthrough() {
