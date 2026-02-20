@@ -342,6 +342,32 @@ status_dashboard() {
     echo -e "${CYN}║${RST}  ${RED}●${RST} TK5 MVS     ${RED}DOWN${RST}                                   ${CYN}║${RST}"
   fi
 
+  # GPU (only if detected)
+  if command -v nvidia-smi &>/dev/null; then
+    local gpu_name_live gpu_vram_used gpu_vram_total gpu_util gpu_temp gpu_vram_pct gpu_tier_label
+    gpu_name_live=$(nvidia-smi --query-gpu=name --format=csv,noheader,nounits 2>/dev/null | head -1)
+    if [ -n "$gpu_name_live" ]; then
+      gpu_vram_used=$(nvidia-smi --query-gpu=memory.used --format=csv,noheader,nounits 2>/dev/null | head -1)
+      gpu_vram_total=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
+      gpu_util=$(nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null | head -1)
+      gpu_temp=$(nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits 2>/dev/null | head -1)
+      gpu_vram_pct=0
+      [ "$gpu_vram_total" -gt 0 ] 2>/dev/null && gpu_vram_pct=$((gpu_vram_used * 100 / gpu_vram_total))
+
+      # Tier label
+      local vgb=$((gpu_vram_total / 1024))
+      if [ "$vgb" -ge 80 ]; then gpu_tier_label="ULTRA"
+      elif [ "$vgb" -ge 40 ]; then gpu_tier_label="HIGH"
+      elif [ "$vgb" -ge 20 ]; then gpu_tier_label="MEDIUM"
+      elif [ "$vgb" -ge 8 ]; then gpu_tier_label="LOW"
+      else gpu_tier_label="MINIMAL"; fi
+
+      echo -e "${CYN}║${RST}  ${MAG}⚡${RST} GPU         ${GRN}DETECTED${RST}   ${BLD}${gpu_name_live}${RST}        ${CYN}║${RST}"
+      echo -e "${CYN}║${RST}    VRAM: ${gpu_vram_used}MB / ${gpu_vram_total}MB (${gpu_vram_pct}%)   Util: ${gpu_util}%   ${gpu_temp}°C  ${CYN}║${RST}"
+      echo -e "${CYN}║${RST}    Tier: ${MAG}${BLD}${gpu_tier_label}${RST}   Model: ${BLD}${MODEL}${RST}              ${CYN}║${RST}"
+    fi
+  fi
+
   echo -e "${CYN}${BLD}╠══════════════════════════════════════════════════════════╣${RST}"
 
   # Memory
