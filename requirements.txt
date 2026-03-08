@@ -1,5 +1,6 @@
-# AI/LLM
-anthropic>=0.40.0
+# AI/LLM (Ollama is the primary backend — no API keys needed)
+# Grok (xAI) cloud LLM — set XAI_API_KEY env var to enable
+# Uses OpenAI-compatible API at api.x.ai — no extra package needed (httpx handles it)
 openai>=1.0.0  # Optional: for GPT fallback
 
 # Mainframe connectivity

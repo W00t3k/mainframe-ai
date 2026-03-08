@@ -1,0 +1,651 @@
+{% extends "base.html" %}
+
+{% block title %}RAKF Security Manager - Mainframe AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/rakf.css">
+{% endblock %}
+
+{% block body %}
+<div class="rakf-page">
+    <!-- ── Header ── -->
+    <header class="rakf-header">
+        <a href="/" class="home-btn" title="Home">
+            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
+        </a>
+        <h1 class="header-title">RAKF Security Manager</h1>
+        <nav>
+            <a href="/labs">Labs</a>
+            <a href="/walkthrough">Walkthrough</a>
+            <a href="/terminal">Terminal</a>
+            <a href="/ftp">FTP</a>
+            <a href="/rakf" class="active">RAKF</a>
+        </nav>
+    </header>
+
+    <div class="rakf-content">
+        <!-- ── Status Bar ── -->
+        <div class="rakf-status">
+            <div class="status-dot" id="statusDot"></div>
+            <span class="status-text" id="statusText">Checking MVS connection...</span>
+            <div class="status-actions">
+                <button class="rakf-btn rakf-btn-primary" id="fetchTablesBtn" title="Fetch RAKF tables from MVS via FTP">Fetch from MVS</button>
+                <button class="rakf-btn rakf-btn-success" id="reloadUsersBtn" title="Send S RAKFUSER to MVS console">Reload Users</button>
+                <button class="rakf-btn rakf-btn-success" id="reloadProfilesBtn" title="Send S RAKFPROF to MVS console">Reload Profiles</button>
+            </div>
+        </div>
+
+        <!-- ── Tabs ── -->
+        <div class="rakf-tabs">
+            <button class="rakf-tab active" data-tab="users">Users Table</button>
+            <button class="rakf-tab" data-tab="profiles">Profiles Table</button>
+            <button class="rakf-tab" data-tab="audit">Security Audit</button>
+            <button class="rakf-tab" data-tab="jcl">JCL Generator</button>
+        </div>
+
+        <!-- ═══ USERS TAB ═══ -->
+        <div class="rakf-panel active" id="panel-users">
+            <div class="rakf-info">
+                <strong>SYS1.SECURE.CNTL(USERS)</strong> — RAKF users table. Contains userids, groups, cleartext passwords, and Operations authority flags.
+                Format: <code>USERNAME GROUP    *PASSWORD O</code> — <code>*</code> = non-expiring, <code>Y</code> = Operations authority.
+            </div>
+            <div class="rakf-table-wrap">
+                <div class="rakf-table-header">
+                    <span>RAKF Users</span>
+                    <span class="badge" id="usersSource">defaults</span>
+                </div>
+                <table class="rakf-data">
+                    <thead>
+                        <tr>
+                            <th>Username</th>
+                            <th>Group</th>
+                            <th>Password</th>
+                            <th>Non-Expiring</th>
+                            <th>Operations</th>
+                            <th>Risk</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <tr><td colspan="6" class="rakf-loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <details>
+                <summary style="color:#5a7aa0; font-size:11px; cursor:pointer;">Raw Table Contents</summary>
+                <pre class="rakf-raw" id="usersRaw">Loading...</pre>
+            </details>
+        </div>
+
+        <!-- ═══ PROFILES TAB ═══ -->
+        <div class="rakf-panel" id="panel-profiles">
+            <div class="rakf-info">
+                <strong>SYS1.SECURE.CNTL(PROFILES)</strong> — RAKF profiles table. Controls access to datasets, facilities, DASD volumes, tape volumes, and terminals.
+                Format: <code>CLASS RESOURCE GROUP ACCESS</code> — Blank group = Universal Access (UACC). Table is sorted ascending; RAKF reads bottom-up.
+            </div>
+            <div class="rakf-table-wrap">
+                <div class="rakf-table-header">
+                    <span>RAKF Profiles</span>
+                    <span class="badge" id="profilesSource">defaults</span>
+                </div>
+                <table class="rakf-data">
+                    <thead>
+                        <tr>
+                            <th>Class</th>
+                            <th>Resource</th>
+                            <th>Group</th>
+                            <th>Access</th>
+                        </tr>
+                    </thead>
+                    <tbody id="profilesTableBody">
+                        <tr><td colspan="4" class="rakf-loading">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <details>
+                <summary style="color:#5a7aa0; font-size:11px; cursor:pointer;">Raw Table Contents</summary>
+                <pre class="rakf-raw" id="profilesRaw">Loading...</pre>
+            </details>
+        </div>
+
+        <!-- ═══ AUDIT TAB ═══ -->
+        <div class="rakf-panel" id="panel-audit">
+            <div class="rakf-info">
+                Automated security audit of the current RAKF configuration. Findings are based on the loaded users and profiles tables.
+            </div>
+            <div class="audit-grid" id="auditGrid">
+                <div class="rakf-loading">Run audit after loading tables...</div>
+            </div>
+        </div>
+
+        <!-- ═══ JCL GENERATOR TAB ═══ -->
+        <div class="rakf-panel" id="panel-jcl">
+            <div class="rakf-info">
+                Generate JCL to modify RAKF configuration. The generated JCL edits <code>SYS1.SECURE.CNTL</code> members and reloads the tables.
+                Submit via card reader: <code>cat rakf.jcl | ncat --send-only -w1 127.0.0.1 3505</code>
+            </div>
+
+            <h3 style="font-size:12px; color:#6a8ab8; margin-top:4px;">Add New User</h3>
+            <div class="rakf-form" id="addUserForm">
+                <div>
+                    <label>Username</label>
+                    <input type="text" id="newUser" maxlength="8" placeholder="NEWUSER" style="text-transform:uppercase;">
+                </div>
+                <div>
+                    <label>Group</label>
+                    <input type="text" id="newGroup" maxlength="8" placeholder="USER" value="USER" style="text-transform:uppercase;">
+                </div>
+                <div>
+                    <label>Password</label>
+                    <input type="text" id="newPass" maxlength="8" placeholder="PASSWORD" style="text-transform:uppercase;">
+                </div>
+                <div>
+                    <label>Non-Expiring</label>
+                    <select id="newExpire">
+                        <option value="*">Yes (*)</option>
+                        <option value="">No</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Operations</label>
+                    <select id="newOps">
+                        <option value="N">No (N)</option>
+                        <option value="Y">Yes (Y)</option>
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button class="rakf-btn rakf-btn-primary" id="genAddUserJcl">Generate JCL</button>
+                </div>
+            </div>
+
+            <h3 style="font-size:12px; color:#6a8ab8; margin-top:12px;">Generated JCL</h3>
+            <pre class="rakf-jcl-area" id="jclOutput">// Select an action above to generate JCL</pre>
+            <div style="display:flex; gap:8px; margin-top:6px;">
+                <button class="rakf-btn rakf-btn-ghost" id="copyJclBtn">Copy to Clipboard</button>
+                <button class="rakf-btn rakf-btn-danger" id="submitJclBtn" title="Submit JCL via card reader port 3505">Submit to MVS</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+/* ═══════════════════════════════════════
+   RAKF Management Page
+   ═══════════════════════════════════════ */
+
+// ── TK5 Default RAKF Tables ──
+const DEFAULT_USERS = [
+    { user: 'HERC01',  group: 'ADMIN',   password: 'CUL8TR', star: true,  ops: 'Y' },
+    { user: 'HERC01',  group: 'RAKFADM', password: 'CUL8TR', star: false, ops: 'Y' },
+    { user: 'HERC02',  group: 'USER',    password: 'PASS4U', star: false, ops: 'N' },
+    { user: 'IBMUSER', group: 'ADMIN',   password: 'SYS1',   star: true,  ops: 'Y' },
+    { user: 'IBMUSER', group: 'RAKFADM', password: 'SYS1',   star: true,  ops: 'Y' },
+];
+
+const DEFAULT_PROFILES_RAW = `DASDVOL *                                          READ
+DASDVOL *                                  ADMIN   ALTER
+DASDVOL *                                  STCGROUPALTER
+DATASET *                                          READ
+DATASET *                                  ADMIN   ALTER
+DATASET *                                  STCGROUPALTER
+DATASET IPCS.DATA.SET.DIRECTRY                     UPDATE
+DATASET IPCS.PROBLEM.DIRECTRY                      UPDATE
+DATASET RPF.V1R5M3.SRPFPROF                        UPDATE
+DATASET SYS1.BRODCAST                              UPDATE
+DATASET SYS1.DUPLEX                                NONE
+DATASET SYS1.PAGECSA                               NONE
+DATASET SYS1.PAGELPA                               NONE
+DATASET SYS1.PAGEL01                               NONE
+DATASET SYS1.PAGEL02                               NONE
+DATASET SYS1.PAGES01                               NONE
+DATASET SYS1.SECURE.*                              NONE
+DATASET SYS1.SECURE.*                      ADMIN   NONE
+DATASET SYS1.SECURE.*                      RAKFADM UPDATE
+DATASET SYS1.STGINDEX                              NONE
+DATASET SYS1.UCAT.TSO                              UPDATE
+FACILITYDDTAPFAUTH                                  NONE
+FACILITYDDTAPFAUTH                         ADMIN   READ
+FACILITYDDTAPFAUTH                         STCGROUPREAD
+FACILITYDIAG8CMD                                   NONE
+FACILITYDIAG8CMD                           ADMIN   READ
+FACILITYDIAG8CMD                           STCGROUPREAD
+FACILITYDSSAUTH                                    NONE
+FACILITYDSSAUTH                            ADMIN   READ
+FACILITYDSSAUTH                            STCGROUPREAD
+FACILITYETPSAUTH                                   NONE
+FACILITYETPSAUTH                           ADMIN   READ
+FACILITYETPSAUTH                           STCGROUPREAD
+FACILITYJRPAUTH                                    NONE
+FACILITYJRPAUTH                            ADMIN   READ
+FACILITYJRPAUTH                            STCGROUPREAD
+FACILITYNONQAUTH                                   NONE
+FACILITYNONQAUTH                           ADMIN   READ
+FACILITYNONQAUTH                           STCGROUPREAD
+FACILITYPGMAUTH                                    NONE
+FACILITYPGMAUTH                            ADMIN   READ
+FACILITYPGMAUTH                            STCGROUPREAD
+FACILITYRAKFADM                                    NONE
+FACILITYRAKFADM                            ADMIN   NONE
+FACILITYRAKFADM                            RAKFADM READ
+FACILITYRAKFADM                            STCGROUPREAD
+FACILITYSHOWAUTH                                   NONE
+FACILITYSHOWAUTH                           ADMIN   READ
+FACILITYSHOWAUTH                           STCGROUPREAD
+FACILITYSTEPAUTH                                   NONE
+FACILITYSTEPAUTH                           ADMIN   READ
+FACILITYSTEPAUTH                           STCGROUPREAD
+FACILITYSVC244                                     NONE
+FACILITYSVC244                             ADMIN   READ
+FACILITYSVC244                             STCGROUPREAD
+TAPEVOL *                                          READ
+TAPEVOL *                                  ADMIN   ALTER
+TAPEVOL *                                  STCGROUPALTER
+TERMINAL*                                          READ`;
+
+let currentUsers = [...DEFAULT_USERS];
+let currentProfiles = [];
+let liveData = false;
+
+// ── Parse profiles from raw text ──
+function parseProfiles(raw) {
+    const lines = raw.split('\n').filter(l => l.trim() && !l.trim().startsWith('*'));
+    return lines.map(line => {
+        // Fixed-width parse: FACILITY is 8 chars, then resource+group+access
+        let cls = '', resource = '', group = '', access = '';
+        if (line.startsWith('FACILITY')) {
+            cls = 'FACILITY';
+            const rest = line.substring(8);
+            // Resource name goes until column ~48, then group, then access
+            const parts = rest.trimEnd().split(/\s+/);
+            if (parts.length >= 1) resource = parts[0];
+            if (parts.length === 2) { access = parts[1]; group = ''; }
+            else if (parts.length >= 3) { group = parts[1]; access = parts[2]; }
+            else { access = ''; }
+        } else if (line.startsWith('DATASET') || line.startsWith('DASDVOL') || line.startsWith('TAPEVOL') || line.startsWith('TERMINAL')) {
+            const firstSpace = line.indexOf(' ');
+            if (firstSpace > 0) {
+                cls = line.substring(0, firstSpace).replace(/\s+$/, '');
+                const rest = line.substring(firstSpace).trimStart();
+                const parts = rest.trimEnd().split(/\s+/);
+                if (parts.length === 2) { resource = parts[0]; access = parts[1]; group = ''; }
+                else if (parts.length >= 3) { resource = parts[0]; group = parts[1]; access = parts[2]; }
+                else if (parts.length === 1) { resource = parts[0]; }
+            }
+        } else {
+            const parts = line.trim().split(/\s+/);
+            cls = parts[0] || '';
+            resource = parts[1] || '';
+            group = parts.length >= 4 ? parts[2] : '';
+            access = parts[parts.length - 1] || '';
+        }
+        return { cls, resource, group, access, raw: line };
+    });
+}
+
+// ── Parse users from raw text ──
+function parseUsersRaw(raw) {
+    const lines = raw.split('\n').filter(l => l.trim() && !l.trim().startsWith('*'));
+    return lines.map(line => {
+        const parts = line.trim().split(/\s+/);
+        if (parts.length < 4) return null;
+        const user = parts[0];
+        const group = parts[1];
+        let password = parts[2];
+        let star = false;
+        if (password.startsWith('*')) { star = true; password = password.substring(1); }
+        const ops = parts[3] || 'N';
+        return { user, group, password, star, ops };
+    }).filter(Boolean);
+}
+
+// ── Render Users Table ──
+function renderUsers() {
+    const tbody = document.getElementById('usersTableBody');
+    if (!currentUsers.length) {
+        tbody.innerHTML = '<tr><td colspan="6" style="color:#6c7086; text-align:center; padding:20px;">No users loaded</td></tr>';
+        return;
+    }
+    tbody.innerHTML = currentUsers.map(u => {
+        let risk = '';
+        if (u.ops === 'Y') risk = '<span style="color:#f38ba8;">HIGH — Operations</span>';
+        else if (u.password === 'PASS4U' || u.password === 'CUL8TR' || u.password === 'SYS1')
+            risk = '<span style="color:#f9e2af;">MED — Default password</span>';
+        else risk = '<span style="color:#a6e3a1;">LOW</span>';
+
+        return `<tr>
+            <td class="user-col">${u.user}</td>
+            <td class="group-col">${u.group}</td>
+            <td class="pass-col">${u.password}</td>
+            <td>${u.star ? '<span style="color:#f9e2af;">*</span> Yes' : 'No'}</td>
+            <td class="${u.ops === 'Y' ? 'ops-y' : 'ops-n'}">${u.ops}</td>
+            <td>${risk}</td>
+        </tr>`;
+    }).join('');
+
+    // Raw view
+    document.getElementById('usersRaw').textContent = currentUsers.map(u =>
+        `${u.user.padEnd(9)}${u.group.padEnd(9)}${u.star ? '*' : ''}${u.password.padEnd(9)}${u.ops}`
+    ).join('\n');
+}
+
+// ── Render Profiles Table ──
+function renderProfiles() {
+    const tbody = document.getElementById('profilesTableBody');
+    if (!currentProfiles.length) {
+        tbody.innerHTML = '<tr><td colspan="4" style="color:#6c7086; text-align:center; padding:20px;">No profiles loaded</td></tr>';
+        return;
+    }
+    tbody.innerHTML = currentProfiles.map(p => {
+        const clsClass = `class-${p.cls.toLowerCase()}`;
+        const accClass = `access-${p.access.toLowerCase()}`;
+        const groupDisplay = p.group || '<span class="uacc-marker">(UACC)</span>';
+        return `<tr>
+            <td class="${clsClass}">${p.cls}</td>
+            <td>${p.resource}</td>
+            <td>${groupDisplay}</td>
+            <td class="${accClass}">${p.access}</td>
+        </tr>`;
+    }).join('');
+
+    document.getElementById('profilesRaw').textContent = currentProfiles.map(p => p.raw).join('\n');
+}
+
+// ── Run Security Audit ──
+function runAudit() {
+    const findings = [];
+
+    // Check cleartext passwords
+    findings.push({
+        severity: 'high',
+        title: 'Cleartext Passwords in SYS1.SECURE.CNTL',
+        detail: `${currentUsers.length} users with passwords stored in plain text. Anyone with READ access to SYS1.SECURE.CNTL can see all passwords.`
+    });
+
+    // Check UACC on DATASET *
+    const datasetStar = currentProfiles.find(p => p.cls === 'DATASET' && p.resource === '*' && !p.group);
+    if (datasetStar && datasetStar.access !== 'NONE') {
+        findings.push({
+            severity: 'high',
+            title: `UACC=${datasetStar.access} on DATASET *`,
+            detail: `Every authenticated user has ${datasetStar.access} access to all datasets by default. Should be NONE with explicit grants.`
+        });
+    }
+
+    // Count Operations users
+    const opsUsers = [...new Set(currentUsers.filter(u => u.ops === 'Y').map(u => u.user))];
+    if (opsUsers.length > 0) {
+        findings.push({
+            severity: 'medium',
+            title: `${opsUsers.length} Users with Operations Authority`,
+            detail: `Users: ${opsUsers.join(', ')}. Operations=Y bypasses most access checks. Minimize this.`
+        });
+    }
+
+    // Default passwords
+    const defaultPasswords = ['CUL8TR', 'SYS1', 'PASS4U', 'PASSWORD', 'SECRET'];
+    const weakUsers = currentUsers.filter(u => defaultPasswords.includes(u.password.toUpperCase()));
+    if (weakUsers.length > 0) {
+        findings.push({
+            severity: 'medium',
+            title: `${weakUsers.length} Entries with Default/Weak Passwords`,
+            detail: `Users: ${[...new Set(weakUsers.map(u => u.user))].join(', ')}. Change default passwords immediately.`
+        });
+    }
+
+    // Check SYS1.SECURE.* protection
+    const secureProfile = currentProfiles.find(p => p.cls === 'DATASET' && p.resource === 'SYS1.SECURE.*' && !p.group);
+    if (secureProfile && secureProfile.access === 'NONE') {
+        findings.push({
+            severity: 'info',
+            title: 'SYS1.SECURE.* Protected (UACC=NONE)',
+            detail: 'Security tables are properly protected from universal access. Only RAKFADM group has UPDATE.'
+        });
+    } else {
+        findings.push({
+            severity: 'high',
+            title: 'SYS1.SECURE.* NOT Protected!',
+            detail: 'Security tables may be readable by any user. This exposes all passwords and security rules.'
+        });
+    }
+
+    // Check SVC244 protection
+    const svc244 = currentProfiles.find(p => p.resource && p.resource.includes('SVC244') && !p.group);
+    if (svc244 && svc244.access === 'NONE') {
+        findings.push({
+            severity: 'info',
+            title: 'SVC 244 Protected via FACILITY Class',
+            detail: 'The privilege escalation SVC is protected. Only authorized groups can use it.'
+        });
+    }
+
+    // Check RAKFADM restriction
+    const rakfadmAdmin = currentProfiles.find(p => p.resource && p.resource.includes('RAKFADM') && p.group === 'ADMIN');
+    if (rakfadmAdmin && rakfadmAdmin.access === 'NONE') {
+        findings.push({
+            severity: 'info',
+            title: 'RAKFADM Restricted — ADMIN Denied',
+            detail: 'Even the ADMIN group cannot administer RAKF. Only RAKFADM group members can reload security tables.'
+        });
+    }
+
+    // PROGRAM class not enforced
+    findings.push({
+        severity: 'low',
+        title: 'PROGRAM Class Not Enforced (MVS 3.8j)',
+        detail: 'RAKF accepts PROGRAM profiles but MVS 3.8j does not call SAF before executing programs. Protect loadlibs via DATASET profiles instead.'
+    });
+
+    // Unprotected system datasets
+    const sysDatasets = ['SYS1.PARMLIB', 'SYS1.PROCLIB', 'SYS1.LINKLIB', 'SYS1.MACLIB'];
+    const unprotected = sysDatasets.filter(ds => {
+        const specific = currentProfiles.find(p => p.cls === 'DATASET' && p.resource === ds && !p.group);
+        return !specific; // No specific profile = inherits UACC
+    });
+    if (unprotected.length > 0 && datasetStar && datasetStar.access !== 'NONE') {
+        findings.push({
+            severity: 'medium',
+            title: `${unprotected.length} System Datasets Inherit UACC=${datasetStar.access}`,
+            detail: `${unprotected.join(', ')} have no specific profile and inherit universal access. Any user can ${datasetStar.access} them.`
+        });
+    }
+
+    // Render
+    const grid = document.getElementById('auditGrid');
+    grid.innerHTML = findings.map(f => `
+        <div class="rakf-audit-card">
+            <h3 class="${f.severity}">[${f.severity.toUpperCase()}] ${f.title}</h3>
+            <p>${f.detail}</p>
+        </div>
+    `).join('');
+}
+
+// ── Fetch Tables from MVS via API ──
+async function fetchTables() {
+    const btn = document.getElementById('fetchTablesBtn');
+    btn.disabled = true;
+    btn.textContent = 'Fetching...';
+
+    try {
+        const res = await fetch('/api/rakf/tables');
+        const data = await res.json();
+
+        if (data.users && data.users.length > 0) {
+            currentUsers = data.users;
+            liveData = true;
+            document.getElementById('usersSource').textContent = 'live';
+            document.getElementById('usersSource').classList.add('live');
+        }
+        if (data.profiles_raw) {
+            currentProfiles = parseProfiles(data.profiles_raw);
+            document.getElementById('profilesSource').textContent = 'live';
+            document.getElementById('profilesSource').classList.add('live');
+            document.getElementById('profilesRaw').textContent = data.profiles_raw;
+        }
+        if (data.users_raw) {
+            document.getElementById('usersRaw').textContent = data.users_raw;
+        }
+
+        renderUsers();
+        renderProfiles();
+        runAudit();
+
+        if (data.error) {
+            if (window.showToast) window.showToast(data.error, { type: 'warning' });
+        } else {
+            if (window.showToast) window.showToast('RAKF tables loaded from MVS', { type: 'success' });
+        }
+    } catch (err) {
+        if (window.showToast) window.showToast('Failed to fetch: ' + err.message, { type: 'error' });
+    } finally {
+        btn.disabled = false;
+        btn.textContent = 'Fetch from MVS';
+    }
+}
+
+// ── Reload Tables on MVS ──
+async function reloadTable(table) {
+    try {
+        const res = await fetch('/api/rakf/reload', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ table })
+        });
+        const data = await res.json();
+        if (data.success) {
+            if (window.showToast) window.showToast(`${table} reload command sent to MVS`, { type: 'success' });
+        } else {
+            if (window.showToast) window.showToast(data.error || 'Reload failed', { type: 'error' });
+        }
+    } catch (err) {
+        if (window.showToast) window.showToast('Reload failed: ' + err.message, { type: 'error' });
+    }
+}
+
+// ── Generate Add User JCL ──
+function generateAddUserJcl() {
+    const user = document.getElementById('newUser').value.toUpperCase().trim();
+    const group = document.getElementById('newGroup').value.toUpperCase().trim();
+    const pass = document.getElementById('newPass').value.toUpperCase().trim();
+    const expire = document.getElementById('newExpire').value;
+    const ops = document.getElementById('newOps').value;
+
+    if (!user || !group || !pass) {
+        if (window.showToast) window.showToast('Fill in Username, Group, and Password', { type: 'error' });
+        return;
+    }
+    if (user.length > 8 || group.length > 8 || pass.length > 8) {
+        if (window.showToast) window.showToast('All fields must be 8 characters or less', { type: 'error' });
+        return;
+    }
+
+    const passField = `${expire}${pass}`;
+    const userLine = `${user.padEnd(9)}${group.padEnd(9)}${passField.padEnd(9)}${ops}`;
+
+    // Generate UADS entry JCL (needed for TSO logon)
+    const jcl = `//RAKFADD  JOB (RAKF),'ADD USER',CLASS=A,MSGCLASS=A,
+//             USER=HERC01,PASSWORD=CUL8TR
+//*
+//* ── Add ${user} to RAKF Users Table ──
+//* Generated by RAKF Management Page
+//*
+//STEP1    EXEC PGM=IEBUPDTE,PARM=MOD
+//SYSPRINT DD SYSOUT=*
+//SYSUT1   DD DSN=SYS1.SECURE.CNTL,DISP=SHR
+//SYSUT2   DD DSN=SYS1.SECURE.CNTL,DISP=SHR
+//SYSIN    DD *
+./ CHANGE NAME=USERS
+${userLine}
+/*
+//*
+//* ── Reload RAKF Users Table ──
+//*
+//STEP2    EXEC RAKFUSER
+//*
+//* ── Add TSO UADS Entry (required for TSO logon) ──
+//*
+//STEP3    EXEC PGM=IKJEFT01
+//SYSTSPRT DD SYSOUT=*
+//SYSTSIN  DD *
+ ACCOUNT
+ ADD(${user} ${pass}/${pass} ACCTNUM(ACCT#) PROC(IKJACCNT))
+ END
+/*
+//`;
+
+    document.getElementById('jclOutput').textContent = jcl;
+}
+
+// ── Check MVS Status ──
+async function checkStatus() {
+    try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+        const dot = document.getElementById('statusDot');
+        const text = document.getElementById('statusText');
+
+        if (data.mainframe === 'online' || data.connected) {
+            dot.classList.add('online');
+            dot.classList.remove('offline');
+            text.textContent = 'MVS Online — RAKF Active';
+        } else {
+            dot.classList.add('offline');
+            dot.classList.remove('online');
+            text.textContent = 'MVS Offline — Showing default configuration';
+        }
+    } catch {
+        document.getElementById('statusDot').classList.add('offline');
+        document.getElementById('statusText').textContent = 'Cannot reach web server';
+    }
+}
+
+// ── Tab Switching ──
+document.querySelectorAll('.rakf-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        document.querySelectorAll('.rakf-tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.rakf-panel').forEach(p => p.classList.remove('active'));
+        tab.classList.add('active');
+        document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+    });
+});
+
+// ── Event Listeners ──
+document.getElementById('fetchTablesBtn').addEventListener('click', fetchTables);
+document.getElementById('reloadUsersBtn').addEventListener('click', () => reloadTable('users'));
+document.getElementById('reloadProfilesBtn').addEventListener('click', () => reloadTable('profiles'));
+document.getElementById('genAddUserJcl').addEventListener('click', generateAddUserJcl);
+document.getElementById('copyJclBtn').addEventListener('click', () => {
+    const jcl = document.getElementById('jclOutput').textContent;
+    navigator.clipboard.writeText(jcl).then(() => {
+        if (window.showToast) window.showToast('JCL copied to clipboard', { type: 'success' });
+    });
+});
+document.getElementById('submitJclBtn').addEventListener('click', async () => {
+    const jcl = document.getElementById('jclOutput').textContent;
+    if (jcl.startsWith('//')) {
+        try {
+            const res = await fetch('/api/rakf/submit-jcl', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ jcl })
+            });
+            const data = await res.json();
+            if (data.success) {
+                if (window.showToast) window.showToast('JCL submitted to MVS card reader', { type: 'success' });
+            } else {
+                if (window.showToast) window.showToast(data.error || 'Submit failed', { type: 'error' });
+            }
+        } catch (err) {
+            if (window.showToast) window.showToast('Submit failed: ' + err.message, { type: 'error' });
+        }
+    }
+});
+
+// ── Initialize ──
+currentProfiles = parseProfiles(DEFAULT_PROFILES_RAW);
+renderUsers();
+renderProfiles();
+runAudit();
+checkStatus();
+</script>
+{% endblock %}

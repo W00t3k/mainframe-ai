@@ -1,0 +1,373 @@
+/* ══════════════════════════════════════
+   RAKF Management — Cyberpunk IBM Theme
+   ══════════════════════════════════════ */
+
+.rakf-page {
+    min-height: 100vh;
+    background: #0a1628;
+    color: #c0cce0;
+    display: flex;
+    flex-direction: column;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Header ── */
+.rakf-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 0 1rem;
+    height: 36px;
+    background: #0f1d35;
+    border-bottom: 1px solid #1a3058;
+    flex-shrink: 0;
+}
+
+.rakf-header .home-btn { display: flex; align-items: center; }
+.rakf-header .ibm-logo { height: 16px; opacity: 0.7; }
+.rakf-header .header-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #6a8ab8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.rakf-header nav {
+    display: flex;
+    gap: 4px;
+    margin-left: auto;
+    align-items: center;
+}
+.rakf-header nav a {
+    padding: 4px 12px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    background: transparent;
+    border: 1px solid #1a3058;
+    color: #5a7aa0;
+    border-radius: 2px;
+    text-decoration: none;
+}
+.rakf-header nav a:hover { background: #1a3058; color: #8ab4f0; }
+.rakf-header nav a.active {
+    background: rgba(100,150,255,0.15);
+    border-color: #6699ff;
+    color: #fff;
+}
+
+/* ── Content ── */
+.rakf-content {
+    flex: 1;
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+/* ── Status Bar ── */
+.rakf-status {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 14px;
+    background: #0f1d35;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+    font-size: 11px;
+}
+.rakf-status .status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #555;
+    flex-shrink: 0;
+}
+.rakf-status .status-dot.online { background: #a6e3a1; }
+.rakf-status .status-dot.offline { background: #f38ba8; }
+.rakf-status .status-text { color: #6c7086; }
+.rakf-status .status-actions { margin-left: auto; display: flex; gap: 6px; }
+
+/* ── Buttons ── */
+.rakf-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    cursor: pointer;
+    border-radius: 2px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    transition: all 0.15s ease;
+}
+.rakf-btn-primary {
+    background: #1a3058;
+    color: #8ab4f0;
+    border: 1px solid #2a4a78;
+}
+.rakf-btn-primary:hover { background: #2a4a78; color: #c0d8ff; }
+.rakf-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.rakf-btn-danger {
+    background: #3a1528;
+    color: #f38ba8;
+    border: 1px solid #5a2538;
+}
+.rakf-btn-danger:hover { background: #5a2538; color: #ffb8c8; }
+
+.rakf-btn-ghost {
+    background: transparent;
+    color: #5a7aa0;
+    border: 1px solid transparent;
+}
+.rakf-btn-ghost:hover { color: #8ab4f0; border-color: #1a3058; }
+
+.rakf-btn-success {
+    background: #1a3528;
+    color: #a6e3a1;
+    border: 1px solid #2a5538;
+}
+.rakf-btn-success:hover { background: #2a5538; color: #c8ffcc; }
+
+/* ── Tabs ── */
+.rakf-tabs {
+    display: flex;
+    gap: 2px;
+    background: #0f1d35;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+    padding: 3px;
+}
+.rakf-tab {
+    padding: 6px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: #5a7aa0;
+    background: transparent;
+    border: none;
+    border-radius: 2px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    transition: all 0.15s;
+}
+.rakf-tab:hover { color: #8ab4f0; background: rgba(100,150,255,0.08); }
+.rakf-tab.active {
+    background: #1a3058;
+    color: #c0d8ff;
+}
+
+/* ── Panels ── */
+.rakf-panel {
+    display: none;
+    flex-direction: column;
+    gap: 12px;
+}
+.rakf-panel.active { display: flex; }
+
+/* ── Table Display ── */
+.rakf-table-wrap {
+    background: #0d1525;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+    overflow: hidden;
+}
+.rakf-table-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    background: #0f1d35;
+    border-bottom: 1px solid #1a3058;
+    font-size: 12px;
+    font-weight: 700;
+    color: #6a8ab8;
+}
+.rakf-table-header .badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    background: #1a3058;
+    color: #5a7aa0;
+    border-radius: 10px;
+}
+.rakf-table-header .badge.live {
+    background: #1a3528;
+    color: #a6e3a1;
+}
+
+table.rakf-data {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+table.rakf-data th {
+    text-align: left;
+    padding: 6px 14px;
+    background: #111a2e;
+    color: #5a7aa0;
+    font-weight: 600;
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #1a3058;
+}
+table.rakf-data td {
+    padding: 5px 14px;
+    border-bottom: 1px solid #0f1a2e;
+    color: #c0cce0;
+}
+table.rakf-data tr:hover td { background: rgba(100,150,255,0.04); }
+
+table.rakf-data .user-col { color: #89dceb; font-weight: 600; }
+table.rakf-data .group-col { color: #cba6f7; }
+table.rakf-data .pass-col { color: #f38ba8; }
+table.rakf-data .ops-y { color: #f9e2af; font-weight: 700; }
+table.rakf-data .ops-n { color: #6c7086; }
+
+table.rakf-data .class-dataset { color: #89dceb; }
+table.rakf-data .class-facility { color: #cba6f7; }
+table.rakf-data .class-dasdvol { color: #f9e2af; }
+table.rakf-data .class-tapevol { color: #a6e3a1; }
+table.rakf-data .class-terminal { color: #fab387; }
+
+table.rakf-data .access-none { color: #f38ba8; font-weight: 700; }
+table.rakf-data .access-read { color: #a6e3a1; }
+table.rakf-data .access-update { color: #f9e2af; }
+table.rakf-data .access-alter { color: #89dceb; font-weight: 700; }
+table.rakf-data .uacc-marker { color: #6c7086; font-style: italic; }
+
+/* ── Raw View ── */
+.rakf-raw {
+    background: #080e18;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #a0b0c8;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 500px;
+    overflow-y: auto;
+}
+
+/* ── Audit Panel ── */
+.rakf-audit-card {
+    background: #0f1d35;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+    padding: 12px 16px;
+}
+.rakf-audit-card h3 {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+.rakf-audit-card h3.high { color: #f38ba8; }
+.rakf-audit-card h3.medium { color: #f9e2af; }
+.rakf-audit-card h3.low { color: #a6e3a1; }
+.rakf-audit-card h3.info { color: #89dceb; }
+.rakf-audit-card p {
+    font-size: 11px;
+    color: #6c7086;
+    line-height: 1.5;
+}
+
+.audit-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 10px;
+}
+
+/* ── JCL Panel ── */
+.rakf-jcl-area {
+    background: #080e18;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+    padding: 12px 16px;
+    font-size: 12px;
+    line-height: 1.6;
+    color: #a6e3a1;
+    overflow-x: auto;
+    white-space: pre;
+    max-height: 400px;
+    overflow-y: auto;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Add User Form ── */
+.rakf-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 8px;
+    padding: 12px;
+    background: #0f1d35;
+    border: 1px solid #1a3058;
+    border-radius: 3px;
+}
+.rakf-form label {
+    font-size: 10px;
+    text-transform: uppercase;
+    color: #5a7aa0;
+    letter-spacing: 0.5px;
+}
+.rakf-form input, .rakf-form select {
+    width: 100%;
+    padding: 5px 8px;
+    background: #080e18;
+    border: 1px solid #1a3058;
+    border-radius: 2px;
+    color: #c0cce0;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+}
+.rakf-form input:focus, .rakf-form select:focus {
+    outline: none;
+    border-color: #6699ff;
+}
+.rakf-form .form-actions {
+    grid-column: 1 / -1;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    padding-top: 4px;
+}
+
+/* ── Info Cards ── */
+.rakf-info {
+    font-size: 11px;
+    color: #6c7086;
+    padding: 8px 12px;
+    background: rgba(100,150,255,0.05);
+    border-left: 3px solid #2a4a78;
+    border-radius: 0 3px 3px 0;
+    line-height: 1.6;
+}
+.rakf-info code {
+    background: #080e18;
+    padding: 1px 4px;
+    border-radius: 2px;
+    color: #89dceb;
+    font-size: 11px;
+}
+
+/* ── Loading ── */
+.rakf-loading {
+    text-align: center;
+    padding: 20px;
+    color: #5a7aa0;
+    font-size: 12px;
+}
+.rakf-loading::after {
+    content: '';
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 2px solid #2a4a78;
+    border-top-color: #6699ff;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin-left: 8px;
+    vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }

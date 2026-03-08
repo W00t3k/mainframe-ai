@@ -20,13 +20,14 @@ Most offensive security methodologies import assumptions from Unix, Windows, and
 
 This is the same failure mode I wrote about in 2018 regarding Active Directory — attackers succeed not because of exploits, but because defenders misunderstand where authority is actually enforced. ADCS, delegation abuse, service account sprawl — these weren't "new vulnerabilities." They were trust boundaries that existed all along, invisible to teams using the wrong mental model.
 
-Mainframes expose this more clearly because security is explicitly federated across five control planes:
+Mainframes expose this more clearly because security is explicitly federated across six control planes:
 
-1. **VTAM** — Session fabric (purple)
-2. **TSO** — Human interaction (blue)
-3. **RACF** — Authorization engine (amber)
-4. **JES** — Deferred execution (pink)
-5. **CICS** — Transaction processing (green)
+1. **VTAM** — Session fabric
+2. **TSO** — Human interaction
+3. **RACF** — Authorization engine
+4. **JES** — Deferred execution
+5. **CICS** — Transaction processing
+6. **PR/SM** — Hardware partitioning (LPARs, HMC, Coupling Facilities)
 
 If you bring the wrong mental model, you miss the real attack paths — just like people missed delegation abuse for years.
 
@@ -260,17 +261,23 @@ Open in browser:
 
 ## Walkthroughs
 
-Seven autonomous walkthroughs demonstrate mainframe control planes:
+Thirteen autonomous walkthroughs demonstrate mainframe control planes:
 
 | Walkthrough | What It Teaches |
-|-------------|-----------------|
+|-------------|------------------|
+| **Quick Demo** | 60-second overview — connect, logon, navigate, logoff |
 | **Session Stack** | VTAM → TSO → ISPF layer traversal, identity binding |
 | **Deferred Execution** | JCL → JES workflow, jobs run later under submitter identity |
 | **System Inspection** | SYS1.PROCLIB, SYS1.PARMLIB — where "config files" live |
 | **Authorization Model** | RACF profiles, LISTCAT, how authority is distributed |
 | **Dataset Model** | PDS, members, catalogs — no filesystem, just datasets |
-| **Address Spaces** | SDSF, active jobs, persistent address spaces |
+| **Address Spaces** | Active jobs, persistent address spaces |
 | **COBOL Development** | Compile-link-go lifecycle, batch-oriented programming |
+| **System Enumeration** | Full mainframe enumeration — the "nmap" of z/OS |
+| **CICS/KICKS** | Transaction processing, BMS maps, COBOL programs |
+| **JCL Injection** | Writable PROCLIB exploitation via JCL |
+| **Reverse Shell** | MVS-native reverse shell via REXX and WTO |
+| **PR/SM & LPARs** | Hardware partitioning, HMC simulation, sysplex (LLM-driven) |
 
 Each walkthrough maps to five core findings areas:
 
@@ -279,6 +286,8 @@ Each walkthrough maps to five core findings areas:
 - **F3:** Deferred Execution — what executes later than expected?
 - **F4:** Policy Enforcement — which subsystem enforces policy?
 - **F5:** Imported Assumptions — what assumptions are you importing?
+
+The PR/SM walkthrough uses an **LLM-driven HMC simulator** — the AI emulates a production IBM z16 with 6 LPARs, letting you explore hardware partitioning interactively even though TK5 doesn't have real PR/SM.
 
 ## The Mental Model
 
@@ -338,23 +347,26 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 ## File Structure
 
 ```
-mainframe_ai_assistant/
+mainframe-ai/
 ├── app/                    # Modular FastAPI application
-│   ├── routes/             # API endpoints (14 modules)
-│   ├── services/           # Business logic
+│   ├── routes/             # API endpoints (15 modules)
+│   ├── services/           # Business logic (ollama, chat, ftp, kicks, rag_context)
 │   ├── constants/          # Prompts, walkthroughs, paths
-│   └── models/             # Pydantic schemas
-├── templates/              # Jinja2 HTML templates (16 pages)
+│   ├── models/             # Pydantic schemas
+│   └── websocket/          # Real-time terminal and graph updates
+├── templates/              # Jinja2 HTML templates (24 pages)
 ├── static/                 # CSS, JS, fonts, images
 │   ├── css/pages/          # Per-page stylesheets
 │   ├── img/                # IBM logos, retro terminal image
 │   └── fonts/              # IBM Plex Mono, IBM Plex Sans
+├── docs/                   # Extended docs, demo data, media
 ├── slides/                 # Presentation assets
 │   ├── screenshots/        # Slide images
 │   └── ocr/                # OCR text from slides
 ├── lab_data/               # Lab exercise definitions (JSON)
-├── trust_graph_data/       # Graph persistence
+├── jcl/                    # JCL files (FTPD, USS screen, KICKS)
 ├── kicks/                  # CICS/KICKS BMS maps, COBOL, JCL
+├── trust_graph_data/       # Graph persistence
 ├── tk5/                    # TK5 MVS 3.8j emulator
 ├── logs/                   # Runtime logs (webapp, ollama, hercules)
 ├── run.py                  # Application entry point
@@ -362,12 +374,14 @@ mainframe_ai_assistant/
 ├── start_mvs.sh            # TK5 foreground/interactive mode
 ├── install.sh              # Linux installer (deps, Ollama, venv, TK5)
 ├── mvs.sh                  # MVS TK5 management (start/stop/restart/status)
+├── kill.sh                 # Stop all services
 ├── agent_tools.py          # TN3270 connection tools
 ├── trust_graph.py          # Graph data structures
 ├── graph_tools.py          # Graph analysis and parsing
 ├── recon_engine.py         # Enumeration and findings engine
 ├── rag_engine.py           # RAG with local embeddings
 ├── methodology_engine.py   # Assessment methodology
+├── tn3270_discovery.py     # TN3270 network discovery engine
 ├── mcp_server.py           # Model Context Protocol server
 ├── ai_bridge.py            # CICS AI bridge
 └── graph_automation.py     # Graph automation utilities

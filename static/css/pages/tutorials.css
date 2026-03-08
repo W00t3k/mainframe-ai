@@ -1,0 +1,348 @@
+/* ══════════════════════════════════════════════════════════════
+   TUTORIALS PAGE — IBM Retro Theme
+   ══════════════════════════════════════════════════════════════ */
+
+.tut-page {
+    min-height: 100vh;
+    background: var(--ibm-bg-dark);
+    color: #ccc;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+/* ── Header ── */
+.tut-header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border-color);
+    background: var(--ibm-bg);
+}
+
+.tut-header .home-btn {
+    display: flex;
+    align-items: center;
+}
+
+.tut-header .ibm-logo {
+    height: 28px;
+    width: auto;
+}
+
+.tut-header h1 {
+    font-size: 18px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+    flex: 1;
+}
+
+.tut-header-actions {
+    display: flex;
+    gap: 8px;
+}
+
+.tut-btn {
+    padding: 6px 14px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: transparent;
+    color: var(--ibm-cyan);
+    text-decoration: none;
+    transition: all 0.15s;
+}
+
+.tut-btn:hover {
+    background: rgba(100, 150, 255, 0.1);
+    border-color: var(--ibm-cyan);
+}
+
+.tut-btn-accent {
+    background: rgba(100, 150, 255, 0.15);
+    border-color: var(--ibm-cyan);
+    color: #fff;
+}
+
+/* ── Category Filter ── */
+.tut-filters {
+    display: flex;
+    gap: 6px;
+    padding: 16px 24px;
+    flex-wrap: wrap;
+    border-bottom: 1px solid rgba(68, 119, 204, 0.3);
+}
+
+.tut-filter {
+    padding: 5px 12px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    cursor: pointer;
+    border: 1px solid transparent;
+    background: rgba(255,255,255,0.04);
+    color: #888;
+    transition: all 0.15s;
+}
+
+.tut-filter:hover {
+    color: #ccc;
+    background: rgba(255,255,255,0.08);
+}
+
+.tut-filter.active {
+    color: #fff;
+    background: rgba(100, 150, 255, 0.2);
+    border-color: var(--ibm-cyan);
+}
+
+/* ── Tutorial Grid ── */
+.tut-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 16px;
+    padding: 20px 24px;
+    max-width: 1400px;
+}
+
+/* ── Tutorial Card ── */
+.tut-card {
+    background: var(--ibm-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    overflow: hidden;
+    transition: border-color 0.2s;
+}
+
+.tut-card:hover {
+    border-color: var(--ibm-cyan);
+}
+
+.tut-card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px 10px;
+    border-bottom: 1px solid rgba(68, 119, 204, 0.2);
+}
+
+.tut-card-icon {
+    font-size: 14px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+    background: rgba(100, 150, 255, 0.1);
+    color: var(--ibm-cyan);
+    flex-shrink: 0;
+}
+
+.tut-card-meta {
+    flex: 1;
+}
+
+.tut-card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0;
+}
+
+.tut-card-cat {
+    font-size: 10px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tut-card-badges {
+    display: flex;
+    gap: 4px;
+}
+
+.tut-badge {
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tut-badge-beginner { background: rgba(85, 255, 85, 0.15); color: #55ff55; }
+.tut-badge-intermediate { background: rgba(100, 150, 255, 0.15); color: #6699ff; }
+.tut-badge-advanced { background: rgba(255, 85, 85, 0.15); color: #ff5555; }
+
+.tut-card-desc {
+    padding: 10px 16px;
+    font-size: 12px;
+    color: #999;
+    line-height: 1.5;
+}
+
+/* ── Steps ── */
+.tut-card-steps {
+    padding: 0 16px 14px;
+}
+
+.tut-step {
+    border: 1px solid rgba(68, 119, 204, 0.15);
+    border-radius: 4px;
+    margin-bottom: 8px;
+    overflow: hidden;
+}
+
+.tut-step-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    background: rgba(255,255,255,0.02);
+    transition: background 0.15s;
+}
+
+.tut-step-header:hover {
+    background: rgba(255,255,255,0.05);
+}
+
+.tut-step-num {
+    font-size: 10px;
+    color: var(--ibm-cyan);
+    font-weight: 700;
+    width: 20px;
+    flex-shrink: 0;
+}
+
+.tut-step-title {
+    font-size: 12px;
+    color: #ccc;
+    flex: 1;
+}
+
+.tut-step-toggle {
+    font-size: 10px;
+    color: #666;
+    transition: transform 0.2s;
+}
+
+.tut-step-toggle.open {
+    transform: rotate(90deg);
+}
+
+.tut-step-body {
+    display: none;
+    padding: 8px 12px 12px;
+    border-top: 1px solid rgba(68, 119, 204, 0.1);
+}
+
+.tut-step-body.open {
+    display: block;
+}
+
+.tut-step-text {
+    font-size: 12px;
+    color: #999;
+    line-height: 1.6;
+    margin-bottom: 8px;
+}
+
+/* ── Command Block ── */
+.tut-cmd {
+    position: relative;
+    background: #0a0a1a;
+    border: 1px solid rgba(68, 119, 204, 0.2);
+    border-radius: 3px;
+    padding: 8px 36px 8px 10px;
+    margin: 6px 0;
+    font-size: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    color: var(--terminal-green);
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+.tut-cmd-copy {
+    position: absolute;
+    top: 4px;
+    right: 4px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(68, 119, 204, 0.2);
+    border-radius: 2px;
+    color: #888;
+    font-size: 10px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+}
+
+.tut-cmd-copy:hover {
+    color: #fff;
+    background: rgba(100, 150, 255, 0.15);
+}
+
+.tut-cmd-copy.copied {
+    color: var(--terminal-green);
+    border-color: var(--terminal-green);
+}
+
+/* ── Note/Tip Callout ── */
+.tut-note {
+    background: rgba(100, 150, 255, 0.06);
+    border-left: 3px solid var(--ibm-cyan);
+    padding: 8px 12px;
+    margin: 8px 0;
+    font-size: 11px;
+    color: #aaa;
+    line-height: 1.5;
+}
+
+.tut-note b {
+    color: var(--ibm-cyan);
+}
+
+/* ── Detail View (expanded tutorial) ── */
+.tut-detail {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 24px;
+    display: none;
+}
+
+.tut-detail.active {
+    display: block;
+}
+
+.tut-detail-back {
+    margin-bottom: 16px;
+}
+
+.tut-detail h2 {
+    font-size: 20px;
+    color: #fff;
+    margin: 0 0 8px;
+}
+
+.tut-detail-desc {
+    font-size: 13px;
+    color: #999;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .tut-grid {
+        grid-template-columns: 1fr;
+        padding: 12px;
+    }
+    .tut-header {
+        padding: 12px 16px;
+    }
+    .tut-filters {
+        padding: 12px 16px;
+    }
+}

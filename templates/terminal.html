@@ -3,11 +3,20 @@
 {% block title %}Terminal - IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/terminal.css?v=7">
+<link rel="stylesheet" href="/static/css/pages/terminal.css?v=8">
 {% endblock %}
 
 {% block body %}
-    <!-- OS/2 Warp Desktop -->
+    <!-- OS/2 Warp 2 Info Bar -->
+    <div class="os2-infobar">
+        <img src="/static/img/ibm-logo-official.svg" alt="IBM" style="height:12px; opacity:0.7; margin-right:4px;">
+        <span class="os2-infobar-field">C:(FAT)</span>
+        <span class="os2-infobar-field" id="infoMem">--- MB Free</span>
+        <div class="os2-infobar-spacer"></div>
+        <span class="os2-infobar-field" id="infoClock">--:--:-- PM</span>
+    </div>
+
+    <!-- OS/2 Warp 2 Desktop -->
     <div class="os2-desktop">
 
         <!-- Desktop Icons -->
@@ -70,6 +79,10 @@
                 <div class="os2-icon-img">🧠</div>
                 <span>Models</span>
             </a>
+            <a href="/ftp" class="os2-icon" title="FTP Client">
+                <div class="os2-icon-img">📁</div>
+                <span>FTP</span>
+            </a>
             <a href="/video" class="os2-icon" title="Video Demo">
                 <div class="os2-icon-img">🎬</div>
                 <span>Video</span>
@@ -84,7 +97,7 @@
                 </div>
                 <div class="os2-titlebar-text">
                     <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="os2-title-logo">
-                    TN3270 Terminal — IBM Mainframe
+                    Personal Communications — 3270 Emulation
                 </div>
                 <div class="os2-titlebar-buttons">
                     <button class="os2-btn-minimize" title="Minimize">▼</button>
@@ -124,31 +137,31 @@
             <!-- PF Key Bar (inside window, bottom) -->
             <div class="os2-pfbar">
                 <div class="os2-pfbar-group">
-                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('enter')">Enter</button>
-                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('clear')">Clear</button>
-                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('tab')">Tab</button>
-                    <button class="os2-pfkey os2-pfkey-special" onclick="sendKey('reset')">Reset</button>
+                    <button class="os2-pfkey os2-pfkey-special" onmousedown="event.preventDefault()" onclick="sendKey('enter')">Enter</button>
+                    <button class="os2-pfkey os2-pfkey-special" onmousedown="event.preventDefault()" onclick="sendKey('clear')">Clear</button>
+                    <button class="os2-pfkey os2-pfkey-special" onmousedown="event.preventDefault()" onclick="sendKey('tab')">Tab</button>
+                    <button class="os2-pfkey os2-pfkey-special" onmousedown="event.preventDefault()" onclick="sendKey('reset')">Reset</button>
                 </div>
                 <div class="os2-pfbar-sep"></div>
                 <div class="os2-pfbar-group">
-                    <button class="os2-pfkey" onclick="sendKey('pf', 1)">F1</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 2)">F2</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 3)">F3</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 4)">F4</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 5)">F5</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 6)">F6</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 7)">F7</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 8)">F8</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 9)">F9</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 10)">F10</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 11)">F11</button>
-                    <button class="os2-pfkey" onclick="sendKey('pf', 12)">F12</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 1)">F1</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 2)">F2</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 3)">F3</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 4)">F4</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 5)">F5</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 6)">F6</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 7)">F7</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 8)">F8</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 9)">F9</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 10)">F10</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 11)">F11</button>
+                    <button class="os2-pfkey" onmousedown="event.preventDefault()" onclick="sendKey('pf', 12)">F12</button>
                 </div>
             </div>
 
             <!-- Window Status Bar -->
             <div class="os2-statusbar">
-                <span class="os2-statusbar-item">OS/2 Warp — Mainframe AI Assistant</span>
+                <span class="os2-statusbar-item">IBM OS/2 Warp 2 — Personal Communications 3270/5250</span>
                 <span class="os2-statusbar-item os2-statusbar-right" id="termStatusBar">Ready</span>
             </div>
             <div class="os2-window-resizer" id="terminalResizer" aria-hidden="true"></div>
@@ -176,13 +189,13 @@
 
     <!-- OS/2 Warp Taskbar -->
     <div class="os2-taskbar">
-        <button class="os2-taskbar-start" title="OS/2 LaunchPad">
+        <button class="os2-taskbar-start" title="OS/2 Desktop">
             <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="os2-taskbar-logo">
-            <span>WarpCenter</span>
+            <span>OS/2 System</span>
         </button>
         <div class="os2-taskbar-divider"></div>
         <button class="os2-taskbar-item active" onclick="document.getElementById('terminalWindow').scrollIntoView()">
-            <span class="os2-taskbar-icon">🖥</span> TN3270 Terminal
+            <span class="os2-taskbar-icon">🖥</span> Personal Communications
         </button>
         <button class="os2-taskbar-item" id="chatTaskbarBtn" onclick="toggleChatPanel()" style="display:none;">
             <span class="os2-taskbar-icon">💬</span> AI Chat
@@ -304,12 +317,10 @@
             }
         }
 
-        terminal.addEventListener('keydown', handleTerminalKey);
-
         document.addEventListener('keydown', function(e) {
             if (!connected) return;
             const tag = (e.target && e.target.tagName) ? e.target.tagName.toLowerCase() : '';
-            if (tag === 'input' || tag === 'textarea') return;
+            if (tag === 'input' || tag === 'textarea' || tag === 'select') return;
             terminal.focus();
             handleTerminalKey(e);
         });
@@ -522,16 +533,29 @@
             }
         })();
 
-        // Taskbar clock
+        // Taskbar clock + Warp 2 info bar clock
         function updateClock() {
             const now = new Date();
             const h = now.getHours().toString().padStart(2, '0');
             const m = now.getMinutes().toString().padStart(2, '0');
             const el = document.getElementById('taskbarClock');
             if (el) el.textContent = h + ':' + m;
+            // Warp 2 info bar clock (12hr with seconds)
+            const infoEl = document.getElementById('infoClock');
+            if (infoEl) {
+                let h12 = now.getHours() % 12 || 12;
+                const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+                const s = now.getSeconds().toString().padStart(2, '0');
+                infoEl.textContent = h12.toString().padStart(2, '0') + ':' + m + ':' + s + ' ' + ampm;
+            }
         }
         updateClock();
-        setInterval(updateClock, 30000);
+        setInterval(updateClock, 1000);
+        // Warp 2 info bar memory (fetch once)
+        fetch('/api/sysinfo').then(r=>r.json()).then(d=>{
+            const el = document.getElementById('infoMem');
+            if (el && d.memory) el.textContent = d.memory + ' Free';
+        }).catch(()=>{});
 
         // Show/hide chat taskbar button
         const _origToggle = toggleChatPanel;

@@ -1,364 +1,293 @@
 """
-KICKS Installation Service
-Automates KICKS (CICS) installation on MVS 3.8j TK5
+KICKS Service
+Start, stop, and check KICKS (CICS) on MVS 3.8j TK5.
+Works via the terminal API (s3270 connection).
 """
 
-import os
 import time
-import asyncio
-import subprocess
 import requests
 from pathlib import Path
 from typing import Optional, Dict, Any, List
 
-# Paths
 BASE_DIR = Path(__file__).parent.parent.parent
 TK5_DIR = BASE_DIR / "tk5" / "mvs-tk5"
 DASD_DIR = TK5_DIR / "dasd"
-CONF_DIR = TK5_DIR / "conf"
-KICKS_INSTALL_DIR = BASE_DIR / "kicks_install" / "kicks-master" / "kicks-tso-v1r5m0"
-XMIT_FILE = KICKS_INSTALL_DIR / "kicks-tso-v1r5m0.xmi"
-JCL_DIR = BASE_DIR / "jcl" / "kicks"
-
-# Terminal API base URL
 TERMINAL_API = "http://localhost:8080/api/terminal"
 
+KICKS_START_CMD = "EXEC 'KICKS.KICKSSYS.V1R5M0.CLIST(KICKS)'"
+KICKS_STOP_CMD = "KSSF"
 
-class KicksInstaller:
-    """Handles KICKS installation process."""
-    
+
+class KicksService:
+    """Manages KICKS lifecycle via the web app terminal."""
+
     def __init__(self):
-        self.status = "idle"
-        self.log: List[str] = []
-        self.step = 0
-        self.total_steps = 6
-        self.error: Optional[str] = None
-        
-    def _log(self, msg: str):
-        """Add to installation log."""
-        self.log.append(f"[Step {self.step}/{self.total_steps}] {msg}")
-        print(f"KICKS: {msg}")
-        
-    def check_prerequisites(self) -> Dict[str, Any]:
-        """Check if all prerequisites are met."""
-        checks = {
-            "xmit_file": XMIT_FILE.exists(),
-            "dasd_dir": DASD_DIR.exists(),
-            "kicks_dasd": (DASD_DIR / "kicks0.350").exists(),
-            "jcl_dir": JCL_DIR.exists(),
-        }
-        checks["ready"] = all(checks.values())
-        return checks
-    
-    def check_kicks_installed(self) -> bool:
-        """Check if KICKS is already installed by looking for catalog entry."""
-        # This would need terminal access - for now check if DASD exists
-        return (DASD_DIR / "kicks0.350").exists()
-    
-    def add_kicks_dasd_config(self) -> bool:
-        """Add KICKS DASD to Hercules configuration."""
-        self.step = 1
-        self._log("Adding KICKS DASD to configuration...")
-        
-        # Add to cbt_dasd.cnf (placeholder file for additional DASD)
-        config_file = CONF_DIR / "cbt_dasd.cnf"
-        kicks_config = """#
-# KICKS DASD
-#
-0351 3350 dasd/kicks0.350
-"""
-        
-        try:
-            current = config_file.read_text() if config_file.exists() else ""
-            if "kicks0" not in current.lower():
-                with open(config_file, 'w') as f:
-                    f.write(kicks_config)
-                self._log("✓ KICKS DASD added to cbt_dasd.cnf")
-                return True
-            else:
-                self._log("✓ KICKS DASD already in configuration")
-                return True
-        except Exception as e:
-            self.error = f"Failed to update config: {e}"
-            self._log(f"✗ {self.error}")
-            return False
-    
-    def create_kicks_dasd(self) -> bool:
-        """Create KICKS DASD image if it doesn't exist."""
-        self.step = 2
-        self._log("Checking KICKS DASD image...")
-        
-        dasd_file = DASD_DIR / "kicks0.350"
-        if dasd_file.exists():
-            self._log("✓ KICKS DASD image already exists")
-            return True
-        
-        # Try to create with dasdinit
-        try:
-            result = subprocess.run(
-                ["dasdinit", "-a", str(dasd_file), "3350", "111111"],
-                capture_output=True,
-                text=True,
-                timeout=30
-            )
-            if result.returncode == 0:
-                self._log("✓ KICKS DASD image created")
-                return True
-            else:
-                self.error = f"dasdinit failed: {result.stderr}"
-                self._log(f"✗ {self.error}")
-                return False
-        except FileNotFoundError:
-            self.error = "dasdinit not found - Hercules tools not in PATH"
-            self._log(f"✗ {self.error}")
-            return False
-        except Exception as e:
-            self.error = f"Failed to create DASD: {e}"
-            self._log(f"✗ {self.error}")
-            return False
-    
-    def get_hercules_commands(self) -> List[str]:
-        """Get list of Hercules console commands needed."""
-        return [
-            "# Attach KICKS DASD (run at Hercules console)",
-            "attach 351 3350 dasd/kicks0.350",
-            "# Bring volume online",
-            "v 351,online", 
-            "# Mount volume",
-            "m 351,vol=(sl,kicks0),use=private",
-            "# Load XMIT file for RECV370",
-            f"devinit 01c {XMIT_FILE} ebcdic",
-        ]
-    
-    def get_mvs_commands(self) -> List[str]:
-        """Get list of MVS commands/jobs needed."""
-        return [
-            "# At TSO READY prompt:",
-            "PROFILE PREFIX(KICKS)",
-            "# Submit ICKDSF to initialize volume (if new)",
-            "SUBMIT 'SYS2.JCLLIB(ICKDSF)'",
-            "# Submit DEFCAT to create user catalog", 
-            "SUBMIT 'SYS2.JCLLIB(DEFCAT)'",
-            "# Run RECV370 to receive XMIT file",
-            "EXEC 'SYS2.CMDPROC(RECV370)'",
-            "# Unpack installation datasets",
-            "See KICKS User's Guide for remaining steps",
-        ]
-    
-    def get_installation_status(self) -> Dict[str, Any]:
-        """Get current installation status."""
-        prereqs = self.check_prerequisites()
-        return {
-            "status": self.status,
-            "step": self.step,
-            "total_steps": self.total_steps,
-            "log": self.log[-20:],  # Last 20 entries
-            "error": self.error,
-            "prerequisites": prereqs,
-            "kicks_installed": self.check_kicks_installed(),
-            "hercules_commands": self.get_hercules_commands(),
-            "mvs_commands": self.get_mvs_commands(),
-        }
-    
-    async def start_installation(self) -> Dict[str, Any]:
-        """Start the KICKS installation process."""
-        self.status = "running"
-        self.log = []
-        self.step = 0
-        self.error = None
-        
-        self._log("Starting KICKS installation...")
-        
-        # Step 1: Check prerequisites
-        prereqs = self.check_prerequisites()
-        if not prereqs["ready"]:
-            missing = [k for k, v in prereqs.items() if not v and k != "ready"]
-            self.error = f"Missing prerequisites: {', '.join(missing)}"
-            self.status = "failed"
-            return self.get_installation_status()
-        
-        # Step 2: Add DASD config
-        if not self.add_kicks_dasd_config():
-            self.status = "failed"
-            return self.get_installation_status()
-        
-        # Step 3: Ensure DASD exists
-        if not self.create_kicks_dasd():
-            self.status = "failed" 
-            return self.get_installation_status()
-        
-        self.step = 3
-        self._log("Configuration complete!")
-        self._log("")
-        self._log("=== MANUAL STEPS REQUIRED ===")
-        self._log("1. Restart TK5 to load new DASD config")
-        self._log("2. Run Hercules commands listed below")
-        self._log("3. Follow MVS commands to complete installation")
-        
-        self.status = "manual_steps_required"
-        return self.get_installation_status()
-    
-    # Terminal helper methods
-    def _send_string(self, text: str) -> bool:
-        """Send string to terminal."""
-        try:
-            r = requests.post(f"{TERMINAL_API}/key", json={"key_type": "string", "value": text}, timeout=5)
-            return r.json().get("success", False)
-        except:
-            return False
-    
-    def _send_enter(self) -> bool:
-        """Send Enter key."""
-        try:
-            r = requests.post(f"{TERMINAL_API}/key", json={"key_type": "enter", "value": ""}, timeout=5)
-            return r.json().get("success", False)
-        except:
-            return False
-    
-    def _send_pf(self, num: int) -> bool:
-        """Send PF key."""
-        try:
-            r = requests.post(f"{TERMINAL_API}/key", json={"key_type": "pf", "value": str(num)}, timeout=5)
-            return r.json().get("success", False)
-        except:
-            return False
-    
+        self.running = False
+        self.last_check: Optional[Dict] = None
+
+    # ── Terminal helpers ──────────────────────────────────
+
     def _get_screen(self) -> str:
-        """Get current screen content."""
         try:
             r = requests.get(f"{TERMINAL_API}/screen", timeout=5)
-            data = r.json()
-            return data.get("screen", "") if data.get("connected") else ""
-        except:
+            d = r.json()
+            return d.get("screen", "") if d.get("connected") else ""
+        except Exception:
             return ""
-    
-    def _send_cmd(self, cmd: str) -> bool:
-        """Send command and enter."""
+
+    def _send_string(self, text: str):
+        try:
+            requests.post(f"{TERMINAL_API}/key",
+                          json={"key_type": "string", "value": text}, timeout=5)
+        except Exception:
+            pass
+
+    def _send_key(self, key_type: str, value: str = ""):
+        try:
+            requests.post(f"{TERMINAL_API}/key",
+                          json={"key_type": key_type, "value": value}, timeout=5)
+        except Exception:
+            pass
+
+    def _send_enter(self):
+        self._send_key("enter")
+
+    def _send_pf(self, n: int):
+        self._send_key("pf", str(n))
+
+    def _send_clear(self):
+        self._send_key("clear")
+
+    def _send_cmd(self, cmd: str, delay: float = 1.5):
         self._send_string(cmd)
         time.sleep(0.3)
         self._send_enter()
-        time.sleep(1.5)
-        return True
-    
-    def _wait_for(self, text: str, timeout: int = 30) -> bool:
-        """Wait for text on screen."""
-        start = time.time()
-        while time.time() - start < timeout:
+        time.sleep(delay)
+
+    def _wait_for(self, text: str, timeout: int = 15) -> bool:
+        end = time.time() + timeout
+        while time.time() < end:
             if text.upper() in self._get_screen().upper():
                 return True
-            time.sleep(1)
+            time.sleep(0.5)
         return False
-    
-    def _ensure_tso_ready(self) -> bool:
-        """Ensure we're at TSO READY prompt."""
-        screen = self._get_screen()
-        
-        if "LOGON" in screen.upper() and "READY" not in screen.upper():
-            self._log("Logging into TSO...")
-            self._send_string("HERC01")
-            self._send_enter()
-            time.sleep(2)
-            self._send_string("CUL8TR")
-            self._send_enter()
-            time.sleep(3)
-            for _ in range(5):
-                if self._wait_for("READY", 2):
-                    break
-                self._send_enter()
-                time.sleep(1)
-        
-        screen = self._get_screen()
-        if "ISPF" in screen.upper() or "OPTION" in screen.upper():
-            self._send_pf(3)
-            time.sleep(1)
-            self._send_pf(3)
-            time.sleep(1)
-        
-        return self._wait_for("READY", 5)
-    
-    async def run_full_installation(self) -> Dict[str, Any]:
-        """Run the full KICKS installation via terminal commands."""
-        self.status = "running"
-        self.log = []
-        self.step = 0
-        self.total_steps = 5
-        self.error = None
-        
-        self._log("Starting full KICKS installation...")
-        
-        # Check terminal connection
+
+    def _at_ready(self) -> bool:
+        return "READY" in self._get_screen().upper()
+
+    def _navigate_to_ready(self) -> bool:
+        """Try to get to TSO READY prompt from wherever we are."""
         screen = self._get_screen()
         if not screen:
-            self.error = "Not connected to mainframe"
-            self.status = "failed"
-            return self.get_installation_status()
-        
-        # Step 1: Ensure at TSO READY
-        self.step = 1
-        self._log("Step 1: Ensuring TSO READY prompt...")
-        if not self._ensure_tso_ready():
-            self.error = "Could not get to TSO READY prompt"
-            self.status = "failed"
-            return self.get_installation_status()
-        self._log("✓ At TSO READY")
-        
-        # Step 2: Check/Create catalog
-        self.step = 2
-        self._log("Step 2: Checking KICKS catalog...")
-        self._send_cmd("LISTCAT ENT(KICKS) ALL")
-        time.sleep(2)
+            return False
+
+        # Already at READY
+        if "READY" in screen.upper():
+            return True
+
+        # At VTAM logon
+        if "LOGON" in screen.upper() and "==>" in screen:
+            self._send_cmd("TSO", 2)
+            screen = self._get_screen()
+
+        # At TSO logon panel
+        if "ENTER USERID" in screen.upper() or "TSO/E LOGON" in screen.upper():
+            self._send_cmd("HERC01", 1)
+            screen = self._get_screen()
+            if "PASSWORD" in screen.upper() or "ENTER" in screen.upper():
+                self._send_cmd("CUL8TR", 3)
+
+        # Press through messages
+        for _ in range(5):
+            screen = self._get_screen()
+            if "READY" in screen.upper():
+                return True
+            if "ISPF" in screen.upper() or "OPTION" in screen.upper():
+                self._send_pf(3)
+                time.sleep(1)
+                continue
+            self._send_enter()
+            time.sleep(1)
+
+        return "READY" in self._get_screen().upper()
+
+    # ── Public API ────────────────────────────────────────
+
+    def check_status(self) -> Dict[str, Any]:
+        """Check KICKS installation and runtime status."""
+        result = {
+            "dasd_exists": (DASD_DIR / "kicks0.350").exists(),
+            "dasd_size_mb": 0,
+            "terminal_connected": False,
+            "catalog_exists": False,
+            "datasets_exist": False,
+            "kicks_running": False,
+            "screen_snippet": "",
+            "log": [],
+        }
+
+        dasd = DASD_DIR / "kicks0.350"
+        if dasd.exists():
+            result["dasd_size_mb"] = round(dasd.stat().st_size / 1024 / 1024)
+
         screen = self._get_screen()
-        
+        if not screen:
+            result["log"].append("Terminal not connected to mainframe")
+            self.last_check = result
+            return result
+
+        result["terminal_connected"] = True
+        result["screen_snippet"] = screen[:200]
+
+        # Check if KICKS is currently running (banner or transaction screen)
+        upper = screen.upper()
+        if "K I C K S" in upper or ("KICKS" in upper and "TRANSACTION" in upper):
+            result["kicks_running"] = True
+            self.running = True
+            result["log"].append("KICKS is currently running")
+            self.last_check = result
+            return result
+
+        # We need to be at READY to check datasets
+        if "READY" not in upper:
+            result["log"].append("Not at TSO READY — cannot check datasets")
+            self.last_check = result
+            return result
+
+        # Check catalog alias
+        self._send_cmd("LISTCAT ENT(KICKS) ALL", 2)
+        screen = self._get_screen()
         if "ALIAS" in screen.upper() and "KICKS" in screen:
-            self._log("✓ KICKS catalog alias exists")
+            result["catalog_exists"] = True
+            result["log"].append("KICKS catalog alias found")
         else:
-            self._log("KICKS catalog not found - needs to be created")
-            self._log("Run these at Hercules console first:")
-            self._log("  v 351,online")
-            self._log("  m 351,vol=(sl,kicks0),use=private")
-            self._log("")
-            self._log("Then submit DEFCAT job to create catalog")
-            self.status = "needs_hercules_commands"
-            return self.get_installation_status()
-        
-        # Step 3: Set KICKS prefix
-        self.step = 3
-        self._log("Step 3: Setting KICKS prefix...")
-        self._send_cmd("PROFILE PREFIX(KICKS)")
-        self._log("✓ Prefix set")
-        
-        # Step 4: Check if KICKS datasets exist
-        self.step = 4
-        self._log("Step 4: Checking KICKS datasets...")
-        self._send_cmd("LISTCAT ENT(KICKS.KICKSSYS.V1R5M0.CLIST) ALL")
-        time.sleep(2)
+            result["log"].append("KICKS catalog alias NOT found")
+
+        # Clear output
+        for _ in range(3):
+            if "READY" in self._get_screen().upper():
+                break
+            self._send_enter()
+            time.sleep(0.5)
+
+        # Check CLIST dataset
+        self._send_cmd("LISTDS 'KICKS.KICKSSYS.V1R5M0.CLIST'", 2)
         screen = self._get_screen()
-        
-        if "KICKS.KICKSSYS" in screen and "NONVSAM" in screen.upper():
-            self._log("✓ KICKS datasets already installed!")
-            self.status = "installed"
-            self._log("")
-            self._log("KICKS is ready! To start:")
-            self._log("  EXEC 'KICKS.KICKSSYS.V1R5M0.CLIST(KICKS)'")
-            return self.get_installation_status()
+        if "KICKS.KICKSSYS" in screen and "NOT IN CATALOG" not in screen.upper():
+            result["datasets_exist"] = True
+            result["log"].append("KICKS datasets found")
         else:
-            self._log("KICKS datasets not found")
-            self._log("Need to upload XMIT file via RECV370")
-            self._log("")
-            self._log("Run at Hercules console:")
-            self._log(f"  devinit 01c {XMIT_FILE} ebcdic")
-            self._log("")
-            self._log("Then run: EXEC 'SYS2.CMDPROC(RECV370)'")
-            self.status = "needs_xmit_upload"
-            return self.get_installation_status()
+            result["log"].append("KICKS datasets NOT found")
+
+        # Clear
+        for _ in range(3):
+            if "READY" in self._get_screen().upper():
+                break
+            self._send_enter()
+            time.sleep(0.5)
+
+        self.last_check = result
+        return result
+
+    def start_kicks(self) -> Dict[str, Any]:
+        """Start KICKS from TSO READY prompt."""
+        result = {"success": False, "message": "", "log": []}
+
+        screen = self._get_screen()
+        if not screen:
+            result["message"] = "Terminal not connected"
+            return result
+
+        # Already running?
+        if "K I C K S" in screen.upper() or ("KICKS" in screen.upper() and "TRANSACTION" in screen.upper()):
+            result["success"] = True
+            result["message"] = "KICKS is already running"
+            self.running = True
+            return result
+
+        # Navigate to READY
+        if not self._navigate_to_ready():
+            result["message"] = "Could not reach TSO READY prompt"
+            result["log"].append(f"Screen: {self._get_screen()[:200]}")
+            return result
+
+        result["log"].append("At TSO READY")
+
+        # Start KICKS
+        result["log"].append(f"Running: {KICKS_START_CMD}")
+        self._send_cmd(KICKS_START_CMD, 5)
+
+        # Wait for KICKS to appear
+        screen = self._get_screen()
+        result["log"].append(f"Screen after EXEC: {screen[:200]}")
+
+        # KICKS shows startup messages then banner on Enter
+        for _ in range(5):
+            screen = self._get_screen()
+            upper = screen.upper()
+            if "K I C K S" in upper or "KICKS" in upper:
+                result["success"] = True
+                result["message"] = "KICKS started successfully"
+                self.running = True
+                return result
+            if "ERROR" in upper or "NOT FOUND" in upper or "NOT IN CATALOG" in upper:
+                result["message"] = "KICKS failed to start — datasets may not be installed"
+                result["log"].append(screen[:300])
+                return result
+            self._send_enter()
+            time.sleep(2)
+
+        # One more check
+        screen = self._get_screen()
+        if "KICKS" in screen.upper():
+            result["success"] = True
+            result["message"] = "KICKS started"
+            self.running = True
+        else:
+            result["message"] = "KICKS may not have started — check terminal"
+            result["log"].append(screen[:300])
+
+        return result
+
+    def stop_kicks(self) -> Dict[str, Any]:
+        """Stop KICKS cleanly with KSSF."""
+        result = {"success": False, "message": "", "log": []}
+
+        screen = self._get_screen()
+        if not screen:
+            result["message"] = "Terminal not connected"
+            return result
+
+        # Send CLEAR then KSSF
+        self._send_clear()
+        time.sleep(0.5)
+        self._send_cmd(KICKS_STOP_CMD, 3)
+
+        screen = self._get_screen()
+        result["log"].append(f"After KSSF: {screen[:200]}")
+
+        # Press enter to get back to READY
+        for _ in range(3):
+            self._send_enter()
+            time.sleep(1)
+            if "READY" in self._get_screen().upper():
+                break
+
+        self.running = False
+        result["success"] = True
+        result["message"] = "KICKS stopped"
+        return result
+
+    def get_installation_status(self) -> Dict[str, Any]:
+        """Legacy compat wrapper."""
+        return self.last_check or self.check_status()
 
 
-# Global installer instance
-_installer: Optional[KicksInstaller] = None
+_service: Optional[KicksService] = None
 
-def get_installer() -> KicksInstaller:
-    """Get or create installer instance."""
-    global _installer
-    if _installer is None:
-        _installer = KicksInstaller()
-    return _installer
+def get_installer() -> KicksService:
+    """Get or create KICKS service instance."""
+    global _service
+    if _service is None:
+        _service = KicksService()
+    return _service

@@ -1,25 +1,39 @@
-# Services (`app/services/`)
+# `app/services/` — Business Logic
 
-Business logic services separated from route handlers.
+Stateless service modules imported by route handlers. Keeps routes thin and logic reusable.
 
-## Service Modules
+## Modules
 
 ### `chat.py`
-Chat message processing and conversation management:
-- Message history tracking
-- RAG context integration
-- Agentic tool-calling loop
+Singleton `ChatService` — chat processing and conversation management:
+- Conversation history (per-session, in-memory, capped at 40 messages)
+- RAG context injection from local embeddings
+- Slash-command handling (`/connect`, `/disconnect`, `/screen`, `/model`, `/clear`, `/help`)
+- Automatic screen context when connected to mainframe
 
 ### `ollama.py`
-Ollama LLM client wrapper:
-- Model status checking
-- Chat completion requests
-- Embedding generation
-- Streaming support
+Singleton `OllamaService` — all Ollama LLM communication:
+- `generate()` — single-shot prompt completion
+- `chat()` — multi-turn chat API with optional tool definitions
+- `chat_simple()` — convenience wrapper returning plain text
+- `quick_explain()` — fast one-sentence screen explanation (low token, short timeout)
+- `check_available()` — health check
+- GPU-optimized options merged automatically from `config.py`
 
-## Design Pattern
+### `ftp.py`
+Singleton `FTPService` — MVS FTP client over `ftplib`:
+- Connect/disconnect to TK5 FTP server (default port 2121)
+- List datasets and PDS members
+- Download/upload with ASCII↔EBCDIC translation
+- Raw FTP command passthrough
+- Transfer history log
+- Full automated test suite
 
-Services are stateless functions that can be imported by route handlers. This separation allows:
-- Easier unit testing
-- Code reuse across routes
-- Clear separation of concerns
+### `kicks_installer.py`
+Singleton `KICKSInstaller` — KICKS (CICS) lifecycle management:
+- Check KICKS installation and runtime status
+- Start/stop KICKS from TSO
+
+### `rag_context.py`
+Shared RAG context builder used by `tutor` and `recon` routes:
+- `build_rag_context(query, n_results)` — queries the RAG engine and returns a formatted context block for LLM prompts

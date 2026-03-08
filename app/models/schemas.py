@@ -9,6 +9,7 @@ from typing import Optional, List, Dict, Any
 class ChatRequest(BaseModel):
     """Chat message request."""
     message: str
+    context: Optional[str] = ""
 
 
 class TerminalKeyRequest(BaseModel):

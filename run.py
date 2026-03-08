@@ -7,13 +7,31 @@ Auto-detects GPU and selects optimal model.
 """
 
 import argparse
+import os
 import uvicorn
 
 from app.config import get_config, update_model
 
 
+def _load_env():
+    """Load .env file into os.environ (no dependency needed)."""
+    env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
+    if not os.path.exists(env_path):
+        return
+    with open(env_path, 'r') as f:
+        for line in f:
+            line = line.strip()
+            if not line or line.startswith('#') or '=' not in line:
+                continue
+            key, val = line.split('=', 1)
+            key, val = key.strip(), val.strip()
+            if val and key not in os.environ:
+                os.environ[key] = val
+
+
 def main():
     """Main entry point for the application."""
+    _load_env()
     parser = argparse.ArgumentParser(description="Mainframe AI Assistant Web App")
     parser.add_argument("--host", default="127.0.0.1", help="Host to bind to")
     parser.add_argument("--port", type=int, default=8080, help="Port to bind to")

@@ -46,6 +46,15 @@
       "steps": 5
     },
     {
+      "id": "rakf-security",
+      "title": "RAKF Security: Users, Profiles & Privilege Analysis",
+      "description": "Explore the RAKF security system on TK5. View users and profiles tables, understand access control, identify misconfigurations, and trace authorization decisions.",
+      "category": "security",
+      "difficulty": "intermediate",
+      "walkthrough": true,
+      "steps": 8
+    },
+    {
       "id": "system-inspection",
       "title": "System Inspection: Configuration & Procedures",
       "description": "Inspect system datasets, PROCLIB, and configuration. Map what a normal user can see.",
@@ -82,6 +91,42 @@
       "steps": 8
     },
     {
+      "id": "jcl-injection",
+      "title": "JCL Library Injection: Privilege Path",
+      "description": "Demonstrate how a low-privileged user influences batch execution by controlling a program library. No exploits — just normal MVS behavior.",
+      "category": "security",
+      "difficulty": "advanced",
+      "walkthrough": true,
+      "steps": 10
+    },
+    {
+      "id": "apf-privesc",
+      "title": "APF Privilege Escalation: MODESET to Superuser",
+      "description": "The classic mainframe privesc. Find writable APF library, assemble MODESET program, escalate to SPECIAL+OPERATIONS. Based on mainframed/APFPRIV.jcl.",
+      "category": "security",
+      "difficulty": "advanced",
+      "walkthrough": false,
+      "steps": 9
+    },
+    {
+      "id": "system-enum",
+      "title": "System Enumeration: z/OS Pentest Recon",
+      "description": "Enumerate APF libraries, RACF settings, SVC table, TSO auth tables, logged-on users. Based on mainframed/ENUM_REFACTORED.",
+      "category": "recon",
+      "difficulty": "advanced",
+      "walkthrough": false,
+      "steps": 9
+    },
+    {
+      "id": "racf-hashes",
+      "title": "RACF Hash Cracking: DES Password Analysis",
+      "description": "How RACF password hashing works — DES + EBCDIC. Why the algorithm is weak and how to crack hashes. Based on mainframed/user_hashes.py.",
+      "category": "security",
+      "difficulty": "advanced",
+      "walkthrough": false,
+      "steps": 8
+    },
+    {
       "id": "reverse-shell",
       "title": "Z/OS Reverse Shell via JCL (Metasploit)",
       "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
@@ -89,6 +134,46 @@
       "difficulty": "advanced",
       "walkthrough": true,
       "steps": 10
+    },
+    {
+      "id": "dc30-hello-world",
+      "title": "DC30 Lab 1: Run HELLO — First Mainframe Program",
+      "description": "Log in to TSO, learn ISPF navigation, and run your first mainframe program. The HELLO binary uses gets() — a deliberately vulnerable C function. Foundation for all buffer overflow labs.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "source": "DC30_Workshop / DEFCON 30",
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "dc30-buffer-overflow",
+      "title": "DC30 Labs 2–4: Buffer Overflow on MVS",
+      "description": "Overflow the HELLO program's 150-byte gets() buffer, find the return address in a dump, use De Bruijn patterns to pinpoint the offset, and control execution to print a WTO message. Classic stack overflow — on a mainframe from 1978.",
+      "category": "security",
+      "difficulty": "intermediate",
+      "source": "DC30_Workshop / DEFCON 30",
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "dc30-arbauth-privesc",
+      "title": "DC30 Lab 9: ARBAUTH Privilege Escalation — Follow the White Rabbit",
+      "description": "Use ARBAUTH to run code as AC=1, exploit the OPENTST buffer overflow to modify your ACEE security control block in memory, escalate privileges, and read the protected WHITE.RABBIT dataset.",
+      "category": "security",
+      "difficulty": "advanced",
+      "source": "DC30_Workshop / DEFCON 30",
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "dc30-ftp-overflow",
+      "title": "DC30 Lab 10: FTP Buffer Overflow — Remote Code Execution",
+      "description": "Exploit a buffer overflow in the MVS FTP server via a long USER command. Use De Bruijn patterns, craft EBCDIC-safe shellcode, and achieve remote code execution on the mainframe over the network — no TSO session required.",
+      "category": "security",
+      "difficulty": "advanced",
+      "source": "DC30_Workshop / DEFCON 30",
+      "walkthrough": true,
+      "steps": 5
     }
   ]
 }

@@ -1,0 +1,718 @@
+{% extends "base.html" %}
+
+{% block title %}FTP Client - IBM Mainframe AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/ftp.css?v=1">
+{% endblock %}
+
+{% block body %}
+{% set brand_title = "MVS FTP Client" %}
+{% set nav_items = [
+    {'href': '/', 'label': 'Home'},
+    {'href': '/terminal', 'label': 'Terminal'},
+    {'href': '/chat', 'label': 'AI Chat'},
+    {'href': '/rag', 'label': 'RAG'}
+] %}
+{% include "partials/site_header.html" %}
+
+<main class="page">
+    <h1 class="page-title">MVS FTP Client</h1>
+    <p class="page-subtitle">Connect to TK5 FTP (port 2121) &mdash; browse datasets, upload/download, test EBCDIC translation</p>
+
+    <!-- Stats Row -->
+    <div class="stats-row">
+        <div class="stat-card">
+            <div class="value" id="statStatus"><span class="status-dot red"></span>Offline</div>
+            <div class="label">Connection</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="statHost">&mdash;</div>
+            <div class="label">Host</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="statUser">&mdash;</div>
+            <div class="label">User</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" id="statTransfers">0</div>
+            <div class="label">Transfers</div>
+        </div>
+    </div>
+
+    <!-- Auto Test Suite -->
+    <div class="section" id="autoTestSection">
+        <div class="section-header">
+            <h2>Automated Test Suite</h2>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <span id="testOverall" style="font-family:'IBM Plex Mono',monospace; font-size:11px; font-weight:700;"></span>
+                <button class="btn primary" onclick="runAutoTest()">Run All Tests</button>
+            </div>
+        </div>
+        <div class="section-body">
+            <div id="testProgress" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5a6a7a; margin-bottom:10px;">
+                Connecting to localhost:2121 and running tests...
+            </div>
+            <div id="testResults"></div>
+        </div>
+    </div>
+
+    <!-- Connection -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Connection</h2>
+            <div>
+                <button class="btn success" id="btnConnect" onclick="ftpConnect()">Connect</button>
+                <button class="btn danger" id="btnDisconnect" onclick="ftpDisconnect()" disabled>Disconnect</button>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="conn-form">
+                <div class="field">
+                    <label>Host</label>
+                    <input type="text" id="inHost" value="localhost" style="width:140px;">
+                </div>
+                <div class="field">
+                    <label>Port</label>
+                    <input type="text" id="inPort" value="2121" style="width:60px;">
+                </div>
+                <div class="field">
+                    <label>User</label>
+                    <input type="text" id="inUser" value="HERC01" style="width:100px;">
+                </div>
+                <div class="field">
+                    <label>Password</label>
+                    <input type="password" id="inPass" value="CUL8TR" style="width:100px;">
+                </div>
+            </div>
+            <p id="connMsg" style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5a6a7a; margin-top:10px;"></p>
+        </div>
+    </div>
+
+    <!-- Dataset Browser -->
+    <div class="section">
+        <div class="section-header" onclick="toggleFtpSection('datasetBrowser', this)" style="cursor:pointer; user-select:none;">
+            <h2><span class="ftp-arrow" style="display:inline-block; font-size:0.6rem; margin-right:6px; transition:transform 0.2s;">&#9660;</span>Dataset Browser</h2>
+        </div>
+        <div class="section-body" id="datasetBrowser">
+            <div class="browser-toolbar">
+                <input type="text" id="inPrefix" placeholder="Dataset prefix (e.g. SYS1, HERC01, or leave blank for user HLQ)" value="">
+                <button class="btn primary" onclick="ftpList()">List</button>
+                <button class="btn secondary" onclick="ftpListUp()">&#8593; Up</button>
+            </div>
+            <div class="breadcrumb" id="breadcrumb"></div>
+            <div id="browserContent">
+                <div class="ds-empty">Connect and list datasets to begin browsing</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Content Viewer -->
+    <div class="section" id="viewerSection" style="display:none;">
+        <div class="section-header">
+            <h2>Content Viewer</h2>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <div class="mode-toggle">
+                    <button id="modeAscii" class="active" onclick="setViewMode('ascii')">ASCII</button>
+                    <button id="modeBinary" onclick="setViewMode('binary')">Binary</button>
+                </div>
+                <button class="btn secondary" onclick="closeViewer()">Close</button>
+            </div>
+        </div>
+        <div class="section-body" id="viewerBody">
+            <div class="content-viewer">
+                <div class="content-viewer-header">
+                    <span class="title" id="viewerTitle">&mdash;</span>
+                    <span class="meta" id="viewerMeta"></span>
+                </div>
+                <pre id="viewerContent">Loading...</pre>
+            </div>
+        </div>
+    </div>
+
+    <!-- Upload via Card Reader -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Submit to MVS (Card Reader)</h2>
+            <span style="font-family:'IBM Plex Mono',monospace; font-size:10px; color:#5a6a7a;">PORT 3505</span>
+        </div>
+        <div class="section-body">
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5a6a7a; margin-bottom:10px;">
+                TK5 FTP is read-only. Upload JCL/data via the card reader (port 3505) instead.
+                Lines are truncated to 80 columns (MVS card image format).
+            </p>
+            <div style="display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap;">
+                <button class="btn secondary" onclick="loadTemplate('job')">JOB Template</button>
+                <button class="btn secondary" onclick="loadTemplate('iebgener')">IEBGENER (copy data)</button>
+                <button class="btn secondary" onclick="loadTemplate('iebupdte')">IEBUPDTE (PDS member)</button>
+            </div>
+            <div class="upload-area">
+                <textarea id="uploadContent" placeholder="Paste JCL here — must start with // JOB card"></textarea>
+                <div class="upload-controls">
+                    <button class="btn success" onclick="submitCard()">Submit to MVS</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EBCDIC Test -->
+    <div class="section">
+        <div class="section-header">
+            <h2>EBCDIC Translation Test</h2>
+        </div>
+        <div class="section-body">
+            <p style="font-family:'IBM Plex Mono',monospace; font-size:11px; color:#5a6a7a; margin-bottom:10px;">
+                Download a dataset in both ASCII and binary mode to verify EBCDIC&harr;ASCII translation is working correctly.
+            </p>
+            <div style="display:flex; gap:8px; align-items:center;">
+                <input type="text" id="ebcdicTarget" placeholder="Dataset to test: SYS2.JCLLIB(HELLO)" style="font-family:'IBM Plex Mono',monospace; font-size:12px; padding:6px 10px; background:#0a0d11; border:1px solid #2a3a4a; border-radius:4px; color:#dde1e6; flex:1; outline:none;">
+                <button class="btn primary" onclick="ftpTestEbcdic()">Run Test</button>
+            </div>
+            <div id="ebcdicResult"></div>
+        </div>
+    </div>
+
+    <!-- Transfer Log -->
+    <div class="section">
+        <div class="section-header">
+            <h2>Transfer Log</h2>
+            <button class="btn secondary" onclick="refreshLog()">Refresh</button>
+        </div>
+        <div class="section-body">
+            <div id="logContent">
+                <div class="ds-empty">No transfers yet</div>
+            </div>
+        </div>
+    </div>
+</main>
+
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+const API = '/api';
+let viewMode = 'ascii';
+let uploadMode = 'ascii';
+let currentPrefix = '';
+let prefixHistory = [];
+
+// ── Section Toggle ──────────────────────────────────────────────
+
+function toggleFtpSection(id, headerEl) {
+    const body = document.getElementById(id);
+    const arrow = headerEl.querySelector('.ftp-arrow');
+    if (body.style.display === 'none') {
+        body.style.display = '';
+        if (arrow) arrow.style.transform = 'rotate(0deg)';
+    } else {
+        body.style.display = 'none';
+        if (arrow) arrow.style.transform = 'rotate(-90deg)';
+    }
+}
+
+// ── Status Polling ───────────────────────────────────────────────
+
+async function pollStatus() {
+    try {
+        const r = await fetch(`${API}/ftp/status`);
+        const d = await r.json();
+        const el = document.getElementById('statStatus');
+        if (d.connected) {
+            el.innerHTML = '<span class="status-dot green"></span>Online';
+            el.className = 'value connected';
+            document.getElementById('statHost').textContent = d.host;
+            document.getElementById('statUser').textContent = d.user;
+            document.getElementById('btnConnect').disabled = true;
+            document.getElementById('btnDisconnect').disabled = false;
+        } else {
+            el.innerHTML = '<span class="status-dot red"></span>Offline';
+            el.className = 'value disconnected';
+            document.getElementById('statHost').textContent = '\u2014';
+            document.getElementById('statUser').textContent = '\u2014';
+            document.getElementById('btnConnect').disabled = false;
+            document.getElementById('btnDisconnect').disabled = true;
+        }
+        document.getElementById('statTransfers').textContent = d.transfers || 0;
+    } catch (e) {}
+}
+
+setInterval(pollStatus, 3000);
+pollStatus();
+
+// ── Auto Test on Page Load ───────────────────────────────────
+
+async function runAutoTest() {
+    const progress = document.getElementById('testProgress');
+    const results = document.getElementById('testResults');
+    const overall = document.getElementById('testOverall');
+    progress.textContent = 'Running tests against localhost:2121 as HERC01...';
+    progress.style.color = '#78a9ff';
+    results.innerHTML = '';
+    overall.textContent = '';
+
+    try {
+        const r = await fetch(`${API}/ftp/test-all`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                host: document.getElementById('inHost').value || 'localhost',
+                port: parseInt(document.getElementById('inPort').value) || 2121,
+                user: document.getElementById('inUser').value || 'HERC01',
+                password: document.getElementById('inPass').value || 'CUL8TR',
+            })
+        });
+        const d = await r.json();
+        renderTestResults(d);
+        pollStatus();
+        refreshLog();
+    } catch (e) {
+        progress.textContent = 'Test failed: ' + e;
+        progress.style.color = '#fa4d56';
+    }
+}
+
+function renderTestResults(d) {
+    const progress = document.getElementById('testProgress');
+    const results = document.getElementById('testResults');
+    const overall = document.getElementById('testOverall');
+
+    // Handle error responses or missing fields
+    const passed = d.passed || 0;
+    const failed = d.failed || 0;
+    const total  = d.total  || 0;
+    const tests  = d.tests  || [];
+
+    // If API returned a plain error (no test structure)
+    if (!d.tests && d.error) {
+        overall.innerHTML = '<span style="color:#fa4d56;">ERROR</span>';
+        progress.innerHTML = `<span style="color:#fa4d56;">${esc(d.error)}</span>`;
+        results.innerHTML = '';
+        return;
+    }
+
+    if (d.overall) {
+        overall.innerHTML = '<span style="color:#42be65;">ALL PASSED</span>';
+        progress.innerHTML = `<span style="color:#42be65;">${passed}/${total} tests passed</span>`;
+    } else {
+        overall.innerHTML = `<span style="color:#fa4d56;">${failed} FAILED</span>`;
+        progress.innerHTML = `<span style="color:#ff832b;">${passed}/${total} tests passed, ${failed} failed</span>`;
+    }
+
+    if (tests.length === 0) {
+        results.innerHTML = '<div class="ds-empty">No test results</div>';
+        return;
+    }
+
+    let html = '<table class="ds-table" style="margin-top:8px;"><thead><tr><th style="width:30px;">Status</th><th>Test</th><th>Detail</th></tr></thead><tbody>';
+    for (const t of tests) {
+        const icon = t.pass
+            ? '<span style="color:#42be65; font-weight:700;">PASS</span>'
+            : '<span style="color:#fa4d56; font-weight:700;">FAIL</span>';
+        html += `<tr><td>${icon}</td><td>${esc(t.test || '')}</td><td style="color:#8d99a8; font-size:11px;">${esc(t.detail || '')}</td></tr>`;
+    }
+    html += '</tbody></table>';
+    results.innerHTML = html;
+}
+
+// Auto-run on page load
+window.addEventListener('DOMContentLoaded', () => {
+    setTimeout(runAutoTest, 500);
+});
+
+// ── Connection ───────────────────────────────────────────────────
+
+async function ftpConnect() {
+    const btn = document.getElementById('btnConnect');
+    btn.disabled = true;
+    btn.textContent = 'Connecting...';
+    document.getElementById('connMsg').textContent = '';
+    try {
+        const r = await fetch(`${API}/ftp/connect`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                host: document.getElementById('inHost').value,
+                port: parseInt(document.getElementById('inPort').value),
+                user: document.getElementById('inUser').value,
+                password: document.getElementById('inPass').value,
+            })
+        });
+        const d = await r.json();
+        const msg = document.getElementById('connMsg');
+        if (d.success) {
+            msg.style.color = '#42be65';
+            msg.textContent = d.message + (d.welcome ? ' — ' + d.welcome : '');
+            pollStatus();
+            ftpList();
+        } else {
+            msg.style.color = '#fa4d56';
+            msg.textContent = 'Error: ' + d.error;
+        }
+    } catch (e) {
+        document.getElementById('connMsg').textContent = 'Connection failed: ' + e;
+        document.getElementById('connMsg').style.color = '#fa4d56';
+    }
+    btn.textContent = 'Connect';
+    pollStatus();
+}
+
+async function ftpDisconnect() {
+    await fetch(`${API}/ftp/disconnect`, {method: 'POST'});
+    document.getElementById('connMsg').textContent = 'Disconnected';
+    document.getElementById('connMsg').style.color = '#5a6a7a';
+    document.getElementById('browserContent').innerHTML = '<div class="ds-empty">Disconnected</div>';
+    pollStatus();
+}
+
+// ── Dataset Browser ──────────────────────────────────────────────
+
+async function ftpList(prefix) {
+    if (prefix === undefined) prefix = document.getElementById('inPrefix').value.trim();
+    currentPrefix = prefix;
+    document.getElementById('inPrefix').value = prefix;
+    updateBreadcrumb();
+
+    const el = document.getElementById('browserContent');
+    el.innerHTML = '<div class="ds-empty">Loading...</div>';
+
+    try {
+        const r = await fetch(`${API}/ftp/list`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({prefix: prefix})
+        });
+        const d = await r.json();
+        if (!d.success) {
+            el.innerHTML = `<div class="ds-empty" style="color:#fa4d56;">${d.error}</div>`;
+            return;
+        }
+        if (!d.entries || d.entries.length === 0) {
+            el.innerHTML = '<div class="ds-empty">No datasets found</div>';
+            return;
+        }
+        renderDatasetTable(d.entries);
+    } catch (e) {
+        el.innerHTML = `<div class="ds-empty" style="color:#fa4d56;">Error: ${e}</div>`;
+    }
+}
+
+function renderDatasetTable(entries) {
+    let html = `<table class="ds-table">
+        <thead><tr><th>Type</th><th>Dataset Name</th><th>Actions</th></tr></thead><tbody>`;
+    for (const e of entries) {
+        const typeCls = e.type === 'PDS' ? 'pds' : e.type === 'PS' ? 'ps' : 'unknown';
+        const typeLabel = e.type || '?';
+        const actions = [];
+        if (e.type === 'PDS') {
+            actions.push(`<button class="btn secondary" onclick="browsePDS('${esc(e.name)}')">Browse</button>`);
+        }
+        actions.push(`<button class="btn secondary" onclick="ftpDownload('${esc(e.name)}')">Download</button>`);
+        html += `<tr>
+            <td><span class="type-badge ${typeCls}">${typeLabel}</span></td>
+            <td class="dsn" onclick="${e.type==='PDS' ? `browsePDS('${esc(e.name)}')` : `ftpDownload('${esc(e.name)}')`}">${e.name}</td>
+            <td>${actions.join(' ')}</td>
+        </tr>`;
+    }
+    html += '</tbody></table>';
+    document.getElementById('browserContent').innerHTML = html;
+}
+
+async function browsePDS(name) {
+    prefixHistory.push(currentPrefix);
+    const el = document.getElementById('browserContent');
+    el.innerHTML = '<div class="ds-empty">Loading members...</div>';
+
+    try {
+        const r = await fetch(`${API}/ftp/list`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({pds: name})
+        });
+        const d = await r.json();
+        if (!d.success) {
+            el.innerHTML = `<div class="ds-empty" style="color:#fa4d56;">${d.error}</div>`;
+            return;
+        }
+        currentPrefix = name;
+        document.getElementById('inPrefix').value = name;
+        updateBreadcrumb();
+
+        if (!d.members || d.members.length === 0) {
+            el.innerHTML = '<div class="ds-empty">PDS is empty</div>';
+            return;
+        }
+        let html = `<table class="ds-table">
+            <thead><tr><th>Member</th><th>Actions</th></tr></thead><tbody>`;
+        for (const m of d.members) {
+            const fullName = `${name}(${m.name})`;
+            html += `<tr>
+                <td class="dsn" onclick="ftpDownload('${esc(fullName)}')">${m.name}</td>
+                <td>
+                    <button class="btn secondary" onclick="ftpDownload('${esc(fullName)}')">View</button>
+                    <button class="btn secondary" onclick="setEbcdicTarget('${esc(fullName)}')">EBCDIC Test</button>
+                </td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        el.innerHTML = html;
+    } catch (e) {
+        el.innerHTML = `<div class="ds-empty" style="color:#fa4d56;">Error: ${e}</div>`;
+    }
+}
+
+function ftpListUp() {
+    if (prefixHistory.length > 0) {
+        ftpList(prefixHistory.pop());
+    } else if (currentPrefix.includes('.')) {
+        const parts = currentPrefix.split('.');
+        parts.pop();
+        ftpList(parts.join('.'));
+    } else {
+        ftpList('');
+    }
+}
+
+function updateBreadcrumb() {
+    const el = document.getElementById('breadcrumb');
+    if (!currentPrefix) {
+        el.innerHTML = '<span onclick="ftpList(\'\')">/ (user HLQ)</span>';
+        return;
+    }
+    let html = '<span onclick="ftpList(\'\')">/ </span>';
+    const parts = currentPrefix.split('.');
+    let acc = '';
+    for (let i = 0; i < parts.length; i++) {
+        acc += (i > 0 ? '.' : '') + parts[i];
+        const p = acc;
+        html += ` <span onclick="ftpList('${esc(p)}')">${parts[i]}</span>`;
+        if (i < parts.length - 1) html += ' . ';
+    }
+    el.innerHTML = html;
+}
+
+// ── Download / View ──────────────────────────────────────────────
+
+async function ftpDownload(dataset) {
+    document.getElementById('viewerSection').style.display = '';
+    document.getElementById('viewerTitle').textContent = dataset;
+    document.getElementById('viewerMeta').textContent = 'Loading...';
+    document.getElementById('viewerContent').textContent = 'Loading...';
+
+    try {
+        const r = await fetch(`${API}/ftp/download`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({dataset: dataset, mode: viewMode})
+        });
+        const d = await r.json();
+        if (!d.success) {
+            document.getElementById('viewerContent').textContent = 'Error: ' + d.error;
+            document.getElementById('viewerMeta').textContent = '';
+            return;
+        }
+        document.getElementById('viewerContent').textContent = d.content || '(empty)';
+        const meta = viewMode === 'binary'
+            ? `${d.size_bytes} bytes | binary mode`
+            : `${d.lines} lines | ASCII mode (EBCDIC auto-translated)`;
+        document.getElementById('viewerMeta').textContent = meta;
+        refreshLog();
+    } catch (e) {
+        document.getElementById('viewerContent').textContent = 'Error: ' + e;
+    }
+}
+
+function setViewMode(mode) {
+    viewMode = mode;
+    document.getElementById('modeAscii').className = mode === 'ascii' ? 'active' : '';
+    document.getElementById('modeBinary').className = mode === 'binary' ? 'active' : '';
+    // Re-download if viewer is open
+    const title = document.getElementById('viewerTitle').textContent;
+    if (title && title !== '\u2014') ftpDownload(title);
+}
+
+function closeViewer() {
+    document.getElementById('viewerSection').style.display = 'none';
+}
+
+// ── Card Reader Upload ───────────────────────────────────────────
+
+const JCL_TEMPLATES = {
+    job: `//MYJOB   JOB (1),'MY JOB',CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),
+//             NOTIFY=HERC01
+//*
+//* Your JCL steps here
+//*
+//STEP1   EXEC PGM=IEFBR14
+/*
+`,
+    iebgener: `//COPYDATA JOB (1),'COPY DATA',CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),
+//             NOTIFY=HERC01
+//*
+//* Copy inline data to a sequential dataset
+//* Change HERC01.MY.DATA to your target dataset name
+//*
+//ALLOC   EXEC PGM=IEFBR14
+//DD1      DD  DSN=HERC01.MY.DATA,DISP=(NEW,CATLG),
+//             UNIT=SYSDA,SPACE=(TRK,(5,5)),
+//             DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120)
+//*
+//COPY    EXEC PGM=IEBGENER
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DSN=HERC01.MY.DATA,DISP=SHR
+//SYSIN    DD  DUMMY
+//SYSUT1   DD  *
+PUT YOUR DATA HERE - ONE LINE PER RECORD
+EACH LINE WILL BE ONE 80-BYTE CARD IMAGE
+/*
+`,
+    iebupdte: `//ADDMEMBR JOB (1),'ADD PDS MEMBER',CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1),
+//             NOTIFY=HERC01
+//*
+//* Add/replace a member in a PDS
+//* Change SYS2.JCLLIB to your target PDS
+//*
+//UPDATE  EXEC PGM=IEBUPDTE,PARM=NEW
+//SYSPRINT DD  SYSOUT=*
+//SYSUT2   DD  DSN=HERC01.TEST.CNTL,DISP=SHR
+//SYSIN    DD  *
+./ ADD NAME=MYMEMBER
+YOUR CONTENT GOES HERE
+LINE TWO OF THE MEMBER
+LINE THREE
+./ ENDUP
+/*
+`,
+};
+
+function loadTemplate(name) {
+    const ta = document.getElementById('uploadContent');
+    if (ta.value.trim() && !confirm('Replace current content with template?')) return;
+    ta.value = JCL_TEMPLATES[name] || '';
+    ta.focus();
+}
+
+async function submitCard() {
+    const content = document.getElementById('uploadContent').value;
+    if (!content.trim()) { alert('Paste JCL content to submit'); return; }
+    if (!content.trim().startsWith('//')) {
+        if (!confirm('Content does not start with // (JOB card). Submit anyway?')) return;
+    }
+
+    try {
+        const r = await fetch(`${API}/ftp/submit-card`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({content: content})
+        });
+        const d = await r.json();
+        if (d.success) {
+            showToast('success', d.message);
+        } else {
+            showToast('error', 'Submit failed: ' + d.error);
+        }
+    } catch (e) {
+        showToast('error', 'Submit error: ' + e);
+    }
+}
+
+// ── EBCDIC Test ──────────────────────────────────────────────────
+
+function setEbcdicTarget(name) {
+    document.getElementById('ebcdicTarget').value = name;
+    document.getElementById('ebcdicTarget').scrollIntoView({behavior: 'smooth'});
+}
+
+async function ftpTestEbcdic() {
+    const dataset = document.getElementById('ebcdicTarget').value.trim();
+    if (!dataset) { alert('Enter a dataset name to test'); return; }
+
+    const el = document.getElementById('ebcdicResult');
+    el.innerHTML = '<div class="ds-empty">Running EBCDIC test...</div>';
+
+    try {
+        const r = await fetch(`${API}/ftp/test-ebcdic`, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({dataset: dataset})
+        });
+        const d = await r.json();
+        if (!d.success) {
+            el.innerHTML = `<div class="ds-empty" style="color:#fa4d56;">Error: ${d.error}</div>`;
+            return;
+        }
+        el.innerHTML = `
+            <div style="margin-top:8px; font-family:'IBM Plex Mono',monospace; font-size:11px; color:${d.translation_ok ? '#42be65' : '#fa4d56'}; font-weight:700;">
+                ${d.translation_ok ? '&#10003; EBCDIC Translation OK' : '&#10007; Translation Issue'}
+            </div>
+            <div class="ebcdic-comparison">
+                <div class="panel">
+                    <div class="panel-header ascii">ASCII Mode (${d.ascii_lines} lines)</div>
+                    <pre>${esc(d.ascii_content || '(empty)')}</pre>
+                </div>
+                <div class="panel">
+                    <div class="panel-header binary">Binary Mode (${d.binary_size} bytes)</div>
+                    <pre>${esc(d.binary_hex || '(empty)')}</pre>
+                </div>
+            </div>`;
+        refreshLog();
+    } catch (e) {
+        el.innerHTML = `<div class="ds-empty" style="color:#fa4d56;">Error: ${e}</div>`;
+    }
+}
+
+// ── Transfer Log ─────────────────────────────────────────────────
+
+async function refreshLog() {
+    try {
+        const r = await fetch(`${API}/ftp/transfers`);
+        const d = await r.json();
+        const el = document.getElementById('logContent');
+        if (!d.transfers || d.transfers.length === 0) {
+            el.innerHTML = '<div class="ds-empty">No transfers yet</div>';
+            return;
+        }
+        let html = `<table class="log-table">
+            <thead><tr><th>Time</th><th>Dir</th><th>Dataset</th><th>Mode</th><th>Size</th></tr></thead><tbody>`;
+        for (const t of d.transfers.reverse()) {
+            const dirCls = t.direction === 'upload' ? 'dir-up' : 'dir-down';
+            const dirIcon = t.direction === 'upload' ? '&#8593; PUT' : '&#8595; GET';
+            html += `<tr>
+                <td>${t.time}</td>
+                <td class="${dirCls}">${dirIcon}</td>
+                <td>${t.dataset}</td>
+                <td>${t.mode}</td>
+                <td>${t.size} bytes</td>
+            </tr>`;
+        }
+        html += '</tbody></table>';
+        el.innerHTML = html;
+    } catch (e) {}
+}
+
+// ── Utils ────────────────────────────────────────────────────────
+
+function esc(s) {
+    if (!s) return '';
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+}
+
+function showToast(type, msg) {
+    // Use global toast if available, else alert
+    if (window.showToast) {
+        window.showToast(msg, type);
+    } else {
+        const container = document.getElementById('toastContainer');
+        if (container) {
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            toast.textContent = msg;
+            toast.style.cssText = 'font-family:"IBM Plex Mono",monospace;font-size:12px;padding:10px 16px;margin:8px;border-radius:4px;color:#fff;background:' + (type==='error'?'#da1e28':'#198038');
+            container.appendChild(toast);
+            setTimeout(() => toast.remove(), 4000);
+        } else {
+            alert(msg);
+        }
+    }
+}
+</script>
+{% endblock %}

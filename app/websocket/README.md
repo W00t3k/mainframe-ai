@@ -1,28 +1,17 @@
-# WebSocket Handlers (`app/websocket/`)
+# `app/websocket/` — Real-Time Communication
 
-Real-time communication handlers for terminal and graph updates.
+WebSocket handlers for live terminal and graph updates.
 
-## Handlers
+## Endpoints
 
-### `handlers.py`
+| Path | Purpose |
+|------|---------|
+| `/ws/terminal` | Screen updates pushed to all connected browsers |
+| `/ws/graph` | Trust graph node/edge changes broadcast live |
 
-**Terminal WebSocket** (`/ws/terminal`)
-- Real-time screen updates from TN3270 emulator
-- Keyboard input forwarding
-- Connection state management
+## How It Works
 
-**Graph WebSocket** (`/ws/graph`)
-- Trust graph live updates
-- Node/edge addition notifications
-- Query result streaming
-
-## Client Management
-
-The module maintains sets of connected clients:
-- `terminal_clients` - WebSocket connections for terminal
-- `graph_clients` - WebSocket connections for graph visualization
-
-## Broadcast Functions
-
-- `broadcast_screen_update()` - Send screen data to all terminal clients
-- `broadcast_graph_update()` - Send graph changes to all graph clients
+- `handlers.py` maintains client sets (`terminal_clients`, `graph_clients`)
+- `broadcast_screen_update()` — pushes screen HTML to all terminal watchers
+- `broadcast_graph_update()` — pushes graph diffs to all graph viewers
+- Clients auto-reconnect on disconnect

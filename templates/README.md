@@ -1,44 +1,44 @@
-# Templates (`templates/`)
+# `templates/` — Jinja2 HTML Pages
 
-Jinja2 HTML templates for the web interface.
+24 Jinja2 templates rendering the full web interface. All extend `base.html`.
 
 ## Base Template
 
-### `base.html`
-Master template with:
-- HTML head (meta, fonts, base CSS)
-- Toast notification container
-- Block definitions for child templates
+`base.html` provides: HTML head (meta, IBM Plex fonts, base CSS), toast notification container, and four override blocks:
 
-## Page Templates
+```jinja2
+{% block title %}       — Page title
+{% block page_styles %} — Per-page CSS <link>
+{% block body %}        — Main content
+{% block page_scripts %} — Per-page <script>
+```
 
-| Template | Route | Description |
-|----------|-------|-------------|
-| `index.html` | `/` | Landing page with feature cards |
-| `chat.html` | `/chat` | AI chat interface |
-| `terminal.html` | `/terminal` | TN3270 terminal emulator |
-| `tutor.html` | `/tutor` | Red Team Tutor |
-| `walkthrough.html` | `/walkthrough` | Autonomous demonstrations |
-| `graph.html` | `/graph` | Trust graph visualization |
-| `recon.html` | `/recon` | Reconnaissance tools |
+## Pages
+
+| Template | Route | Feature |
+|----------|-------|---------|
+| `index.html` | `/` | CRT hero + live terminal overlay + matrix boot sequence |
+| `terminal.html` | `/terminal` | Full-screen TN3270 with color rendering |
+| `walkthrough.html` | `/walkthrough` | 13 autonomous walkthroughs with narration |
+| `tutor.html` | `/tutor` | Red Team Tutor — labs, chat, terminal side-by-side |
+| `tutorials.html` | `/tutorials` | Step-by-step tutorial library |
+| `chat.html` | `/chat`, `/connect` | AI chat with tool-calling |
+| `graph.html` | `/graph` | D3.js trust graph visualization |
+| `recon.html` | `/recon` | Test & Report — enumeration + findings |
 | `labs.html` | `/labs` | Security lab exercises |
-| `scanner.html` | `/scanner` | Network scanner |
-| `rag.html` | `/rag` | Knowledge base management |
-| `architecture.html` | `/architecture` | System architecture |
+| `scanner.html` | `/scanner` | TN3270 network discovery + EBCDIC tools |
+| `rag.html` | `/rag` | Knowledge base upload + query |
+| `abstract_models.html` | `/abstract-models` | Interactive mental model explorer |
+| `abstract.html` | `/abstract` | Conference abstract |
+| `architecture.html` | `/architecture` | System architecture diagram |
+| `ftp.html` | `/ftp` | MVS FTP client |
+| `uss_editor.html` | `/uss-editor` | USS logon screen editor |
+| `slides.html` | `/slides` | Presentation slide viewer |
+| `presentation.html` | `/presentation` | Teaching presentation deck |
+| `video.html` | `/video` | IBM-AI demo video player |
 | `docs.html` | `/docs` | API documentation |
-| `abstract-models.html` | `/abstract-models` | Mental models |
-| `screencaps.html` | `/screencaps` | Screen captures |
+| `screencaps.html` | — | Legacy (redirects to `/recon`) |
 
 ## Partials
 
-### `partials/`
-Reusable template fragments:
-- `site_header.html` - Standard page header with back button
-
-## Template Blocks
-
-Templates extend `base.html` and override blocks:
-- `{% block title %}` - Page title
-- `{% block page_styles %}` - Page-specific CSS
-- `{% block body %}` - Main content
-- `{% block page_scripts %}` - Page-specific JavaScript
+`partials/site_header.html` — reusable page header with back button and IBM logo.

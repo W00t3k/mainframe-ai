@@ -40,7 +40,7 @@ class OllamaService:
             async with httpx.AsyncClient() as client:
                 response = await client.get(f"{self.url}/api/tags", timeout=5.0)
                 return response.status_code == 200
-        except:
+        except Exception:
             return False
     
     def _build_options(self, temperature: float = 0.7, num_predict: int = 2048) -> dict:

@@ -4,6 +4,7 @@ WebSocket Handlers
 Handles real-time WebSocket connections for terminal and graph visualization.
 """
 
+import asyncio
 import json
 from datetime import datetime
 from fastapi import WebSocket, WebSocketDisconnect
@@ -94,7 +95,8 @@ async def websocket_terminal(websocket: WebSocket):
             msg = json.loads(data)
 
             if msg["type"] == "key":
-                result = send_terminal_key(msg["key_type"], msg.get("value", ""))
+                loop = asyncio.get_running_loop()
+                result = await loop.run_in_executor(None, send_terminal_key, msg["key_type"], msg.get("value", ""))
                 await websocket.send_text(json.dumps({
                     "type": "key_result",
                     "data": result

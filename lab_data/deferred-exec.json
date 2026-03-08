@@ -1,0 +1,45 @@
+{
+  "id": "deferred-exec",
+  "title": "Deferred Execution: JCL → JES",
+  "description": "Submit a job and trace the execution chain. Identity binding, JES scheduling, deferred trust.",
+  "category": "fundamentals",
+  "difficulty": "beginner",
+  "steps": [
+    {
+      "title": "What is JCL?",
+      "screen": "Job Control Language (JCL)\n\n//MYJOB   JOB (ACCT),'MY JOB',CLASS=A,MSGCLASS=X\n//STEP1   EXEC PGM=IEFBR14\n//SYSPRINT DD  SYSOUT=*\n\nJCL defines: who runs it, what program, what data.",
+      "expected": "Understand the three parts of a JCL job: JOB, EXEC, DD.",
+      "hint": "JOB card = identity + accounting. EXEC = program to run. DD = data definition."
+    },
+    {
+      "title": "Submit a Job via ISPF",
+      "screen": "ISPF Edit - HERC01.JCL(TESTJOB)\n\n//TESTJOB JOB (ACCT),'TEST',CLASS=A,MSGCLASS=X\n//STEP1   EXEC PGM=IEFBR14\n//SYSPRINT DD  SYSOUT=*\n\nEnter SUB on command line to submit.",
+      "expected": "Job submitted to JES input queue.",
+      "hint": "Type SUB on the command line and press Enter. Note the job number returned."
+    },
+    {
+      "title": "JES Input Queue",
+      "screen": "SDSF INPUT QUEUE\n\nNJobname  JobID    Owner  Prty Queue  C Pos\n-TESTJOB  JOB00123 HERC01 1    INPUT  A   1\n\nJob is waiting for JES to schedule it.",
+      "expected": "Job appears in JES input queue with assigned job ID.",
+      "hint": "JES assigns a unique job ID. The job waits here until a class initiator picks it up."
+    },
+    {
+      "title": "Job Execution",
+      "screen": "SDSF STATUS DISPLAY\n\nNJobname  JobID    Owner  Prty Status  C\n-TESTJOB  JOB00123 HERC01 1    ACTIVE  A\n\nJob is executing on an initiator.",
+      "expected": "Job moves from INPUT to ACTIVE status.",
+      "hint": "An initiator (address space) picks up the job and executes each step sequentially."
+    },
+    {
+      "title": "Job Output (SYSOUT)",
+      "screen": "SDSF OUTPUT QUEUE\n\nNJobname  JobID    Owner  Prty  Queue Dest\n-TESTJOB  JOB00123 HERC01 5     PRINT LOCAL\n\nIEF142I TESTJOB STEP1 - STEP WAS EXECUTED - COND CODE 0000",
+      "expected": "Job completes with condition code 0000 (success).",
+      "hint": "Condition code 0000 = success. Non-zero codes indicate warnings or errors."
+    },
+    {
+      "title": "Deferred Trust Implications",
+      "screen": "Security Analysis: Deferred Execution\n\nKey insight: JCL runs LATER under the submitter's identity.\n\nAttack vector:\n- Inject JCL into a trusted user's input queue\n- Job runs with THEIR RACF identity\n- Deferred = harder to detect in real-time\n\nThis is the mainframe equivalent of a cron job injection.",
+      "expected": "Understand why deferred execution creates unique security risks.",
+      "hint": "Unlike interactive commands, batch jobs run asynchronously — detection and attribution are harder."
+    }
+  ]
+}

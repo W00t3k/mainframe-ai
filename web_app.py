@@ -1823,7 +1823,7 @@ async def api_recon_enumerate(request: Request):
         _active_enumerator = enumerator
 
         # Run enumeration in a thread to avoid blocking the event loop
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         results = await loop.run_in_executor(None, enumerator.enumerate)
 
         _active_enumerator = None
@@ -1854,7 +1854,7 @@ async def api_recon_hidden_fields():
 
     try:
         detector = HiddenFieldDetector()
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         fields = await loop.run_in_executor(None, detector.detect)
         return JSONResponse({"fields": fields})
     except Exception as e:
@@ -1871,7 +1871,7 @@ async def api_recon_analyze_screen():
 
     try:
         analyzer = ScreenAnalyzer()
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         findings = await loop.run_in_executor(None, analyzer.analyze_current_screen)
         return JSONResponse({"findings": findings})
     except Exception as e:
@@ -1895,7 +1895,7 @@ async def api_recon_map(request: Request):
         mapper = ApplicationMapper(max_depth=max_depth)
         _active_mapper = mapper
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         tree = await loop.run_in_executor(None, mapper.map)
 
         stats = mapper.stats
@@ -2204,10 +2204,11 @@ async def api_terminal_reset_session():
 
         # Disconnect and reconnect for a truly clean state
         from agent_tools import disconnect_mainframe
+        # Save target before disconnecting (disconnect clears host/port)
+        reconnect_target = f"{connection.host}:{connection.port}" if connection and connection.host else "localhost:3270"
         disconnect_mainframe()
         _rst_time.sleep(1)
-        host = f"{connection.host}:{connection.port}" if connection else "localhost:3270"
-        connect_mainframe(host)
+        connect_mainframe(reconnect_target)
         _rst_time.sleep(2)
         screen = read_screen()
 

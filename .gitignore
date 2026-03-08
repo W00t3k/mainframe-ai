@@ -30,8 +30,24 @@ tk5/mvs-tk5/prt/
 .DS_Store
 Thumbs.db
 
+# Cached downloads
+.cache/
+
 # RAG data (user-specific)
 rag_data/
 
 # Screencaps (user-specific)
 screencaps/
+
+# TK5 runtime artifacts (downloaded by setup.sh from GitHub release)
+tk5/mvs-tk5/dasd_backup/
+tk5/mvs-tk5/nohup.out
+*.mac
+
+# Discovery database (runtime)
+discovery.db
+discovery.db-shm
+discovery.db-wal
+
+# Screenshots (runtime)
+static/screenshots/

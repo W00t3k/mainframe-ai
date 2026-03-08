@@ -66,6 +66,7 @@ body {
 .sidebar-header {
     padding: 16px;
     border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
 }
 
 .sidebar-header .back-link {
@@ -107,12 +108,16 @@ body {
 .sidebar-section {
     padding: 12px 0;
     border-bottom: 1px solid var(--border);
-    overflow-y: auto;
+    flex-shrink: 0;
+    overflow: hidden;
 }
 
-.sidebar-section:last-of-type {
-    border-bottom: none;
+.sidebar-labs {
     flex: 1;
+    flex-shrink: 1;
+    border-bottom: none;
+    overflow-y: auto;
+    min-height: 0;
 }
 
 .section-title {
@@ -303,6 +308,7 @@ body {
     padding: 12px 16px;
     border-top: 1px solid var(--border);
     margin-top: auto;
+    flex-shrink: 0;
 }
 
 .conn-status {

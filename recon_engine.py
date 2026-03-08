@@ -21,8 +21,439 @@ from typing import Optional
 
 from agent_tools import (
     connection, exec_emulator_command, read_screen,
-    send_terminal_key, normalize_screen_text
+    normalize_screen_text
 )
+
+
+# =============================================================================
+# Terminal State Detection & Navigation
+# =============================================================================
+# Every recon feature depends on being in the right terminal state.
+# These helpers detect the current state and navigate to the required one.
+# They are designed to recover from ANY state the terminal might be in.
+
+import logging as _logging
+_log = _logging.getLogger("recon_engine")
+
+# Terminal states
+STATE_VTAM_USS = "vtam_uss"          # VTAM logon screen  (Logon ==>)
+STATE_TSO_LOGON = "tso_logon"        # TSO userid prompt  (IKJ56700A)
+STATE_TSO_PASSWORD = "tso_password"  # TSO password prompt
+STATE_TSO_READY = "tso_ready"        # TSO READY prompt
+STATE_TSO_ISPF = "tso_ispf"          # Inside ISPF panels
+STATE_TSO_MORE = "tso_more"          # TSO output with *** (MORE) indicator
+STATE_TSO_REENTER = "tso_reenter"    # TSO asking to reenter (IKJ56703A)
+STATE_TSO_LOGON_LOGOFF = "tso_logon_logoff"  # IKJ56400A ENTER LOGON OR LOGOFF
+STATE_CICS = "cics"                  # Inside a CICS region
+STATE_UNKNOWN = "unknown"
+
+
+def _clear_input_field() -> None:
+    """Clear the current input field before typing.
+
+    Matches walkthrough.py pattern: Home() to first unprotected field,
+    EraseEOF() to clear any leftover text. This prevents appending to
+    stale input and ensures commands go to the right field.
+    """
+    try:
+        exec_emulator_command(b'Home()')
+        exec_emulator_command(b'EraseEOF()')
+    except Exception:
+        pass
+    time.sleep(0.2)
+
+
+def _read_screen_upper() -> str:
+    """Read the terminal screen, return upper-cased text. Handles errors."""
+    try:
+        return read_screen().upper()
+    except Exception:
+        return ""
+
+
+def _detect_state() -> str:
+    """Read the current screen and classify terminal state.
+
+    Order matters: check the most specific patterns first to avoid
+    false matches (e.g. IKJ56700A before the generic 'IKJ5' prefix).
+    """
+    screen = _read_screen_upper()
+    if not screen.strip():
+        return STATE_UNKNOWN
+
+    # VTAM USS logon screen — full-screen check (distinct banner)
+    if "LOGON ==>" in screen or "RUNNING  TK5" in screen:
+        return STATE_VTAM_USS
+
+    # ISPF panels — full-screen check
+    if "ISPF PRIMARY" in screen or "OPTION ===>" in screen or "ISPF/PDF" in screen:
+        return STATE_TSO_ISPF
+
+    # CICS/KICKS — full-screen check
+    if "DFHCE" in screen or ("CICS" in screen and ("SIGN" in screen or "CESN" in screen)):
+        return STATE_CICS
+
+    # --- For TSO prompts, check only the BOTTOM of the screen ---
+    # TSO scrolls: old prompts remain visible above the current one.
+    # Only the last few non-empty lines contain the ACTIVE prompt.
+    lines = screen.split('\n')
+    bottom_lines = [l for l in lines if l.strip()]
+    bottom = '\n'.join(bottom_lines[-6:]) if bottom_lines else ""
+
+    # TSO READY prompt
+    if "READY" in bottom:
+        # Make sure it's the actual READY prompt, not just part of other text
+        for bl in reversed(bottom_lines):
+            if "READY" in bl:
+                return STATE_TSO_READY
+                break
+
+    # Password failed (NOT AUTHORIZED) — bail out
+    if "NOT AUTHORIZED" in bottom:
+        return STATE_TSO_REENTER
+
+    # TSO asking to reenter after invalid command
+    if "IKJ56703A" in bottom or "REENTER" in bottom:
+        return STATE_TSO_REENTER
+
+    # Password prompt
+    if "ENTER CURRENT PASSWORD" in bottom or "ENTER PASSWORD" in bottom:
+        return STATE_TSO_PASSWORD
+
+    # "ENTER LOGON OR LOGOFF" — userid in use
+    if "IKJ56400A" in bottom or "ENTER LOGON OR LOGOFF" in bottom:
+        return STATE_TSO_LOGON_LOGOFF
+
+    # TSO userid prompt
+    if "IKJ56700A" in bottom or "ENTER USERID" in bottom:
+        return STATE_TSO_LOGON
+
+    # TSO MORE indicator (*** at end of output)
+    if "***" in bottom and "READY" not in bottom:
+        return STATE_TSO_MORE
+
+    # Generic TSO message prefix — probably at some prompt
+    if "IKJ5" in bottom:
+        return STATE_TSO_READY
+
+    return STATE_UNKNOWN
+
+
+def _clear_screen_state() -> None:
+    """Dismiss any pending prompt: page through MORE, clear REENTER, etc."""
+    for _ in range(8):
+        state = _detect_state()
+        if state == STATE_TSO_MORE:
+            _fast_key("enter", wait=True)
+            time.sleep(0.5)
+        elif state == STATE_TSO_REENTER:
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.3)
+            _fast_key("clear")
+            time.sleep(0.3)
+        else:
+            break
+
+
+def _go_to_vtam(max_attempts: int = 4) -> bool:
+    """Navigate from any state back to the VTAM USS logon screen.
+    Returns True if successful."""
+    for attempt in range(max_attempts):
+        _clear_screen_state()
+        state = _detect_state()
+        _log.debug("_go_to_vtam attempt %d: state=%s", attempt, state)
+
+        if state == STATE_VTAM_USS:
+            return True
+
+        if state == STATE_TSO_ISPF:
+            # Exit ISPF — press PF3 up to 6 times to handle nested panels
+            for _ in range(6):
+                _fast_key("pf", "3", wait=True)
+                time.sleep(0.4)
+                s = _detect_state()
+                if s != STATE_TSO_ISPF:
+                    break
+            # Now at TSO READY — fall through to logoff
+
+        if state in (STATE_TSO_READY, STATE_TSO_LOGON, STATE_TSO_PASSWORD,
+                     STATE_TSO_REENTER, STATE_TSO_MORE, STATE_TSO_ISPF,
+                     STATE_TSO_LOGON_LOGOFF):
+            _clear_input_field()
+            _fast_key("string", "LOGOFF")
+            _fast_key("enter", wait=True)
+            time.sleep(4.0)
+            continue
+
+        if state == STATE_CICS:
+            _clear_input_field()
+            _fast_key("string", "CESF LOGOFF")
+            _fast_key("enter", wait=True)
+            time.sleep(3.0)
+            continue
+
+        # STATE_UNKNOWN — try PA1 to reset, then LOGOFF
+        _fast_key("pa", "1", wait=True)
+        time.sleep(0.5)
+        _clear_input_field()
+        _fast_key("string", "LOGOFF")
+        _fast_key("enter", wait=True)
+        time.sleep(4.0)
+
+    return _detect_state() == STATE_VTAM_USS
+
+
+def _go_to_tso_logon() -> bool:
+    """Navigate to the TSO logon userid prompt.
+    Returns True if successful."""
+    state = _detect_state()
+    if state == STATE_TSO_LOGON:
+        return True
+
+    if not _go_to_vtam():
+        return False
+    _clear_input_field()
+    _fast_key("string", "TSO")
+    _fast_key("enter", wait=True)
+    time.sleep(3.0)
+    state = _detect_state()
+    return state in (STATE_TSO_LOGON, STATE_TSO_PASSWORD)
+
+
+def _send_password(password: str) -> None:
+    """Type password and press Enter. Used at any TSO password prompt.
+
+    Clears the input field first to avoid appending to leftover text
+    from a previous failed attempt (REENTER scenario).
+    """
+    try:
+        exec_emulator_command(b'Reset()')
+        exec_emulator_command(b'Home()')
+        exec_emulator_command(b'EraseEOF()')
+    except Exception:
+        pass
+    time.sleep(0.2)
+    _fast_key("string", password)
+    _fast_key("enter", wait=True)
+    time.sleep(3.0)
+
+
+def _go_to_tso_ready(userid: str = "HERC01", password: str = "CUL8TR") -> bool:
+    """Log into TSO and reach the READY prompt.
+
+    If the requested userid is in use, automatically falls back to HERC02.
+    Handles every known intermediate state:
+      - Already at READY → done
+      - ISPF → PF3 out to READY
+      - VTAM USS → type TSO → userid → password → READY
+      - Userid in use → logoff, try HERC02
+      - Reconnect prompt → press Enter
+      - MORE / REENTER → dismiss
+    Returns True if at READY when done.
+    """
+    # Build fallback list: requested userid first, then HERC02 if not already
+    userids_to_try = [userid]
+    if userid.upper() == "HERC01":
+        userids_to_try.append("HERC02")
+    elif userid.upper() == "HERC02":
+        userids_to_try.append("HERC01")
+
+    for current_userid in userids_to_try:
+        _log.info("Trying TSO login as %s", current_userid)
+        result = _try_tso_login(current_userid, password)
+        if result:
+            return True
+        _log.warning("Login as %s failed, trying next", current_userid)
+        # Make sure we're back at a clean state before trying next
+        _go_to_vtam()
+
+    final = _detect_state()
+    _log.error("All TSO login attempts failed. Final state: %s", final)
+    return final == STATE_TSO_READY
+
+
+def _try_tso_login(userid: str, password: str) -> bool:
+    """Single attempt to log into TSO as the given userid.
+
+    Walks through screens step by step. Returns True if READY reached.
+    Returns False if userid is in use or login fails (caller should
+    try a different userid).
+    """
+    for step in range(20):
+        # Bail immediately if connection died
+        if not connection.connected or not connection.emulator:
+            print(f"[LOGIN] Connection lost at step {step}", flush=True)
+            return False
+
+        _clear_screen_state()
+        state = _detect_state()
+        screen = _read_screen_upper()
+        # Temporary debug — shows in server stdout
+        last_lines = [l for l in screen.split('\n') if l.strip()][-3:]
+        print(f"[LOGIN] step={step} state={state} userid={userid} screen_tail={'|'.join(last_lines)}", flush=True)
+
+        # === CONNECTION LOST ===
+        if "NOT CONNECTED" in screen:
+            print(f"[LOGIN] Screen says not connected", flush=True)
+            return False
+
+        # === SUCCESS ===
+        if state == STATE_TSO_READY:
+            return True
+
+        # === PASSWORD FAILED — must be checked BEFORE password handler ===
+        if "NOT AUTHORIZED" in screen or "INVALID PASSWORD" in screen:
+            print(f"[LOGIN] Password rejected for {userid}", flush=True)
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.5)
+            return False
+
+        # === USERID IN USE — reconnect (walkthrough.py pattern) ===
+        if state == STATE_TSO_LOGON_LOGOFF or "IKJ56400A" in screen:
+            reconnect = "IN USE" in screen or "LOGON REJECTED" in screen
+            cmd = f"LOGON {userid} RECONNECT" if reconnect else f"LOGON {userid}"
+            print(f"[LOGIN] {userid} in use — sending {cmd}", flush=True)
+            _clear_input_field()
+            _fast_key("string", cmd)
+            _fast_key("enter", wait=True)
+            time.sleep(4.0)
+            continue  # next iteration handles password prompt
+
+        if "IKJ56425I" in screen or ("IN USE" in screen and "IKJ" in screen):
+            print(f"[LOGIN] {userid} rejected (in use) — sending LOGON RECONNECT", flush=True)
+            _clear_input_field()
+            _fast_key("string", f"LOGON {userid} RECONNECT")
+            _fast_key("enter", wait=True)
+            time.sleep(4.0)
+            continue
+
+        # === ISPF — PF3 out to READY ===
+        if state == STATE_TSO_ISPF:
+            for _ in range(6):
+                _fast_key("pf", "3", wait=True)
+                time.sleep(0.4)
+                if _detect_state() != STATE_TSO_ISPF:
+                    break
+            continue
+
+        # === PASSWORD PROMPT — enter password ===
+        if state == STATE_TSO_PASSWORD:
+            _send_password(password)
+            continue
+
+        # === USERID PROMPT — enter userid ===
+        if state == STATE_TSO_LOGON:
+            _clear_input_field()
+            _fast_key("string", userid)
+            _fast_key("enter", wait=True)
+            time.sleep(2.0)
+            continue
+
+        # === LOGON RECONNECT — press Enter to proceed ===
+        if "LOGON RECONNECT" in screen:
+            _fast_key("enter", wait=True)
+            time.sleep(2.0)
+            continue
+
+        # === ALREADY LOGGED ON — press Enter ===
+        if "ALREADY LOGGED ON" in screen or "IKJ56455I" in screen:
+            _fast_key("enter", wait=True)
+            time.sleep(2.0)
+            continue
+
+        # === MORE indicator ===
+        if state == STATE_TSO_MORE:
+            _fast_key("enter", wait=True)
+            time.sleep(0.5)
+            continue
+
+        # === REENTER prompt ===
+        if state == STATE_TSO_REENTER:
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.3)
+            _fast_key("clear")
+            time.sleep(0.3)
+            continue
+
+        # === ENTER AN OPTION ===
+        if "ENTER AN OPTION" in screen or "ENTER OPTION" in screen:
+            _fast_key("enter", wait=True)
+            time.sleep(1.0)
+            continue
+
+        # === VTAM USS — type TSO at the Logon ==> field ===
+        if state == STATE_VTAM_USS:
+            _clear_input_field()
+            _fast_key("string", "TSO")
+            _fast_key("enter", wait=True)
+            time.sleep(3.0)
+            continue
+
+        # === CICS — logoff first ===
+        if state == STATE_CICS:
+            _clear_input_field()
+            _fast_key("string", "CESF LOGOFF")
+            _fast_key("enter", wait=True)
+            time.sleep(3.0)
+            continue
+
+        # === INPUT NOT RECOGNIZED — VTAM error, clear and retry ===
+        if "INPUT NOT RECOGNIZED" in screen:
+            print(f"[LOGIN] VTAM INPUT NOT RECOGNIZED — clearing", flush=True)
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.5)
+            continue
+
+        # === UNKNOWN — press Enter once ===
+        _log.debug("  unknown screen, pressing Enter")
+        _fast_key("enter", wait=True)
+        time.sleep(1.0)
+
+    return _detect_state() == STATE_TSO_READY
+
+
+def _wait_output(timeout: float = 2.0) -> None:
+    """Wait for s3270 to receive new screen output (up to timeout seconds)."""
+    try:
+        exec_emulator_command(f'Wait({timeout},Unlock)'.encode())
+    except Exception:
+        pass
+
+
+def _fast_key(key_type: str, value: str = "", wait: bool = False) -> None:
+    """Send a key directly without Wait(Unlock) overhead.
+    recon_engine controls its own timing via time.sleep() so the
+    3s Wait in send_terminal_key causes enumeration to hang for minutes.
+    Set wait=True for action keys (Enter/PF/PA) to block until screen updates.
+    """
+    try:
+        exec_emulator_command(b'Reset()')
+    except Exception:
+        pass
+    try:
+        if key_type == "string":
+            if value:
+                exec_emulator_command(f'String("{value}")'.encode())
+        elif key_type == "enter":
+            exec_emulator_command(b'Enter()')
+            if wait:
+                _wait_output(2.0)
+        elif key_type == "clear":
+            exec_emulator_command(b'Clear()')
+            if wait:
+                _wait_output(1.0)
+        elif key_type == "pf":
+            exec_emulator_command(f'PF({value})'.encode())
+            if wait:
+                _wait_output(2.0)
+        elif key_type == "tab":
+            exec_emulator_command(b'Tab()')
+        elif key_type == "pa":
+            exec_emulator_command(f'PA({value})'.encode())
+            if wait:
+                _wait_output(1.5)
+    except Exception:
+        pass
 
 
 # =============================================================================
@@ -141,23 +572,36 @@ class TSOEnumerator:
     def _check_connected(self) -> bool:
         return connection.connected and connection.emulator is not None
 
-    def _navigate_to_tso(self) -> bool:
-        """Navigate to TSO logon screen using command sequence."""
-        for cmd in self.command_sequence:
-            send_terminal_key("clear")
-            time.sleep(0.3)
-            send_terminal_key("string", cmd)
-            send_terminal_key("enter")
-            time.sleep(1.0)
-        screen = read_screen()
-        return "TSO" in screen.upper() or "LOGON" in screen.upper()
+    def _navigate_to_tso_logon(self) -> bool:
+        """Navigate to TSO logon userid prompt.
+        Uses the navigation helpers to get to VTAM USS then TSO logon."""
+        state = _detect_state()
+        if state == STATE_TSO_LOGON:
+            return True
+        return _go_to_tso_logon()
 
-    def _clear_session(self):
-        """Reset to a clean state between attempts."""
-        send_terminal_key("pf", "3")
-        time.sleep(0.5)
-        send_terminal_key("clear")
-        time.sleep(0.3)
+    def _reset_to_tso_logon(self):
+        """After testing a userid, get back to the TSO userid prompt."""
+        screen = read_screen().upper()
+        # If at password prompt or logged in — escape
+        if "PASSWORD" in screen or "READY" in screen or "ISPF" in screen:
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.5)
+            _fast_key("clear")
+            time.sleep(0.3)
+            _fast_key("string", "LOGOFF")
+            _fast_key("enter", wait=True)
+            time.sleep(1.5)
+        # If we ended up at VTAM, send TSO again
+        state = _detect_state()
+        if state == STATE_VTAM_USS:
+            _clear_input_field()
+            _fast_key("string", "TSO")
+            _fast_key("enter", wait=True)
+            time.sleep(1.5)
+        # If already at TSO logon or REENTER prompt, just clear input
+        elif state in (STATE_TSO_LOGON, STATE_UNKNOWN):
+            _clear_input_field()
 
     def _classify_screen(self, screen_text: str) -> tuple[str, str]:
         """Classify screen response after sending a userid.
@@ -184,6 +628,9 @@ class TSOEnumerator:
     def enumerate(self, callback=None) -> list[dict]:
         """Run TSO enumeration against all candidate userids.
 
+        Navigates to TSO logon prompt first, enumerates userids,
+        then returns to TSO READY.
+
         Args:
             callback: Optional callable(progress, total, result_dict) for progress updates.
 
@@ -192,6 +639,11 @@ class TSOEnumerator:
         """
         if not self._check_connected():
             return [{"userid": "*", "status": "error", "message": "Not connected"}]
+
+        # Navigate to TSO logon prompt
+        if not self._navigate_to_tso_logon():
+            return [{"userid": "*", "status": "error",
+                     "message": "Could not navigate to TSO logon screen"}]
 
         self.results = []
         self.running = True
@@ -204,12 +656,14 @@ class TSOEnumerator:
 
             self.progress = i + 1
 
-            # Navigate to TSO logon
-            self._navigate_to_tso()
+            # Make sure we're at the TSO logon prompt
+            state = _detect_state()
+            if state != STATE_TSO_LOGON:
+                self._reset_to_tso_logon()
 
             # Send the userid
-            send_terminal_key("string", userid)
-            send_terminal_key("enter")
+            _fast_key("string", userid)
+            _fast_key("enter", wait=True)
             time.sleep(1.0)
 
             screen_text = read_screen()
@@ -226,10 +680,14 @@ class TSOEnumerator:
             if callback:
                 callback(self.progress, self.total, result)
 
-            # Clear for next attempt
-            self._clear_session()
+            # Reset for next attempt
+            self._reset_to_tso_logon()
 
         self.running = False
+
+        # Return to TSO READY
+        _go_to_tso_ready()
+
         return self.results
 
     def stop(self):
@@ -300,8 +758,48 @@ class CICSEnumerator:
 
         return "valid", "Transaction responded"
 
+    # Common CICS APPLIDs to try when navigating
+    CICS_APPLIDS = ["CICS", "CICS2", "CICSA", "CICSTEST", "KICKS"]
+
+    def _navigate_to_cics(self) -> bool:
+        """Navigate to a CICS region from VTAM USS.
+        Tries common CICS APPLIDs until one responds."""
+        if not _go_to_vtam():
+            return False
+
+        for applid in self.CICS_APPLIDS:
+            _fast_key("clear")
+            time.sleep(0.3)
+            _fast_key("string", f"LOGON APPLID({applid})")
+            _fast_key("enter", wait=True)
+            time.sleep(2.0)
+
+            screen = read_screen().upper()
+            # Check if we got into CICS (no error patterns)
+            if any(p in screen for p in ["DFHCE", "SIGN", "CICS", "CESN",
+                                          "TRANSACTION", "ENTER TRANS"]):
+                return True
+            # Also check: if it's not an error, we might be in CICS
+            if not any(p in screen for p in ["NOT ACTIVE", "UNABLE",
+                                              "IST075I", "IST453I",
+                                              "UNKNOWN", "NOT FOUND",
+                                              "INACTIVE", "LOGON ==>"]):
+                # Might be in the application
+                state = _detect_state()
+                if state == STATE_CICS:
+                    return True
+
+            # Failed — go back to VTAM and try next
+            _fast_key("clear")
+            time.sleep(0.3)
+
+        return False
+
     def enumerate(self, callback=None) -> list[dict]:
         """Run CICS transaction enumeration.
+
+        Navigates to a CICS region first. If no CICS is available,
+        returns a clear error. Returns to TSO READY after enumeration.
 
         Args:
             callback: Optional callable(progress, total, result_dict).
@@ -312,6 +810,14 @@ class CICSEnumerator:
         if not self._check_connected():
             return [{"transaction_id": "*", "status": "error",
                      "message": "Not connected"}]
+
+        # Try to navigate to CICS
+        if not self._navigate_to_cics():
+            # No CICS available — return to TSO and report
+            _go_to_tso_ready()
+            return [{"transaction_id": "*", "status": "error",
+                     "message": "No CICS region found. Tried: " +
+                     ", ".join(self.CICS_APPLIDS)}]
 
         self.results = []
         self.running = True
@@ -325,10 +831,10 @@ class CICSEnumerator:
             self.progress = i + 1
 
             # Clear and send transaction
-            send_terminal_key("clear")
+            _fast_key("clear")
             time.sleep(0.3)
-            send_terminal_key("string", txn)
-            send_terminal_key("enter")
+            _fast_key("string", txn)
+            _fast_key("enter", wait=True)
             time.sleep(0.8)
 
             screen_text = read_screen()
@@ -346,10 +852,15 @@ class CICSEnumerator:
                 callback(self.progress, self.total, result)
 
             # Clear after each attempt
-            send_terminal_key("clear")
+            _fast_key("clear")
             time.sleep(0.2)
 
         self.running = False
+
+        # Return to TSO READY
+        _go_to_vtam()
+        _go_to_tso_ready()
+
         return self.results
 
     def stop(self):
@@ -421,6 +932,9 @@ class VTAMEnumerator:
     def enumerate(self, callback=None) -> list[dict]:
         """Run VTAM APPLID enumeration.
 
+        Navigates to the VTAM USS screen first (logging off TSO if needed),
+        enumerates APPLIDs, then returns to TSO READY.
+
         Args:
             callback: Optional callable(progress, total, result_dict).
 
@@ -430,6 +944,11 @@ class VTAMEnumerator:
         if not self._check_connected():
             return [{"applid": "*", "status": "error",
                      "message": "Not connected"}]
+
+        # Navigate to VTAM USS screen
+        if not _go_to_vtam():
+            return [{"applid": "*", "status": "error",
+                     "message": "Could not navigate to VTAM USS screen"}]
 
         self.results = []
         self.running = True
@@ -442,11 +961,20 @@ class VTAMEnumerator:
 
             self.progress = i + 1
 
+            # Make sure we're at VTAM USS for each attempt
+            state = _detect_state()
+            if state != STATE_VTAM_USS:
+                # We navigated away — try to get back
+                _clear_input_field()
+                _fast_key("string", "LOGOFF")
+                _fast_key("enter", wait=True)
+                time.sleep(1.5)
+
             # Send LOGON APPLID command
-            send_terminal_key("clear")
+            _fast_key("clear")
             time.sleep(0.3)
-            send_terminal_key("string", f"LOGON APPLID({applid})")
-            send_terminal_key("enter")
+            _fast_key("string", f"LOGON APPLID({applid})")
+            _fast_key("enter", wait=True)
             time.sleep(1.0)
 
             screen_text = read_screen()
@@ -463,11 +991,22 @@ class VTAMEnumerator:
             if callback:
                 callback(self.progress, self.total, result)
 
-            # Reset for next attempt
-            send_terminal_key("clear")
-            time.sleep(0.3)
+            # If valid, we may have entered the application — escape back
+            if status == "valid":
+                _fast_key("clear")
+                time.sleep(0.3)
+                _fast_key("string", "LOGOFF")
+                _fast_key("enter", wait=True)
+                time.sleep(1.5)
+            else:
+                _fast_key("clear")
+                time.sleep(0.3)
 
         self.running = False
+
+        # Return to TSO READY
+        _go_to_tso_ready()
+
         return self.results
 
     def stop(self):
@@ -922,8 +1461,8 @@ class ApplicationMapper:
             if not self.running:
                 break
 
-            send_terminal_key("string", option)
-            send_terminal_key("enter")
+            _fast_key("string", option)
+            _fast_key("enter", wait=True)
             time.sleep(0.8)
 
             new_screen = read_screen()
@@ -936,7 +1475,7 @@ class ApplicationMapper:
                     node["children"].append(child)
 
             # Navigate back
-            send_terminal_key("pf", "3")
+            _fast_key("pf", "3", wait=True)
             time.sleep(0.5)
 
             # Verify we're back
@@ -944,7 +1483,7 @@ class ApplicationMapper:
             back_hash = self._hash_screen(back_screen)
             if back_hash != screen_hash:
                 # Try clear as fallback
-                send_terminal_key("clear")
+                _fast_key("clear")
                 time.sleep(0.3)
                 break
 
@@ -1191,3 +1730,452 @@ code {{ background: rgba(255,255,255,0.06); padding: 2px 6px; }}
 <p style="color:#555;font-size:12px;">Generated by Mainframe AI Assistant - Recon Engine</p>
 </body>
 </html>"""
+
+
+# =============================================================================
+# SystemEnumerator — Live TSO-based system enumeration
+# Adapted from mainframed/pentesting/ENUM_REFACTORED
+# =============================================================================
+
+class SystemEnumerator:
+    """Run live TSO commands on a connected mainframe to enumerate
+    system configuration, RACF settings, APF libraries, datasets,
+    and user authority.
+
+    This is the core enumeration engine. It:
+      1. Detects the current terminal state
+      2. Logs into TSO automatically if not already logged in
+      3. Verifies READY prompt before EVERY command
+      4. Handles multi-screen output (*** MORE paging)
+      5. Recovers from mid-command errors (REENTER, timeouts)
+      6. Returns structured results with severity-tagged findings
+    """
+
+    # Commands to run and their categories
+    # Mirrors mainframed/Enumeration ENUM args: JOB, WHO, VERS, SEC, APF, PATH, TSOT, TSTA, CAT
+    ENUM_COMMANDS = [
+        # ── VERS ── Operating system / JES / TSO version info
+        {
+            "id": "vers_status",
+            "label": "VERS: System Status",
+            "command": "STATUS",
+            "description": "Current job name, TSO session info (ENUM VERS / JOB equivalent)",
+            "finding_patterns": {
+                "critical": [],
+                "warning": [],
+                "info": ["JOB", "TSO", "LOGON", "USER"],
+            },
+        },
+        {
+            "id": "vers_time",
+            "label": "VERS: System Time",
+            "command": "TIME",
+            "description": "CPU time, elapsed time, LPAR/system clock",
+            "finding_patterns": {
+                "critical": [],
+                "warning": [],
+                "info": ["TIME", "CPU", "SERVICE"],
+            },
+        },
+        # ── SEC ── Security manager (RACF on MVS 3.8j TK5)
+        {
+            "id": "sec_identity",
+            "label": "SEC: User Profile (LU)",
+            "command": "LU {userid}",
+            "description": "RACF LISTUSER — attributes, groups, special authority (ENUM SEC)",
+            "finding_patterns": {
+                "critical": ["SPECIAL", "OPERATIONS", "AUDITOR"],
+                "warning": ["REVOKED", "NO-PASSWORD", "EXPIRED"],
+                "info": ["DEFAULT-GROUP", "PASSDATE", "PASS-INTERVAL", "GROUP"],
+            },
+        },
+        {
+            "id": "sec_racf_dataset",
+            "label": "SEC: RACF Dataset",
+            "command": "LISTDS 'SYS1.RACF'",
+            "description": "Check RACF primary database dataset — UACC exposure is critical",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "LRECL", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        # ── WHO ── Logged-on users (LISTBC is the TSO equivalent on MVS 3.8j)
+        {
+            "id": "who_listbc",
+            "label": "WHO: Broadcast Messages / Active Users",
+            "command": "LISTBC",
+            "description": "LISTBC shows pending TSO broadcast messages — confirms active TSO sessions (ENUM WHO equivalent)",
+            "finding_patterns": {
+                "critical": [],
+                "warning": [],
+                "info": ["MESSAGE", "BROADCAST", "USER", "NOTIFY"],
+            },
+        },
+        # ── PATH ── Dataset concatenations (SYSPROC / SYSEXEC = executable search path)
+        {
+            "id": "path_listalc",
+            "label": "PATH: DD Concatenations (LISTALC)",
+            "command": "LISTALC STATUS",
+            "description": "All allocated DDNAMEs — SYSPROC/SYSEXEC are the TSO executable path (ENUM PATH)",
+            "finding_patterns": {
+                "critical": ["SYS1.CMDLIB", "SYS1.LINKLIB"],
+                "warning": ["USER.", "HERC"],
+                "info": ["STEPLIB", "SYSPROC", "SYSEXEC", "ISPLLIB", "SYSLIB"],
+            },
+        },
+        # ── APF ── APF-authorized libraries
+        {
+            "id": "apf_linklib",
+            "label": "APF: SYS1.LINKLIB",
+            "command": "LISTDS 'SYS1.LINKLIB' MEMBERS",
+            "description": "Primary APF-authorized load library — members are privileged programs (ENUM APF)",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND", "VSAM"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "LRECL", "BLKSIZE", "VOLUMES", "MEMBERS"],
+            },
+        },
+        {
+            "id": "apf_svclib",
+            "label": "APF: SYS1.SVCLIB",
+            "command": "LISTDS 'SYS1.SVCLIB'",
+            "description": "SVC library — unauthorized SVC replacement = privilege escalation path",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND", "VSAM"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "LRECL", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        {
+            "id": "apf_cmdlib",
+            "label": "APF: SYS1.CMDLIB",
+            "command": "LISTDS 'SYS1.CMDLIB'",
+            "description": "APF-authorized TSO command library — writable = inject privileged commands",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND", "VSAM"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "LRECL", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        {
+            "id": "apf_sysc_linklib",
+            "label": "APF: SYSC.LINKLIB",
+            "command": "LISTDS 'SYSC.LINKLIB'",
+            "description": "System catalog link library — alternate APF lib on some TK5 configs",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND", "VSAM"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "LRECL", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        {
+            "id": "apf_nucleus",
+            "label": "APF: SYS1.NUCLEUS",
+            "command": "LISTDS 'SYS1.NUCLEUS'",
+            "description": "MVS nucleus — contains IPL text and supervisor modules",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        # ── TSOT ── TSO auth tables (IKJEFTE2=AUTHCMD, IKJEFTE8=AUTHPGM)
+        {
+            "id": "tsot_authcmd",
+            "label": "TSOT: TSO Auth Cmd Table (IKJEFTE2)",
+            "command": "LISTDS 'SYS1.PARMLIB' MEMBERS",
+            "description": "PARMLIB members — IKJTSO00/IKJTSO1x define AUTHCMD/AUTHPGM tables (ENUM TSOT)",
+            "finding_patterns": {
+                "critical": ["IEAAPF"],
+                "warning": ["IKJTSO", "SMFPRM", "COMMND"],
+                "info": ["IEASYS", "MEMBERS", "LNKAUTH", "PAGESCIN"],
+            },
+        },
+        {
+            "id": "tsot_authpgm",
+            "label": "TSOT: TSO Authorized Programs",
+            "command": "LISTDS 'SYS1.UADS'",
+            "description": "User Attribute Dataset — TSO user definitions, authorized programs",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        # ── TSTA ── TESTAUTH authorization check
+        {
+            "id": "tsta_testauth",
+            "label": "TSTA: TESTAUTH Check",
+            "command": "TESTAUTH EXEC",
+            "description": "Test if current user can run TESTAUTH — confirms APF-auth status (ENUM TSTA)",
+            "finding_patterns": {
+                "critical": ["AUTHORIZED", "IKJ56711I"],
+                "warning": ["IKJ56712I"],
+                "info": ["TESTAUTH", "NOT AUTHORIZED"],
+            },
+        },
+        # ── CAT ── Master catalog
+        {
+            "id": "cat_listcat",
+            "label": "CAT: Master Catalog",
+            "command": "LISTCAT",
+            "description": "Master catalog root — alias and dataset namespace (ENUM CAT)",
+            "finding_patterns": {
+                "critical": [],
+                "warning": [],
+                "info": ["IN-CAT", "NONVSAM", "ALIAS", "CLUSTER", "USERCATALOG"],
+            },
+        },
+        {
+            "id": "cat_user",
+            "label": "CAT: User Datasets",
+            "command": "LISTCAT ENTRIES('{userid}.*')",
+            "description": "All datasets owned by this userid — reveals accessible data",
+            "finding_patterns": {
+                "critical": [],
+                "warning": [],
+                "info": ["NONVSAM", "ALIAS", "IN-CAT"],
+            },
+        },
+        # ── SVC ── SVC table (no direct TSO cmd on MVS 3.8j — check auth programs instead)
+        {
+            "id": "svc_proclib",
+            "label": "SVC: SYS1.PROCLIB Members",
+            "command": "LISTDS 'SYS1.PROCLIB' MEMBERS",
+            "description": "Started-task procedures — JES, VTAM, RACF started tasks (ENUM SVC context)",
+            "finding_patterns": {
+                "critical": [],
+                "warning": ["RACF", "BACKDOOR"],
+                "info": ["MEMBERS", "JES", "TSO", "VTAM", "NET", "TCPIP"],
+            },
+        },
+        # ── Extra APF-adjacent datasets worth checking ──
+        {
+            "id": "apf_lpalib",
+            "label": "APF: SYS1.LPALIB",
+            "command": "LISTDS 'SYS1.LPALIB'",
+            "description": "Link Pack Area library — modules loaded at IPL into shared memory",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "BLKSIZE", "VOLUMES"],
+            },
+        },
+        {
+            "id": "apf_linklist",
+            "label": "APF: SYS1.LNKLIB",
+            "command": "LISTDS 'SYS1.LNKLIB'",
+            "description": "Linklist library — searched for all programs without explicit DD",
+            "finding_patterns": {
+                "critical": ["NOT IN CATALOG", "NOT FOUND"],
+                "warning": ["WARNING"],
+                "info": ["DSORG", "RECFM", "BLKSIZE", "VOLUMES"],
+            },
+        },
+    ]
+
+    def __init__(self, userid: str = "HERC01", password: str = "CUL8TR",
+                 commands: list[str] | None = None):
+        self.userid = userid
+        self.password = password
+        self.selected_commands = commands  # None = all
+        self.results: list[dict] = []
+        self.running = False
+        self.progress = 0
+        self.total = 0
+
+    def _check_connected(self) -> bool:
+        return connection.connected and connection.emulator is not None
+
+    def _ensure_ready(self) -> bool:
+        """Verify we are at the TSO READY prompt. If not, navigate there.
+
+        Called before EVERY command to guarantee correct state.
+        Handles: not logged in, ISPF, MORE prompts, REENTER, unknown states.
+        Returns True if at READY, False if recovery failed.
+        """
+        _clear_screen_state()
+        state = _detect_state()
+
+        if state == STATE_TSO_READY:
+            return True
+
+        _log.info("Not at TSO READY (state=%s), navigating...", state)
+        return _go_to_tso_ready(self.userid, self.password)
+
+    def _run_tso_command(self, command: str) -> str:
+        """Send a TSO command and capture multi-screen output.
+
+        Handles:
+          - Clearing pending input before sending
+          - Multi-screen *** MORE paging (up to 20 pages)
+          - IKJ56703A REENTER prompts (invalid command recovery)
+          - Deduplicating repeated screen reads
+        """
+        # Clear input field before typing command
+        _clear_input_field()
+
+        # Send the command
+        _fast_key("string", command)
+        _fast_key("enter", wait=True)
+        time.sleep(1.5)
+
+        # Capture first screen
+        first_screen = read_screen()
+        output_parts = [first_screen]
+        seen_hashes = {hash(first_screen)}
+
+        # Check for REENTER prompt (command was rejected)
+        upper = first_screen.upper()
+        if "IKJ56703A" in upper:
+            _log.warning("Command rejected (REENTER): %s", command)
+            # Clear the error and return what we got
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.3)
+            _fast_key("clear")
+            time.sleep(0.3)
+            return first_screen
+
+        # Page through MORE indicators — up to 20 pages for large outputs
+        # (LISTDS MEMBERS, LISTCAT, etc. can produce many screens)
+        for page in range(20):
+            screen = read_screen()
+            screen_upper = screen.upper()
+
+            # Check for *** (MORE indicator) — common on TK5
+            has_more = "***" in screen and "READY" not in screen_upper
+            if not has_more:
+                break
+
+            _fast_key("enter", wait=True)
+            time.sleep(0.8)
+
+            new_screen = read_screen()
+            h = hash(new_screen)
+            if h not in seen_hashes:
+                seen_hashes.add(h)
+                output_parts.append(new_screen)
+
+        # Final screen may contain READY + last output lines
+        final = read_screen()
+        h = hash(final)
+        if h not in seen_hashes:
+            output_parts.append(final)
+
+        return "\n".join(output_parts)
+
+    def _analyze_output(self, output: str, patterns: dict) -> list[dict]:
+        """Analyze command output for security-relevant patterns."""
+        findings = []
+        upper = output.upper()
+
+        for severity, pattern_list in patterns.items():
+            for pattern in pattern_list:
+                if pattern in upper:
+                    for line in output.splitlines():
+                        if pattern in line.upper():
+                            findings.append({
+                                "severity": severity,
+                                "pattern": pattern,
+                                "line": line.strip()[:200],
+                            })
+                            break
+
+        return findings
+
+    def enumerate(self, callback=None) -> list[dict]:
+        """Run all selected enumeration commands on the live system.
+
+        For each command:
+          1. Verify TSO READY (auto-login if needed)
+          2. Send command and capture output
+          3. Analyze output for security findings
+          4. If command failed, record error and continue
+
+        Returns list of {id, label, command, output, findings, description} dicts.
+        """
+        if not self._check_connected():
+            return [{"id": "error", "label": "Error", "command": "",
+                     "output": "Not connected to mainframe. Use the Connect "
+                               "button to connect first.",
+                     "findings": [], "description": ""}]
+
+        # Initial login — navigate to TSO READY
+        if not self._ensure_ready():
+            return [{"id": "error", "label": "Error", "command": "",
+                     "output": "Could not log into TSO. Verify the mainframe "
+                               "is running and credentials are correct.\n\n"
+                               f"Userid: {self.userid}\n"
+                               f"Terminal state: {_detect_state()}",
+                     "findings": [], "description": ""}]
+
+        commands = self.ENUM_COMMANDS
+        if self.selected_commands:
+            commands = [c for c in commands if c["id"] in self.selected_commands]
+
+        self.results = []
+        self.running = True
+        self.progress = 0
+        self.total = len(commands)
+        consecutive_failures = 0
+
+        for i, cmd_def in enumerate(commands):
+            if not self.running:
+                break
+
+            self.progress = i + 1
+
+            # === KEY: verify READY before every command ===
+            if not self._ensure_ready():
+                _log.error("Lost TSO session before command %s", cmd_def["id"])
+                consecutive_failures += 1
+                result = {
+                    "id": cmd_def["id"],
+                    "label": cmd_def["label"],
+                    "command": cmd_def["command"],
+                    "description": cmd_def["description"],
+                    "output": f"[ERROR] Could not reach TSO READY prompt. "
+                              f"State: {_detect_state()}",
+                    "findings": [],
+                }
+                self.results.append(result)
+                if consecutive_failures >= 3:
+                    _log.error("3 consecutive failures — aborting enumeration")
+                    break
+                continue
+
+            consecutive_failures = 0
+
+            # Substitute userid if needed
+            command = cmd_def["command"].replace("{userid}", self.userid)
+
+            # Run the command
+            _log.info("Running: %s", command)
+            try:
+                output = self._run_tso_command(command)
+            except Exception as e:
+                _log.exception("Exception running %s", command)
+                output = f"[ERROR] Exception: {e}"
+
+            # Analyze for findings
+            findings = self._analyze_output(output, cmd_def["finding_patterns"])
+
+            result = {
+                "id": cmd_def["id"],
+                "label": cmd_def["label"],
+                "command": command,
+                "description": cmd_def["description"],
+                "output": output[:5000],
+                "findings": findings,
+            }
+            self.results.append(result)
+
+            if callback:
+                callback(self.progress, self.total, result)
+
+        self.running = False
+        return self.results
+
+    def stop(self):
+        self.running = False

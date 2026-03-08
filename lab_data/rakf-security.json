@@ -1,0 +1,57 @@
+{
+  "id": "rakf-security",
+  "title": "RAKF Security: Users, Profiles & Privilege Analysis",
+  "description": "Explore the RAKF security system on TK5. View users and profiles tables, understand access control, identify misconfigurations, and trace authorization decisions.",
+  "category": "security",
+  "difficulty": "intermediate",
+  "steps": [
+    {
+      "title": "RAKF Architecture Overview",
+      "screen": "RAKF — Resource Access Control Facility (v1.2.6)\n\nRAKF is a RACF-like SAF for MVS 3.8j.\nAll security calls (RACDEF, RACINIT, RACHECK)\nroute through ICHSFR00.\n\nTwo in-memory tables control everything:\n  SYS1.SECURE.CNTL(USERS)    — who can log on\n  SYS1.SECURE.CNTL(PROFILES) — what they can access\n\nTables are reloadable:\n  S RAKFUSER   — reload users\n  S RAKFPROF   — reload profiles",
+      "expected": "Understand that RAKF uses text-based tables, not a database like real RACF.",
+      "hint": "Unlike z/OS RACF, there are no ADDUSER/PERMIT commands. You edit text files directly."
+    },
+    {
+      "title": "Browse RAKF Users Table",
+      "screen": "TSO: BROWSE 'SYS1.SECURE.CNTL(USERS)'\n\nHERC01   ADMIN   *CUL8TR  Y\nHERC01   RAKFADM  CUL8TR  Y\nHERC02   USER     PASS4U  N\nIBMUSER  ADMIN   *SYS1    Y\nIBMUSER  RAKFADM *SYS1    Y\n\nFormat:\nUUUUUUUU GGGGGGGG PPPPPPPP O\nUsername Group    *Password Operations\n\n* = password never expires\nY = Operations authority (bypass most checks)\nN = normal user",
+      "expected": "Identify all users, their groups, passwords (cleartext!), and Operations flag.",
+      "hint": "Passwords are stored in CLEARTEXT. If SYS1.SECURE.CNTL is readable, all passwords are exposed."
+    },
+    {
+      "title": "Analyze Operations Authority",
+      "screen": "Users with Operations=Y:\n  HERC01  — ADMIN group, password CUL8TR\n  IBMUSER — ADMIN group, password SYS1\n\nUsers with Operations=N:\n  HERC02  — USER group, password PASS4U\n\nOperations=Y means:\n- Can access ANY resource unless EXPLICITLY denied\n- Closest equivalent to 'root' on Unix\n- Can be overridden by NONE access in profiles\n\nRisk: Too many Operations=Y users = no accountability",
+      "expected": "Understand that Operations authority is the highest privilege level in RAKF.",
+      "hint": "In a real audit, you'd flag every user with Operations=Y and verify they need it."
+    },
+    {
+      "title": "Browse RAKF Profiles Table",
+      "screen": "TSO: BROWSE 'SYS1.SECURE.CNTL(PROFILES)'\n\nDATASET *                                          READ\nDATASET *                                  ADMIN   ALTER\nDATASET *                                  STCGROUPALTER\nDATASET SYS1.SECURE.*                              NONE\nDATASET SYS1.SECURE.*                      ADMIN   NONE\nDATASET SYS1.SECURE.*                      RAKFADM UPDATE\nFACILITYDIAG8CMD                                   NONE\nFACILITYDIAG8CMD                           ADMIN   READ\nFACILITYSVC244                                     NONE\nFACILITYSVC244                             ADMIN   READ\n\nFormat: CLASS RESOURCE_NAME GROUP ACCESS",
+      "expected": "Trace the access decision chain: universal access first, then group overrides.",
+      "hint": "Blank group = universal access (UACC). Specific group entries override UACC."
+    },
+    {
+      "title": "UACC Misconfiguration Risk",
+      "screen": "Profile Analysis:\n\nDATASET *    (blank group)   READ\n\nThis means: EVERY authenticated user can READ\nevery dataset on the system by default.\n\nOnly specific profiles override this:\n  SYS1.SECURE.*  NONE  — blocks everyone\n  SYS1.DUPLEX    NONE  — blocks everyone\n  SYS1.PAGECSA   NONE  — blocks everyone\n\nBut: SYS1.PARMLIB, SYS1.PROCLIB, SYS1.LINKLIB\nhave NO specific profile = inherit UACC=READ\n\nAny user can READ system configuration!",
+      "expected": "Identify that the default UACC=READ on DATASET * is overly permissive.",
+      "hint": "On a production system, UACC should be NONE with explicit grants. TK5 is permissive for education."
+    },
+    {
+      "title": "Facility Class Protection",
+      "screen": "Facility profiles control system utilities:\n\nFACILITYSVC244     NONE  — blocks SVC 244 by default\nFACILITYSVC244     ADMIN READ — ADMIN can use SVC 244\n\nFACILITYRAKFADM    NONE  — blocks RAKF admin tools\nFACILITYRAKFADM    ADMIN NONE — even ADMIN is blocked!\nFACILITYRAKFADM    RAKFADM READ — only RAKFADM group\n\nSVC 244: Allows programs to enter supervisor state.\nWithout FACILITY protection, ANY user could escalate.\n\nRAKFADM: Controls who can reload security tables.\nNote: ADMIN group is explicitly DENIED (NONE).",
+      "expected": "Understand how FACILITY profiles protect system utilities from abuse.",
+      "hint": "SVC 244 is the classic MVS privilege escalation vector. RAKF's secured version checks FACILITY class."
+    },
+    {
+      "title": "RACF Indicator & Dataset Protection",
+      "screen": "RAKF only protects datasets with the RACF indicator set.\n\nTo check: CDSCB 'dataset' VOL(vol) UNIT(SYSDA) SHR\nTo set:   CDSCB 'dataset' VOL(vol) UNIT(SYSDA) SHR RACF\nTo clear: CDSCB 'dataset' VOL(vol) UNIT(SYSDA) SHR NORACF\n\nWARNING: Due to DADSM bugs in MVS 3.8j, an attacker\ncan manipulate an UNPROTECTED dataset to bypass RAKF\nchecks on PROTECTED datasets.\n\nFix: Set RACF indicator on ALL datasets, not just\nsensitive ones. Use VTOCSRAC/VSAMLRAC/VSAMSRAC\nutilities to bulk-set indicators.",
+      "expected": "Understand the RACF indicator requirement and the DADSM bypass vulnerability.",
+      "hint": "This is a real vulnerability in MVS 3.8j — unprotected datasets can be used to bypass protected ones."
+    },
+    {
+      "title": "Security Audit Summary",
+      "screen": "RAKF Security Audit — TK5 Default Configuration\n\n[HIGH] Cleartext passwords in SYS1.SECURE.CNTL\n[HIGH] UACC=READ on DATASET * (all datasets readable)\n[MED]  2 users with Operations=Y (HERC01, IBMUSER)\n[MED]  Default passwords (CUL8TR, SYS1, PASS4U)\n[LOW]  PROGRAM class not enforced (MVS 3.8j limitation)\n[INFO] SYS1.SECURE.* properly protected (UACC=NONE)\n[INFO] SVC 244 protected via FACILITY class\n[INFO] RAKFADM restricted to RAKFADM group only\n\nRemediation:\n1. Change default passwords\n2. Set UACC=NONE on DATASET *, grant READ explicitly\n3. Set RACF indicator on all datasets\n4. Install ZP60034 for userid propagation in batch",
+      "expected": "Produce a security assessment of the RAKF configuration.",
+      "hint": "This mirrors a real mainframe security audit — the same findings apply to production RACF systems."
+    }
+  ]
+}

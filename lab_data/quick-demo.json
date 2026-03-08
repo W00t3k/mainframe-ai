@@ -1,0 +1,45 @@
+{
+  "id": "quick-demo",
+  "title": "Quick Demo: ISPF Primary Menu",
+  "description": "30-second automated walkthrough. Connect, authenticate, reach ISPF.",
+  "category": "fundamentals",
+  "difficulty": "beginner",
+  "steps": [
+    {
+      "title": "Connect to TN3270",
+      "screen": "IBM 3270 Terminal Emulator\nConnecting to localhost:3270...\n\nEstablishing TN3270 session.",
+      "expected": "TN3270 session established to the mainframe.",
+      "hint": "Use the Terminal panel and enter localhost:3270 then click Connect."
+    },
+    {
+      "title": "VTAM Welcome Screen",
+      "screen": "WELCOME TO MVS/TK5\n\nHERCULES EMULATED MAINFRAME\n\nPress ENTER to continue.",
+      "expected": "The VTAM welcome screen is displayed.",
+      "hint": "Press Enter to proceed past the welcome screen."
+    },
+    {
+      "title": "TSO Logon",
+      "screen": "TSO/E LOGON\n\nUser ID  ===> HERC01\nPassword ===> ________\n\nProcedure ===> IKJACCNT\nAcct Nmbr ===> ACCT#\nSize     ===> 6144\nPerform  ===>",
+      "expected": "Enter credentials HERC01 / CUL8TR to authenticate.",
+      "hint": "Type HERC01 as the user ID and CUL8TR as the password."
+    },
+    {
+      "title": "ISPF Primary Menu",
+      "screen": "ISPF Primary Option Menu\nOption ===>\n\n0  Settings\n1  View\n2  Edit\n3  Utilities\n4  Foreground\n5  Batch\n6  Command\n7  Dialog Test\n9  IBM Products\nS  SDSF\n\nF1=Help  F3=Exit  F4=Return",
+      "expected": "ISPF Primary Menu is displayed — you are now inside the mainframe.",
+      "hint": "You have successfully navigated from VTAM through TSO into ISPF."
+    },
+    {
+      "title": "Explore SDSF",
+      "screen": "SDSF PRIMARY OPTION MENU\n\nDA  Active users\nI   Input queue\nO   Output queue\nH   Held output\nST  Status of jobs\nLOG System log\n\nCommand ===>",
+      "expected": "SDSF shows active jobs, queues, and system log.",
+      "hint": "Type S from the ISPF menu to enter SDSF."
+    },
+    {
+      "title": "Demo Complete",
+      "screen": "Demo walkthrough complete.\n\nYou have:\n- Connected via TN3270\n- Authenticated with RACF\n- Reached ISPF\n- Explored SDSF\n\nNext: Try the Security Labs.",
+      "expected": "Understand the full session stack from TN3270 to ISPF.",
+      "hint": "The full path is: TN3270 -> VTAM -> TSO -> RACF -> ISPF -> SDSF."
+    }
+  ]
+}

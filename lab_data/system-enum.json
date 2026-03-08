@@ -1,0 +1,69 @@
+{
+  "id": "system-enum",
+  "title": "System Enumeration: z/OS Pentest Recon",
+  "description": "Adapt the mainframed/ENUM_REFACTORED tool into a hands-on walkthrough. Enumerate APF libraries, RACF settings, SVC table, TSO authorization tables, logged-on users, and system version info. Based on Soldier of FORTRAN's z/OS Enumeration Pentesting Tool.",
+  "category": "recon",
+  "difficulty": "advanced",
+  "steps": [
+    {
+      "title": "Enumeration Overview",
+      "screen": "z/OS System Enumeration — Pentest Recon\n\nSource: mainframed/pentesting/ENUM_REFACTORED\nAuthor: Soldier of FORTRAN (Philip Young)\n\nThis lab adapts the REXX enumeration tool into\ninteractive TSO commands you can run on TK5.\n\nWhat we'll enumerate:\n  1. OS version, JES, VTAM info\n  2. Security manager (RACF) configuration\n  3. APF-authorized libraries\n  4. TSO authorization tables (AUTHCMD/AUTHPGM)\n  5. Logged-on users and address spaces\n  6. Dataset concatenations (SYSPROC/SYSEXEC)\n  7. Master catalog\n  8. TESTAUTH authorization check\n\nAll of this runs under a NORMAL user account.\nNo special privileges needed for most checks.\nThis is what an attacker sees after getting creds.",
+      "expected": "Understand what system information is available to a normal TSO user.",
+      "hint": "Most of this info is exposed through TSO commands and REXX STORAGE() function. The system assumes if you're logged on, you're authorized to see system configuration."
+    },
+    {
+      "title": "Step 1: Connect and Login",
+      "screen": " Logon ===> HERC01\n IKJ56710I ENTER CURRENT PASSWORD\n ********\n READY\n\n First recon step: identify yourself.\n TSO PROFILE shows your current settings.\n LISTUSER shows your RACF profile.",
+      "expected": "Log in as HERC01 and reach TSO READY.",
+      "hint": "HERC01 / CUL8TR — PF3 to exit ISPF if it auto-starts."
+    },
+    {
+      "title": "Step 2: OS Version and Environment",
+      "screen": " READY\n TIME\n IKJ56650I TIME-09:42:31 AM. CPU-00:00:01 SERVICE-2847 SESSION-00:02:14\n READY\n STATUS\n IKJ56650I JOB HERC01(TSU00025) EXECUTING\n READY\n\n From the ENUM tool, version info comes from:\n   CVT (Communications Vector Table) at address 16\n   Product name: MVS/SE2 (or z/OS on modern systems)\n   TSO version: from CVT+156 → TSVT\n   JES version: from CVT+296 → JESCT\n\n On TK5: MVS 3.8j SP 1.3.2, JES2, VTAM",
+      "expected": "Run TIME and STATUS to identify the current environment.",
+      "hint": "TIME shows CPU time and session duration. STATUS shows your job name and execution status. On z/OS, the REXX ENUM tool reads these from control blocks directly."
+    },
+    {
+      "title": "Step 3: RACF Security Manager Info",
+      "screen": " READY\n LU HERC01\n USER=HERC01  NAME=HERCULES ADMIN  OWNER=SYS1\n  DEFAULT-GROUP=SYS1 PASSDATE=25.054 PASS-INTERVAL=60\n  ATTRIBUTES=SPECIAL OPERATIONS\n  ...\n READY\n\n ENUM_REFACTORED checks:\n   CVT+992 → RCVT (RACF CVT)\n   First 4 bytes = 'RCVT' → RACF is the security manager\n   (Could also be 'RTSS' for Top Secret, or ACF2)\n\n RACF SETROPTS info from RCVT:\n   - PROTECT-ALL setting\n   - ERASE-ON-SCRATCH setting\n   - Password rules (min length, history, revoke count)\n   - Audit settings (what gets logged)\n   - UADS dataset location",
+      "expected": "Run LU (LISTUSER) to see your RACF profile. Note SPECIAL and OPERATIONS attributes.",
+      "hint": "LU HERC01 — SPECIAL means full RACF admin, OPERATIONS means access to all datasets. On TK5, HERC01 already has both. On a real system, finding a user with SPECIAL is the goal."
+    },
+    {
+      "title": "Step 4: APF Library Enumeration",
+      "screen": " READY\n LISTALC STATUS\n --DDNAME   DISP\n   STEPLIB\n            KEEP   SYS1.CMDLIB\n   SYSPROC\n            KEEP   SYSC.CMDPROC\n   SYSEXEC\n            KEEP   SYSC.EXEC\n   ISPLLIB\n            KEEP   ISP.V2R2M0.ISPLOAD\n READY\n\n APF libraries (from SYS1.PARMLIB(IEAAPF00)):\n   SYS1.LINKLIB  — system default, always APF\n   SYS1.SVCLIB   — SVC routines\n   SYS1.CMDLIB   — TSO commands\n   SYSC.LINKLIB  — community software\n\n The ENUM tool reads the APF table from:\n   CVT+484 → CVTAUTHL (static APF list)\n   or CVT+140 → ECVT → CSVT (dynamic APF list)\n\n Key question: Can we UPDATE any of these?",
+      "expected": "Run LISTALC STATUS to see your allocated datasets. Then check APF library access.",
+      "hint": "LISTALC STATUS shows what's allocated to your session. To see APF libraries, check SYS1.PARMLIB(IEAAPF00) — or on z/OS, use D PROG,APF operator command."
+    },
+    {
+      "title": "Step 5: Check APF Library Write Access",
+      "screen": " READY\n LISTDS 'SYSC.LINKLIB'\n SYSC.LINKLIB\n --RECFM-LRECL-BLKSIZE-DSORG\n   U     0     19069   PO\n --VOLUMES--\n   PUB001\n READY\n\n If HERC01 has UPDATE access to an APF library:\n   → APF privilege escalation is possible\n   → MODESET → supervisor state → ACEE modification\n   → SPECIAL + OPERATIONS = full system control\n\n On TK5 with OPERATIONS attribute:\n   HERC01 can write to almost everything.\n   This is finding #1 in every assessment.",
+      "expected": "Check if HERC01 can write to APF libraries like SYSC.LINKLIB.",
+      "hint": "LISTDS 'SYSC.LINKLIB' shows the dataset attributes. With OPERATIONS authority, HERC01 has implicit UPDATE access to all datasets — the APF privesc path is wide open."
+    },
+    {
+      "title": "Step 6: TSO Authorization Tables",
+      "screen": " The ENUM tool reads TSO auth tables from:\n   CVT → TSVT (+X'9C') → TPVT (+X'4C') → CTLT (+X'14')\n\n Tables found:\n   IKJEFTE2 / AUTHCMD  — authorized TSO commands\n     Commands that require APF authorization:\n     ACCOUNT, SYNC, CANCEL, SEND, TRANSMIT, ...\n\n   IKJEFTE8 / AUTHPGM  — authorized programs\n     Programs that can run APF-authorized:\n     IKJEFT01, IRXJCL, ISRPCP, ...\n\n   IKJEFTNS / NOTBKGND — not-in-background commands\n     Commands that cannot run in batch\n\n   IKJEFTAP / AUTHTSF  — authorized TSO service facility\n\n Why this matters:\n   If you can modify these tables (via SYS1.PARMLIB),\n   you can add your own programs to the auth list\n   → another path to authorized execution",
+      "expected": "Understand the TSO authorization tables and why they matter for privesc.",
+      "hint": "The PARMLIB members IKJTSOxx define which commands/programs get APF authorization. Modifying these is another privilege escalation vector — add your program to AUTHPGM."
+    },
+    {
+      "title": "Step 7: Logged-On Users",
+      "screen": " READY\n STATUS\n IKJ56650I JOB HERC01(TSU00025) EXECUTING\n READY\n\n The ENUM tool walks the ASVT (Address Space Vector Table)\n to find all active address spaces:\n\n   CVT+556 → ASVT+512 → ASVT entries\n   For each entry → ASCB → check type:\n     X'01' = TSO user\n     X'02' = Started task\n     X'03' = Batch job\n     X'04' = System\n\n On TK5 you'll see:\n   **** Started Tasks ****\n   JES2     - +MASTER+\n   VTAM     - +MASTER+\n   NET      - +MASTER+\n   TSO      - +MASTER+\n\n   **** TSO Users ****\n   HERC01   - HERC01\n\n Knowing who's logged on helps plan attack timing.",
+      "expected": "Understand how the ENUM tool discovers active users and address spaces.",
+      "hint": "On TK5, use STATUS to see your session. On z/OS, the ENUM REXX tool reads ASVT directly from memory using STORAGE() — no special authority needed."
+    },
+    {
+      "title": "Step 8: Master Catalog",
+      "screen": " READY\n LISTCAT\n IN-CAT --- SYS1.VMASTCAT\n   ...\n READY\n\n The ENUM tool reads the master catalog name from:\n   CVT+140 → ECVT+392 → IPA+224\n\n Master catalog: SYS1.VMASTCAT\n\n Why this matters:\n   The master catalog is the root of the dataset namespace\n   It contains aliases to user catalogs\n   Controlling the catalog = controlling dataset resolution\n   On TK5: SYS1.VMASTCAT on volume MVSRES\n\n LISTCAT shows all cataloged datasets.\n LISTCAT UCAT shows user catalogs.\n Each user catalog is a trust boundary.",
+      "expected": "Identify the master catalog and understand its role in dataset resolution.",
+      "hint": "LISTCAT without arguments shows entries in the master catalog. The master catalog is the root of trust for dataset name resolution — controlling it means controlling which datasets get found."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "System Enumeration Lab Complete\n\nWhat we enumerated (as a normal user):\n  - OS version and environment\n  - RACF security manager configuration\n  - APF-authorized libraries + write access\n  - TSO authorization tables (AUTHCMD/AUTHPGM)\n  - Active users and address spaces\n  - Dataset concatenations and search paths\n  - Master catalog and dataset namespace\n\nKey findings:\n  F1: Identity info exposed via LU command\n  F2: APF libraries visible + writable\n  F3: TSO auth tables reveal trusted programs\n  F4: All address spaces visible to any user\n  F5: Master catalog readable by default\n\nRemediation:\n  1. Restrict LU to self only (SETROPTS NOLIST)\n  2. Audit APF library access profiles\n  3. Protect SYS1.PARMLIB members\n  4. Enable SMF logging for sensitive commands\n  5. Review default RACF UACC settings\n\nSource: mainframed/pentesting/ENUM_REFACTORED\nCredits: Soldier of FORTRAN, Mark Zelden, CBT Tape",
+      "expected": "Review all enumeration findings and remediation steps.",
+      "hint": "The key takeaway: a normal user account exposes enormous amounts of system configuration. The mainframe security model assumes authenticated users are trusted — this assumption is the root cause."
+    }
+  ]
+}

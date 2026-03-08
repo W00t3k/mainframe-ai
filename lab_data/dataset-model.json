@@ -1,0 +1,51 @@
+{
+  "id": "dataset-model",
+  "title": "Dataset Model: PDS, Members & Catalogs",
+  "description": "Enumerate catalog entries and dataset attributes. Map the storage namespace and trust-sensitive datasets.",
+  "category": "fundamentals",
+  "difficulty": "beginner",
+  "steps": [
+    {
+      "title": "Enter ISPF Option 3 (Utilities)",
+      "screen": "ISPF Primary Option Menu\nOption ===> 3\n\n3  Utilities\n\nF1=Help  F3=Exit",
+      "expected": "Navigate to ISPF Utilities.",
+      "hint": "Type 3 at the ISPF Primary Menu and press Enter."
+    },
+    {
+      "title": "Dataset List (Option 4)",
+      "screen": "ISPF Utility Menu\nOption ===> 4\n\n1  Library\n2  Dataset\n3  Move/Copy\n4  DSLIST\n5  Reset\n6  Hardcopy\n\nF1=Help  F3=Exit",
+      "expected": "Access the dataset list utility.",
+      "hint": "Type 4 to list datasets by pattern."
+    },
+    {
+      "title": "List SYS1 Datasets",
+      "screen": "DSLIST - Data Sets Matching SYS1.*\n\nDataset Name          Org  Recfm Lrecl Blksz\nSYS1.BRODCAST         DA   FB    129   6450\nSYS1.LINKLIB          PO   U     0     32760\nSYS1.LPALIB           PO   U     0     32760\nSYS1.NUCLEUS          PO   U     0     32760\nSYS1.PARMLIB          PO   FB    80    3120\nSYS1.PROCLIB          PO   FB    80    3120\n\nCommand ===>",
+      "expected": "Identify critical system datasets: PARMLIB, PROCLIB, LINKLIB.",
+      "hint": "Enter SYS1.* as the dataset pattern to list system datasets."
+    },
+    {
+      "title": "Browse SYS1.PARMLIB",
+      "screen": "BROWSE  SYS1.PARMLIB\n\nName     Prompt   Size  Created\nIEASYS00          15   1999/01/01\nIEASYM00          8    1999/01/01\nSMFPRM00          22   1999/01/01\nIKJTSO00          31   1999/01/01\n\nCommand ===>",
+      "expected": "SYS1.PARMLIB is a PDS containing system configuration members.",
+      "hint": "PARMLIB controls IPL parameters, SMF settings, and TSO configuration."
+    },
+    {
+      "title": "View IEASYS00",
+      "screen": "BROWSE  SYS1.PARMLIB(IEASYS00)\n\nNUCLST=00,\nPAGE=(SYS1.PAGEDUMP),\nSMF=00,\nSYS=00,\nCONSOLE=00,\nCOMMND=00\n\n*** Bottom of Data ***",
+      "expected": "IEASYS00 defines the IPL system parameters.",
+      "hint": "This member is read at IPL time — modifying it changes system behavior."
+    },
+    {
+      "title": "Catalog Structure",
+      "screen": "ISMF - Interactive Storage Management Facility\n\nMaster Catalog: SYS1.MASTER.ICFCAT\nUser Catalogs:\n  UCAT.HERC01\n  UCAT.WORK\n\nAll datasets are cataloged here for name resolution.",
+      "expected": "Understand the ICF catalog hierarchy.",
+      "hint": "The master catalog is the root of all dataset name resolution on z/OS."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "Dataset Model Lab Complete\n\nKey concepts:\n- PDS = Partitioned Dataset (library with members)\n- PDSE = Extended PDS\n- SYS1.PARMLIB controls system config\n- ICF Catalog resolves all dataset names\n- Trust-sensitive: PARMLIB, PROCLIB, LINKLIB",
+      "expected": "Map the storage namespace and identify trust-sensitive datasets.",
+      "hint": "An attacker with write access to PARMLIB or PROCLIB owns the system."
+    }
+  ]
+}

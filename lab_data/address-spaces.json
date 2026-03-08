@@ -1,0 +1,45 @@
+{
+  "id": "address-spaces",
+  "title": "Address Space Anatomy",
+  "description": "Inspect address spaces, allocations, and job output. Destroy the process-centric mental model.",
+  "category": "fundamentals",
+  "difficulty": "intermediate",
+  "steps": [
+    {
+      "title": "What is an Address Space?",
+      "screen": "z/OS Address Space Model\n\nNot a process. Not a container.\nAn address space is a 64-bit virtual memory region.\n\nTypes:\n- Started Tasks (STC) — system daemons\n- TSO sessions — interactive users\n- Batch jobs — JES-scheduled work\n- System address spaces — JES2, RACF, VTAM\n\nAll share the same physical memory via DAT.",
+      "expected": "Understand that z/OS address spaces are not Unix processes.",
+      "hint": "Multiple address spaces can share memory via cross-memory services — a key attack surface."
+    },
+    {
+      "title": "Display Active Address Spaces",
+      "screen": "SDSF DA (Display Active)\n\nNJobname  StepName ProcStep  Status   ASID  CPU\n-JES2     JES2              ACTIVE   0001  12.3\n-RACF     RACF              ACTIVE   0002  0.1\n-VTAM     VTAM              ACTIVE   0003  0.4\n-TSO      IKJEFT01          ACTIVE   0045  0.2\n-HERC01   IKJEFT01          ACTIVE   0046  0.1\n\nCommand ===>",
+      "expected": "List all active address spaces including system tasks.",
+      "hint": "ASID (Address Space ID) is the unique identifier. JES2=0001, RACF=0002 are always present."
+    },
+    {
+      "title": "TSO Session Address Space",
+      "screen": "SDSF DA — Filter: HERC01\n\nNJobname  StepName  Status   ASID  CPU   SIO\n-HERC01   IKJEFT01  ACTIVE   0046  0.1   142\n\nThis is YOUR address space.\nIKJEFT01 = TSO terminal monitor program.\nAll your commands run here under your RACF identity.",
+      "expected": "Identify your own TSO address space.",
+      "hint": "Your identity (HERC01) is bound to this address space for its entire lifetime."
+    },
+    {
+      "title": "Cross-Memory Services",
+      "screen": "z/OS Cross-Memory Architecture\n\nAddress spaces can communicate via:\n- PC (Program Call) — authorized cross-memory calls\n- XMEM (Cross-Memory Attach) — shared data\n- SRB (Service Request Block) — async work units\n\nSecurity implication:\nA compromised address space with TRUSTED or PRIVILEGED\nattribute can inject work into ANY other address space.",
+      "expected": "Understand cross-memory as an attack vector.",
+      "hint": "This is how mainframe rootkits work — inject an SRB into a privileged address space."
+    },
+    {
+      "title": "Job Output Analysis",
+      "screen": "SDSF OUTPUT — HERC01\n\nNJobname  JobID    Owner  Prty  Queue  Dest\n-HERC01   TSU00046 HERC01 15    PRINT  LOCAL\n\nBrowse output:\nIKJ56455I HERC01 LOGGED ON AT 21:15:32\nIKJ56951I NO BROADCAST MESSAGES\nREADY\n\nSession log shows all commands executed.",
+      "expected": "TSO session output is logged and auditable via SMF.",
+      "hint": "SMF type 30 records capture all TSO command activity — this is the audit trail."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "Address Space Anatomy — Complete\n\nKey concepts:\n- Address spaces != Unix processes\n- Identity is bound at logon, persists for session lifetime\n- Cross-memory = lateral movement vector\n- TRUSTED/PRIVILEGED = supervisor-state escalation\n- SMF records all activity\n\nMental model shift:\nThink in terms of identity planes, not process trees.",
+      "expected": "Replace the process-centric mental model with the address space model.",
+      "hint": "On z/OS, the attack graph is identity-centric, not process-centric."
+    }
+  ]
+}

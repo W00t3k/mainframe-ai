@@ -17,6 +17,12 @@
             <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
         </a>
         <h1 class="header-title">Walkthrough</h1>
+        <nav style="display:flex; gap:4px; margin-left:auto;">
+            <a href="/walkthrough" style="padding:5px 14px; font-size:12px; font-family:'IBM Plex Mono',monospace; background:rgba(100,150,255,0.2); border:1px solid var(--ibm-cyan); color:#fff; border-radius:3px; text-decoration:none;">Walkthrough</a>
+            <a href="/tutorials" style="padding:5px 14px; font-size:12px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid var(--border-color); color:var(--ibm-cyan); border-radius:3px; text-decoration:none;">Tutorials</a>
+            <a href="/tutor" style="padding:5px 14px; font-size:12px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid var(--border-color); color:var(--ibm-cyan); border-radius:3px; text-decoration:none;">AI Tutor</a>
+            <a href="/labs" style="padding:5px 14px; font-size:12px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid var(--border-color); color:var(--ibm-cyan); border-radius:3px; text-decoration:none;">Labs</a>
+        </nav>
     </header>
 
     <!-- Connection bar -->
@@ -49,12 +55,13 @@
                     <option value="quick-demo">Quick Demo: Connect &amp; Login</option>
                     <option value="session-stack">Session Stack (VTAM &rarr; TSO &rarr; ISPF)</option>
                     <option value="deferred-exec">Deferred Execution (JCL &rarr; JES)</option>
-                    <!-- KICKS not installed - use Install KICKS/CICS button on main page first -->
-                    <!-- <option value="cics-kicks">CICS/KICKS: Transaction Processing</option> -->
+                    <option value="cics-kicks">CICS/KICKS: Transaction Processing</option>
                     <option value="system-inspection">System Inspection (Procedures &amp; Config)</option>
                     <option value="auth-model">Authorization Model (RACF)</option>
                     <option value="dataset-model">Dataset Model (PDS, Members &amp; Catalogs)</option>
                     <option value="address-spaces">Address Space Anatomy (What's Running)</option>
+                    <option value="jcl-injection">JCL Library Injection: Privilege Path</option>
+                    <option value="system-enum">System Enumeration: z/OS Pentest Recon</option>
                     <option value="reverse-shell">Z/OS Reverse Shell (Metasploit JCL)</option>
                 </select>
                 <span id="revshellInputs" style="display:none; margin-left:8px;">

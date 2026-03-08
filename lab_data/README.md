@@ -1,32 +1,32 @@
-# Lab Data (`lab_data/`)
+# `lab_data/` — Security Lab Definitions
 
-Security lab exercise definitions in JSON format.
+JSON files defining hands-on security lab exercises. Each lab is a sequence of guided steps with instructions, expected outcomes, and hints.
 
 ## Structure
 
-### `index.json`
-Lab index with metadata:
+`index.json` is the lab index — the `/api/labs` endpoint reads it to list available labs in the UI.
+
+Each lab file contains:
 ```json
 {
-  "labs": [
-    {"id": "lab-id", "title": "Lab Title", "steps": 5}
+  "id": "lab-id",
+  "title": "Lab Title",
+  "category": "security|fundamentals|recon",
+  "difficulty": "beginner|intermediate|advanced",
+  "description": "What you'll learn",
+  "steps": [
+    {
+      "title": "Step Name",
+      "instruction": "What to type or do",
+      "expected": "What should appear on screen",
+      "hint": "Recovery tip if stuck"
+    }
   ]
 }
 ```
 
-### Individual Lab Files
-Each lab is a JSON file (e.g., `batch-basics.json`) containing:
-- `title` - Lab display name
-- `description` - Lab overview
-- `steps` - Array of step objects with instructions
+## Adding a Lab
 
-## Adding New Labs
-
-1. Create a new JSON file in this directory
-2. Add entry to `index.json`
-3. Define steps with `title`, `instruction`, `expected`, and `hint` fields
-
-## Available Labs
-
-- `batch-basics.json` - JCL and batch job execution
-- `session-stack.json` - VTAM → TSO → ISPF navigation
+1. Create `my-lab.json` following the schema above
+2. Add an entry to `index.json`
+3. The lab appears automatically in the Labs page and Tutor sidebar

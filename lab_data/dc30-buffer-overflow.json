@@ -1,0 +1,47 @@
+{
+  "id": "dc30-buffer-overflow",
+  "title": "DC30 Labs 2–4: Buffer Overflow on MVS",
+  "description": "Overflow the HELLO program's 150-byte gets() buffer, find the return address in a dump, use De Bruijn patterns to pinpoint the offset, and control execution to print a WTO message. Classic stack overflow — on a mainframe from 1978.",
+  "category": "security",
+  "difficulty": "intermediate",
+  "source": "DC30_Workshop / DEFCON 30",
+  "walkthrough": true,
+  "steps": [
+    {
+      "title": "The Vulnerable Program",
+      "screen": "/* hello.c — deliberately vulnerable */\n#include <string.h>\n#include <stdlib.h>\n#include <stdio.h>\n\nint main(int argc, char **argv) {\n   char buff[150];          /* fixed-size stack buffer */\n   printf(\"What is your handle?\\n\");\n   gets(buff);              /* NO BOUNDS CHECK — classic vuln */\n   printf(\"Wake up, %s\\n\", buff);\n   return 0;\n}\n\nThe overflow:\n  buff is 150 bytes on the stack\n  gets() reads until newline — no limit\n  Feed > 150 bytes → overwrite return address\n  Control where the function returns → RCE",
+      "expected": "Understand why gets() is dangerous and how a stack overflow works.",
+      "hint": "gets() is banned in modern C (removed in C11). On MVS/370 the stack is in the same address space as program code — overflowing it overwrites the return address stored by STM (Store Multiple Registers)."
+    },
+    {
+      "title": "Lab 2: View the Overflow File in Hex",
+      "screen": " ISPF EDIT - HERC01.OVERFLOW(LGBT400)\n Command ===> HEX ON\n\n 000001 D3C7C2E3D3C7C2E3D3C7C2E3D3C7C2E3  LGTBLGTBLGTBLGTB\n        D3C7C2E3D3C7C2E3D3C7C2E3D3C7C2E3\n 000002 D3C7C2E3D3C7C2E3D3C7C2E3D3C7C2E3  LGTBLGTBLGTBLGTB\n        ...\n\n This record is 400 bytes wide — 250 bytes past the buffer.\n LGTB in EBCDIC = D3 C7 C2 E3\n\n Submit LAB02 — it will ABEND with SYSTEM 0C6 (data exception)",
+      "expected": "See the overflow input in hex. Submit LAB02 and get an 0C6 abend.",
+      "hint": "0C6 = Data Exception abend. The program tried to execute our overflow data as an instruction. That's good — it means we overwrote the return address. Now we need to find WHERE in the 400-byte buffer the return address sits."
+    },
+    {
+      "title": "Lab 2: Read the Dump",
+      "screen": " ISPF BROWSE - HERC01.DUMP001\n Command ===> F D3C7C2E3\n\n 0B40AC  D3C7C2E3 D3C7C2E3 D3C7C2E3 D3C7C2E3  LGTBLGTBLGTBLGTB\n 0B40BC  D3C7C2E3 D3C7C2E3 D3C7C2E3 D3C7C2E3  LGTBLGTBLGTBLGTB\n\n The LGTB pattern starts at address 0B40AC.\n\n Registers at time of abend (look for RG in dump):\n   R14 (return address) = D3C7C2E3  ← overwritten with LGTB!\n\n This tells us: the return address is somewhere in our buffer.",
+      "expected": "Find the LGTB pattern in the dump and note the memory address (e.g. 0B40AC).",
+      "hint": "Use F D3C7C2E3 to search for LGTB in EBCDIC hex. The address in the left column is where our buffer starts in memory. R14 holds the return address — if it shows D3C7C2E3 we've confirmed the overflow."
+    },
+    {
+      "title": "Lab 3: De Bruijn Pattern — Find the Exact Offset",
+      "screen": " TSO READY\n CALL 'HERC01.LOAD(DEBRUIJN)' '400'\n\n AABACADAEAFAGAHAIAJAKALAMANAOA...\n\n A De Bruijn sequence has the property that every\n N-byte subsequence appears exactly once.\n\n Feed this to HELLO instead of LGTB:\n  → The return address will contain a unique 4-byte pattern\n  → Look up that pattern → know the exact byte offset\n\n Edit HERC01.JCLLIB(LAB03) to use DEBRUIJN output as STDIN\n Submit → get the abend → read R14 from the dump\n Look up the 4 bytes in the De Bruijn sequence → offset found",
+      "expected": "Run DEBRUIJN REXX, feed output to HELLO via LAB03 JCL, find the exact offset of the return address.",
+      "hint": "The DEBRUIJN.rex script is in HERC01.EXEC (or SYS2.EXEC). Run it with the length of your overflow (400). The 4 bytes in R14 after the abend tell you exactly which byte in the buffer overwrites the return address."
+    },
+    {
+      "title": "Lab 4: Control Execution — WTO Shellcode",
+      "screen": " ISPF EDIT - HERC01.OVERFLOW(WTO400)\n Command ===> HEX ON\n\n Columns 257-328 contain shellcode instead of LGTB:\n  47F0xxxx  BC 15,<address>   Branch to shellcode\n  ...\n  WTO 'H4CK3D TH3 M41NFR4M3'  ← our payload\n\n Submit HERC01.JCLLIB(LAB04)\n\n JES2 JOBLOG output:\n  +H4CK3D TH3 M41NFR4M3\n\n MAX COND CODE 0000",
+      "expected": "Submit LAB04 and see your WTO message in the job log.",
+      "hint": "WTO (Write To Operator) is an MVS macro that writes a message to the system console and job log. Our shellcode just calls WTO — proof of code execution. The + prefix in the job log means it's a WTO message."
+    },
+    {
+      "title": "What Just Happened",
+      "screen": "Buffer Overflow Summary — MVS Edition\n\n1. HELLO has a 150-byte stack buffer\n2. gets() reads 400 bytes from STDIN (our overflow file)\n3. Bytes 1-150: fill the buffer\n4. Bytes 151-256: overwrite saved registers on the stack\n5. Bytes 257-260: overwrite R14 (return address)\n6. We set R14 to point to our shellcode (bytes 261+)\n7. When main() returns: BR 14 → jumps to our code\n8. Our code executes WTO → message in job log\n\nKey differences from x86:\n  - No NX/DEP, no ASLR, no stack canaries on MVS 3.8j\n  - EBCDIC encoding — shellcode bytes must be valid EBCDIC\n  - Return via BR 14 (not RET instruction)\n  - Registers saved/restored with STM/LM macros",
+      "expected": "Understand the complete overflow chain on MVS.",
+      "hint": "Modern z/OS has ASLR and execute protection, but many legacy applications still use gets() or equivalent. The EBCDIC encoding constraint makes shellcode harder — that's what the e2alookup.py and findbytes.py tools are for."
+    }
+  ]
+}

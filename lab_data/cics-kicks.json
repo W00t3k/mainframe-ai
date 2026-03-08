@@ -1,0 +1,57 @@
+{
+  "id": "cics-kicks",
+  "title": "CICS/KICKS: Transaction Processing",
+  "description": "Map the transaction execution plane. Install and run CICS transactions on the TK5 lab.",
+  "category": "security",
+  "difficulty": "advanced",
+  "steps": [
+    {
+      "title": "What is CICS?",
+      "screen": "CICS — Customer Information Control System\n\nCICS is a transaction processing monitor.\nIt manages:\n- Short-lived, interactive transactions\n- Shared resources (files, queues, programs)\n- Terminal sessions (3270 and web)\n\nKICKS = CICS-compatible subsystem for MVS/TK5\nRuns CICS transactions without full CICS license.",
+      "expected": "Understand CICS as a transaction execution plane separate from TSO.",
+      "hint": "CICS transactions run under a SINGLE address space shared by ALL users — a key security boundary."
+    },
+    {
+      "title": "Connect to CICS/KICKS",
+      "screen": "VTAM USS Screen\n\nAPPLID ===> CICS2\n\nConnecting to CICS2 application...\n\nKICKS/MVS  Version 3.0\nCopyright (C) 2009-2023 The KICKS Project\n\nClear screen or enter transaction ID.",
+      "expected": "Connect to the CICS/KICKS subsystem via VTAM APPLID.",
+      "hint": "Type CICS2 at the VTAM USS screen and press Enter to connect."
+    },
+    {
+      "title": "Run CESN (Signon)",
+      "screen": "KICKS TRANSACTION: CESN\n\nSIGNON TO CICS\n\nUserid   ===> CICSUSER\nPassword ===> ________\n\nKICKS Security: RACF-integrated\nAll transactions run under the signed-on identity.",
+      "expected": "CICS signon binds a RACF identity to the CICS terminal session.",
+      "hint": "CESN = CICS signon transaction. Identity is bound here for all subsequent transactions."
+    },
+    {
+      "title": "Run CEMT (Master Terminal)",
+      "screen": "KICKS TRANSACTION: CEMT\n\nSTATUS SYSTEM\n  Akpfreq(0)  Cicsstatus(Open)  Cmdprot(Enabled)\n  Dtrpgm(Dfhdtrp)  Dtrtran(Cdtf)\n  Maxtasks(10)  Mrobatch(1)\n  Progautoexit(Dfhpgadx)\n  Runaway(0)  Scandelay(0)\n\nCommand ===>",
+      "expected": "CEMT shows the CICS system status and configuration.",
+      "hint": "CEMT requires CICS SPECIAL authority — equivalent to RACF SPECIAL within CICS."
+    },
+    {
+      "title": "Transaction Security Model",
+      "screen": "CICS Transaction Security\n\nEach transaction has:\n- Transaction ID (4 chars)\n- Transaction security key (1-64)\n- User security key requirement\n\nRACF CICS resource classes:\n- TCICSTRN: transaction authorization\n- GCICSTRN: group transaction auth\n\nGap: If RACF CICS classes are inactive,\nANY signed-on user can run ANY transaction.",
+      "expected": "Understand the CICS transaction authorization model.",
+      "hint": "Check if TCICSTRN class is active: SETROPTS LIST — if not, all transactions are open."
+    },
+    {
+      "title": "Enumerate Transactions",
+      "screen": "KICKS TRANSACTION: CEMT I TRAN\n\nTRAN(CEDA)  STA(ENABLED)  USE(0)  PRI(1)\nTRAN(CECI)  STA(ENABLED)  USE(0)  PRI(1)\nTRAN(CEMT)  STA(ENABLED)  USE(0)  PRI(1)\nTRAN(CESF)  STA(ENABLED)  USE(0)  PRI(1)\nTRAN(CESN)  STA(ENABLED)  USE(0)  PRI(1)\n\nCEDA = resource definition (admin)\nCECI = command interpreter (dangerous)",
+      "expected": "List all enabled CICS transactions.",
+      "hint": "CECI (Command Interpreter) allows arbitrary CICS API calls — highest risk transaction."
+    },
+    {
+      "title": "CECI — Command Interpreter",
+      "screen": "KICKS TRANSACTION: CECI\n\nEXEC CICS COMMAND INTERPRETER\n\nEnter command:\nEXEC CICS WRITEQ TS QUEUE('ATTACK') FROM('PAYLOAD') LENGTH(7)\n\nRESPONSE: NORMAL\n\nCECI allows direct CICS API execution.\nNo JCL required. Immediate execution.\nRuns under current user's identity.",
+      "expected": "CECI enables direct CICS API calls — a powerful attack tool.",
+      "hint": "CECI + CICS FILE WRITE = direct dataset modification without ISPF or JCL."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "CICS/KICKS Lab Complete\n\nKey findings:\n- CICS is a shared execution plane\n- All users share ONE address space\n- CECI = arbitrary API execution\n- CEDA = resource definition (admin)\n- TCICSTRN class controls transaction auth\n\nAttack path:\n1. Connect to CICS via VTAM\n2. Signon with any valid RACF user\n3. Run CECI if TCICSTRN inactive\n4. Read/write datasets directly",
+      "expected": "Map the CICS transaction execution plane and its attack surface.",
+      "hint": "CICS is often the most exposed attack surface on a mainframe — it faces the network."
+    }
+  ]
+}

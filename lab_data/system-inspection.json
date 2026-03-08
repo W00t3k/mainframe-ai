@@ -1,0 +1,51 @@
+{
+  "id": "system-inspection",
+  "title": "System Inspection: Configuration & Procedures",
+  "description": "Inspect system datasets, PROCLIB, and configuration. Map what a normal user can see.",
+  "category": "recon",
+  "difficulty": "intermediate",
+  "steps": [
+    {
+      "title": "Navigate to ISPF Option 3.4",
+      "screen": "ISPF Primary Option Menu\nOption ===> 3\n\nISPF Utility Menu\nOption ===> 4\n\nDSLIST - Enter Dataset Pattern\nDsname Level ===> SYS1",
+      "expected": "Access the dataset list for SYS1 system datasets.",
+      "hint": "Type 3 at ISPF, then 4 for DSLIST, then enter SYS1 as the pattern."
+    },
+    {
+      "title": "Inspect SYS1.PROCLIB",
+      "screen": "BROWSE  SYS1.PROCLIB\n\nName     Prompt   Size  Created\nCOBOL             12   1999/01/01\nFORTRAN           8    1999/01/01\nIEFBR14           2    1999/01/01\nJES2              45   1999/01/01\nRACF              31   1999/01/01\nSTARTED           18   1999/01/01\nTSO               22   1999/01/01\n\nCommand ===>",
+      "expected": "PROCLIB contains JCL procedures for started tasks and batch jobs.",
+      "hint": "Write access to PROCLIB = ability to modify how started tasks execute."
+    },
+    {
+      "title": "View JES2 Proc",
+      "screen": "BROWSE  SYS1.PROCLIB(JES2)\n\n//JES2     PROC\n//JES2     EXEC PGM=HASJES20,DPRTY=(15,15)\n//HASPPARM DD   DSN=SYS1.PARMLIB(JES2PARM),DISP=SHR\n//HASPINDX DD   DSN=SYS1.HASPACE,DISP=SHR\n\n*** Bottom of Data ***",
+      "expected": "JES2 procedure defines how the job entry subsystem starts.",
+      "hint": "Modifying this proc or its PARMLIB member affects ALL job processing on the system."
+    },
+    {
+      "title": "Check LINKLIST",
+      "screen": "TSO COMMAND: D LINKLIST\n\nCSF031I  14.22.35  LINKLIST DISPLAY  001\nLINKLIST SET: LNKLST00\n  SYS1.LINKLIB\n  SYS1.MIGLIB\n  SYS1.CSSLIB\n  CEE.SCEERUN\n  CEE.SCEERUN2\n\nAny program in these libraries runs without APF authorization check.",
+      "expected": "LINKLIST libraries are searched for programs without explicit DSN specification.",
+      "hint": "Injecting a program into a LINKLIST library = arbitrary code execution for any user."
+    },
+    {
+      "title": "APF List",
+      "screen": "TSO COMMAND: D PROG,APF\n\nCSF028I  14.22.40  APF LIST  001\nFORMAT=DYNAMIC\nVOLUME=MVSRES  DSNAME=SYS1.LINKLIB\nVOLUME=MVSRES  DSNAME=SYS1.SVCLIB\nVOLUME=MVSRES  DSNAME=SYS1.LPALIB\n\nAPF-authorized libraries can issue privileged SVCs.",
+      "expected": "APF-authorized libraries can run privileged code.",
+      "hint": "Write access to any APF library = privilege escalation to supervisor state."
+    },
+    {
+      "title": "Inspection Summary",
+      "screen": "System Inspection Complete\n\nHigh-value targets identified:\n- SYS1.PARMLIB  (system config)\n- SYS1.PROCLIB  (started task JCL)\n- SYS1.LINKLIB  (APF + LINKLIST)\n- SYS1.LPALIB   (link pack area)\n\nAny write access to these = system compromise.\nMap RACF profiles for each before proceeding.",
+      "expected": "Identify the highest-value datasets for privilege escalation.",
+      "hint": "These four datasets are the crown jewels of z/OS security."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "Lab: System Inspection Complete\n\nKey takeaways:\n1. PROCLIB controls how started tasks run\n2. LINKLIB/LPALIB = APF-authorized code paths\n3. PARMLIB = system behavior at IPL\n4. Normal users can READ most of these\n5. WRITE access = full system control\n\nNext: RACF Authorization Plane Analysis",
+      "expected": "Understand the attack surface of z/OS system datasets.",
+      "hint": "The z/OS attack surface is defined by who can write to these four dataset groups."
+    }
+  ]
+}

@@ -27,6 +27,9 @@
         <button class="sc-tab" data-tab="fingerprint">[F] FINGERPRINT</button>
         <button class="sc-tab" data-tab="ebcdic">[E] EBCDIC</button>
         <button class="sc-tab" data-tab="captures">[S] CAPTURES</button>
+        <button class="sc-tab" data-tab="cics">[C] CICS ENUM</button>
+        <button class="sc-tab" data-tab="tpx">[T] TPX ENUM</button>
+        <button class="sc-tab" data-tab="discover">[D] DISCOVER</button>
     </div>
 
     <!-- ══════ SCAN TAB ══════ -->
@@ -127,6 +130,243 @@
         </div>
         <div class="results" id="captureResults">
             <div class="empty">Saved banners, screen captures, and fingerprint results</div>
+        </div>
+    </div>
+
+    <!-- Capture Viewer Modal -->
+    <div id="capModal" onclick="if(event.target===this)closeCapModal()" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.85);padding:2rem;overflow-y:auto;">
+        <div style="max-width:820px;margin:0 auto;background:#0a0e14;border:1px solid #1a2a3a;border-radius:6px;padding:0;">
+            <div id="capModalHeader" style="display:flex;justify-content:space-between;align-items:center;padding:12px 16px;border-bottom:1px solid #1a2a3a;background:#101820;border-radius:6px 6px 0 0;">
+                <span id="capModalTitle" style="font-family:'IBM Plex Mono',monospace;font-size:13px;font-weight:600;color:#4af;"></span>
+                <div style="display:flex;gap:6px;">
+                    <button class="btn btn-sm" onclick="copyCapModal()" style="font-size:11px;">Copy</button>
+                    <button class="btn btn-sm" onclick="downloadCapModal()" style="font-size:11px;">Download</button>
+                    <button class="btn btn-sm btn-red" onclick="closeCapModal()" style="font-size:11px;">Close</button>
+                </div>
+            </div>
+            <pre id="capModalBody" style="padding:16px 20px;font-family:'IBM Plex Mono',monospace;font-size:12px;line-height:1.6;color:#00ff41;white-space:pre-wrap;word-break:break-all;margin:0;max-height:70vh;overflow-y:auto;"></pre>
+        </div>
+    </div>
+    <!-- ══════ CICS ENUM TAB ══════ -->
+    <div class="sc-panel" id="tab-cics">
+        <div class="scan-form">
+            <p style="font-size:11px;color:#888;margin-bottom:0.75rem;">
+                <strong style="color:#4af;">cics-enum.nse</strong> — CICS Transaction ID enumerator by
+                <a href="https://github.com/mainframed/nmap-scripts" target="_blank" style="color:#4af;">Soldier of Fortran</a>.
+                Uses nmap's TN3270 library to brute-force CICS transaction IDs (4-char max).
+                Detects valid, auth-required, disabled, and abended transactions.
+            </p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Target (IP/hostname)</label>
+                    <input type="text" id="cicsTarget" value="localhost" placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label>Port</label>
+                    <input type="text" id="cicsPort" value="3270" placeholder="23,3270">
+                </div>
+                <div class="form-group">
+                    <label>CICS Commands</label>
+                    <input type="text" id="cicsCommands" placeholder="cics" value="cics" title="Semi-colon separated commands to reach CICS (e.g. 'exit;logon applid(cics42)')">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Auth Username (optional)</label>
+                    <input type="text" id="cicsUser" placeholder="Leave blank for unauth enum">
+                </div>
+                <div class="form-group">
+                    <label>Auth Password (optional)</label>
+                    <input type="password" id="cicsPass" placeholder="Leave blank for unauth enum">
+                </div>
+                <div class="form-group">
+                    <label>Stealth</label>
+                    <select id="cicsStealth" style="background:#0a0e14;color:#c6cdd5;border:1px solid #2a3a5a;padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                        <option value="polite" selected>Polite (T2)</option>
+                        <option value="normal">Normal (T3)</option>
+                        <option value="aggressive">Aggressive (T4)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" id="cicsEnumBtn" onclick="startCicsEnum()">Start CICS Enumeration</button>
+        </div>
+        <div class="results" id="cicsResults">
+            <div class="empty">
+                Enumerate CICS transaction IDs on a target mainframe.<br><br>
+                <strong>How it works:</strong> Connects via TN3270, navigates to CICS, then tries each
+                4-character transaction ID from the built-in CICS TS 6.3 list (~280 IDs).<br>
+                <strong>Results:</strong> Valid IDs, IDs requiring auth, disabled IDs, and abended IDs.<br>
+                <strong>Requires:</strong> nmap with tn3270 NSE library installed.
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════ TPX ENUM TAB ══════ -->
+    <div class="sc-panel" id="tab-tpx">
+        <div class="scan-form">
+            <p style="font-size:11px;color:#888;margin-bottom:0.75rem;">
+                <strong style="color:#4af;">tpx-enum.nse</strong> — TPX User ID enumerator by
+                <a href="https://github.com/mainframed/nmap-scripts" target="_blank" style="color:#4af;">Soldier of Fortran</a>.
+                TPX logon panel reveals valid/invalid userids via <code style="color:#0f0;">IKJ56420I</code> message.
+                User IDs: max 7 chars, alphanumeric + @#$, cannot start with a number.
+            </p>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Target (IP/hostname)</label>
+                    <input type="text" id="tpxTarget" value="localhost" placeholder="192.168.1.100">
+                </div>
+                <div class="form-group">
+                    <label>Port</label>
+                    <input type="text" id="tpxPort" value="23" placeholder="23,992,3270">
+                </div>
+                <div class="form-group">
+                    <label>TPX Commands</label>
+                    <input type="text" id="tpxCommands" placeholder="tpx" value="tpx" title="Semi-colon separated commands to reach TPX (e.g. 'logon applid(tpx)')">
+                </div>
+                <div class="form-group">
+                    <label>Stealth</label>
+                    <select id="tpxStealth" style="background:#0a0e14;color:#c6cdd5;border:1px solid #2a3a5a;padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                        <option value="polite" selected>Polite (T2)</option>
+                        <option value="normal">Normal (T3)</option>
+                        <option value="aggressive">Aggressive (T4)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn" id="tpxEnumBtn" onclick="startTpxEnum()">Start TPX Enumeration</button>
+        </div>
+        <div class="results" id="tpxResults">
+            <div class="empty">
+                Enumerate valid TPX user IDs on a target mainframe.<br><br>
+                <strong>How it works:</strong> Connects via TN3270, navigates to TPX logon panel, then
+                tries user IDs from the wordlist. TPX reveals valid vs invalid via error messages.<br>
+                <strong>Default users tested:</strong> TPXADMIN, TPXOPER, NVIADMIN, STXADMIN, STXOPER + nmap wordlist.<br>
+                <strong>Detects:</strong> Security product (RACF, ACF2, TopSecret) from response patterns.<br>
+                <strong>Requires:</strong> nmap with tn3270 NSE library installed.
+            </div>
+        </div>
+    </div>
+
+    <!-- ══════ DISCOVER TAB ══════ -->
+    <div class="sc-panel" id="tab-discover">
+        <!-- Stats dashboard -->
+        <div id="discoverStats" style="display:flex;gap:0.75rem;margin-bottom:1rem;flex-wrap:wrap;"></div>
+
+        <!-- Source selector -->
+        <div class="scan-form">
+            <div class="form-row" style="align-items:flex-end;gap:0.5rem;flex-wrap:wrap;">
+                <div class="form-group">
+                    <label>Source</label>
+                    <select id="discSrc" onchange="toggleDiscoverInputs()" style="background:#0a0e14;color:#c6cdd5;border:1px solid #2a3a5a;padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                        <option value="shodan">Shodan API</option>
+                        <option value="nmap">nmap (targeted)</option>
+                        <option value="masscan">masscan (sweep)</option>
+                        <option value="probe">Probe Single Host</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Stealth</label>
+                    <select id="discStealth" onchange="updateStealthInfo()" style="background:#0a0e14;color:#c6cdd5;border:1px solid #2a3a5a;padding:6px 8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                        <option value="paranoid">Paranoid (T0)</option>
+                        <option value="sneaky">Sneaky (T1)</option>
+                        <option value="polite" selected>Polite (T2)</option>
+                        <option value="normal">Normal (T3)</option>
+                        <option value="aggressive">Aggressive (T4)</option>
+                        <option value="insane">Insane (T5)</option>
+                    </select>
+                </div>
+
+                <!-- Shodan inputs -->
+                <div class="form-group disc-shodan">
+                    <label>Shodan API Key</label>
+                    <input type="password" id="discShodanKey" placeholder="Your Shodan API key" style="width:220px;">
+                </div>
+                <div class="form-group disc-shodan">
+                    <label>Query</label>
+                    <input type="text" id="discShodanQuery" value='port:23,3270,2323 product:"TN3270"' style="width:380px;">
+                </div>
+                <div class="form-group disc-shodan">
+                    <label>Max Results</label>
+                    <input type="number" id="discShodanMax" value="500" min="1" max="10000" style="width:80px;">
+                </div>
+
+                <!-- nmap / masscan inputs -->
+                <div class="form-group disc-nmap disc-masscan" style="display:none;">
+                    <label>Targets (IP/CIDR)</label>
+                    <input type="text" id="discTargets" value="0.0.0.0/0" style="width:220px;">
+                </div>
+                <div class="form-group disc-nmap disc-masscan" style="display:none;">
+                    <label>Ports</label>
+                    <input type="text" id="discPorts" value="23,992,2323,3270,3271,3272,3273,3274,3275" style="width:280px;">
+                </div>
+                <div class="form-group disc-masscan" style="display:none;">
+                    <label>Rate (pps)</label>
+                    <input type="number" id="discRate" value="10000" min="100" max="100000" style="width:100px;">
+                </div>
+
+                <!-- Probe inputs -->
+                <div class="form-group disc-probe" style="display:none;">
+                    <label>Host</label>
+                    <input type="text" id="discProbeHost" placeholder="hostname or IP" style="width:180px;">
+                </div>
+                <div class="form-group disc-probe" style="display:none;">
+                    <label>Port</label>
+                    <input type="number" id="discProbePort" value="23" style="width:80px;">
+                </div>
+            </div>
+            <div id="stealthInfo" style="font-size:10px;color:#888;margin-top:4px;font-family:'IBM Plex Mono',monospace;">3 concurrent, 2-5s random jitter, randomized host order. Won't trigger most IDS.</div>
+            <div class="btn-row" style="margin-top:0.5rem;gap:0.5rem;">
+                <button class="btn" id="discStartBtn" onclick="startDiscovery()">Start Discovery</button>
+                <button class="btn btn-red" id="discStopBtn" onclick="stopDiscovery()" style="display:none;">Stop</button>
+                <button class="btn btn-sm" onclick="loadDiscoverHosts()">Refresh DB</button>
+                <button class="btn btn-sm" onclick="loadDiscoverStats()">Stats</button>
+            </div>
+        </div>
+
+        <!-- Progress -->
+        <div id="discProgress" style="display:none;margin:0.75rem 0;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;color:#888;margin-bottom:4px;">
+                <span id="discPhase">Initializing...</span>
+                <span id="discCount">0 / ?</span>
+            </div>
+            <div style="height:4px;background:#1a1a2e;border-radius:2px;overflow:hidden;">
+                <div id="discFill" style="height:100%;background:#4af;width:0%;transition:width 0.3s;"></div>
+            </div>
+            <div id="discCurrent" style="font-size:10px;color:#555;margin-top:2px;"></div>
+        </div>
+
+        <!-- Live Console -->
+        <div id="discConsole" style="display:none;margin:0.75rem 0;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                <span style="font-size:11px;color:#4af;font-family:'IBM Plex Mono',monospace;">▸ CONSOLE</span>
+                <div style="display:flex;gap:0.4rem;">
+                    <button class="btn btn-sm" onclick="toggleConsole()" style="font-size:10px;padding:2px 6px;">Toggle</button>
+                    <button class="btn btn-sm" onclick="clearConsole()" style="font-size:10px;padding:2px 6px;">Clear</button>
+                </div>
+            </div>
+            <div id="discConsoleBody" style="
+                background:#060a10;
+                border:1px solid #1a2a3a;
+                border-radius:4px;
+                padding:8px 10px;
+                font-family:'IBM Plex Mono',monospace;
+                font-size:11px;
+                line-height:1.5;
+                color:#00ff41;
+                max-height:260px;
+                min-height:80px;
+                overflow-y:auto;
+                white-space:pre-wrap;
+                word-break:break-all;
+            "><span style="color:#555;">Waiting for discovery to start...</span></div>
+        </div>
+
+        <!-- Results -->
+        <div class="results" id="discoverResults">
+            <div class="empty">Choose a source and run discovery to find open TN3270 mainframes on the internet.<br><br>
+            <strong>Shodan</strong> — query existing internet index (fastest, broadest, uses API credits)<br>
+            <strong>nmap</strong> — targeted scan with TN3270 NSE scripts (deep fingerprint)<br>
+            <strong>masscan</strong> — fast SYN sweep on IP ranges (requires sudo)<br>
+            <strong>Probe</strong> — connect to a single host with our TN3270 protocol handler</div>
         </div>
     </div>
 </main>
@@ -351,27 +591,153 @@ function loadCaptures() {
     const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
     if (!captures.length) { out.innerHTML = '<div class="empty">No captures yet. Use Banner Grab, Fingerprint, or Capture Live Screen.</div>'; return; }
 
-    out.innerHTML = captures.map((c, i) => {
+    // Collect unique ports for filter
+    const ports = [...new Set(captures.map(c => c.data.port || '').filter(Boolean))].sort((a,b) => a - b);
+    const activePort = window._capFilterPort || '';
+
+    let filterHtml = '';
+    if (ports.length > 1) {
+        filterHtml = `<div style="display:flex;gap:4px;align-items:center;margin-bottom:8px;flex-wrap:wrap;">
+            <span style="font-size:10px;color:#666;">Port:</span>
+            <button class="btn btn-sm" style="font-size:10px;padding:2px 6px;${!activePort ? 'background:#1a2a3a;color:#4af;' : ''}" onclick="window._capFilterPort='';loadCaptures();">All</button>
+            ${ports.map(p => `<button class="btn btn-sm" style="font-size:10px;padding:2px 6px;${activePort == p ? 'background:#1a2a3a;color:#4af;' : ''}" onclick="window._capFilterPort='${p}';loadCaptures();">${p}</button>`).join('')}
+            <span style="font-size:10px;color:#555;margin-left:auto;">${captures.length} captures</span>
+        </div>`;
+    }
+
+    const filtered = activePort ? captures.filter(c => String(c.data.port) === String(activePort)) : captures;
+
+    out.innerHTML = filterHtml + filtered.map((c, i) => {
+        const realIdx = captures.indexOf(c);
         const icon = c.type === 'banner' ? '[B]' : c.type === 'fingerprint' ? '[F]' : '[>_]';
         const label = c.type === 'banner' ? 'Banner' : c.type === 'fingerprint' ? 'Fingerprint' : 'Screen';
-        const host = c.data.host || (c.data.host + ':' + c.data.port) || '?';
+        const host = c.data.host || '?';
+        const port = c.data.port ? ':' + c.data.port : '';
         const time = new Date(c.time).toLocaleString();
+        const hasShot = c.data.screenshot_txt || c.data.screenshot_png;
+        const shotBadge = hasShot ? '<span style="color:#10b981;font-size:9px;margin-left:4px;">&#128247;</span>' : '';
         const preview = c.type === 'screen' ? (c.data.screen || '').substring(0, 120) + '...' :
                         c.type === 'banner' ? (c.data.banner || c.data.screen_text || '').substring(0, 120) + '...' :
                         (c.data.service || '') + ' ' + (c.data.applications || []).join(', ');
         return `
-            <div class="result-card">
+            <div class="result-card" style="cursor:pointer;" onclick="openCapModal(${realIdx})">
                 <div class="rc-icon">${icon}</div>
                 <div class="rc-body">
-                    <div class="rc-host">${escHtml(host)} <span class="sc-cap-badge badge-blue">${label}</span></div>
+                    <div class="rc-host">${escHtml(host)}${escHtml(port)} <span class="sc-cap-badge badge-blue">${label}</span>${shotBadge}</div>
                     <div class="rc-detail">${escHtml(time)}</div>
                     <pre class="rc-preview">${escHtml(preview)}</pre>
                 </div>
                 <div class="rc-actions">
-                    <button class="btn btn-sm btn-red" onclick="deleteCapture(${i})">&#10005;</button>
+                    ${c.data.screenshot_png ? `<a href="${c.data.screenshot_png}" target="_blank" class="btn btn-sm" onclick="event.stopPropagation();" title="View PNG" style="font-size:10px;color:#10b981;">PNG</a>` : ''}
+                    <button class="btn btn-sm btn-red" onclick="event.stopPropagation();deleteCapture(${realIdx})">&#10005;</button>
                 </div>
             </div>`;
     }).join('');
+}
+
+let _capModalIdx = -1;
+
+function _getCapContent(c) {
+    if (!c) return '';
+    if (c.type === 'screen') return c.data.screen || '(empty screen)';
+    if (c.type === 'banner') {
+        let t = c.data.banner || '';
+        if (c.data.screen_text) t += '\n\n── Screen Text ──\n' + c.data.screen_text;
+        if (c.data.raw_bytes) t += '\n\n── Raw Bytes ──\n' + c.data.raw_bytes;
+        if (c.data.screenshot_txt) t += '\n\n── Screenshot ──\n[TXT] ' + c.data.screenshot_txt;
+        if (c.data.screenshot_png) t += '\n[PNG] ' + c.data.screenshot_png;
+        return t || '(empty banner)';
+    }
+    if (c.type === 'fingerprint') {
+        const d = c.data;
+        let t = 'Host:         ' + (d.host||'?') + ':' + (d.port||'?')
+            + '\nService:      ' + (d.service||'?')
+            + '\nSystem:       ' + (d.system_type||'?')
+            + '\nApplications: ' + ((d.applications||[]).join(', ') || 'none')
+            + '\nSSL/TLS:      ' + (d.ssl ? 'Yes' : 'No')
+            + '\nSource:       ' + (d.source || '?')
+            + '\nCountry:      ' + (d.country || '?')
+            + '\nOrg:          ' + (d.org || '?')
+            + '\nSecurity:     ' + ((d.security_issues||[]).join(', ') || 'none');
+        if (d.banner || d.screen_text) t += '\n\n── Banner ──\n' + (d.banner || d.screen_text || '(empty)');
+        if (d.screenshot_txt) t += '\n\n── Screenshot ──\n[TXT] ' + d.screenshot_txt;
+        if (d.screenshot_png) t += '\n[PNG] ' + d.screenshot_png;
+        return t;
+    }
+    return JSON.stringify(c.data, null, 2);
+}
+
+function openCapModal(idx) {
+    const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+    const c = captures[idx];
+    if (!c) return;
+    _capModalIdx = idx;
+    const label = c.type === 'banner' ? 'BANNER' : c.type === 'fingerprint' ? 'FINGERPRINT' : 'SCREEN';
+    const host = c.data.host || '?';
+    const port = c.data.port ? ':' + c.data.port : '';
+    document.getElementById('capModalTitle').textContent = host + port + '  ─  ' + label + '  ─  ' + new Date(c.time).toLocaleString();
+
+    // If there's a screenshot_txt URL, fetch and display its content
+    if (c.data.screenshot_txt && !c._screenshotLoaded) {
+        document.getElementById('capModalBody').textContent = _getCapContent(c) + '\n\nLoading screenshot...';
+        fetch(c.data.screenshot_txt).then(r => r.ok ? r.text() : null).then(txt => {
+            if (txt) {
+                c._screenshotContent = txt;
+                c._screenshotLoaded = true;
+                document.getElementById('capModalBody').textContent = _getCapContent(c) + '\n\n── Full Screenshot ──\n' + txt;
+            }
+        }).catch(() => {});
+    } else if (c._screenshotContent) {
+        document.getElementById('capModalBody').textContent = _getCapContent(c) + '\n\n── Full Screenshot ──\n' + c._screenshotContent;
+    } else {
+        document.getElementById('capModalBody').textContent = _getCapContent(c);
+    }
+
+    // Add screenshot PNG preview if available
+    const headerEl = document.getElementById('capModalHeader');
+    const existingImgBtn = headerEl.querySelector('.cap-png-btn');
+    if (existingImgBtn) existingImgBtn.remove();
+    if (c.data.screenshot_png) {
+        const btn = document.createElement('a');
+        btn.href = c.data.screenshot_png;
+        btn.target = '_blank';
+        btn.className = 'btn btn-sm cap-png-btn';
+        btn.style.cssText = 'font-size:11px;color:#10b981;';
+        btn.textContent = 'View PNG';
+        headerEl.querySelector('div:last-child').prepend(btn);
+    }
+
+    document.getElementById('capModal').style.display = 'block';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeCapModal() {
+    document.getElementById('capModal').style.display = 'none';
+    document.body.style.overflow = '';
+    _capModalIdx = -1;
+}
+
+function copyCapModal() {
+    const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+    const text = _getCapContent(captures[_capModalIdx]);
+    navigator.clipboard.writeText(text).then(() => showToast('Copied to clipboard', {type:'success'}));
+}
+
+function downloadCapModal() {
+    const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+    const c = captures[_capModalIdx];
+    if (!c) return;
+    const ts = new Date(c.time).toISOString().replace(/[:.]/g, '-').substring(0, 19);
+    const host = (c.data.host || 'unknown').replace(/[^a-zA-Z0-9.-]/g, '_');
+    const ext = c.type === 'fingerprint' ? 'json' : 'txt';
+    const text = c.type === 'fingerprint' ? JSON.stringify(c.data, null, 2) : _getCapContent(c);
+    const fname = c.type + '_' + host + '_' + ts + '.' + ext;
+    const blob = new Blob([text], {type: 'text/plain'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = fname;
+    a.click();
+    URL.revokeObjectURL(a.href);
 }
 
 function deleteCapture(idx) {
@@ -385,5 +751,557 @@ function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').
 
 // Auto-load captures tab
 loadCaptures();
+
+// ==========================================================================
+// CICS Enumeration (mainframed/nmap-scripts)
+// ==========================================================================
+
+async function startCicsEnum() {
+    const target = document.getElementById('cicsTarget').value.trim();
+    const port = document.getElementById('cicsPort').value.trim();
+    const commands = document.getElementById('cicsCommands').value.trim();
+    const user = document.getElementById('cicsUser').value.trim();
+    const pass = document.getElementById('cicsPass').value.trim();
+    const stealth = document.getElementById('cicsStealth').value;
+    const out = document.getElementById('cicsResults');
+    const btn = document.getElementById('cicsEnumBtn');
+
+    if (!target) { showToast('Target is required', {type:'error'}); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Enumerating...';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Running cics-enum.nse — this may take several minutes...</div>';
+
+    try {
+        const body = { targets: target, ports: port || undefined, commands: commands || undefined, stealth };
+        if (user) body.user = user;
+        if (pass) body.password = pass;
+
+        const res = await fetch('/api/scanner/discover/cics-enum', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(600000),
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            out.innerHTML = `<div class="empty" style="color:#f44;">${escHtml(data.error)}</div>`;
+        } else {
+            renderCicsResults(data);
+        }
+    } catch (e) {
+        out.innerHTML = `<div class="empty" style="color:#f44;">CICS enumeration failed: ${escHtml(e.message)}</div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Start CICS Enumeration';
+}
+
+function renderCicsResults(data) {
+    const out = document.getElementById('cicsResults');
+    const txns = data.transactions || [];
+    const hosts = data.hosts || [];
+    const scriptOut = data.script_output || '';
+    let html = '';
+
+    // Always show script output (the human-readable nmap result)
+    if (scriptOut) {
+        html += `<pre style="background:#060a10;border:1px solid #1a2a3a;border-radius:4px;padding:12px;font-size:12px;color:#0f0;max-height:400px;overflow:auto;white-space:pre-wrap;font-family:'IBM Plex Mono',monospace;">${escHtml(scriptOut)}</pre>`;
+    }
+
+    // Show structured transaction table if we have parsed data
+    if (txns.length > 0) {
+        html += `<div style="font-size:11px;color:#888;margin:0.75rem 0 0.25rem;">${txns.length} transaction(s) across ${hosts.length} host(s)</div>`;
+        html += '<div style="display:flex;flex-direction:column;gap:3px;">';
+        txns.forEach(t => {
+            let color = '#0f0', badge = 'VALID';
+            const id = t.id || '';
+            if (/requires? auth/i.test(id)) { color = '#f59e0b'; badge = 'AUTH'; }
+            else if (/ab[b]?end/i.test(id)) { color = '#ef4444'; badge = 'ABEND'; }
+            else if (/blank screen/i.test(id)) { color = '#6b7280'; badge = 'BLANK'; }
+            else if (/access denied/i.test(id)) { color = '#f97316'; badge = 'DENIED'; }
+            html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 10px;background:#0a0e14;border:1px solid #1a2030;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                <span style="color:#888;min-width:140px;">${escHtml(t.ip||'')}:${t.port||''}</span>
+                <span style="color:${color};font-weight:600;min-width:60px;">${escHtml(id.split(' - ')[0].split('[')[0].trim())}</span>
+                <span style="background:#1a1a2e;border:1px solid #2a3a5a;padding:0 6px;border-radius:2px;font-size:10px;color:${color};">${badge}</span>
+                ${t.region ? `<span style="color:#555;font-size:10px;">${escHtml(t.region)}</span>` : ''}
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    // If nothing at all, show empty state
+    if (!html) {
+        html = '<div class="empty">No CICS output. Target may not have CICS or nmap TN3270 library missing.</div>';
+    }
+
+    // Raw XML in collapsed details
+    if (data.raw_output) {
+        html += `<details style="margin-top:0.75rem;"><summary style="font-size:11px;color:#5a7aa0;cursor:pointer;">Raw XML</summary>
+            <pre style="background:#060a10;border:1px solid #1a2a3a;border-radius:4px;padding:12px;font-size:10px;color:#556;max-height:200px;overflow:auto;white-space:pre-wrap;margin-top:0.25rem;">${escHtml(data.raw_output)}</pre></details>`;
+    }
+
+    out.innerHTML = html;
+}
+
+// ==========================================================================
+// TPX Enumeration (mainframed/nmap-scripts)
+// ==========================================================================
+
+async function startTpxEnum() {
+    const target = document.getElementById('tpxTarget').value.trim();
+    const port = document.getElementById('tpxPort').value.trim();
+    const commands = document.getElementById('tpxCommands').value.trim();
+    const stealth = document.getElementById('tpxStealth').value;
+    const out = document.getElementById('tpxResults');
+    const btn = document.getElementById('tpxEnumBtn');
+
+    if (!target) { showToast('Target is required', {type:'error'}); return; }
+
+    btn.disabled = true;
+    btn.textContent = 'Enumerating...';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Running tpx-enum.nse — this may take several minutes...</div>';
+
+    try {
+        const body = { targets: target, ports: port || undefined, commands: commands || undefined, stealth };
+
+        const res = await fetch('/api/scanner/discover/tpx-enum', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(600000),
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            out.innerHTML = `<div class="empty" style="color:#f44;">${escHtml(data.error)}</div>`;
+        } else {
+            renderTpxResults(data);
+        }
+    } catch (e) {
+        out.innerHTML = `<div class="empty" style="color:#f44;">TPX enumeration failed: ${escHtml(e.message)}</div>`;
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Start TPX Enumeration';
+}
+
+function renderTpxResults(data) {
+    const out = document.getElementById('tpxResults');
+    const users = data.users || [];
+    const hosts = data.hosts || [];
+    const scriptOut = data.script_output || '';
+    let html = '';
+
+    // Always show script output (the human-readable nmap result)
+    if (scriptOut) {
+        html += `<pre style="background:#060a10;border:1px solid #1a2a3a;border-radius:4px;padding:12px;font-size:12px;color:#0f0;max-height:400px;overflow:auto;white-space:pre-wrap;font-family:'IBM Plex Mono',monospace;">${escHtml(scriptOut)}</pre>`;
+    }
+
+    // Show structured user table if we have parsed data
+    if (users.length > 0) {
+        html += `<div style="font-size:11px;color:#888;margin:0.75rem 0 0.25rem;">${users.length} user(s) across ${hosts.length} host(s)</div>`;
+        html += '<div style="display:flex;flex-direction:column;gap:3px;">';
+        users.forEach(u => {
+            const user = u.user || u;
+            const ip = u.ip || '';
+            const port = u.port || '';
+            html += `<div style="display:flex;align-items:center;gap:8px;padding:4px 10px;background:#0a0e14;border:1px solid #1a2030;border-radius:2px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                <span style="color:#888;min-width:140px;">${escHtml(ip)}:${port}</span>
+                <span style="color:#4af;font-weight:600;">${escHtml(typeof user === 'string' ? user : JSON.stringify(user))}</span>
+                <span style="background:#1a2e1a;border:1px solid #2a5a3a;padding:0 6px;border-radius:2px;font-size:10px;color:#10b981;">VALID</span>
+            </div>`;
+        });
+        html += '</div>';
+    }
+
+    if (!html) {
+        html = '<div class="empty">No TPX output. Target may not have TPX or nmap TN3270 library missing.</div>';
+    }
+
+    if (data.raw_output) {
+        html += `<details style="margin-top:0.75rem;"><summary style="font-size:11px;color:#5a7aa0;cursor:pointer;">Raw XML</summary>
+            <pre style="background:#060a10;border:1px solid #1a2a3a;border-radius:4px;padding:12px;font-size:10px;color:#556;max-height:200px;overflow:auto;white-space:pre-wrap;margin-top:0.25rem;">${escHtml(data.raw_output)}</pre></details>`;
+    }
+
+    out.innerHTML = html;
+}
+
+// ==========================================================================
+// Discovery
+// ==========================================================================
+
+const stealthDescriptions = {
+    paranoid:    '1 concurrent, 15-30s random jitter, randomized order. Near-invisible. Extremely slow.',
+    sneaky:      '1 concurrent, 5-15s random jitter, randomized order. Very slow, very quiet.',
+    polite:      '3 concurrent, 2-5s random jitter, randomized order. Won\'t trigger most IDS.',
+    normal:      '10 concurrent, 0.5-2s jitter. Default nmap speed.',
+    aggressive:  '50 concurrent, no delay. Fast but noisy.',
+    insane:      '100 concurrent, no delay, short timeouts. Research/lab only.',
+};
+
+function toggleDiscoverInputs() {
+    const src = document.getElementById('discSrc').value;
+    document.querySelectorAll('.disc-shodan,.disc-nmap,.disc-masscan,.disc-probe').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.disc-' + src).forEach(el => el.style.display = '');
+}
+
+function updateStealthInfo() {
+    const s = document.getElementById('discStealth').value;
+    document.getElementById('stealthInfo').textContent = stealthDescriptions[s] || '';
+}
+
+let discPollTimer = null;
+let discLogTimer = null;
+let discLogSeq = 0;
+let discConsoleCollapsed = false;
+
+async function startDiscovery() {
+    const src = document.getElementById('discSrc').value;
+    const out = document.getElementById('discoverResults');
+    const startBtn = document.getElementById('discStartBtn');
+    const stopBtn = document.getElementById('discStopBtn');
+    const prog = document.getElementById('discProgress');
+
+    startBtn.style.display = 'none';
+    stopBtn.style.display = 'inline-flex';
+    prog.style.display = '';
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Running discovery...</div>';
+
+    // Show and reset console
+    discLogSeq = 0;
+    const con = document.getElementById('discConsole');
+    con.style.display = '';
+    document.getElementById('discConsoleBody').innerHTML = '';
+
+    let body = {};
+    let endpoint = '';
+
+    if (src === 'shodan') {
+        const key = document.getElementById('discShodanKey').value.trim();
+        if (!key) { showToast('Shodan API key required', {type:'error'}); resetDiscUI(); return; }
+        // Save key to localStorage for convenience
+        localStorage.setItem('shodan_key', key);
+        body = {
+            api_key: key,
+            query: document.getElementById('discShodanQuery').value.trim() || undefined,
+            max_results: parseInt(document.getElementById('discShodanMax').value) || 100,
+            probe: true,
+            stealth: document.getElementById('discStealth').value,
+        };
+        endpoint = '/api/scanner/discover/shodan';
+    } else if (src === 'nmap') {
+        const targets = document.getElementById('discTargets').value.trim();
+        if (!targets) { showToast('Targets required', {type:'error'}); resetDiscUI(); return; }
+        body = {
+            targets,
+            ports: document.getElementById('discPorts').value.trim() || undefined,
+            nse_scripts: true,
+            stealth: document.getElementById('discStealth').value,
+        };
+        endpoint = '/api/scanner/discover/nmap';
+    } else if (src === 'masscan') {
+        const targets = document.getElementById('discTargets').value.trim();
+        if (!targets) { showToast('Targets required', {type:'error'}); resetDiscUI(); return; }
+        body = {
+            targets,
+            ports: document.getElementById('discPorts').value.trim() || undefined,
+            rate: parseInt(document.getElementById('discRate').value) || 10000,
+            probe: true,
+            stealth: document.getElementById('discStealth').value,
+        };
+        endpoint = '/api/scanner/discover/masscan';
+    } else if (src === 'probe') {
+        const host = document.getElementById('discProbeHost').value.trim();
+        if (!host) { showToast('Host required', {type:'error'}); resetDiscUI(); return; }
+        body = {
+            ip: host,
+            port: parseInt(document.getElementById('discProbePort').value) || 23,
+        };
+        endpoint = '/api/scanner/discover/probe';
+    }
+
+    // Start polling progress + console log
+    discPollTimer = setInterval(pollDiscProgress, 1500);
+    discLogTimer = setInterval(pollDiscLog, 800);
+
+    try {
+        const res = await fetch(endpoint, {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(body),
+            signal: AbortSignal.timeout(600000),
+        });
+        const data = await res.json();
+
+        if (data.error) {
+            out.innerHTML = `<div class="empty" style="color:#f44;">${escHtml(data.error)}</div>`;
+        } else if (src === 'probe') {
+            renderDiscoverHosts([data]);
+        } else {
+            const hosts = data.hosts || [];
+            if (hosts.length === 0) {
+                out.innerHTML = '<div class="empty">No TN3270 services found</div>';
+            } else {
+                renderDiscoverHosts(hosts);
+            }
+            showToast(`Discovery complete: ${hosts.length} hosts found`, {type:'success'});
+        }
+    } catch (e) {
+        out.innerHTML = `<div class="empty" style="color:#f44;">Discovery failed: ${escHtml(e.message)}</div>`;
+    }
+
+    resetDiscUI();
+    loadDiscoverStats();
+}
+
+function resetDiscUI() {
+    clearInterval(discPollTimer);
+    clearInterval(discLogTimer);
+    // One final log poll to catch last lines
+    pollDiscLog();
+    document.getElementById('discStartBtn').style.display = 'inline-flex';
+    document.getElementById('discStopBtn').style.display = 'none';
+    document.getElementById('discProgress').style.display = 'none';
+}
+
+async function stopDiscovery() {
+    await fetch('/api/scanner/discover/stop', {method:'POST'}).catch(()=>{});
+    resetDiscUI();
+    showToast('Discovery stopped', {type:'warning'});
+}
+
+async function pollDiscProgress() {
+    try {
+        const res = await fetch('/api/scanner/discover/progress', {method:'POST'});
+        const data = await res.json();
+        if (data.running && data.progress) {
+            const p = data.progress;
+            document.getElementById('discPhase').textContent = p.phase || '';
+            const total = p.total > 0 ? p.total : '?';
+            document.getElementById('discCount').textContent = `${p.completed} / ${total}`;
+            document.getElementById('discCurrent').textContent = p.current || '';
+            if (p.total > 0) {
+                document.getElementById('discFill').style.width = Math.min(100, (p.completed / p.total) * 100) + '%';
+            } else {
+                document.getElementById('discFill').style.width = '30%';
+            }
+        }
+    } catch(e) {}
+}
+
+async function pollDiscLog() {
+    try {
+        const res = await fetch(`/api/scanner/discover/log?since=${discLogSeq}`);
+        const data = await res.json();
+        if (data.lines && data.lines.length > 0) {
+            const body = document.getElementById('discConsoleBody');
+            for (const line of data.lines) {
+                const el = document.createElement('div');
+                const ts = line.ts ? line.ts.split('T')[1]?.split('.')[0] || '' : '';
+                let color = '#00ff41';
+                if (line.text.startsWith('ERROR')) color = '#ff4444';
+                else if (line.text.startsWith('$')) color = '#4af';
+                else if (line.text.startsWith('===')) color = '#f59e0b';
+                else if (line.text.includes('→ TN3270')) color = '#10b981';
+                else if (line.text.includes('→ no-tn3270')) color = '#666';
+                else if (line.text.includes('→ ERROR')) color = '#ef4444';
+                else if (line.text.includes('Waiting')) color = '#555';
+                el.style.color = color;
+                el.textContent = (ts ? `[${ts}] ` : '') + line.text;
+                body.appendChild(el);
+                discLogSeq = Math.max(discLogSeq, line.seq);
+            }
+            // Auto-scroll to bottom
+            body.scrollTop = body.scrollHeight;
+        }
+    } catch(e) {}
+}
+
+function toggleConsole() {
+    const body = document.getElementById('discConsoleBody');
+    discConsoleCollapsed = !discConsoleCollapsed;
+    body.style.display = discConsoleCollapsed ? 'none' : '';
+}
+
+function clearConsole() {
+    document.getElementById('discConsoleBody').innerHTML = '';
+}
+
+function renderDiscoverHosts(hosts) {
+    const out = document.getElementById('discoverResults');
+    if (!hosts || !hosts.length) {
+        out.innerHTML = '<div class="empty">No hosts found</div>';
+        return;
+    }
+
+    const sysColors = {
+        'z/OS': '#4af', 'z/VM': '#a78bfa', 'z/VSE': '#f59e0b',
+        'AS/400 (IBM i)': '#10b981', 'CICS': '#ef4444', 'IMS': '#f97316',
+        'Hercules': '#6b7280', 'unknown': '#555',
+    };
+
+    let html = `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
+        <span style="font-size:11px;color:#888;">${hosts.length} hosts discovered</span>
+        <button class="btn btn-sm" onclick="saveAllDiscToCaptures()" style="font-size:10px;padding:3px 8px;" title="Save all discovered hosts to the Captures tab">Save All to Captures</button>
+    </div>`;
+    html += '<div style="display:flex;flex-direction:column;gap:4px;">';
+
+    hosts.forEach(h => {
+        const ip = h.ip || '?';
+        const port = h.port || '?';
+        const sysType = h.system_type || 'unknown';
+        const color = sysColors[sysType] || '#555';
+        const apps = (h.applications || []);
+        const appsStr = apps.length ? apps.map(a => `<span style="background:#1a1a2e;border:1px solid #2a3a5a;padding:0 4px;border-radius:2px;font-size:10px;color:#aaa;">${escHtml(a)}</span>`).join(' ') : '';
+        const ssl = h.ssl ? '<span style="color:#10b981;font-size:10px;">SSL</span>' : '<span style="color:#f44;font-size:10px;">NO SSL</span>';
+        const banner = escHtml((h.banner || h.screen_text || '').substring(0, 100));
+        const country = h.country ? `<span style="color:#888;font-size:10px;">${escHtml(h.country)}</span>` : '';
+        const org = h.org ? `<span style="color:#666;font-size:10px;">${escHtml(h.org)}</span>` : '';
+        const src = h.source ? `<span style="color:#444;font-size:9px;">[${escHtml(h.source)}]</span>` : '';
+
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:#0a0e14;border:1px solid #1a2030;border-radius:3px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+            <span style="color:${color};font-weight:600;min-width:100px;">${escHtml(sysType)}</span>
+            <span style="color:#fff;min-width:160px;">${escHtml(ip)}:${port}</span>
+            ${ssl}
+            <span style="flex:1;display:flex;gap:4px;align-items:center;">${appsStr}</span>
+            ${country} ${org} ${src}
+            <div style="display:flex;gap:4px;">
+                ${h.screenshot_png ? `<a href="${h.screenshot_png}" target="_blank" class="btn btn-sm" title="View Screenshot (PNG)" style="color:#10b981;">📷</a>` : ''}
+                ${h.screenshot_txt ? `<a href="${h.screenshot_txt}" target="_blank" class="btn btn-sm" title="View Screen Text" style="color:#4af;">T</a>` : ''}
+                <button class="btn btn-sm" onclick="document.getElementById('bannerHost').value='${escHtml(ip)}';document.getElementById('bannerPort').value='${port}';document.querySelector('[data-tab=banner]').click();" title="Banner Grab">B</button>
+                <button class="btn btn-sm" onclick="document.getElementById('fpHost').value='${escHtml(ip)}';document.getElementById('fpPort').value='${port}';document.querySelector('[data-tab=fingerprint]').click();" title="Fingerprint">F</button>
+                <a href="/terminal?host=${escHtml(ip)}:${port}" class="btn btn-sm btn-green" title="Connect">C</a>
+            </div>
+        </div>`;
+
+        if (banner) {
+            html += `<div style="padding:2px 10px 4px 118px;font-size:10px;color:#555;border-bottom:1px solid #0a0e14;">${banner}</div>`;
+        }
+    });
+
+    html += '</div>';
+    out.innerHTML = html;
+}
+
+function saveAllDiscToCaptures() {
+    // Fetch all hosts from DB and save to localStorage captures
+    fetch('/api/scanner/discover/hosts?limit=500&no_ssl=false')
+        .then(r => r.json())
+        .then(data => {
+            if (!data.hosts || !data.hosts.length) {
+                showToast('No hosts to save', {type:'warning'});
+                return;
+            }
+            const captures = JSON.parse(localStorage.getItem('sc_captures') || '[]');
+            let added = 0;
+            // Build set of existing capture keys to avoid duplicates
+            const existing = new Set(captures.map(c => c.data.host + ':' + (c.data.port||'')));
+
+            data.hosts.forEach(h => {
+                if (typeof h.applications === 'string') try { h.applications = JSON.parse(h.applications); } catch(e) { h.applications = []; }
+                if (typeof h.security_issues === 'string') try { h.security_issues = JSON.parse(h.security_issues); } catch(e) { h.security_issues = []; }
+
+                const key = h.ip + ':' + h.port;
+                if (existing.has(key)) return; // skip duplicates
+
+                captures.push({
+                    type: h.screen_text ? 'banner' : 'fingerprint',
+                    time: h.last_seen || new Date().toISOString(),
+                    data: {
+                        host: h.ip,
+                        port: h.port,
+                        service: 'TN3270',
+                        is_tn3270: !!h.is_tn3270,
+                        ssl: !!h.ssl,
+                        system_type: h.system_type || 'unknown',
+                        applications: h.applications || [],
+                        banner: h.banner || '',
+                        screen_text: h.screen_text || '',
+                        org: h.org || '',
+                        country: h.country || '',
+                        security_issues: h.security_issues || [],
+                        source: h.source || '',
+                        screenshot_txt: h.screenshot_txt || '',
+                        screenshot_png: h.screenshot_png || '',
+                    }
+                });
+                existing.add(key);
+                added++;
+            });
+
+            localStorage.setItem('sc_captures', JSON.stringify(captures.slice(0, 500)));
+            showToast(`${added} hosts saved to Captures (${data.hosts.length - added} duplicates skipped)`, {type:'success'});
+        })
+        .catch(e => showToast('Error: ' + e.message, {type:'error'}));
+}
+
+async function loadDiscoverHosts() {
+    const out = document.getElementById('discoverResults');
+    out.innerHTML = '<div class="loading"><div class="spinner"></div>Loading database...</div>';
+    try {
+        const res = await fetch('/api/scanner/discover/hosts?limit=200&no_ssl=false');
+        const data = await res.json();
+        if (data.hosts && data.hosts.length) {
+            // Parse JSON strings in DB rows
+            data.hosts.forEach(h => {
+                if (typeof h.applications === 'string') try { h.applications = JSON.parse(h.applications); } catch(e) { h.applications = []; }
+                if (typeof h.security_issues === 'string') try { h.security_issues = JSON.parse(h.security_issues); } catch(e) { h.security_issues = []; }
+            });
+            renderDiscoverHosts(data.hosts);
+        } else {
+            out.innerHTML = '<div class="empty">No hosts in database yet. Run a discovery scan.</div>';
+        }
+    } catch(e) {
+        out.innerHTML = `<div class="empty" style="color:#f44;">Error: ${escHtml(e.message)}</div>`;
+    }
+}
+
+async function loadDiscoverStats() {
+    const el = document.getElementById('discoverStats');
+    try {
+        const res = await fetch('/api/scanner/discover/stats');
+        const s = await res.json();
+        if (s.error) { el.innerHTML = ''; return; }
+
+        let html = '';
+        const cards = [
+            {label:'Total Hosts', val: s.total, color:'#4af'},
+            {label:'TN3270 Confirmed', val: s.tn3270_confirmed, color:'#10b981'},
+            {label:'No SSL/TLS', val: s.no_ssl, color:'#f44'},
+        ];
+        cards.forEach(c => {
+            html += `<div style="background:#0a0e14;border:1px solid #1a2030;padding:8px 16px;border-radius:4px;text-align:center;min-width:100px;">
+                <div style="font-size:1.5rem;font-weight:700;color:${c.color};">${c.val}</div>
+                <div style="font-size:0.65rem;color:#888;">${c.label}</div>
+            </div>`;
+        });
+
+        // System type breakdown
+        const types = s.by_system_type || {};
+        if (Object.keys(types).length) {
+            html += '<div style="background:#0a0e14;border:1px solid #1a2030;padding:8px 12px;border-radius:4px;flex:1;min-width:200px;">';
+            html += '<div style="font-size:0.65rem;color:#888;margin-bottom:4px;">By System Type</div>';
+            Object.entries(types).sort((a,b) => b[1]-a[1]).forEach(([t,n]) => {
+                html += `<span style="display:inline-block;font-size:10px;padding:1px 6px;margin:1px;background:#1a1a2e;border:1px solid #2a3a5a;border-radius:2px;color:#ccc;">${escHtml(t)}: ${n}</span> `;
+            });
+            html += '</div>';
+        }
+
+        el.innerHTML = html;
+    } catch(e) { el.innerHTML = ''; }
+}
+
+// Restore saved Shodan key
+if (localStorage.getItem('shodan_key')) {
+    document.getElementById('discShodanKey').value = localStorage.getItem('shodan_key');
+}
+
+// Load stats on tab switch to discover
+document.querySelector('[data-tab=discover]').addEventListener('click', () => {
+    loadDiscoverStats();
+    loadDiscoverHosts();
+});
 </script>
 {% endblock %}

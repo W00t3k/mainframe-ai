@@ -98,6 +98,7 @@ class MainframeAssistant:
     def __init__(self, ollama_url: Optional[str] = None, model: Optional[str] = None):
         self.ollama_url = ollama_url or os.getenv("OLLAMA_URL", "http://localhost:11434")
         self.model = model or os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+        self.client = httpx.Client(timeout=120.0)
         self.console = Console()
         self.connection = MainframeConnection()
         self.conversation_history = []
@@ -183,7 +184,7 @@ class MainframeAssistant:
             return f"[Action error: {e}]"
 
     def chat(self, user_message: str) -> str:
-        """Send message to Claude and get response"""
+        """Send message to Ollama and get response"""
         # Add screen context if connected
         context = ""
         if self.connection.connected:
@@ -201,14 +202,36 @@ class MainframeAssistant:
         })
 
         try:
-            response = self.client.messages.create(
-                model=self.model,
-                max_tokens=4096,
-                system=SYSTEM_PROMPT,
-                messages=self.conversation_history
+            # Build prompt from conversation history for Ollama
+            prompt = SYSTEM_PROMPT + "\n\n"
+            for msg in self.conversation_history:
+                role = msg["role"]
+                content = msg["content"]
+                if role == "user":
+                    prompt += f"User: {content}\n\n"
+                else:
+                    prompt += f"Assistant: {content}\n\n"
+            prompt += "Assistant: "
+
+            response = self.client.post(
+                f"{self.ollama_url}/api/generate",
+                json={
+                    "model": self.model,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {
+                        "temperature": 0.7,
+                        "num_predict": 2048,
+                    }
+                }
             )
 
-            assistant_message = response.content[0].text
+            if response.status_code == 200:
+                data = response.json()
+                assistant_message = data.get("response", "No response generated.")
+            else:
+                assistant_message = f"Ollama error: {response.status_code}"
+
             self.conversation_history.append({
                 "role": "assistant",
                 "content": assistant_message
@@ -220,7 +243,7 @@ class MainframeAssistant:
             return assistant_message
 
         except Exception as e:
-            return f"[API Error: {e}]"
+            return f"[Ollama Error: {e}]"
 
     def _process_actions(self, response: str):
         """Extract and execute any action commands from response"""
@@ -275,7 +298,7 @@ class MainframeAssistant:
                     self._handle_command(user_input)
                     continue
 
-                # Chat with Claude
+                # Chat with LLM
                 self.console.print()
                 with self.console.status("[bold blue]Thinking...[/bold blue]"):
                     response = self.chat(user_input)
@@ -362,13 +385,12 @@ def main():
 
     parser = argparse.ArgumentParser(description="Mainframe AI Assistant")
     parser.add_argument("-t", "--target", help="Connect to mainframe (host:port)")
-    parser.add_argument("-k", "--api-key", help="Anthropic API key")
-    parser.add_argument("--model", default="claude-sonnet-4-20250514", help="Claude model to use")
+    parser.add_argument("--ollama-url", default=None, help="Ollama API URL")
+    parser.add_argument("--model", default="llama3.1:8b", help="Ollama model to use")
     args = parser.parse_args()
 
     try:
-        assistant = MainframeAssistant(api_key=args.api_key)
-        assistant.model = args.model
+        assistant = MainframeAssistant(ollama_url=args.ollama_url, model=args.model)
 
         if args.target:
             assistant.connect(args.target)
@@ -377,8 +399,8 @@ def main():
 
     except ValueError as e:
         print(f"Error: {e}")
-        print("\nSet your API key:")
-        print("  export ANTHROPIC_API_KEY='your-key'")
+        print("\nMake sure Ollama is running:")
+        print("  ollama serve")
         sys.exit(1)
     except KeyboardInterrupt:
         print("\nGoodbye!")

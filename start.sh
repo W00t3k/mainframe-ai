@@ -14,10 +14,18 @@ set -o pipefail
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 PORT=8080
+
 HOST="0.0.0.0"
 TK5="$DIR/tk5/mvs-tk5"
 LOGDIR="$DIR/logs"
 mkdir -p "$LOGDIR"
+
+# ── Kill stale processes from previous runs ─────────────
+pkill -9 -f "run\.py" 2>/dev/null
+pkill -9 -f "uvicorn" 2>/dev/null
+pkill -9 -f "s3270" 2>/dev/null
+lsof -ti :$PORT 2>/dev/null | xargs kill -9 2>/dev/null
+sleep 1
 
 # ── Colors ─────────────────────────────────────────────
 RED='\033[0;31m'; GRN='\033[0;32m'; YEL='\033[0;33m'
@@ -55,19 +63,19 @@ detect_model() {
       ok "GPU detected: $GPU_NAME (${GPU_VRAM_GB}GB VRAM)"
 
       if [ "$GPU_VRAM_GB" -ge 80 ]; then
-        MODEL="llama3.1:70b"
+        MODEL="deepseek-r1:70b"
         ok "GPU tier: ULTRA — using $MODEL"
       elif [ "$GPU_VRAM_GB" -ge 40 ]; then
-        MODEL="llama3.1:70b-instruct-q4_0"
+        MODEL="deepseek-r1:32b"
         ok "GPU tier: HIGH — using $MODEL"
       elif [ "$GPU_VRAM_GB" -ge 20 ]; then
         MODEL="deepseek-coder-v2:16b"
         ok "GPU tier: MEDIUM — using $MODEL"
       elif [ "$GPU_VRAM_GB" -ge 8 ]; then
-        MODEL="llama3.1:8b"
+        MODEL="deepseek-r1:8b"
         ok "GPU tier: LOW — using $MODEL"
       else
-        MODEL="llama3.2:3b"
+        MODEL="phi3:mini"
         ok "GPU tier: MINIMAL — using $MODEL"
       fi
 
@@ -83,6 +91,10 @@ detect_model() {
         export OLLAMA_MAX_LOADED_MODELS="2"
       fi
 
+      # Set RAM for status display
+      TOTAL_RAM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')
+      [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
+      [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=0
       return
     fi
   fi
@@ -93,10 +105,14 @@ detect_model() {
   [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
   [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=16000
 
-  if [ "$TOTAL_RAM_MB" -ge 16000 ]; then
-    MODEL="llama3.1:8b"
+  if [ "$TOTAL_RAM_MB" -ge 32000 ]; then
+    MODEL="deepseek-r1:14b"
+  elif [ "$TOTAL_RAM_MB" -ge 16000 ]; then
+    MODEL="deepseek-r1:8b"
   elif [ "$TOTAL_RAM_MB" -ge 8000 ]; then
-    MODEL="llama3.2:3b"
+    MODEL="phi3:mini"
+  elif [ "$TOTAL_RAM_MB" -ge 4000 ]; then
+    MODEL="gemma2:2b"
   else
     MODEL="tinyllama"
   fi
@@ -157,14 +173,14 @@ kill_all() {
 }
 
 # ═══════════════════════════════════════════════════════
-#  HEALTH CHECKS (curl-based)
+#  HEALTH CHECKS (TCP socket — no curl, no OOM risk)
 # ═══════════════════════════════════════════════════════
 check_webapp() {
-  curl -sf --max-time 5 "http://127.0.0.1:$PORT/api/status" > /dev/null 2>&1
+  (echo > /dev/tcp/127.0.0.1/$PORT) 2>/dev/null
 }
 
 check_ollama() {
-  curl -sf --max-time 5 "http://127.0.0.1:11434/api/tags" > /dev/null 2>&1
+  (echo > /dev/tcp/127.0.0.1/11434) 2>/dev/null
 }
 
 check_tk5() {
@@ -201,7 +217,8 @@ start_ollama_svc() {
     ok "Ollama already running"
   else
     info "Starting Ollama..."
-    ollama serve > "$LOGDIR/ollama.log" 2>&1 &
+    nohup ollama serve >> "$LOGDIR/ollama.log" 2>&1 &
+    disown $!
     if wait_for "Ollama" check_ollama 10; then
       ok "Ollama started (pid $(pgrep -x ollama 2>/dev/null))"
     else
@@ -212,12 +229,24 @@ start_ollama_svc() {
     fi
   fi
 
-  info "RAM: ${TOTAL_RAM_MB}MB → model: ${BLD}$MODEL${RST}"
-  info "Model loads on first AI request (saves RAM)"
+  info "RAM: ${TOTAL_RAM_MB}MB → target model: ${BLD}$MODEL${RST}"
   OLLAMA_OK=1
 
-  # Ensure model is available (background, non-blocking)
-  ( ollama list 2>/dev/null | grep -q "$MODEL" || ollama pull "$MODEL" ) >> "$LOGDIR/ollama.log" 2>&1 &
+  # Check if target model is already pulled
+  if ollama list 2>/dev/null | grep -q "$MODEL"; then
+    ok "Model $MODEL ready"
+  else
+    # Use first available model as fallback while target pulls
+    FALLBACK=$(ollama list 2>/dev/null | tail -n +2 | head -1 | awk '{print $1}')
+    if [ -n "$FALLBACK" ]; then
+      info "Using $FALLBACK while pulling $MODEL in background..."
+      MODEL="$FALLBACK"
+    else
+      info "No models installed — pulling $MODEL (this may take a while)..."
+    fi
+    # Pull target model in background
+    ( ollama pull "$MODEL" ) >> "$LOGDIR/ollama.log" 2>&1 &
+  fi
 }
 
 start_tk5_svc() {
@@ -244,8 +273,32 @@ start_tk5_svc() {
     return 1
   fi
 
+  pkill -9 s3270 2>/dev/null
+  > "$TK5/log/hardcopy.log" 2>/dev/null || true
+
+  # Restore fresh DASD — kill -9 on Hercules corrupts disk images
+  DASD_BACKUP="$TK5/dasd_backup"
+  DASD_CACHE="$DIR/.cache/tk5-files.tar.gz"
+  if [ -d "$DASD_BACKUP" ] && [ "$(ls "$DASD_BACKUP"/*.298 2>/dev/null | wc -l)" -gt 0 ]; then
+    cp -f "$DASD_BACKUP"/* "$TK5/dasd/" 2>/dev/null
+    ok "DASD restored from dasd_backup/"
+  elif [ -f "$DASD_CACHE" ]; then
+    tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
+    ok "DASD restored from cache"
+  elif command -v gh &>/dev/null; then
+    info "Downloading DASD from GitHub release..."
+    mkdir -p "$DIR/.cache"
+    rm -f "$DASD_CACHE"
+    gh release download v1.0-tk5 -R W00t3k/mainframe-ai -p "tk5-files.tar.gz" -D "$(dirname "$DASD_CACHE")" 2>/dev/null
+    tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
+    ok "DASD restored from GitHub release"
+  else
+    info "No DASD backup or cache — run setup.sh first"
+  fi
+
   info "Starting Hercules ($(uname -s)/$(uname -m))..."
 
+  # tail keeps stdin open — Hercules daemon mode exits on EOF without it
   nohup bash -c "
     cd \"$TK5\"
     export PATH=\"$HERC_BIN:\$PATH\"
@@ -255,6 +308,7 @@ start_tk5_svc() {
     export HERCULES_PATH=\"$HERC_LIB/hercules\"
     tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5.cnf -r scripts/ipl.rc -d
   " > "$LOGDIR/hercules.log" 2>&1 &
+  disown $!
 
   if wait_for "TK5" check_tk5 30; then
     ok "TK5 started — TN3270 on port 3270"
@@ -270,6 +324,88 @@ start_tk5_svc() {
 
 start_webapp_svc() {
   echo -e "\n${BLD}[3/3] Web Application${RST}"
+  # Auto-connect to TK5 after webapp starts (background, non-blocking)
+  # Uses Python instead of curl — curl gets OOM-killed on Mac under memory pressure
+  _auto_connect_tk5() {
+    local hardcopy="$TK5/log/hardcopy.log"
+    local waited=0
+    # Phase 1: Wait for VTAM via hardcopy.log (poll every 2s, up to 60s)
+    while [ $waited -lt 60 ]; do
+      sleep 2; waited=$((waited+2))
+      grep -q "TCAS ACCEPTING LOGONS" "$hardcopy" 2>/dev/null && break
+    done
+    grep -q "TCAS ACCEPTING LOGONS" "$hardcopy" 2>/dev/null || return 1
+    sleep 1
+
+    # Phase 2: Connect web app
+    check_webapp || return 1
+    "$PYTHON" -c "
+import urllib.request, json
+req = urllib.request.Request(
+  'http://127.0.0.1:$PORT/api/terminal/connect',
+  data=json.dumps({'target':'localhost:3270'}).encode(),
+  headers={'Content-Type':'application/json'},
+  method='POST'
+)
+urllib.request.urlopen(req, timeout=30)
+" 2>/dev/null
+
+    # Phase 2b: Submit JCL via port 3505 card reader (no TN3270 needed)
+    # Install extra terminals + FTPD proc if not already done
+    _submit_jcl() {
+      local jcl_file="$1"
+      local label="$2"
+      if [ -f "$DIR/$jcl_file" ]; then
+        "$PYTHON" -c "
+import socket, sys
+raw = open('$DIR/$jcl_file').read()
+clean = '\n'.join(''.join(c if ord(c)<128 else ' ' for c in l)[:80] for l in raw.splitlines()) + '\n'
+try:
+    s = socket.socket(); s.settimeout(10)
+    s.connect(('localhost', 3505)); s.sendall(clean.encode('ascii')); s.close()
+    print('Submitted: $jcl_file')
+except Exception as e:
+    print(f'Submit failed: {e}', file=sys.stderr)
+" 2>/dev/null && ok "$label JCL submitted" || info "$label submit skipped"
+      fi
+    }
+
+    # Wait a few seconds for JES2 to be fully ready
+    sleep 5
+
+    # Remove SNASOL from VTAM config (safety net — primary fix is in dasd_backup)
+    # SNASOL intercepts logons; UPDVTAM.jcl removes LOGAPPL=NETSOL from L3274
+    _submit_jcl "jcl/UPDVTAM.jcl" "VTAM config (remove SNASOL)"
+    sleep 5
+
+    _submit_jcl "jcl/terminals.jcl" "Extra terminals (32x VTAM)"
+    sleep 3
+    _submit_jcl "jcl/ftpd.jcl"      "FTPD server (port 2121)"
+    sleep 3
+
+    # Install AI/OS custom USS logon screen (ASM+LKED into SYS1.VTAMLIB)
+    _submit_jcl "jcl/IBMAI.jcl" "AI/OS USS logon screen"
+    sleep 15  # wait for ASM+LKED to complete
+
+    # Restart VTAM via Hercules HTTP console so new ISTNSC00 takes effect
+    "$PYTHON" -c "
+import urllib.request, urllib.parse, time
+def herc_cmd(cmd):
+    data = urllib.parse.urlencode({'command': cmd}).encode()
+    urllib.request.urlopen(
+        urllib.request.Request('http://localhost:8038/cgi-bin/tasks/syslog',
+                               data=data, method='POST'), timeout=10)
+try:
+    herc_cmd('/Z NET,QUICK')
+    time.sleep(25)
+    herc_cmd('/S NET')
+    print('VTAM restarted — AI/OS USS screen active')
+except Exception as e:
+    print(f'VTAM restart skipped: {e}')
+" 2>/dev/null && ok "VTAM restarted — AI/OS USS logon screen active" || info "VTAM restart skipped"
+
+    ok "VTAM ready — AI/OS TN3270 logon screen available"
+  }
 
   detect_python
 
@@ -285,20 +421,6 @@ start_webapp_svc() {
       fi
     fi
   fi
-
-  # Verify venv has required packages — reinstall if missing
-  if ! "$PYTHON" -c "import fastapi, uvicorn, httpx" 2>/dev/null; then
-    warn "Missing Python packages in $PYTHON — reinstalling requirements..."
-    "$PYTHON" -m pip install -q -r "$DIR/requirements.txt" 2>/dev/null
-    if ! "$PYTHON" -c "import fastapi, uvicorn, httpx" 2>/dev/null; then
-      fail "Cannot import required packages. Check $PYTHON and requirements.txt"
-      return 1
-    fi
-    ok "Packages reinstalled"
-  fi
-
-  PY_VER=$("$PYTHON" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
-  info "Python: $PYTHON (v${PY_VER})"
 
   # Kill anything on the port
   lsof -ti :$PORT 2>/dev/null | xargs kill -9 2>/dev/null
@@ -316,6 +438,8 @@ start_webapp_svc() {
   if wait_for "Web App" check_webapp 15; then
     ok "Web app running — http://$HOST:$PORT (pid $WEBAPP_PID)"
     WEBAPP_OK=1
+    _auto_connect_tk5 &
+    disown $!
   else
     fail "Web app failed to start (pid $WEBAPP_PID)"
     info "Check log: $LOGDIR/webapp.log"
@@ -354,6 +478,20 @@ status_dashboard() {
     echo -e "${CYN}║${RST}  ${GRN}●${RST} TK5 MVS     ${GRN}RUNNING${RST}   TN3270 port 3270           ${CYN}║${RST}"
   else
     echo -e "${CYN}║${RST}  ${RED}●${RST} TK5 MVS     ${RED}DOWN${RST}                                   ${CYN}║${RST}"
+  fi
+
+  # FTP
+  if (echo > /dev/tcp/127.0.0.1/2121) 2>/dev/null; then
+    echo -e "${CYN}║${RST}  ${GRN}●${RST} FTP Server  ${GRN}RUNNING${RST}   ftp localhost 2121         ${CYN}║${RST}"
+  else
+    echo -e "${CYN}║${RST}  ${YEL}●${RST} FTP Server  ${YEL}STANDBY${RST}   submit jcl/ftpd.jcl        ${CYN}║${RST}"
+  fi
+
+  # KICKS
+  if check_tk5; then
+    echo -e "${CYN}║${RST}  ${GRN}●${RST} KICKS CICS  ${GRN}AVAILABLE${RST} type CICS at logon         ${CYN}║${RST}"
+  else
+    echo -e "${CYN}║${RST}  ${YEL}●${RST} KICKS CICS  ${YEL}STANDBY${RST}   needs TK5 running          ${CYN}║${RST}"
   fi
 
   # GPU (only if detected)
@@ -411,13 +549,13 @@ watchdog() {
     sleep 5
     [ "$SHUTTING_DOWN" = "1" ] && break
 
-    # Check web app via curl (more reliable than kill -0)
+    # Check web app via TCP socket
     if check_webapp; then
       backoff=2
       continue
     fi
 
-    # Also check if process is alive (curl might fail during request)
+    # Also check if process is alive (TCP check can fail during a slow request)
     if [ -n "$WEBAPP_PID" ] && kill -0 $WEBAPP_PID 2>/dev/null; then
       continue
     fi

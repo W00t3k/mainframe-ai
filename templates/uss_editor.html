@@ -1,0 +1,795 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>USS Screen Editor — AI/OS</title>
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #111118;
+    --border: #1e1e2e;
+    --text: #cdd6f4;
+    --dim: #6c7086;
+    --accent: #6699ff;
+    --green: #a6e3a1;
+    --yellow: #f9e2af;
+    --red: #f38ba8;
+    --turq: #89dceb;
+    --pink: #cba6f7;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 13px;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Top nav ── */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 20px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .topbar-logo { color: var(--turq); font-weight: 700; font-size: 15px; }
+  .topbar-logo span { color: var(--text); }
+  .topbar-nav { display: flex; gap: 8px; margin-left: auto; }
+  .topbar-nav a {
+    padding: 4px 10px;
+    font-size: 11px;
+    border: 1px solid #333;
+    color: var(--accent);
+    border-radius: 2px;
+    text-decoration: none;
+  }
+  .topbar-nav a:hover { background: rgba(102,153,255,.15); }
+
+  /* ── Main layout ── */
+  .main {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+    height: calc(100vh - 45px);
+  }
+
+  /* ── Left panel: editor ── */
+  .editor-panel {
+    width: 420px;
+    flex-shrink: 0;
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .panel-header {
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    flex-shrink: 0;
+  }
+  .editor-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+    flex-shrink: 0;
+  }
+  .editor-tab {
+    padding: 8px 16px;
+    font-size: 11px;
+    cursor: pointer;
+    color: var(--dim);
+    border-bottom: 2px solid transparent;
+    transition: all .15s;
+  }
+  .editor-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .editor-tab:hover:not(.active) { color: var(--text); }
+
+  .tab-content { display: none; flex: 1; overflow-y: auto; padding: 16px; }
+  .tab-content.active { display: block; }
+
+  .field-group { margin-bottom: 16px; }
+  .field-label {
+    font-size: 10px;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 4px;
+  }
+  .field-hint { font-size: 10px; color: #444; margin-bottom: 4px; }
+  input[type=text], textarea {
+    width: 100%;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    padding: 6px 8px;
+    border-radius: 2px;
+    outline: none;
+    transition: border-color .15s;
+  }
+  input[type=text]:focus, textarea:focus { border-color: var(--accent); }
+  textarea { resize: vertical; min-height: 60px; }
+
+  .raw-jcl-area {
+    width: 100%;
+    background: #0d0d14;
+    border: 1px solid var(--border);
+    color: #a6e3a1;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    padding: 8px;
+    border-radius: 2px;
+    outline: none;
+    resize: none;
+    height: calc(100vh - 200px);
+    tab-size: 4;
+  }
+  .raw-jcl-area:focus { border-color: var(--accent); }
+
+  /* ── Action buttons ── */
+  .action-bar {
+    padding: 12px 16px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+    background: var(--surface);
+  }
+  .btn {
+    padding: 7px 14px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    border: 1px solid;
+    border-radius: 2px;
+    cursor: pointer;
+    transition: all .15s;
+    text-transform: uppercase;
+    letter-spacing: .04em;
+  }
+  .btn-preview { background: transparent; border-color: var(--accent); color: var(--accent); }
+  .btn-preview:hover { background: rgba(102,153,255,.15); }
+  .btn-save { background: transparent; border-color: var(--yellow); color: var(--yellow); }
+  .btn-save:hover { background: rgba(249,226,175,.1); }
+  .btn-install { background: rgba(166,227,161,.15); border-color: var(--green); color: var(--green); }
+  .btn-install:hover { background: rgba(166,227,161,.25); }
+  .btn-revert { background: transparent; border-color: var(--red); color: var(--red); }
+  .btn-revert:hover { background: rgba(243,139,168,.15); }
+  .btn:disabled { opacity: .4; cursor: not-allowed; }
+
+  /* ── Right panel: preview ── */
+  .preview-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  .preview-header {
+    padding: 10px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  .preview-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--dim);
+    text-transform: uppercase;
+    letter-spacing: .08em;
+  }
+  .preview-badge {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+    color: var(--dim);
+  }
+  .preview-badge.live { border-color: var(--green); color: var(--green); }
+
+  .preview-wrap {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: #050508;
+  }
+
+  /* TN3270 screen simulation */
+  .tn3270-screen {
+    background: #000;
+    border: 2px solid #333;
+    border-radius: 4px;
+    padding: 0;
+    width: 640px;
+    min-height: 384px;
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    overflow: hidden;
+    box-shadow: 0 0 40px rgba(0,200,200,.08), 0 0 0 1px #222;
+    position: relative;
+  }
+  .tn3270-screen::before {
+    content: 'TN3270  80×24  VTAM LOGON';
+    display: block;
+    background: #111;
+    color: #444;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-bottom: 1px solid #222;
+    letter-spacing: .06em;
+  }
+  .screen-body {
+    padding: 4px 6px;
+    white-space: pre;
+  }
+  .screen-row {
+    display: block;
+    height: 1.4em;
+    overflow: hidden;
+  }
+
+  /* TN3270 color classes */
+  .c-turq  { color: #00e5e5; }
+  .c-lturq { color: #80ffff; }
+  .c-blue  { color: #6699ff; }
+  .c-green { color: #00cc66; }
+  .c-lgreen{ color: #80ff80; }
+  .c-yellow{ color: #ffcc00; }
+  .c-red   { color: #ff4444; }
+  .c-white { color: #ffffff; }
+  .c-grey  { color: #888888; }
+  .c-dblue { color: #334466; }
+  .c-pink  { color: #ff88ff; }
+  .c-input { color: #80ff80; text-decoration: underline; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    padding: 6px 16px;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    font-size: 10px;
+    color: var(--dim);
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+  .status-ok   { color: var(--green); }
+  .status-err  { color: var(--red); }
+  .status-warn { color: var(--yellow); }
+  #statusMsg { margin-left: auto; }
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-logo">AI<span>/OS</span></div>
+  <span style="color:var(--dim);font-size:11px;">USS Logon Screen Editor</span>
+  <div class="topbar-nav">
+    <a href="/">Home</a>
+    <a href="/terminal">Terminal</a>
+    <a href="/ftp">FTP</a>
+    <a href="/tutor">AI Tutor</a>
+    <a href="/walkthrough">Walkthrough</a>
+    <a href="/labs">Labs</a>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ── Left: Editor ── -->
+  <div class="editor-panel">
+    <div class="panel-header">Screen Editor</div>
+
+    <div class="editor-tabs">
+      <div class="editor-tab active" data-tab="fields">Fields</div>
+      <div class="editor-tab" data-tab="raw">Raw JCL</div>
+    </div>
+
+    <!-- Fields tab -->
+    <div class="tab-content active" id="tab-fields">
+
+      <div class="field-group">
+        <div class="field-label">Banner Line 1</div>
+        <div class="field-hint">Max 58 chars — left half (turquoise)</div>
+        <input type="text" id="f-line1" maxlength="58"
+          value=" ___  _____    ___  ____     ">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Banner Line 2</div>
+        <input type="text" id="f-line2" maxlength="58"
+          value="|   ||_   _|  / _ \\ / ___|   ">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Banner Line 3</div>
+        <input type="text" id="f-line3" maxlength="58"
+          value="|  _| | |   | | | |\\___ \\   ">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Banner Line 4</div>
+        <input type="text" id="f-line4" maxlength="58"
+          value="|_|   |_|    \\___/ |____/   ">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Tagline <span style="color:var(--green)">green</span></div>
+        <div class="field-hint">Max 76 chars</div>
+        <input type="text" id="f-tagline" maxlength="76"
+          value="   Artificial Intelligence Operating System  v1.0-TK5   ">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Pun / Subtitle <span style="color:var(--yellow)">yellow</span></div>
+        <div class="field-hint">Max 76 chars</div>
+        <input type="text" id="f-pun" maxlength="76"
+          value="   Not your grandfather's z/OS. Well, actually...      ">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Kernel / System</div>
+        <input type="text" id="f-kernel" maxlength="34"
+          value="MVS 3.8j TK5 (Hercules)">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Node Name</div>
+        <input type="text" id="f-node" maxlength="12" value="AIOS">
+      </div>
+      <div class="field-group">
+        <div class="field-label">AI Core</div>
+        <input type="text" id="f-ai-core" maxlength="34"
+          value="OLLAMA LOCAL LLM">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Port</div>
+        <input type="text" id="f-port" maxlength="8" value="8080">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Architecture</div>
+        <input type="text" id="f-arch" maxlength="11" value="S/370 ESA">
+      </div>
+      <div class="field-group">
+        <div class="field-label">Security</div>
+        <input type="text" id="f-security" maxlength="12" value="RACF">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Warning Line <span style="color:var(--red)">red</span></div>
+        <input type="text" id="f-warning" maxlength="76"
+          value="  [ AUTHORIZED ACCESS ONLY ]">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Capabilities Row</div>
+        <input type="text" id="f-caps" maxlength="76"
+          value="  CAPABILITIES: TN3270 | FTP | JCL/JES | RACF | COBOL | AI TUTOR">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Labs Row</div>
+        <input type="text" id="f-labs" maxlength="76"
+          value="  LABS: Buffer Overflow | APF Privesc | RACF Hashes | FTP RCE ">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Commands Row</div>
+        <input type="text" id="f-cmds" maxlength="76"
+          value="  CMD: TSO | CICS/KICKS | FTP:2121 | USS-EDIT | web:8080">
+      </div>
+
+      <div class="field-group">
+        <div class="field-label">Footer</div>
+        <input type="text" id="f-footer" maxlength="76"
+          value="  github.com/W00t3k/mainframe-ai    AI/OS on MVS 3.8j / TK5">
+      </div>
+
+    </div><!-- /tab-fields -->
+
+    <!-- Raw JCL tab -->
+    <div class="tab-content" id="tab-raw">
+      <div class="field-hint" style="margin-bottom:8px;">
+        Edit raw JCL directly. Save will overwrite jcl/IBMAI.jcl.
+      </div>
+      <textarea class="raw-jcl-area" id="rawJcl" spellcheck="false"></textarea>
+    </div>
+
+    <div class="action-bar" style="flex-wrap:wrap;gap:6px;">
+      <select id="presetSelect" onchange="loadPreset(this.value)" style="background:#0d0d14;border:1px solid #333;color:#cdd6f4;font-family:'IBM Plex Mono',monospace;font-size:11px;padding:6px 8px;border-radius:2px;cursor:pointer;">
+        <option value="">── Presets ──</option>
+        <option value="aios">AI/OS (current)</option>
+        <option value="ibm">IBM MAINFRAME AI (original)</option>
+        <option value="tk5default">TK5 Turnkey Default</option>
+        <option value="minimal">Minimal / Blank</option>
+      </select>
+      <button class="btn btn-preview" onclick="updatePreview()">&#9654; Preview</button>
+      <button class="btn btn-save" onclick="saveJcl()">&#128190; Save JCL</button>
+      <button class="btn btn-install" onclick="installUss()">&#9654;&#9654; Install</button>
+      <button class="btn btn-revert" id="btnRevert" onclick="revertUss()" style="display:none;">&#8634; Revert</button>
+    </div>
+  </div><!-- /editor-panel -->
+
+  <!-- ── Right: Preview ── -->
+  <div class="preview-panel">
+    <div class="preview-header">
+      <div class="preview-title">TN3270 Preview</div>
+      <div class="preview-badge" id="previewBadge">80×24</div>
+      <div style="margin-left:auto;font-size:10px;color:var(--dim)">
+        Updates live as you type &nbsp;|&nbsp; Colors approximate TN3270 SFE attributes
+      </div>
+    </div>
+
+    <div class="preview-wrap">
+      <div class="tn3270-screen">
+        <div class="screen-body" id="screenBody"></div>
+      </div>
+    </div>
+
+    <div class="status-bar">
+      <span id="mfStatus">Mainframe: <span class="status-warn">checking...</span></span>
+      <span id="cardStatus">Card reader 3505: <span class="status-warn">checking...</span></span>
+      <span id="statusMsg"></span>
+    </div>
+  </div>
+
+</div><!-- /main -->
+
+<script>
+// ── Tab switching ──────────────────────────────────────────────────
+document.querySelectorAll('.editor-tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.editor-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    if (tab.dataset.tab === 'raw') loadRawJcl();
+  });
+});
+
+// ── Helpers ───────────────────────────────────────────────────────
+function pad(s, n) {
+  s = String(s || '');
+  return s.length >= n ? s.slice(0, n) : s + ' '.repeat(n - s.length);
+}
+function get(id) { return document.getElementById(id).value; }
+
+function hbar(n) { return '─'.repeat(n); }
+
+// ── Live preview ──────────────────────────────────────────────────
+function buildScreenRows() {
+  const line1   = pad(get('f-line1'),   58);
+  const line2   = pad(get('f-line2'),   58);
+  const line3   = pad(get('f-line3'),   58);
+  const line4   = pad(get('f-line4'),   58);
+  const tagline = pad(get('f-tagline'), 76);
+  const pun     = pad(get('f-pun'),     76);
+  const kernel  = pad(get('f-kernel'),  34);
+  const node    = pad(get('f-node'),    12);
+  const aicore  = pad(get('f-ai-core'), 34);
+  const port    = pad(get('f-port'),    8);
+  const arch    = pad(get('f-arch'),    11);
+  const sec     = pad(get('f-security'),12);
+  const warning = pad(get('f-warning'), 76);
+  const caps    = pad(get('f-caps'),    76);
+  const labs    = pad(get('f-labs'),    76);
+  const cmds    = pad(get('f-cmds'),    76);
+  const footer  = pad(get('f-footer'),  76);
+
+  const T = (s) => `<span class="c-turq">${esc(s)}</span>`;
+  const B = (s) => `<span class="c-blue">${esc(s)}</span>`;
+  const LT = (s) => `<span class="c-lturq">${esc(s)}</span>`;
+  const G = (s) => `<span class="c-green">${esc(s)}</span>`;
+  const Y = (s) => `<span class="c-yellow">${esc(s)}</span>`;
+  const R = (s) => `<span class="c-red">${esc(s)}</span>`;
+  const W = (s) => `<span class="c-white">${esc(s)}</span>`;
+  const GR = (s) => `<span class="c-grey">${esc(s)}</span>`;
+  const DB = (s) => `<span class="c-dblue">${esc(s)}</span>`;
+  const IN = (s) => `<span class="c-input">${esc(s)}</span>`;
+  const vb = T('│');
+  const sep = DB('─'.repeat(76));
+
+  const rows = [
+    // Row 1: top border
+    T('┌' + '─'.repeat(76) + '┐'),
+    // Row 2-5: banner (left=turq AI, right=blue OS)
+    vb + LT(line1.slice(0,29)) + B(line1.slice(29,58)) + '   ' + vb,
+    vb + LT(line2.slice(0,29)) + B(line2.slice(29,58)) + '   ' + vb,
+    vb + LT(line3.slice(0,29)) + B(line3.slice(29,58)) + '   ' + vb,
+    vb + LT(line4.slice(0,29)) + B(line4.slice(29,58)) + '   ' + vb,
+    // Row 6: tagline
+    vb + G(tagline) + vb,
+    // Row 7: pun
+    vb + Y(pun) + vb,
+    // Row 8: separator
+    vb + sep + vb,
+    // Row 9: kernel
+    vb + GR('  KERNEL  : ') + LT(kernel) + GR('NODE: ') + LT(node) + vb,
+    // Row 10: ai core
+    vb + GR('  AI CORE : ') + G(aicore) + GR('PORT: ') + G(port) + '    ' + vb,
+    // Row 11: arch
+    vb + GR('  ARCH    : ') + Y(arch) + GR('  SECURITY: ') + Y(sec) + GR('  JES2 ACTIVE  ') + vb,
+    // Row 12: separator
+    vb + sep + vb,
+    // Row 13: warning
+    vb + R(warning) + vb,
+    // Row 14: research
+    vb + W('  Research & education platform. Sessions monitored.    ') + '       ' + vb,
+    // Row 15: capabilities
+    vb + GR(caps) + vb,
+    // Row 16: labs
+    vb + G(labs) + vb,
+    // Row 17: separator
+    vb + sep + vb,
+    // Row 18: commands
+    vb + GR(cmds) + vb,
+    // Row 19: blank
+    vb + ' '.repeat(78) + vb,
+    // Row 20: logon prompt
+    vb + LT('  Logon ===> ') + IN('                                                          ') + vb,
+    // Row 21: blank
+    vb + ' '.repeat(78) + vb,
+    // Row 22: footer
+    vb + GR(footer) + vb,
+    // Row 23: bottom border
+    T('└' + '─'.repeat(76) + '┘'),
+    // Row 24: input
+    G('  ==> ') + IN('                                                                      '),
+  ];
+  return rows;
+}
+
+function esc(s) {
+  return String(s)
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+
+function updatePreview() {
+  const rows = buildScreenRows();
+  const body = document.getElementById('screenBody');
+  body.innerHTML = rows.map(r => `<span class="screen-row">${r}</span>`).join('\n');
+}
+
+// Live update on any input change
+document.querySelectorAll('input[type=text]').forEach(el => {
+  el.addEventListener('input', updatePreview);
+});
+
+// ── Load raw JCL from server ──────────────────────────────────────
+async function loadRawJcl() {
+  const ta = document.getElementById('rawJcl');
+  ta.value = 'Loading...';
+  try {
+    const r = await fetch('/api/system/uss/current');
+    const d = await r.json();
+    ta.value = d.jcl || d.error || '';
+  } catch(e) {
+    ta.value = '-- Could not load JCL: ' + e.message;
+  }
+}
+
+// ── Save JCL ──────────────────────────────────────────────────────
+async function saveJcl() {
+  setStatus('Saving...', 'warn');
+  const activeTab = document.querySelector('.editor-tab.active').dataset.tab;
+  let jcl;
+  if (activeTab === 'raw') {
+    jcl = document.getElementById('rawJcl').value;
+  } else {
+    // Fetch current, we're saving the raw file as-is (fields don't regenerate JCL yet)
+    const r = await fetch('/api/system/uss/current');
+    const d = await r.json();
+    jcl = d.jcl || '';
+  }
+  try {
+    const r = await fetch('/api/system/uss/save', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({jcl})
+    });
+    const d = await r.json();
+    if (d.status === 'saved') {
+      setStatus(`Saved (${d.bytes} bytes)`, 'ok');
+    } else {
+      setStatus('Save failed: ' + (d.error || JSON.stringify(d)), 'err');
+    }
+  } catch(e) {
+    setStatus('Save error: ' + e.message, 'err');
+  }
+}
+
+// ── Install USS screen ────────────────────────────────────────────
+async function installUss() {
+  setStatus('Submitting JCL to card reader 3505...', 'warn');
+  document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+  try {
+    const r = await fetch('/api/system/uss/install', {method: 'POST'});
+    const d = await r.json();
+    if (d.status === 'submitted') {
+      setStatus('✓ ' + d.message, 'ok');
+      document.getElementById('previewBadge').textContent = 'INSTALLED';
+      document.getElementById('previewBadge').classList.add('live');
+    } else {
+      setStatus('✗ ' + (d.error || JSON.stringify(d)), 'err');
+    }
+  } catch(e) {
+    setStatus('Install error: ' + e.message, 'err');
+  } finally {
+    document.querySelectorAll('.btn').forEach(b => b.disabled = false);
+  }
+}
+
+function setStatus(msg, level) {
+  const el = document.getElementById('statusMsg');
+  el.textContent = msg;
+  el.className = level === 'ok' ? 'status-ok' : level === 'err' ? 'status-err' : 'status-warn';
+}
+
+// ── Poll mainframe status ─────────────────────────────────────────
+async function pollStatus() {
+  try {
+    const r = await fetch('/api/system/mainframe/status');
+    const d = await r.json();
+    const mf = document.getElementById('mfStatus');
+    const cr = document.getElementById('cardStatus');
+    mf.innerHTML = 'Mainframe: <span class="' +
+      (d.running ? 'status-ok">online' : 'status-err">offline') + '</span>';
+    const card = d.services?.card_reader?.up;
+    cr.innerHTML = 'Card reader 3505: <span class="' +
+      (card ? 'status-ok">open' : 'status-warn">closed') + '</span>';
+  } catch(e) {
+    document.getElementById('mfStatus').innerHTML =
+      'Mainframe: <span class="status-err">unreachable</span>';
+  }
+}
+
+// ── Presets ──────────────────────────────────────────────────────
+const PRESETS = {
+  aios: {
+    'f-line1':   ' ___  _____    ___  ____     ',
+    'f-line2':   '|   ||_   _|  / _ \\ / ___|   ',
+    'f-line3':   '|  _| | |   | | | |\\___ \\   ',
+    'f-line4':   '|_|   |_|    \\___/ |____/   ',
+    'f-tagline': '    AI/OS  --  Artificial Intelligence Operating System ',
+    'f-pun':     "   Not your grandfather's z/OS. Well, actually...      ",
+    'f-kernel':  'MVS 3.8j TK5 (Hercules)',
+    'f-node':    'AIOS',
+    'f-ai-core': 'OLLAMA LOCAL LLM',
+    'f-port':    '8080',
+    'f-arch':    'S/370 ESA',
+    'f-security':'RACF',
+    'f-warning': '  [ AUTHORIZED ACCESS ONLY ]',
+    'f-caps':    '  CAPABILITIES: TN3270 | FTP | JCL/JES | RACF | COBOL | AI TUTOR',
+    'f-labs':    '  LABS: Buffer Overflow | APF Privesc | RACF Hashes | FTP RCE',
+    'f-cmds':    '  CMD: TSO | CICS/KICKS | FTP:2121 | USS-EDIT | web:8080',
+    'f-footer':  '  github.com/W00t3k/mainframe-ai    AI/OS on MVS 3.8j / TK5',
+  },
+  ibm: {
+    'f-line1':   '  ___  ____  __  __      __  __    _    ___ _   _ ___ ',
+    'f-line2':   ' |_ _|| __ \\|  \\/  |    |  \\/  |  / \\  |_ _| \\ | |_ _|',
+    'f-line3':   '  | | |  _ <| |\\/| |    | |\\/| | / _ \\  | ||  \\| || | ',
+    'f-line4':   ' |___||____/|_|  |_|    |_|  |_/_/   \\_\\___|_| \\_|___|',
+    'f-tagline': '          AI-Powered Mainframe Operations Platform      ',
+    'f-pun':     '                                                        ',
+    'f-kernel':  'MVS 3.8j TK5 (Hercules)',
+    'f-node':    'HERCULES',
+    'f-ai-core': 'OLLAMA LOCAL LLM',
+    'f-port':    '8080',
+    'f-arch':    'S/370 ESA',
+    'f-security':'RACF',
+    'f-warning': '  ** AUTHORIZED ACCESS ONLY **',
+    'f-caps':    '  This system is for authorized research and education',
+    'f-labs':    '  only. All sessions are monitored and logged.',
+    'f-cmds':    '  CMD: TSO | CICS/KICKS | FTP:2121 | USS-EDIT | web:8080',
+    'f-footer':  '  github.com/W00t3k/mainframe-ai          MVS 3.8j / TK5',
+  },
+  tk5default: {
+    'f-line1':   '  _____  _  __ ____                                     ',
+    'f-line2':   ' |_   _|| |/ /| ___|    TK5 MVS Turnkey System          ',
+    'f-line3':   '   | |  |   / |___ \\    MVS 3.8j (Hercules)             ',
+    'f-line4':   '   |_|  |_|  |____/    Turnkey 5 Distribution           ',
+    'f-tagline': '         MVS 3.8j Turnkey System  —  Juergen Winkelmann  ',
+    'f-pun':     '         The Heritage of IBM Mainframe Computing         ',
+    'f-kernel':  'MVS 3.8j TK5 (Hercules)',
+    'f-node':    'HERCULES',
+    'f-ai-core': 'N/A',
+    'f-port':    '3270',
+    'f-arch':    'S/370',
+    'f-security':'RACF',
+    'f-warning': '  AUTHORIZED USERS ONLY — ALL ACCESS LOGGED',
+    'f-caps':    '  TSO | ISPF | JES2 | COBOL | FORTRAN | PL/I | RPG | CICS (KICKS)',
+    'f-labs':    '  VTAM | SNA | NCP | RACF | SMF | RMF | SYSLOG | CONSOLE',
+    'f-cmds':    '  Enter TSO userid to logon, or LOGOFF to disconnect',
+    'f-footer':  '  TK5 — github.com/mainframed/tk5    MVS 3.8j Turnkey',
+  },
+  minimal: {
+    'f-line1':   '                                                        ',
+    'f-line2':   '                                                        ',
+    'f-line3':   '                                                        ',
+    'f-line4':   '                                                        ',
+    'f-tagline': '                MVS 3.8j TK5 — Hercules Emulator        ',
+    'f-pun':     '                                                        ',
+    'f-kernel':  'MVS 3.8j TK5',
+    'f-node':    'HERCULES',
+    'f-ai-core': 'OLLAMA',
+    'f-port':    '8080',
+    'f-arch':    'S/370',
+    'f-security':'RACF',
+    'f-warning': '  AUTHORIZED ACCESS ONLY',
+    'f-caps':    '  Research and education use only.',
+    'f-labs':    '                                                        ',
+    'f-cmds':    '  CMD: TSO  CICS  LOGOFF',
+    'f-footer':  '  github.com/W00t3k/mainframe-ai',
+  },
+};
+
+function loadPreset(name) {
+  if (!name || !PRESETS[name]) return;
+  const p = PRESETS[name];
+  Object.entries(p).forEach(([id, val]) => {
+    const el = document.getElementById(id);
+    if (el) el.value = val;
+  });
+  document.getElementById('presetSelect').value = '';
+  updatePreview();
+  setStatus('Preset loaded — click Save JCL then Install to apply.', 'warn');
+}
+
+// ── Revert to backup ─────────────────────────────────────────────
+async function revertUss() {
+  if (!confirm('Revert to the previous USS screen? This will restore the backup JCL and re-submit it to MVS.')) return;
+  setStatus('Reverting...', 'warn');
+  document.querySelectorAll('.btn').forEach(b => b.disabled = true);
+  try {
+    const r = await fetch('/api/system/uss/revert', {method: 'POST'});
+    const d = await r.json();
+    if (d.status === 'reverted') {
+      setStatus('✓ ' + d.message, 'ok');
+      // Reload the raw JCL tab to show restored content
+      loadRawJcl();
+    } else {
+      setStatus('✗ ' + (d.error || JSON.stringify(d)), 'err');
+    }
+  } catch(e) {
+    setStatus('Revert error: ' + e.message, 'err');
+  } finally {
+    document.querySelectorAll('.btn').forEach(b => b.disabled = false);
+  }
+}
+
+async function checkBackup() {
+  try {
+    const r = await fetch('/api/system/uss/has-backup');
+    const d = await r.json();
+    document.getElementById('btnRevert').style.display = d.has_backup ? '' : 'none';
+  } catch(e) {}
+}
+
+// ── Init ──────────────────────────────────────────────────────────
+updatePreview();
+pollStatus();
+checkBackup();
+setInterval(pollStatus, 8000);
+</script>
+</body>
+</html>

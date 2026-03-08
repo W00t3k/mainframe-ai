@@ -1,21 +1,22 @@
 /* ══════════════════════════════════════════════════════════════════════════
-   OS/2 WARP 4 THEME — Terminal Page
-   Authentic IBM OS/2 Warp desktop aesthetic
+   OS/2 WARP 2 THEME — Terminal Page
+   Authentic IBM OS/2 Warp 2.x desktop aesthetic with deep blue desktop
    ══════════════════════════════════════════════════════════════════════════ */
 
-/* ── OS/2 Warp Color Palette ── */
+/* ── OS/2 Warp 2 Color Palette ── */
 :root {
-    --os2-desktop: #008080;
-    --os2-desktop-dark: #006868;
+    --os2-desktop: #000080;
+    --os2-desktop-dark: #000060;
+    --os2-desktop-light: #0000a0;
     --os2-win-bg: #c0c0c0;
     --os2-win-light: #ffffff;
     --os2-win-dark: #808080;
     --os2-win-darker: #404040;
-    --os2-title-bg: #00007b;
-    --os2-title-bg2: #1084d0;
+    --os2-title-bg: #000080;
+    --os2-title-bg2: #1060a0;
     --os2-title-text: #ffffff;
-    --os2-title-inactive: #7f7f7f;
-    --os2-menu-bg: #d4d0c8;
+    --os2-title-inactive: #808080;
+    --os2-menu-bg: #c0c0c0;
     --os2-menu-text: #000000;
     --os2-btn-face: #c0c0c0;
     --os2-btn-highlight: #ffffff;
@@ -24,7 +25,7 @@
     --os2-field-bg: #ffffff;
     --os2-field-text: #000000;
     --os2-taskbar-bg: #c0c0c0;
-    --os2-selection: #00007b;
+    --os2-selection: #000080;
 }
 
 body {
@@ -38,13 +39,21 @@ body {
     font-size: 12px;
 }
 
-/* ── OS/2 Desktop ── */
+/* ── OS/2 Warp 2 Desktop ── */
 .os2-desktop {
     flex: 1;
     position: relative;
     background:
-        radial-gradient(ellipse at 30% 40%, rgba(0,180,180,0.15) 0%, transparent 60%),
-        linear-gradient(135deg, #006868 0%, #008080 30%, #009090 60%, #007878 100%);
+        /* Subtle dither pattern — classic OS/2 2.x feel */
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 1px,
+            rgba(0,0,80,0.08) 1px,
+            rgba(0,0,80,0.08) 2px
+        ),
+        radial-gradient(ellipse at 40% 35%, rgba(0,40,160,0.2) 0%, transparent 60%),
+        linear-gradient(180deg, #000070 0%, #000088 35%, #0000a0 65%, #000078 100%);
     display: flex;
     padding: 8px;
     overflow: hidden;
@@ -77,24 +86,24 @@ body {
     text-decoration: none;
     color: #fff;
     font-size: 10px;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.6);
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.9);
     border: 1px solid transparent;
-    border-radius: 2px;
+    border-radius: 0;
     cursor: pointer;
     min-width: 56px;
     text-align: center;
 }
 
 .os2-icon:hover {
-    background: rgba(255,255,255,0.15);
-    border-color: rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.25);
     color: #fff;
     text-decoration: none;
 }
 
 .os2-icon-active {
-    background: rgba(255,255,255,0.18);
-    border-color: rgba(255,255,255,0.35);
+    background: rgba(255,255,255,0.15);
+    border-color: rgba(255,255,255,0.3);
 }
 
 .os2-icon-img {
@@ -132,7 +141,7 @@ body {
     display: flex;
     align-items: center;
     height: 22px;
-    background: linear-gradient(90deg, var(--os2-title-bg) 0%, var(--os2-title-bg2) 100%);
+    background: linear-gradient(90deg, #000060 0%, #000080 30%, #0040a0 70%, #0060b0 100%);
     padding: 0 2px;
     gap: 2px;
     flex-shrink: 0;
@@ -604,6 +613,37 @@ body {
 .os2-taskbar-logo {
     height: 14px;
     width: auto;
+}
+
+/* Warp 2 top info bar (drive/memory info) */
+.os2-infobar {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    background: var(--os2-taskbar-bg);
+    border-bottom: 2px solid var(--os2-btn-darkshadow);
+    border-top: none;
+    padding: 0 4px;
+    gap: 4px;
+    flex-shrink: 0;
+    z-index: 100;
+}
+
+.os2-infobar-field {
+    background: var(--os2-field-bg);
+    border-top: 1px solid var(--os2-btn-shadow);
+    border-left: 1px solid var(--os2-btn-shadow);
+    border-right: 1px solid var(--os2-btn-highlight);
+    border-bottom: 1px solid var(--os2-btn-highlight);
+    padding: 1px 6px;
+    font-size: 10px;
+    font-weight: 700;
+    color: #000;
+    white-space: nowrap;
+}
+
+.os2-infobar-spacer {
+    flex: 1;
 }
 
 .os2-taskbar-divider {

@@ -6,7 +6,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 
 ### Prerequisites
 
-- Python 3.10+
+- Python 3.11+
 - [Ollama](https://ollama.com) for local LLM inference
 - TK5 MVS 3.8j emulator for integration testing (optional)
 
@@ -68,24 +68,29 @@ mypy app/
 ## Project Structure
 
 ```
-mainframe_ai_assistant/
-├── run.py                   # Application entry point
+mainframe-ai/
+├── run.py                   # Application entry point (Uvicorn)
 ├── app/                     # Modular FastAPI application
 │   ├── routes/              # API endpoints (14 modules)
-│   ├── services/            # Business logic
-│   ├── constants/           # Prompts, walkthroughs, paths
-│   └── models/              # Pydantic schemas
-├── agent_tools.py           # TN3270 connection tools
-├── trust_graph.py           # Graph data model
-├── graph_tools.py           # Graph analysis
-├── rag_engine.py            # RAG engine
-├── recon_engine.py          # Enumeration and findings
-├── methodology_engine.py    # Assessment methodology
-├── mcp_server.py            # MCP server
-├── templates/               # Jinja2 HTML templates (16 pages)
+│   ├── services/            # Business logic (chat, Ollama client)
+│   ├── constants/           # Prompts, 13 walkthroughs, 9 learning paths
+│   ├── models/              # Pydantic schemas
+│   └── websocket/           # Real-time terminal/graph updates
+├── agent_tools.py           # TN3270 connection, screen reading, tool definitions
+├── trust_graph.py           # BloodHound-style graph data model
+├── graph_tools.py           # JCL/SYSOUT parsers, screen classifiers
+├── rag_engine.py            # Local RAG with file-based vector store
+├── recon_engine.py          # TSO/CICS/VTAM enumeration + report gen
+├── methodology_engine.py    # F1–F5 findings framework, 6 control planes
+├── mcp_server.py            # Model Context Protocol server
+├── ai_bridge.py             # KICKS/CICS ↔ Ollama bridge
+├── templates/               # Jinja2 HTML templates (24 pages)
 ├── static/                  # CSS, JS, fonts, images
 ├── docs/                    # Documentation
-└── lab_data/                # Lab exercise definitions
+├── lab_data/                # Lab exercise definitions (JSON)
+├── start.sh                 # One-command launcher (Ollama + TK5 + Web App)
+├── install.sh               # Linux installer (deps, Ollama, venv, TK5)
+└── tk5/                     # TK5 MVS 3.8j emulator + Hercules binaries
 ```
 
 ## Making Changes
@@ -136,7 +141,7 @@ pytest
 pytest tests/test_models.py
 
 # Run with coverage
-pytest --cov=tn3270v2_modules
+pytest --cov=app
 
 # Run only unit tests (no mainframe required)
 pytest -m "not integration"
@@ -145,29 +150,26 @@ pytest -m "not integration"
 ### Writing Tests
 
 ```python
-# tests/test_models.py
+# tests/test_agent_tools.py
 import pytest
-from tn3270v2_modules.core.models import Screen, Field
+from agent_tools import connect_mainframe, read_screen, disconnect_mainframe
 
-def test_field_creation():
-    field = Field("TEST", 0, 0, "SF(c0=c8)")
-    assert field.contents == "TEST"
-    assert field.row == 0
-    assert field.col == 0
+def test_disconnect_when_not_connected():
+    result = disconnect_mainframe()
+    assert "Disconnected" in result
 
-def test_screen_fields():
-    # Create mock buffer
-    buffer = ["00 00 SF(c0=c8) 54 45 53 54"]  # "TEST"
-    screen = Screen(buffer)
-    assert len(screen.fields) > 0
+def test_read_screen_when_not_connected():
+    screen = read_screen()
+    assert "Not connected" in screen
 
 @pytest.mark.integration
-def test_emulator_connect():
-    """Requires running mainframe"""
-    from tn3270v2_modules.emulator.wrapper import WrappedEmulator
-    em = WrappedEmulator(visible=False)
-    em.connect('localhost:3270')
-    assert em.is_connected()
+def test_connect_and_read():
+    """Requires running TK5 mainframe on localhost:3270"""
+    success, msg = connect_mainframe('localhost:3270')
+    assert success
+    screen = read_screen()
+    assert len(screen) > 0
+    disconnect_mainframe()
 ```
 
 ### Test Markers
@@ -214,74 +216,46 @@ Each module should have a README.md with:
 
 ## Adding Features
 
-### New z/OS Parser
+### New Walkthrough
 
-1. Create `tn3270v2_modules/zos/new_helper.py`:
-
-```python
-#!/usr/bin/env python3
-"""
-New Subsystem Helper for z/OS
-"""
-
-class NewHelper:
-    def __init__(self):
-        pass
-
-    def detect_screen(self, screen_text: str) -> bool:
-        """Detect if screen is from this subsystem"""
-        indicators = ['INDICATOR1', 'INDICATOR2']
-        return any(i in screen_text.upper() for i in indicators)
-
-    def parse_output(self, screen_text: str) -> dict:
-        """Parse subsystem output"""
-        result = {}
-        # Implementation
-        return result
-```
-
-2. Update `tn3270v2_modules/zos/__init__.py`:
+1. Add step definitions to `app/constants/walkthrough_scripts.py`:
 
 ```python
-from .new_helper import NewHelper
+WALKTHROUGH_SCRIPTS["my-walkthrough"] = {
+    "title": "My Walkthrough Title",
+    "steps": [
+        {
+            "title": "Step Name",
+            "control_plane": "tso",
+            "narration": "**What's happening** — explanation here.",
+            "actions": [{"type": "connect"}],
+            "expect": ["VTAM", "Logon"],
+            "display_seconds": 8,
+        },
+    ],
+}
 ```
 
-3. Add tests in `tests/test_new_helper.py`
-4. Document in `tn3270v2_modules/zos/README.md`
+2. Add a walkthrough prompt to `app/constants/prompts.py` in `WALKTHROUGH_PROMPTS`
+3. Optionally add a learning path in `app/constants/paths.py`
+4. The walkthrough appears automatically in the UI
 
-### New Security Check
+### New Route Module
 
-1. Add pattern to `SecurityScanner.patterns`:
+1. Create `app/routes/myfeature.py`:
 
 ```python
-self.patterns['new_pattern'] = [
-    r'regex_pattern_1',
-    r'regex_pattern_2',
-]
+from fastapi import APIRouter
+from fastapi.responses import JSONResponse
+
+router = APIRouter(tags=["myfeature"])
+
+@router.get("/api/myfeature/status")
+async def status():
+    return JSONResponse({"status": "ok"})
 ```
 
-2. Update `scan_screen()` if needed
-3. Add test case
-4. Update documentation
-
-### New Export Format
-
-1. Add function to `tn3270v2_modules/io/exporters.py`:
-
-```python
-def export_to_new_format(history, filename):
-    """Export to new format"""
-    # Implementation
-    return True
-```
-
-2. Update `auto_export()`:
-
-```python
-elif filename_lower.endswith('.new'):
-    return export_to_new_format(history, filename)
-```
-
+2. Register in `app/routes/__init__.py`
 3. Add tests and documentation
 
 ## Pull Request Process

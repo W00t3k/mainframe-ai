@@ -197,21 +197,6 @@ start_webapp_gpu() {
 
   detect_python
 
-  # Verify venv has required packages — reinstall if missing
-  if ! "$PYTHON" -c "import fastapi, uvicorn, httpx" 2>/dev/null; then
-    info "Missing Python packages — reinstalling requirements..."
-    "$PYTHON" -m pip install -q -r "$DIR/requirements.txt" 2>/dev/null
-    if ! "$PYTHON" -c "import fastapi, uvicorn, httpx" 2>/dev/null; then
-      fail "Cannot import required packages from $PYTHON"
-      fail "Run: $PYTHON -m pip install -r requirements.txt"
-      exit 1
-    fi
-    ok "Packages reinstalled"
-  fi
-
-  PY_VER=$("$PYTHON" -c "import sys; print(f'{sys.version_info.major}.{sys.version_info.minor}')" 2>/dev/null)
-  gpu "Python: $PYTHON (v${PY_VER})"
-
   export OLLAMA_MODEL="$MODEL"
   nohup $PYTHON run.py --host $HOST --port $PORT --model "$MODEL" \
     > "$LOGDIR/webapp_gpu.log" 2>&1 &

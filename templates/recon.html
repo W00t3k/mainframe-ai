@@ -310,6 +310,9 @@
                     <button class="step-nav-btn" data-step="4" onclick="showAssessStep(4)">
                         <span class="step-num">5</span> App Mapper
                     </button>
+                    <button class="step-nav-btn" data-step="5" onclick="showAssessStep(5)">
+                        <span class="step-num">6</span> System Enum
+                    </button>
                 </div>
 
                 <!-- Step 1: VTAM -->
@@ -480,16 +483,35 @@
                         <div class="rationale-tags"><span class="tag">Authority Evaluation</span><span class="tag">Policy Enforcement</span></div>
                     </div>
                     <div class="step-controls">
-                        <div class="form-row">
+                        <div class="form-row" style="gap:0.5rem;flex-wrap:wrap;">
+                            <div class="form-group" style="flex:1;min-width:160px;">
+                                <label>Navigate to Screen First</label>
+                                <select id="hiddenNavTarget" style="width:100%;background:#0f1520;color:#c6cdd5;border:1px solid #2a3a5a;padding:4px 8px;font-family:IBM Plex Mono,monospace;font-size:12px;">
+                                    <option value="">— Current Screen —</option>
+                                    <option value="tso-logon">TSO Logon Screen</option>
+                                    <option value="cics">CICS/KICKS Logon</option>
+                                    <option value="vtam">VTAM USS Screen</option>
+                                    <option value="ispf">ISPF Primary Menu</option>
+                                </select>
+                            </div>
+                            <button class="btn btn-primary" id="hiddenScanBtn" onclick="runHiddenFieldScan()">
+                                🔍 Scan Hidden Fields
+                            </button>
                             <button class="btn btn-primary" onclick="runScreenAnalysis()">
                                 Scan Current Screen
                             </button>
+                        </div>
+                        <div id="hiddenScanStatus" style="display:none;margin-top:0.5rem;font-size:11px;color:#f80;font-family:IBM Plex Mono,monospace;">
+                            Navigating and scanning...
                         </div>
                     </div>
                     <div class="step-results" id="screenResults" style="display:none;">
                         <!-- Hidden Fields -->
                         <div id="hiddenFieldsSection" style="margin-bottom:1.5rem;">
-                            <h4>Hidden Fields</h4>
+                            <h4 style="display:flex;align-items:center;gap:0.5rem;">
+                                Hidden Fields
+                                <span id="hiddenFieldCount" style="background:#f80;color:#000;font-size:10px;padding:1px 6px;border-radius:3px;font-weight:bold;display:none;"></span>
+                            </h4>
                             <div class="results-scroll">
                                 <table class="results-table">
                                     <thead><tr><th>Row</th><th>Col</th><th>Type</th><th>Content</th><th>Attr</th></tr></thead>
@@ -567,6 +589,53 @@
                     </div>
                 </div>
 
+                <!-- Step 6: System Enumeration -->
+                <div class="assess-step" id="step-5">
+                    <div class="step-header">
+                        <div class="step-badge cp-racf">RACF</div>
+                        <div class="step-badge cp-tso">TSO</div>
+                        <h3>Step 6: System Enumeration (Live)</h3>
+                    </div>
+                    <div class="step-rationale">
+                        <div class="rationale-label">WHY</div>
+                        <p>A normal TSO user can enumerate APF libraries, RACF settings, dataset allocations,
+                           system configuration, and the master catalog — all without triggering alerts.
+                           This is what an attacker sees after obtaining credentials.
+                           Adapted from <strong>mainframed/pentesting/ENUM_REFACTORED</strong>.</p>
+                        <div class="rationale-tags"><span class="tag">APF Libraries</span><span class="tag">RACF Config</span><span class="tag">Privilege Paths</span></div>
+                    </div>
+                    <div class="step-controls">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>TSO Userid</label>
+                                <input type="text" id="sysEnumUserid" placeholder="HERC01" value="HERC01" style="width:120px;">
+                            </div>
+                            <div class="form-group">
+                                <label>Password</label>
+                                <input type="password" id="sysEnumPassword" placeholder="CUL8TR" value="CUL8TR" style="width:120px;">
+                            </div>
+                            <button class="btn btn-primary" id="sysEnumStart" onclick="runSystemEnum()">
+                                Run System Enumeration
+                            </button>
+                            <button class="btn btn-stop" id="sysEnumStop" onclick="stopEnumeration()" style="display:none;">Stop</button>
+                        </div>
+                        <p style="font-size:11px;color:#888;margin-top:4px;">Auto-logs into TSO if needed. Runs: LU, LISTALC, LISTDS on APF libs, LISTDS PARMLIB/PROCLIB, LISTCAT, TIME.</p>
+                    </div>
+                    <div class="progress-label" id="sysEnumProgressLabel"></div>
+                    <div class="progress-bar" id="sysEnumProgress"><div class="fill" id="sysEnumProgressFill"></div></div>
+                    <div class="step-results" id="sysEnumResults" style="display:none;">
+                        <div id="sysEnumResultsContainer"></div>
+                        <button class="btn btn-secondary" style="margin-top:0.75rem;" onclick="runStepAI('sysenum')">AI Interpret Results</button>
+                        <div class="ai-analysis-panel step-ai" id="sysenumAI" style="display:none;margin-top:0.75rem;">
+                            <div class="ai-loading" id="sysenumAILoading" style="display:none;"><span class="ai-spinner"></span> Analyzing...</div>
+                            <div id="sysenumAIText" class="ai-markdown"></div>
+                        </div>
+                    </div>
+                    <div class="empty-state" id="sysEnumEmpty">
+                        <p>Run live TSO commands to enumerate APF libraries, RACF settings, dataset allocations, PARMLIB, and the master catalog.</p>
+                    </div>
+                </div>
+
             </div>
         </div>
 
@@ -619,6 +688,12 @@
                             <div class="no-findings">No mapping findings yet. Run Step 5 in the Assess tab.</div>
                         </div>
                     </div>
+                    <div class="plane-findings-group" id="findings-sysenum">
+                        <h3><span class="cp-tag cp-racf">RACF</span> <span class="cp-tag cp-tso">TSO</span> System Enumeration Findings</h3>
+                        <div class="plane-findings-list" id="findingsList-sysenum">
+                            <div class="no-findings">No system enumeration findings yet. Run Step 6 in the Assess tab.</div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="empty-state" id="findingsEmpty">
@@ -643,6 +718,7 @@
                         <div class="report-step-badge" id="reportStep2">Step 3: CICS <span class="step-status">--</span></div>
                         <div class="report-step-badge" id="reportStep3">Step 4: Screen Analysis <span class="step-status">--</span></div>
                         <div class="report-step-badge" id="reportStep4">Step 5: App Mapper <span class="step-status">--</span></div>
+                        <div class="report-step-badge" id="reportStep5">Step 6: System Enum <span class="step-status">--</span></div>
                     </div>
                 </div>
 
@@ -959,11 +1035,15 @@ async function runAssessStep(module) {
         if (wordlist) body.wordlist = wordlist;
         if (cmdSeq) body.command_sequence = cmdSeq.split(',').map(s => s.trim());
 
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), 300000); // 5 min max
         const res = await fetch('/api/recon/enumerate', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
-            body: JSON.stringify(body)
+            body: JSON.stringify(body),
+            signal: ctrl.signal
         });
+        clearTimeout(timer);
         const data = await res.json();
 
         if (data.results) {
@@ -987,12 +1067,125 @@ async function runAssessStep(module) {
 function stopEnumeration() {
     fetch('/api/recon/enumerate/stop', {method: 'POST'}).catch(() => {});
     enumRunning = false;
-    ['vtam','tso','cics'].forEach(m => {
+    ['vtam','tso','cics','sysEnum'].forEach(m => {
         const startBtn = document.getElementById(m + 'Start');
         const stopBtn = document.getElementById(m + 'Stop');
         if (startBtn) startBtn.style.display = 'inline-flex';
         if (stopBtn) stopBtn.style.display = 'none';
     });
+}
+
+// ==========================================================================
+// System Enumeration (mainframed/ENUM_REFACTORED adapted)
+// ==========================================================================
+let sysEnumResults = [];
+assessResults.sysenum = [];
+
+async function runSystemEnum() {
+    if (!isConnected) {
+        showToast('Connect to a mainframe first', 'error');
+        return;
+    }
+
+    const userid = document.getElementById('sysEnumUserid').value.trim() || 'HERC01';
+    const password = document.getElementById('sysEnumPassword').value.trim() || 'CUL8TR';
+    const startBtn = document.getElementById('sysEnumStart');
+    const stopBtn = document.getElementById('sysEnumStop');
+    const emptyEl = document.getElementById('sysEnumEmpty');
+    const resultsEl = document.getElementById('sysEnumResults');
+    const container = document.getElementById('sysEnumResultsContainer');
+    const progressBar = document.getElementById('sysEnumProgress');
+    const progressFill = document.getElementById('sysEnumProgressFill');
+    const progressLabel = document.getElementById('sysEnumProgressLabel');
+
+    if (startBtn) startBtn.style.display = 'none';
+    if (stopBtn) stopBtn.style.display = 'inline-flex';
+    if (emptyEl) emptyEl.style.display = 'none';
+    if (progressBar) progressBar.classList.add('active');
+    if (progressFill) progressFill.style.width = '5%';
+    if (progressLabel) { progressLabel.classList.add('active'); progressLabel.textContent = 'Logging into TSO and running enumeration (10 commands)...'; }
+    enumRunning = true;
+
+    try {
+        const res = await fetch('/api/recon/enumerate/system', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ userid, password }),
+            signal: AbortSignal.timeout(300000)
+        });
+        const data = await res.json();
+
+        if (data.results) {
+            sysEnumResults = data.results;
+            assessResults.sysenum = data.results;
+            renderSysEnumResults(container, data.results);
+            if (resultsEl) resultsEl.style.display = '';
+            if (progressFill) progressFill.style.width = '100%';
+            const totalFindings = data.results.reduce((n, r) => n + (r.findings || []).length, 0);
+            if (progressLabel) progressLabel.textContent = `Done — ${data.results.length} commands, ${totalFindings} findings`;
+            updateFindingsTab('sysenum', data.results);
+            updateReportStepStatus('sysenum', data.results.length);
+        }
+        if (data.error) showToast(data.error, 'error');
+    } catch (e) {
+        showToast('System enumeration failed: ' + e.message, 'error');
+    }
+
+    enumRunning = false;
+    if (startBtn) startBtn.style.display = 'inline-flex';
+    if (stopBtn) stopBtn.style.display = 'none';
+    if (progressBar) progressBar.classList.remove('active');
+}
+
+function renderSysEnumResults(container, results) {
+    if (!container) return;
+
+    const sevColors = { critical: '#f44', warning: '#f80', info: '#4af' };
+    let totalFindings = { critical: 0, warning: 0, info: 0 };
+
+    results.forEach(r => {
+        (r.findings || []).forEach(f => {
+            if (totalFindings[f.severity] !== undefined) totalFindings[f.severity]++;
+        });
+    });
+
+    let html = `<div style="display:flex;gap:1rem;margin-bottom:1rem;flex-wrap:wrap;">
+        <div style="background:#1a1a2e;border:1px solid #f44;padding:8px 16px;border-radius:4px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:700;color:#f44;">${totalFindings.critical}</div>
+            <div style="font-size:0.7rem;color:#888;">Critical</div>
+        </div>
+        <div style="background:#1a1a2e;border:1px solid #f80;padding:8px 16px;border-radius:4px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:700;color:#f80;">${totalFindings.warning}</div>
+            <div style="font-size:0.7rem;color:#888;">Warning</div>
+        </div>
+        <div style="background:#1a1a2e;border:1px solid #4af;padding:8px 16px;border-radius:4px;text-align:center;">
+            <div style="font-size:1.5rem;font-weight:700;color:#4af;">${totalFindings.info}</div>
+            <div style="font-size:0.7rem;color:#888;">Info</div>
+        </div>
+    </div>`;
+
+    results.forEach(r => {
+        const findingsHtml = (r.findings || []).map(f =>
+            `<span style="display:inline-block;font-size:10px;padding:1px 6px;border-radius:3px;margin:1px;background:${sevColors[f.severity] || '#555'}22;color:${sevColors[f.severity] || '#888'};border:1px solid ${sevColors[f.severity] || '#555'}44;">${f.pattern}: ${f.line.substring(0,80)}</span>`
+        ).join('');
+
+        const outputEsc = (r.output || '').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+        html += `<details style="margin-bottom:0.5rem;border:1px solid #2a3a5a;border-radius:4px;">
+            <summary style="padding:8px 12px;cursor:pointer;background:#0f1520;display:flex;align-items:center;gap:8px;font-family:'IBM Plex Mono',monospace;font-size:12px;">
+                <span style="color:#63a7ff;font-weight:600;min-width:180px;">${r.label}</span>
+                <span style="color:#888;font-size:11px;flex:1;">${r.description}</span>
+                <span style="color:#555;font-size:10px;">${(r.findings || []).length} findings</span>
+            </summary>
+            <div style="padding:8px 12px;">
+                <div style="font-size:10px;color:#888;margin-bottom:4px;">$ ${r.command}</div>
+                ${findingsHtml ? '<div style="margin-bottom:8px;">' + findingsHtml + '</div>' : ''}
+                <pre style="background:#080c12;padding:8px;border-radius:3px;font-size:11px;color:#c6cdd5;max-height:300px;overflow:auto;white-space:pre-wrap;margin:0;">${outputEsc}</pre>
+            </div>
+        </details>`;
+    });
+
+    container.innerHTML = html;
 }
 
 function renderStepResults(module, results) {
@@ -1028,6 +1221,97 @@ function renderStepResults(module, results) {
 // ==========================================================================
 let hiddenFields = [];
 let screenFindings = [];
+
+async function runHiddenFieldScan() {
+    const navTarget = document.getElementById('hiddenNavTarget').value;
+    const statusEl = document.getElementById('hiddenScanStatus');
+    const btn = document.getElementById('hiddenScanBtn');
+
+    btn.disabled = true;
+    btn.textContent = 'Scanning...';
+    statusEl.style.display = 'block';
+
+    // Navigate to target screen first if requested
+    if (navTarget) {
+        const navMap = {
+            'tso-logon': [
+                {type:'clear'}, {type:'string', value:'TSO'}, {type:'enter'}
+            ],
+            'cics': [
+                {type:'clear'}, {type:'string', value:'LOGON APPLID(CICS2)'}, {type:'enter'}
+            ],
+            'vtam': [
+                {type:'clear'}, {type:'pa', value:'1'}
+            ],
+            'ispf': [
+                {type:'clear'}, {type:'string', value:'TSO'}, {type:'enter'},
+                {type:'string', value:'HERC01'}, {type:'enter'}
+            ]
+        };
+        const steps = navMap[navTarget] || [];
+        for (const step of steps) {
+            await fetch('/api/terminal/key', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(step)
+            }).catch(() => {});
+            await new Promise(r => setTimeout(r, 1200));
+        }
+        statusEl.textContent = 'Navigated — scanning for hidden fields...';
+        await new Promise(r => setTimeout(r, 800));
+    } else {
+        statusEl.textContent = 'Scanning current screen...';
+    }
+
+    // Run hidden field scan
+    try {
+        const res = await fetch('/api/recon/hidden-fields', {method: 'POST'});
+        const data = await res.json();
+        hiddenFields = data.fields || [];
+        assessResults.screen = assessResults.screen || {};
+        assessResults.screen.hidden = hiddenFields;
+
+        // Show results
+        document.getElementById('screenEmpty').style.display = 'none';
+        document.getElementById('screenResults').style.display = 'block';
+
+        const hfBody = document.getElementById('hiddenFieldsBody');
+        hfBody.innerHTML = '';
+        const countBadge = document.getElementById('hiddenFieldCount');
+
+        if (hiddenFields.length > 0) {
+            countBadge.textContent = hiddenFields.length + ' found';
+            countBadge.style.display = 'inline';
+            hiddenFields.forEach(f => {
+                const tr = document.createElement('tr');
+                const content = (f.content || '').substring(0, 60);
+                const sev = f.field_type && f.field_type.includes('hidden') ? 'color:#f80;font-weight:bold;' : '';
+                tr.innerHTML = `
+                    <td>${f.row}</td>
+                    <td>${f.col}</td>
+                    <td style="${sev}">${f.field_type}</td>
+                    <td><code style="color:#0f0;">${content || '(empty)'}</code></td>
+                    <td style="color:var(--ibm-gray-50);">${f.attr_hex || '-'}</td>
+                `;
+                hfBody.appendChild(tr);
+            });
+            statusEl.textContent = `✓ Found ${hiddenFields.length} hidden field(s)`;
+            statusEl.style.color = '#f80';
+        } else {
+            countBadge.style.display = 'none';
+            hfBody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--ibm-gray-50);">No hidden fields detected on this screen</td></tr>';
+            statusEl.textContent = '✓ No hidden fields found';
+            statusEl.style.color = '#0f0';
+        }
+        updateReportStepStatus('screen', hiddenFields.length);
+    } catch(e) {
+        statusEl.textContent = 'Error: ' + e.message;
+        statusEl.style.color = '#f44';
+    }
+
+    btn.disabled = false;
+    btn.textContent = '🔍 Scan Hidden Fields';
+}
 
 async function runScreenAnalysis() {
     document.getElementById('screenEmpty').style.display = 'none';
@@ -1190,6 +1474,13 @@ async function runStepAI(module) {
 
     if (module === 'vtam' || module === 'tso' || module === 'cics') {
         payload.enumerate_results = assessResults[module];
+    } else if (module === 'sysenum') {
+        // Pass system enum findings as screen_findings for AI analysis
+        const allFindings = (assessResults.sysenum || []).flatMap(r => (r.findings || []).map(f => ({
+            severity: f.severity, description: f.pattern, match: f.line, location: r.label
+        })));
+        payload.screen_findings = allFindings;
+        payload.current_screen = (assessResults.sysenum || []).map(r => `=== ${r.label} ===\n$ ${r.command}\n${r.output || ''}`).join('\n\n').substring(0, 3000);
     } else if (module === 'screen') {
         payload.hidden_fields = assessResults.screen.hidden;
         payload.screen_findings = assessResults.screen.findings;
@@ -1240,6 +1531,32 @@ function updateFindingsTab(module, results) {
     if (!listEl) return;
 
     document.getElementById('findingsEmpty').style.display = 'none';
+
+    if (module === 'sysenum') {
+        listEl.innerHTML = '';
+        const allFindings = results.flatMap(r => (r.findings || []).map(f => ({...f, label: r.label})));
+        if (allFindings.length === 0) {
+            listEl.innerHTML = '<div class="no-findings">System enumeration complete — no security findings detected.</div>';
+            updateSeverityBar();
+            return;
+        }
+        const sevColors = { critical: 'critical', warning: 'high', info: 'info' };
+        allFindings.forEach(f => {
+            const sev = sevColors[f.severity] || 'info';
+            const card = document.createElement('div');
+            card.className = 'finding-card ' + sev;
+            card.innerHTML = `
+                <div class="finding-header">
+                    <span class="badge sev-${sev}">${f.severity}</span>
+                    <span class="finding-desc"><strong>${f.pattern}</strong>: ${(f.line || '').substring(0, 120)}</span>
+                </div>
+                <div class="finding-location">From: ${f.label}</div>
+            `;
+            listEl.appendChild(card);
+        });
+        updateSeverityBar();
+        return;
+    }
 
     if (module === 'screen') {
         // Screen analysis findings
@@ -1329,6 +1646,15 @@ function updateSeverityBar() {
         });
     });
 
+    // Count from system enum findings
+    (assessResults.sysenum || []).forEach(r => {
+        (r.findings || []).forEach(f => {
+            if (f.severity === 'critical') counts.critical++;
+            else if (f.severity === 'warning') counts.high++;
+            else counts.info++;
+        });
+    });
+
     const total = Object.values(counts).reduce((a, b) => a + b, 0);
     if (total > 0) {
         bar.style.display = 'flex';
@@ -1344,7 +1670,7 @@ function updateSeverityBar() {
 // Report tab
 // ==========================================================================
 function updateReportStepStatus(module, count) {
-    const stepMap = { vtam: 0, tso: 1, cics: 2, screen: 3, map: 4 };
+    const stepMap = { vtam: 0, tso: 1, cics: 2, screen: 3, map: 4, sysenum: 5 };
     const idx = stepMap[module];
     if (idx === undefined) return;
     const el = document.getElementById('reportStep' + idx);
@@ -1367,7 +1693,12 @@ async function generateReport(format) {
                 format: format,
                 enumerate_results: getEnumResults(),
                 hidden_fields: assessResults.screen.hidden || [],
-                screen_findings: assessResults.screen.findings || [],
+                screen_findings: [
+                    ...(assessResults.screen.findings || []),
+                    ...(assessResults.sysenum || []).flatMap(r => (r.findings || []).map(f => ({
+                        severity: f.severity, description: f.pattern, match: f.line, location: r.label
+                    })))
+                ],
                 map_tree: assessResults.map || [],
             })
         });

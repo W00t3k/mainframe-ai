@@ -1,0 +1,47 @@
+{
+  "id": "dc30-hello-world",
+  "title": "DC30 Lab 1: Run HELLO — First Mainframe Program",
+  "description": "Log in to TSO, learn ISPF navigation, and run your first mainframe program. The HELLO binary uses gets() — a deliberately vulnerable C function. This is the foundation for all buffer overflow labs.",
+  "category": "fundamentals",
+  "difficulty": "beginner",
+  "source": "DC30_Workshop / DEFCON 30",
+  "walkthrough": true,
+  "steps": [
+    {
+      "title": "Connect and Log In",
+      "screen": " VTAM LOGON SCREEN\n\n Enter your TSO userid and press ENTER.\n\n Userid   ===> HERC01\n Password ===> (enter CUL8TR)\n\n TK5 MVS 3.8j — TN3270 on port 3270\n Connect with: x3270 localhost:3270\n Or use the web terminal at http://localhost:8080",
+      "expected": "You are at the TSO READY prompt after logging in.",
+      "hint": "On TK5 use HERC01 / CUL8TR. In the original DC30 workshop users were DC00-DC22 with matching passwords."
+    },
+    {
+      "title": "Run the HELLO Program",
+      "screen": " READY\n CALL 'HERC01.LOAD(HELLO)'\n\n Hi, D3FC0N attendee what is your handle?\n _\n\n Note: Always include the single quotes around the dataset name.\n Before running, clear the screen with: CLS",
+      "expected": "The HELLO program prints its greeting and waits for your input.",
+      "hint": "CALL is the TSO command to execute a load module from a PDS. The format is CALL 'HLQ.LOAD(MEMBER)'. The program uses gets() — no bounds checking on the 150-byte buffer."
+    },
+    {
+      "title": "ISPF Primer — Accessing Files",
+      "screen": " TSO READY\n ISPF\n\n ---- ISPF PRIMARY OPTION MENU ----\n  0  Settings\n  1  View\n  2  Edit\n  3  Utilities\n  4  Foreground\n  5  Batch\n  6  Command\n  7  Dialog Test\n  9  IBM Products\n  10 SCLM\n  11 Workplace\n\n Option ===>",
+      "expected": "You are at the ISPF Primary Option Menu.",
+      "hint": "Type ISPF at the READY prompt to enter ISPF. Use =3.4 to browse datasets, =3.8 to view job output. F3 exits any screen. F2 opens a second window, F9 cycles between windows."
+    },
+    {
+      "title": "Browse Your Datasets",
+      "screen": " ISPF OPTION ===> 3.4\n\n  DSLIST - Data Sets Matching HERC01\n  Command ===> ___________\n\n  Dataset Name                       Volume\n  HERC01.JCLLIB                      PUB001\n  HERC01.LOAD                        PUB001\n  HERC01.OVERFLOW                    PUB001\n  HERC01.DUMP001                     PUB001",
+      "expected": "You can see your personal datasets: JCLLIB, LOAD, OVERFLOW, DUMP001.",
+      "hint": "Type =3.4 from anywhere in ISPF to reach the dataset list. Enter your HLQ (HERC01) in the prefix field. Put V next to a dataset to view it, E to edit, S to browse members."
+    },
+    {
+      "title": "Access LAB01 JCL",
+      "screen": " EDIT - HERC01.JCLLIB(LAB01)\n Command ===> ___________\n\n //LAB01    JOB (TSO),'RUN HELLO',CLASS=A,\n //             MSGCLASS=X,MSGLEVEL=(1,1),\n //             USER=HERC01,PASSWORD=CUL8TR\n //*\n //STEP01   EXEC PGM=HELLO\n //STEPLIB  DD DSN=HERC01.LOAD,DISP=SHR\n //STDIN    DD DSN=HERC01.OVERFLOW(LOC400),DISP=SHR\n //SYSUDUMP DD DSN=HERC01.DUMP001,DISP=(,CATLG,DELETE),\n //             UNIT=SYSDA,SPACE=(CYL,(5,1))",
+      "expected": "You can see the JCL for Lab 1 in the ISPF editor.",
+      "hint": "Navigate: =3.4 → put E next to HERC01.JCLLIB → put E next to LAB01. The STDIN DD points to an overflow file — this is what gets fed to gets() in the HELLO program."
+    },
+    {
+      "title": "Submit and View Output",
+      "screen": " EDIT - HERC01.JCLLIB(LAB01)\n Command ===> SUBMIT\n\n IKJ56250I JOB LAB01(JOB00123) SUBMITTED\n\n --- View output: =3.8 ---\n\n SDSF OUTPUT DISPLAY  HERC01  JOB00123\n  NP JOBNAME  JobID    Owner    Prty Queue  C Pos  SAff  ASid  Status\n     LAB01    JOB00123 HERC01   1    PRINT  A\n\n MAX COND CODE 0000",
+      "expected": "Job LAB01 completes with MAX COND CODE 0000.",
+      "hint": "Type SUBMIT on the command line while in the JCL editor. Then =3.8 to view job output. Put S next to the job to see the sysout. MAX COND CODE 0000 means success."
+    }
+  ]
+}

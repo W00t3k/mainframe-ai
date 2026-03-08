@@ -1,0 +1,138 @@
+{
+  "id": "bof-demo",
+  "title": "Buffer Overflow on MVS 3.8j",
+  "subtitle": "Classic stack overflow on a 1978 mainframe OS",
+  "level": "intermediate",
+  "domain": "exploit-development",
+  "time": "20-30 minutes",
+  "objective": "Demonstrate that buffer overflows exist on mainframes using the same primitive as modern exploitation",
+  "summary": "A vulnerable assembler program reads input without bounds checking. When input exceeds the buffer, the MVS save area (equivalent to the stack frame) is corrupted. The return address (R14) is overwritten, causing S0C4 — the mainframe equivalent of SIGSEGV. A controlled payload proves arbitrary code execution via WTO (Write To Operator).",
+  "defender_outcome": "Understand that mainframe programs are susceptible to memory corruption bugs, and that ABEND dumps reveal the same diagnostic information as core dumps on modern systems.",
+  "intent": "educational",
+  "tags": ["buffer-overflow", "exploit", "assembler", "S0C4", "save-area", "WTO", "DC30"],
+  "steps": [
+    {
+      "id": 1,
+      "title": "Understand the Vulnerability",
+      "instruction": "Review the vulnerable program structure. On MVS, the save area chain (R13 pointer) replaces the stack. R14 holds the return address. A buffer overflow overwrites these registers.",
+      "type": "theory",
+      "key_concepts": [
+        "MVS save area = stack frame (72 bytes, 18 fullwords)",
+        "R14 = return address (like RIP/EIP on x86)",
+        "R13 = save area pointer (like RSP/ESP)",
+        "MVC instruction copies fixed length — no bounds check",
+        "S0C4 = Protection Exception = SIGSEGV equivalent"
+      ]
+    },
+    {
+      "id": 2,
+      "title": "Assemble the Vulnerable Program",
+      "instruction": "Submit the bof_demo.jcl job. This assembles BOFVULN — a program with a 24-byte buffer that copies 80 bytes of input into it.",
+      "jcl": "jcl/bof_demo.jcl",
+      "expected": "ASM RC=0000, LKED RC=0000",
+      "expected_signature": ["RC=0000"]
+    },
+    {
+      "id": 3,
+      "title": "Run with Safe Input",
+      "instruction": "The SAFE step runs BOFVULN with input shorter than 24 bytes. It should complete normally with RC=0000 and output 'HELLO SHORT INPUT - SAFE'.",
+      "expected": "HELLO SHORT INPUT",
+      "expected_signature": ["RC=0000", "HELLO"]
+    },
+    {
+      "id": 4,
+      "title": "Trigger the Overflow",
+      "instruction": "The CRASH step sends 68 bytes (AAAA...BBBB...CCCC...DDDD...) into the 24-byte buffer. This overwrites the canary ('DEADBEEF'), adjacent data, and eventually the save area.",
+      "expected": "S0C4 ABEND",
+      "expected_signature": ["S0C4", "SYSTEM COMPLETION CODE"]
+    },
+    {
+      "id": 5,
+      "title": "Analyze the ABEND Dump",
+      "instruction": "Examine the job output. Look for: (1) The PSW at time of error — shows where execution went wrong. (2) Register contents — R14 should contain corrupted data (0xC1C1C1C1 = 'AAAA' in EBCDIC). (3) The save area chain — shows corruption pattern.",
+      "key_concepts": [
+        "PSW (Program Status Word) = instruction pointer + status flags",
+        "Register dump shows R0-R15 at time of ABEND",
+        "0xC1 = EBCDIC 'A' — if R14 contains C1C1C1C1, overflow reached return address",
+        "Save area at R13 should show corruption pattern"
+      ]
+    },
+    {
+      "id": 6,
+      "title": "Find the Exact Offset",
+      "instruction": "Use the De Bruijn pattern generator to create a unique pattern. Submit it as input and check which bytes landed in R14. The pattern offset tells you exactly how many bytes of padding are needed before the return address.",
+      "type": "interactive",
+      "tool": "debruijn_pattern"
+    },
+    {
+      "id": 7,
+      "title": "Prove Controlled Execution (WTO Payload)",
+      "instruction": "Submit bof_exploit.jcl which assembles and runs WTOPAYLD — a program that issues WTO messages to the operator console. In a real exploit, this code would be injected via the overflow. The WTO messages on the Hercules console prove controlled execution.",
+      "jcl": "jcl/bof_exploit.jcl",
+      "expected": "*** HELLO FROM EXPLOIT ***",
+      "expected_signature": ["HELLO FROM EXPLOIT", "WTO"]
+    },
+    {
+      "id": 8,
+      "title": "Connect the Dots",
+      "instruction": "The exploit chain: User Input → MVC (no bounds check) → Save Area Corruption → R14 Overwrite → Controlled Execution. This is identical to modern buffer overflows. The mainframe has no ASLR, no stack canaries, no DEP — making exploitation conceptually simpler than modern systems.",
+      "type": "theory",
+      "key_concepts": [
+        "No ASLR — addresses are predictable",
+        "No stack canaries — no runtime overflow detection",
+        "No DEP/NX — data areas are executable",
+        "No PIE — program loaded at fixed address",
+        "Save area chain is always at a known offset from R13",
+        "WTO = proof of arbitrary code execution",
+        "SVC calls = the path to Supervisor Mode"
+      ]
+    }
+  ],
+  "de_bruijn": {
+    "description": "A De Bruijn sequence where every N-character substring is unique. Used to determine the exact offset of the return address in a buffer overflow.",
+    "charset": "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789",
+    "note": "On MVS, input is EBCDIC. The pattern must account for ASCII→EBCDIC translation."
+  },
+  "memory_layout": {
+    "description": "Memory layout of the vulnerable program",
+    "diagram": [
+      "Low Address",
+      "┌─────────────────────────────┐",
+      "│ SAVEAREA (72 bytes / 18F)   │ ← R13 points here",
+      "│   +0:  unused               │",
+      "│   +4:  backward chain ptr   │",
+      "│   +8:  forward chain ptr    │",
+      "│   +12: saved R14 (RET ADDR) │ ★ TARGET",
+      "│   +16: saved R15            │",
+      "│   +20: saved R0             │",
+      "│   ...                       │",
+      "│   +68: saved R12            │",
+      "├─────────────────────────────┤",
+      "│ SMALLBUF (24 bytes)         │ ← OVERFLOW STARTS HERE",
+      "├─────────────────────────────┤",
+      "│ CANARY 'DEADBEEF' (8 bytes) │ ← First to be corrupted",
+      "├─────────────────────────────┤",
+      "│ ADJDATA (48 bytes)          │",
+      "├─────────────────────────────┤",
+      "│ INBUF (80 bytes)            │ ← Full input read here first",
+      "├─────────────────────────────┤",
+      "│ OUTMSG (80 bytes)           │",
+      "├─────────────────────────────┤",
+      "│ INDCB / OUTDCB              │",
+      "└─────────────────────────────┘",
+      "High Address"
+    ]
+  },
+  "svc_escalation": {
+    "title": "Historical: Supervisor Mode via SVC on MVS",
+    "description": "On MVS 3.8j, SVC (Supervisor Call) instructions transition from Problem State to Supervisor State. If an attacker can execute arbitrary code (via buffer overflow), they can issue SVC instructions to gain Supervisor Mode privileges. SVC 244 was historically used for authorized program facility (APF) bypass. This is the mainframe equivalent of a kernel exploit — going from userland to ring 0.",
+    "key_concepts": [
+      "SVC = System Call (like syscall on Linux)",
+      "Problem State = User Mode (PSW bit 15 = 1)",
+      "Supervisor State = Kernel Mode (PSW bit 15 = 0)",
+      "APF authorization = trusted program status",
+      "SVC 244 = historical APF bypass vector",
+      "Once in Supervisor State: full memory access, I/O, everything"
+    ]
+  }
+}

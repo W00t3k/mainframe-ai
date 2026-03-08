@@ -230,14 +230,23 @@ class RAGEngine:
         except Exception as e:
             print(f"Error saving embeddings: {e}")
 
+    def _ollama_reachable(self) -> bool:
+        """Quick check if Ollama is up — 2s timeout to avoid blocking."""
+        try:
+            with httpx.Client() as client:
+                r = client.get(f"{OLLAMA_URL}/api/tags", timeout=2.0)
+                return r.status_code == 200
+        except Exception:
+            return False
+
     def get_embedding_sync(self, text: str) -> Optional[List[float]]:
         """Get embedding from Ollama (sync version)"""
         try:
             with httpx.Client() as client:
                 response = client.post(
                     f"{OLLAMA_URL}/api/embeddings",
-                    json={"model": EMBEDDING_MODEL, "prompt": text[:8000]},  # Limit text length
-                    timeout=60.0
+                    json={"model": EMBEDDING_MODEL, "prompt": text[:8000]},
+                    timeout=10.0
                 )
                 if response.status_code == 200:
                     return response.json().get("embedding")
@@ -308,6 +317,9 @@ class RAGEngine:
             return {"success": False, "error": "No content to index"}
 
         # Get embeddings and store
+        if not self._ollama_reachable():
+            return {"success": False, "error": "Ollama is offline — cannot generate embeddings"}
+
         added_chunks = 0
         existing_hashes = {c.get("hash") for c in self.chunks if c.get("hash")}
         for i, chunk in enumerate(text_chunks):

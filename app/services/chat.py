@@ -9,6 +9,7 @@ from typing import List, Dict, Any, Optional
 
 from app.config import get_config
 from app.services.ollama import get_ollama_service
+from app.services.llm_provider import get_llm_service
 from app.constants.prompts import SYSTEM_PROMPT
 
 
@@ -18,6 +19,7 @@ class ChatService:
     def __init__(self):
         self.config = get_config()
         self.ollama = get_ollama_service()
+        self.llm = get_llm_service()
         self.conversation_history: List[Dict[str, str]] = []
         self.max_history = 40
         
@@ -184,21 +186,20 @@ class ChatService:
             args = parts[1] if len(parts) > 1 else ""
             return await self.process_command(cmd, args)
         
-        # Check if Ollama is running
-        if not await self.ollama.check_available():
-            result["response"] = """⚠️ **Ollama is not running!**
+        # Check if any LLM provider is available
+        if not await self.llm.check_available():
+            result["response"] = """⚠️ **No LLM provider available!**
 
-Start Ollama with:
+**Option 1 — Local (Ollama):**
 ```bash
 ollama serve
+ollama pull llama3.1:8b
 ```
 
-Or install it:
-```bash
-brew install ollama
-ollama pull llama3.1:8b
-ollama serve
-```"""
+**Option 2 — Cloud (Grok):**
+Set `XAI_API_KEY` environment variable with your xAI API key.
+Then switch provider: `POST /api/llm/provider/switch {"provider": "grok"}`
+"""
             return result
         
         # Build context
@@ -217,8 +218,8 @@ ollama serve
             "content": full_message
         })
         
-        # Call Ollama
-        assistant_message = await self.ollama.chat_simple(self.conversation_history)
+        # Call LLM (routes to Ollama or Grok based on provider config)
+        assistant_message = await self.llm.chat_simple(self.conversation_history)
         
         self.conversation_history.append({
             "role": "assistant",

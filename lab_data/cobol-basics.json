@@ -1,0 +1,51 @@
+{
+  "id": "cobol-basics",
+  "title": "COBOL Compile & Execute on MVS",
+  "description": "Create a COBOL program, write JCL, submit the compile-link-go job. Trace the deferred execution model.",
+  "category": "fundamentals",
+  "difficulty": "intermediate",
+  "steps": [
+    {
+      "title": "Create a COBOL Source Member",
+      "screen": "ISPF Edit — HERC01.COBOL(HELLO)\n\n       IDENTIFICATION DIVISION.\n       PROGRAM-ID. HELLO.\n       ENVIRONMENT DIVISION.\n       DATA DIVISION.\n       PROCEDURE DIVISION.\n           DISPLAY 'HELLO FROM MVS'.\n           STOP RUN.\n\nCommand ===>",
+      "expected": "Write a minimal COBOL program in a PDS member.",
+      "hint": "COBOL on MVS uses fixed-format columns: 7-72 for code, 73-80 for sequence numbers."
+    },
+    {
+      "title": "Write Compile JCL",
+      "screen": "ISPF Edit — HERC01.JCL(COBCOMP)\n\n//COBCOMP  JOB (ACCT),'COMPILE',CLASS=A,MSGCLASS=X\n//COBOL    EXEC IGYWCL\n//COBOL.SYSIN  DD DSN=HERC01.COBOL(HELLO),DISP=SHR\n//LKED.SYSLMOD DD DSN=HERC01.LOAD(HELLO),\n//             DISP=(NEW,CATLG,DELETE),\n//             SPACE=(TRK,(1,1,1))\n\nCommand ===>",
+      "expected": "JCL to compile and link-edit the COBOL program.",
+      "hint": "IGYWCL is the compile-link procedure. SYSLMOD is the output load module library."
+    },
+    {
+      "title": "Submit and Monitor",
+      "screen": "SDSF STATUS DISPLAY\n\nNJobname  JobID    Owner  Prty  Status\n-COBCOMP  JOB00201 HERC01 1     ACTIVE\n\nStep COBOL executing...\nStep LKED executing...\n\nIEWL530I END OF LINKEDIT\nIEF142I COBCOMP COBOL  - STEP WAS EXECUTED - COND CODE 0000\nIEF142I COBCOMP LKED   - STEP WAS EXECUTED - COND CODE 0000",
+      "expected": "Both compile and link steps complete with condition code 0000.",
+      "hint": "Condition code 0000 = success. Code 4 = warning. Code 8+ = error."
+    },
+    {
+      "title": "Write Execute JCL",
+      "screen": "ISPF Edit — HERC01.JCL(COBRUN)\n\n//COBRUN   JOB (ACCT),'RUN HELLO',CLASS=A,MSGCLASS=X\n//STEP1    EXEC PGM=HELLO\n//STEPLIB  DD DSN=HERC01.LOAD,DISP=SHR\n//SYSOUT   DD SYSOUT=*\n\nCommand ===>",
+      "expected": "JCL to execute the compiled COBOL load module.",
+      "hint": "STEPLIB points to the load library containing the HELLO program."
+    },
+    {
+      "title": "View Output",
+      "screen": "SDSF OUTPUT — COBRUN JOB00202\n\n1                                       JOB00202\n0         HELLO FROM MVS\n\nIEF142I COBRUN STEP1 - STEP WAS EXECUTED - COND CODE 0000\nIEF285I  HERC01.LOAD                      KEPT\nIEF373I STEP/STEP1/START 2026060.2115\nIEF374I STEP/STEP1/STOP  2026060.2115 CPU 0MIN 00.01SEC",
+      "expected": "Program output 'HELLO FROM MVS' appears in SYSOUT.",
+      "hint": "The output goes to the JES spool, not a terminal — this is deferred execution."
+    },
+    {
+      "title": "Deferred Execution Model",
+      "screen": "COBOL Execution Model on MVS\n\nWrite source -> Compile (IGYCRCTL) -> Link (IEWL) -> Execute\n\nEach step is a SEPARATE job or step.\nExecution is DEFERRED — not interactive.\nIdentity is bound at JOB card submission time.\n\nSecurity implication:\nA malicious COBOL program submitted under a privileged\nuser's identity runs with THEIR RACF authority.",
+      "expected": "Understand the compile-link-go pipeline and its security implications.",
+      "hint": "The gap between submission and execution is the mainframe's unique attack surface."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "COBOL Basics Lab Complete\n\nYou have:\n- Written COBOL source in a PDS member\n- Compiled with IGYWCL procedure\n- Link-edited to a load module\n- Executed via JCL batch job\n- Observed deferred execution model\n\nKey insight: All execution on MVS is fundamentally\nbatch-oriented, even interactive TSO sessions.",
+      "expected": "Complete the full COBOL compile-link-go cycle on MVS.",
+      "hint": "Understanding this pipeline is essential for analyzing JCL-based attack vectors."
+    }
+  ]
+}

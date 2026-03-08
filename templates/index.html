@@ -3,7 +3,7 @@
 {% block title %}IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/index.css?v=413">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=416">
 {% endblock %}
 
 {% block head_extra %}
@@ -18,6 +18,7 @@
     <div class="idx-toolbar" id="idxToolbar">
         <div class="idx-toolbar-items">
             <div class="idx-toolbar-center">
+                <a href="/tutorials" class="idx-pill idx-pill-outline" data-hint="Tutorial library — step-by-step exercises for TSO, ISPF, JCL, COBOL, KICKS/CICS, and more.">[T] TUTORIALS</a>
                 <a href="/walkthrough" class="idx-pill idx-pill-accent" data-hint="Interactive walkthrough — learn mainframe concepts, control planes, and security fundamentals step by step.">[F1] LEARN</a>
                 <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()" data-hint="Connect to the TN3270 terminal — opens a live session to the MVS 3.8j mainframe via Hercules emulator.">[C] CONNECT</button>
                 <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()" data-hint="Run a guided demo — automatically walks through mainframe screens with AI narration explaining each step.">[D] DEMO</button>
@@ -106,25 +107,137 @@
             </a>
         </div>
 
-        <!-- ── More Tools (collapsible, collapsed by default) ── -->
+        <!-- ══ OS/2 Warp 2 — Programs Window ══ -->
         <div class="cp-heading cp-toggle" onclick="toggleSection('toolsGrid', this)" style="margin-top:1.5rem;"><span class="cp-arrow">&#9654;</span> MORE TOOLS</div>
-        <nav class="idx-nav collapsed" id="toolsGrid">
-            <a href="/terminal" class="idx-nav-item" data-hint="Full-screen TN3270 terminal — direct mainframe access with AI-powered screen analysis and command assistance."><span class="idx-nav-icon">[>_]</span><span class="idx-nav-label">Terminal</span></a>
-            <a href="/chat" class="idx-nav-item" data-hint="AI Chat — ask questions about mainframe operations, security, JCL, COBOL, and get instant expert answers."><span class="idx-nav-icon">[AI]</span><span class="idx-nav-label">AI Chat</span></a>
-            <a href="/walkthrough" class="idx-nav-item" data-hint="Guided walkthrough — step-by-step tour of mainframe subsystems with AI narration and live terminal demos."><span class="idx-nav-icon">[>>]</span><span class="idx-nav-label">Walkthrough</span></a>
-            <a href="/scanner" class="idx-nav-item" data-hint="Screen scanner — analyze TN3270 screens for security issues, hidden fields, and configuration weaknesses."><span class="idx-nav-icon">[?]</span><span class="idx-nav-label">Scanner</span></a>
-            <a href="/tutor" class="idx-nav-item" data-hint="Red Team Tutor — interactive learning environment for mainframe penetration testing techniques and methodology."><span class="idx-nav-icon">[F1]</span><span class="idx-nav-label">Tutor</span></a>
-            <a href="/labs" class="idx-nav-item" data-hint="Hands-on labs — practice mainframe skills with guided exercises covering JCL, TSO, RACF, and more."><span class="idx-nav-icon">[LAB]</span><span class="idx-nav-label">Labs</span></a>
-            <a href="/recon" class="idx-nav-item" data-hint="Test & Report — run security assessments, enumerate subsystems, and generate professional pentest reports."><span class="idx-nav-icon">[*]</span><span class="idx-nav-label">Test & Report</span></a>
-            <a href="/graph" class="idx-nav-item" data-hint="Trust graph — visualize relationships between mainframe subsystems, users, and security controls."><span class="idx-nav-icon">[#]</span><span class="idx-nav-label">Graph</span></a>
-            <a href="/abstract-models" class="idx-nav-item" data-hint="Abstract models — mental models for understanding mainframe security architecture and attack surfaces."><span class="idx-nav-icon">[M]</span><span class="idx-nav-label">Models</span></a>
-            <a href="/rag" class="idx-nav-item" data-hint="Knowledge base — RAG-powered document manager. Upload and query mainframe documentation and manuals."><span class="idx-nav-icon">[KB]</span><span class="idx-nav-label">Knowledge</span></a>
-            <a href="/architecture" class="idx-nav-item" data-hint="Architecture view — explore the system design, API endpoints, and component relationships of this application."><span class="idx-nav-icon">[A]</span><span class="idx-nav-label">Architecture</span></a>
-            <a href="/docs" class="idx-nav-item" data-hint="API documentation — full reference for all REST endpoints, request/response formats, and integration guides."><span class="idx-nav-icon">[DOC]</span><span class="idx-nav-label">API Docs</span></a>
-            <a href="#" onclick="event.preventDefault();toggleSection('videoSection', document.querySelector('[onclick*=videoSection]'));document.getElementById('videoSection').scrollIntoView({behavior:'smooth'});" class="idx-nav-item" data-hint="Watch the AI-powered mainframe demo video."><span class="idx-nav-icon">[&#9654;]</span><span class="idx-nav-label">Video</span></a>
-            <a href="/deck" class="idx-nav-item" data-hint="Download the conference PowerPoint deck."><span class="idx-nav-icon">[PPT]</span><span class="idx-nav-label">Deck</span></a>
-            <a href="/abstract" class="idx-nav-item" data-hint="Conference abstract — Hacking Big Iron with AI."><span class="idx-nav-icon">[ABS]</span><span class="idx-nav-label">Abstract</span></a>
-        </nav>
+        <div class="os2w collapsed" id="toolsGrid">
+            <!-- OS/2 Title Bar -->
+            <div class="os2w-titlebar">
+                <div class="os2w-sysmenu"><span>&#9632;</span></div>
+                <div class="os2w-title">Programs &mdash; Icon View</div>
+                <div class="os2w-btns">
+                    <button class="os2w-btn" title="Minimize">&#9660;</button>
+                    <button class="os2w-btn" title="Maximize">&#9650;</button>
+                </div>
+            </div>
+            <!-- OS/2 Menu Bar -->
+            <div class="os2w-menubar">
+                <span class="os2w-menu-item"><u>F</u>older</span>
+                <span class="os2w-menu-item"><u>E</u>dit</span>
+                <span class="os2w-menu-item"><u>V</u>iew</span>
+                <span class="os2w-menu-item"><u>S</u>elected</span>
+                <span class="os2w-menu-item"><u>H</u>elp</span>
+            </div>
+            <!-- OS/2 Icon View Client Area -->
+            <div class="os2w-client">
+                <nav class="os2w-icons">
+                    <!-- Terminal — black window, green text -->
+                    <a href="/terminal" class="os2w-icon" data-hint="Full-screen TN3270 terminal.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="3" width="28" height="22" fill="#000" stroke="#C0C0C0" stroke-width="1"/><rect x="2" y="3" width="28" height="3" fill="#000080"/><text x="4" y="5.5" fill="#FFF" font-size="2.5" font-family="monospace">_</text><rect x="26" y="3.5" width="3" height="2" fill="#C0C0C0" stroke="#808080" stroke-width=".3"/><text x="4" y="13" fill="#00FF00" font-size="5" font-family="monospace">C:\&gt;_</text><text x="4" y="19" fill="#00FF00" font-size="3.5" font-family="monospace">READY</text><rect x="4" y="27" width="24" height="3" rx="1" fill="#808080"/><rect x="5" y="27.5" width="22" height="2" rx=".5" fill="#C0C0C0"/></svg></span>
+                        <span class="os2w-icon-lbl">Terminal</span>
+                    </a>
+                    <!-- AI Chat — yellow speech bubble -->
+                    <a href="/chat" class="os2w-icon" data-hint="AI Chat.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="3" y="2" width="26" height="18" rx="3" fill="#FFFF00" stroke="#808000" stroke-width="1"/><polygon points="8,20 12,20 7,26" fill="#FFFF00" stroke="#808000" stroke-width="1" stroke-linejoin="round"/><text x="7" y="9" fill="#000080" font-size="5" font-weight="bold" font-family="monospace">AI</text><circle cx="9" cy="14" r="1.5" fill="#000080"/><circle cx="15" cy="14" r="1.5" fill="#000080"/><circle cx="21" cy="14" r="1.5" fill="#000080"/></svg></span>
+                        <span class="os2w-icon-lbl">AI Chat</span>
+                    </a>
+                    <!-- Walkthrough — green play on white doc -->
+                    <a href="/walkthrough" class="os2w-icon" data-hint="Guided walkthrough.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="20" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="24,2 24,8 30,8" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><line x1="24" y1="2" x2="30" y2="8" stroke="#808080" stroke-width="1"/><rect x="4" y="8" width="26" height="22" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="11,12 11,24 23,18" fill="#008000" stroke="#004000" stroke-width="1"/></svg></span>
+                        <span class="os2w-icon-lbl">Walkthrough</span>
+                    </a>
+                    <!-- Scanner — magnifying glass -->
+                    <a href="/scanner" class="os2w-icon" data-hint="Screen scanner.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="14" cy="13" r="9" fill="none" stroke="#000080" stroke-width="2.5"/><circle cx="14" cy="13" r="7" fill="#C0FFFF" stroke="none"/><line x1="20" y1="19" x2="28" y2="28" stroke="#808000" stroke-width="3" stroke-linecap="round"/><line x1="21" y1="20" x2="29" y2="29" stroke="#FFFF00" stroke-width="1.5" stroke-linecap="round"/><text x="9" y="16" fill="#FF0000" font-size="7" font-weight="bold" font-family="monospace">?</text></svg></span>
+                        <span class="os2w-icon-lbl">Scanner</span>
+                    </a>
+                    <!-- Tutor — yellow book with ? -->
+                    <a href="/tutor" class="os2w-icon" data-hint="Red Team Tutor.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="5" y="4" width="22" height="26" rx="1" fill="#FFFF00" stroke="#808000" stroke-width="1"/><rect x="5" y="4" width="4" height="26" fill="#808000"/><rect x="10" y="7" width="14" height="1.5" fill="#800000"/><rect x="10" y="11" width="14" height="1.5" fill="#800000"/><rect x="10" y="15" width="10" height="1.5" fill="#800000"/><text x="12" y="26" fill="#FF0000" font-size="8" font-weight="bold" font-family="sans-serif">F1</text></svg></span>
+                        <span class="os2w-icon-lbl">Tutor</span>
+                    </a>
+                    <!-- Labs — green beaker -->
+                    <a href="/labs" class="os2w-icon" data-hint="Hands-on labs.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="11" y="2" width="10" height="10" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><polygon points="11,12 4,28 28,28 21,12" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><rect x="6" y="20" width="20" height="8" rx="0" fill="#00FF00" opacity=".7"/><circle cx="12" cy="22" r="1.5" fill="#FFFF00"/><circle cx="18" cy="24" r="1" fill="#00FFFF"/><rect x="4" y="28" width="24" height="2" rx="1" fill="#808080"/></svg></span>
+                        <span class="os2w-icon-lbl">Labs</span>
+                    </a>
+                    <!-- Test & Report — red clipboard -->
+                    <a href="/recon" class="os2w-icon" data-hint="Test &amp; Report.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="5" y="5" width="22" height="26" rx="1" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="10" y="2" width="12" height="5" rx="1" fill="#800000" stroke="#400000" stroke-width=".5"/><rect x="12" y="3" width="8" height="3" rx=".5" fill="#C0C0C0"/><rect x="8" y="10" width="10" height="2" fill="#FF0000"/><rect x="8" y="14" width="16" height="1.5" fill="#808080"/><rect x="8" y="18" width="16" height="1.5" fill="#808080"/><rect x="8" y="22" width="12" height="1.5" fill="#808080"/><text x="19" y="12" fill="#008000" font-size="5" font-weight="bold" font-family="monospace">&#x2713;</text></svg></span>
+                        <span class="os2w-icon-lbl">Test &amp; Report</span>
+                    </a>
+                    <!-- Graph — connected nodes -->
+                    <a href="/graph" class="os2w-icon" data-hint="Trust graph.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><line x1="8" y1="8" x2="24" y2="8" stroke="#808080" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="24" stroke="#808080" stroke-width="1.5"/><line x1="24" y1="8" x2="16" y2="24" stroke="#808080" stroke-width="1.5"/><line x1="16" y1="24" x2="8" y2="20" stroke="#808080" stroke-width="1.5"/><line x1="16" y1="24" x2="24" y2="20" stroke="#808080" stroke-width="1.5"/><circle cx="8" cy="8" r="4" fill="#0000FF" stroke="#000080" stroke-width="1"/><circle cx="24" cy="8" r="4" fill="#FF0000" stroke="#800000" stroke-width="1"/><circle cx="16" cy="24" r="4" fill="#00FF00" stroke="#008000" stroke-width="1"/><circle cx="8" cy="20" r="3" fill="#FFFF00" stroke="#808000" stroke-width="1"/><circle cx="24" cy="20" r="3" fill="#FF00FF" stroke="#800080" stroke-width="1"/></svg></span>
+                        <span class="os2w-icon-lbl">Graph</span>
+                    </a>
+                    <!-- Models — gears -->
+                    <a href="/abstract-models" class="os2w-icon" data-hint="Abstract models.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="12" cy="12" r="8" fill="none" stroke="#808080" stroke-width="3"/><circle cx="12" cy="12" r="3" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><circle cx="22" cy="22" r="6" fill="none" stroke="#000080" stroke-width="3"/><circle cx="22" cy="22" r="2" fill="#C0C0C0" stroke="#000080" stroke-width="1"/><rect x="10" y="1" width="4" height="4" fill="#808080"/><rect x="10" y="18" width="4" height="4" fill="#808080"/><rect x="1" y="10" width="4" height="4" fill="#808080"/><rect x="18.5" y="10" width="4" height="4" fill="#808080"/></svg></span>
+                        <span class="os2w-icon-lbl">Models</span>
+                    </a>
+                    <!-- Knowledge — brown book -->
+                    <a href="/rag" class="os2w-icon" data-hint="Knowledge base.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="3" width="24" height="26" rx="1" fill="#800000" stroke="#400000" stroke-width="1"/><rect x="4" y="3" width="5" height="26" fill="#400000"/><rect x="6" y="5" width="1" height="22" fill="#808000"/><rect x="11" y="6" width="14" height="2" fill="#FFFF00"/><rect x="11" y="10" width="14" height="1.5" fill="#C0C0C0"/><rect x="11" y="13" width="14" height="1.5" fill="#C0C0C0"/><rect x="11" y="16" width="10" height="1.5" fill="#C0C0C0"/><text x="13" y="26" fill="#FFFF00" font-size="5" font-weight="bold" font-family="monospace">K</text></svg></span>
+                        <span class="os2w-icon-lbl">Knowledge</span>
+                    </a>
+                    <!-- USS Editor — text editor window -->
+                    <a href="/uss-editor" class="os2w-icon" data-hint="USS logon screen editor.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="2" width="28" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="2" y="2" width="28" height="4" fill="#000080"/><text x="4" y="5" fill="#FFF" font-size="3" font-family="monospace">USS</text><rect x="4" y="9" width="20" height="1.5" fill="#000"/><rect x="4" y="12" width="24" height="1.5" fill="#000"/><rect x="4" y="15" width="16" height="1.5" fill="#000"/><rect x="4" y="18" width="22" height="1.5" fill="#000080"/><rect x="4" y="21" width="18" height="1.5" fill="#000"/><rect x="4" y="24" width="24" height="1.5" fill="#000080"/><rect x="23" y="17" width="6" height="10" fill="#FFFF00" stroke="#808000" stroke-width=".5"/><polygon points="26,14 23,17 29,17" fill="#FFFF00"/></svg></span>
+                        <span class="os2w-icon-lbl">USS Editor</span>
+                    </a>
+                    <!-- FTP Client — globe with arrows -->
+                    <a href="/ftp" class="os2w-icon" data-hint="MVS FTP Client.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="15" cy="15" r="12" fill="#0000FF" stroke="#000080" stroke-width="1"/><ellipse cx="15" cy="15" rx="5" ry="12" fill="none" stroke="#00FFFF" stroke-width=".8"/><line x1="3" y1="10" x2="27" y2="10" stroke="#00FFFF" stroke-width=".8"/><line x1="3" y1="20" x2="27" y2="20" stroke="#00FFFF" stroke-width=".8"/><line x1="15" y1="3" x2="15" y2="27" stroke="#00FFFF" stroke-width=".8"/><polygon points="25,5 30,5 30,1 25,1 25,5" fill="#00FF00"/><polygon points="27,1 27.5,0 28,1" fill="#00FF00"/><polygon points="2,25 7,25 7,29 2,29" fill="#FF0000"/><polygon points="4.5,29 4,30 5,30" fill="#FF0000"/></svg></span>
+                        <span class="os2w-icon-lbl">FTP Client</span>
+                    </a>
+                    <!-- Tutorials — open book -->
+                    <a href="/tutorials" class="os2w-icon" data-hint="Tutorial library.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><path d="M16,6 L3,4 L3,26 L16,28 L29,26 L29,4 Z" fill="#FFF" stroke="#808080" stroke-width="1"/><line x1="16" y1="6" x2="16" y2="28" stroke="#808080" stroke-width="1"/><rect x="5" y="8" width="9" height="1.5" fill="#000080"/><rect x="5" y="11" width="9" height="1.5" fill="#808080"/><rect x="5" y="14" width="7" height="1.5" fill="#808080"/><rect x="18" y="8" width="9" height="1.5" fill="#000080"/><rect x="18" y="11" width="9" height="1.5" fill="#808080"/><rect x="18" y="14" width="7" height="1.5" fill="#808080"/><rect x="5" y="18" width="9" height="1.5" fill="#FF0000"/><rect x="18" y="18" width="9" height="1.5" fill="#FF0000"/></svg></span>
+                        <span class="os2w-icon-lbl">Tutorials</span>
+                    </a>
+                    <!-- Architecture — layered system -->
+                    <a href="/architecture" class="os2w-icon" data-hint="Architecture view.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="3" y="22" width="26" height="6" fill="#808080" stroke="#404040" stroke-width="1"/><text x="8" y="27" fill="#FFF" font-size="4" font-family="monospace">HW</text><rect x="5" y="14" width="22" height="7" fill="#000080" stroke="#000040" stroke-width="1"/><text x="8" y="19.5" fill="#00FFFF" font-size="4" font-family="monospace">MVS</text><rect x="7" y="6" width="18" height="7" fill="#008000" stroke="#004000" stroke-width="1"/><text x="9" y="11.5" fill="#FFFF00" font-size="4" font-family="monospace">APP</text><polygon points="3,4 16,1 29,4" fill="none" stroke="#FF0000" stroke-width="1"/><text x="12" y="3.8" fill="#FF0000" font-size="2.5" font-family="monospace">AI</text></svg></span>
+                        <span class="os2w-icon-lbl">Architecture</span>
+                    </a>
+                    <!-- API Docs — blue document -->
+                    <a href="/docs" class="os2w-icon" data-hint="API documentation.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="20" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="24,2 24,8 30,8" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><line x1="24" y1="2" x2="30" y2="8" stroke="#808080" stroke-width="1"/><rect x="4" y="8" width="26" height="22" fill="#FFF" stroke="#808080" stroke-width="1"/><text x="7" y="14" fill="#000080" font-size="4.5" font-weight="bold" font-family="monospace">API</text><rect x="7" y="16" width="18" height="1.5" fill="#808080"/><rect x="7" y="19" width="18" height="1.5" fill="#808080"/><rect x="7" y="22" width="14" height="1.5" fill="#808080"/><rect x="7" y="25" width="18" height="1.5" fill="#000080"/></svg></span>
+                        <span class="os2w-icon-lbl">API Docs</span>
+                    </a>
+                    <!-- Video — red film reel -->
+                    <a href="/video" class="os2w-icon" data-hint="Demo video.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="4" width="28" height="20" rx="2" fill="#000" stroke="#808080" stroke-width="1"/><rect x="4" y="6" width="24" height="16" fill="#000080"/><polygon points="13,9 13,19 22,14" fill="#FF0000" stroke="#800000" stroke-width="1"/><rect x="3" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><rect x="9" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><rect x="19" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><rect x="25" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/></svg></span>
+                        <span class="os2w-icon-lbl">Video</span>
+                    </a>
+                    <!-- Deck — presentation slides -->
+                    <a href="/deck" class="os2w-icon" data-hint="Conference deck.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="6" y="6" width="24" height="18" rx="1" fill="#FFF" stroke="#808080" stroke-width=".5"/><rect x="4" y="4" width="24" height="18" rx="1" fill="#FFF" stroke="#808080" stroke-width=".5"/><rect x="2" y="2" width="24" height="18" rx="1" fill="#FFFF00" stroke="#808000" stroke-width="1"/><rect x="4" y="4" width="20" height="3" fill="#FF0000"/><rect x="4" y="9" width="16" height="1.5" fill="#808080"/><rect x="4" y="12" width="12" height="1.5" fill="#808080"/><rect x="4" y="15" width="18" height="1.5" fill="#808080"/><text x="6" y="27" fill="#808080" font-size="4" font-family="monospace">PPT</text></svg></span>
+                        <span class="os2w-icon-lbl">Deck</span>
+                    </a>
+                    <!-- Abstract — white document with seal -->
+                    <a href="/abstract" class="os2w-icon" data-hint="Conference abstract.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="24" height="28" rx="1" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="7" y="5" width="18" height="2" fill="#000080"/><rect x="7" y="9" width="18" height="1.5" fill="#808080"/><rect x="7" y="12" width="18" height="1.5" fill="#808080"/><rect x="7" y="15" width="14" height="1.5" fill="#808080"/><rect x="7" y="18" width="18" height="1.5" fill="#808080"/><rect x="7" y="21" width="12" height="1.5" fill="#808080"/><circle cx="22" cy="25" r="4" fill="#FF0000" stroke="#800000" stroke-width=".5"/><circle cx="22" cy="25" r="2" fill="#FFFF00"/></svg></span>
+                        <span class="os2w-icon-lbl">Abstract</span>
+                    </a>
+                    <!-- Demo — IBM red play button -->
+                    <a href="/walkthrough?plane=demo" class="os2w-icon" data-hint="Live demo.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="2" width="28" height="28" rx="3" fill="#000080" stroke="#000040" stroke-width="1"/><text x="5" y="10" fill="#FFF" font-size="5" font-weight="bold" font-family="sans-serif">IBM</text><rect x="4" y="12" width="24" height="1" fill="#FFF"/><polygon points="10,16 10,27 24,21.5" fill="#FF0000" stroke="#800000" stroke-width="1"/><circle cx="17" cy="21.5" r="1.5" fill="#FFF"/></svg></span>
+                        <span class="os2w-icon-lbl">Demo</span>
+                    </a>
+                    <!-- Slides — blue projector screen -->
+                    <a href="/slides" class="os2w-icon" data-hint="Slide deck viewer.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="24" height="3" rx="1" fill="#808080" stroke="#404040" stroke-width=".5"/><rect x="4" y="5" width="24" height="20" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="6" y="7" width="20" height="16" fill="#000080"/><polygon points="13,11 13,19 21,15" fill="#00FFFF" stroke="#008080" stroke-width=".5"/><line x1="16" y1="25" x2="16" y2="30" stroke="#808080" stroke-width="1.5"/><rect x="12" y="29" width="8" height="2" rx="1" fill="#808080"/></svg></span>
+                        <span class="os2w-icon-lbl">Slides</span>
+                    </a>
+                </nav>
+            </div>
+            <!-- OS/2 Status Bar -->
+            <div class="os2w-statusbar">
+                <span>20 objects</span>
+                <span>IBM OS/2 Warp 2</span>
+            </div>
+        </div>
     </main>
 
 </div><!-- /.idx-main-col -->
@@ -168,6 +281,18 @@
         <span class="idx-cp-icon">▣</span>
         <span>Test & Report</span>
     </a>
+    <a href="/ftp" class="idx-cp-item cp-ftp">
+        <span class="idx-cp-icon">⇅</span>
+        <span>FTP Client</span>
+    </a>
+    <a href="/uss-editor" class="idx-cp-item cp-uss">
+        <span class="idx-cp-icon">✎</span>
+        <span>USS Editor</span>
+    </a>
+    <a href="/tutorials" class="idx-cp-item cp-tutorials">
+        <span class="idx-cp-icon">📖</span>
+        <span>Tutorials</span>
+    </a>
     <a href="/rag" class="idx-cp-item cp-rag">
         <span class="idx-cp-icon">▤</span>
         <span>KB</span>
@@ -176,10 +301,14 @@
         <span class="idx-cp-icon">▦</span>
         <span>Arch</span>
     </a>
+    <a href="/docs" class="idx-cp-item cp-docs">
+        <span class="idx-cp-icon">◰</span>
+        <span>API Docs</span>
+    </a>
     <div class="idx-cp-divider"></div>
     <button class="idx-cp-item cp-demo-prep" id="demoPrepBtn" onclick="prepareDemo()">
         <span class="idx-cp-icon">⚙</span>
-        <span>Demo Prep</span>
+        <span>Reboot</span>
     </button>
 </aside>
 </div><!-- /.idx-layout -->
@@ -191,6 +320,70 @@ let isConnected = false;
 let wtRunning = false;
 let wtPollingInterval = null;
 let wtLastLogLen = 0;
+
+// ── Matrix-style Boot Status ──
+const BOOT_PHASES = [
+    {msg: 'HERCULES  INITIALIZING CHANNEL SUBSYSTEM',          delay: 400},
+    {msg: 'HHC01417I CHANNEL SET 0: IOCDS LOADED',             delay: 300},
+    {msg: 'HHC00100I THREAD 00000001 STARTED — CPU ENGINE 0',  delay: 250},
+    {msg: 'HHC01023I DASD 0148 CKD   tk5res.390 CYLS=885',     delay: 200},
+    {msg: 'HHC01023I DASD 0149 CKD   tk5dlb.392 CYLS=400',     delay: 200},
+    {msg: 'HHC01023I DASD 014A CKD   tk5spl.393 CYLS=200',     delay: 200},
+    {msg: 'HHC01023I DASD 014B CKD   tk5pag.391 CYLS=50',      delay: 150},
+    {msg: 'HHC00811I 3270 DEVICE 0:0C00 TCP PORT 3270 READY',  delay: 300},
+    {msg: 'HHC00811I HERCULES HTTP SERVER PORT 8038 READY',     delay: 300},
+    {msg: 'IPL       MVS 3.8J — NUCLEUS LOAD FROM 0148',       delay: 600},
+    {msg: 'IEA101A   SPECIFY SYSTEM PARAMETERS',                delay: 400},
+    {msg: 'IEF165I   JES2 CHECKPOINT DATASET DEFINED',          delay: 350},
+    {msg: 'IEF403I   JES2 — STARTED',                           delay: 300},
+    {msg: '$HASP426  JES2 INITIALIZATION COMPLETE',             delay: 400},
+    {msg: 'IEA630I   OPERATOR FACILITY ACTIVE',                 delay: 300},
+    {msg: 'IEE600I   VTAM INITIALIZATION IN PROGRESS',          delay: 500},
+    {msg: 'IST020I   VTAM DOMAIN = APPN — NETWORK ACTIVE',     delay: 400},
+    {msg: 'IST093I   L3274 NODE NOW ACTIVE',                    delay: 300},
+    {msg: 'IST093I   TCAS ACCEPTING LOGONS',                    delay: 400},
+    {msg: 'CONNECT   ESTABLISHING TN3270 SESSION . . .',        delay: 800},
+];
+
+let bootLines = [];
+let bootInterval = null;
+let bootPhase = 0;
+let bootActive = false;
+
+function startBootSequence() {
+    if (bootActive) return;
+    bootActive = true;
+    bootPhase = 0;
+    bootLines = [''];
+    const pre = document.getElementById('terminalText');
+    if (!pre) return;
+
+    function addBootLine() {
+        if (bootPhase >= BOOT_PHASES.length || isConnected) {
+            bootActive = false;
+            return;
+        }
+        const phase = BOOT_PHASES[bootPhase];
+        bootLines.push(phase.msg);
+        // Keep last 20 lines to fit terminal
+        if (bootLines.length > 20) bootLines.shift();
+        // Only update if not yet connected
+        if (!isConnected) {
+            pre.textContent = bootLines.join('\n');
+        }
+        bootPhase++;
+        if (bootPhase < BOOT_PHASES.length && !isConnected) {
+            setTimeout(addBootLine, BOOT_PHASES[bootPhase].delay);
+        } else if (!isConnected) {
+            // All phases done, show waiting message
+            bootLines.push('');
+            bootLines.push('WAITING   POLLING FOR LOGON SCREEN . . .');
+            pre.textContent = bootLines.join('\n');
+            bootActive = false;
+        }
+    }
+    addBootLine();
+}
 
 // ── Toolbar Status ──
 function setLed(id, online) {
@@ -280,12 +473,14 @@ async function checkStatus() {
 checkStatus();
 setInterval(checkStatus, 5000);
 
-// Auto-connect on page load
+// Auto-connect on page load — show boot sequence while waiting
 (async function autoConnect() {
     try {
         const s = await fetch('/api/status');
         const d = await s.json();
         if (!d.connected) {
+            // Show matrix boot sequence while connecting
+            startBootSequence();
             const res = await fetch('/api/terminal/connect', {
                 method:'POST', headers:{'Content-Type':'application/json'},
                 body: JSON.stringify({target: 'localhost:3270'})
@@ -293,6 +488,7 @@ setInterval(checkStatus, 5000);
             const data = await res.json();
             if (data.success) {
                 isConnected = true;
+                bootActive = false;
                 showTerminal();
                 if (data.screen_data) updateTerminal(data.screen_data);
                 updateConnBtn();
@@ -307,7 +503,9 @@ setInterval(checkStatus, 5000);
             await refreshScreen();
             setTimeout(triggerAiExplain, 500);
         }
-    } catch(e) {}
+    } catch(e) {
+        // Connection failed — boot sequence will show waiting state
+    }
 })();
 
 // ── Connection ──
@@ -505,7 +703,7 @@ async function startWalkthrough() {
     wtSeenRunning = false;
     // Delay first poll to let backend thread start
     setTimeout(() => {
-        wtPollingInterval = setInterval(pollWalkthrough, 2000);
+        wtPollingInterval = setInterval(pollWalkthrough, 500);
         pollWalkthrough();
     }, 1000);
 }
@@ -536,21 +734,15 @@ async function pollWalkthrough() {
                 aiExplainScreen(data.screen || '', data.title);
             }
         }
-        // Stop polling: walkthrough done, or after 20 polls grace, or hard cap 300 polls (~10min)
-        if (wtPollCount > 300 || (!data.running && (wtSeenRunning || wtPollCount > 20))) {
+        // Only stop polling if we've seen it running first, or after 20 polls (10s grace)
+        if (!data.running && (wtSeenRunning || wtPollCount > 20)) {
             clearInterval(wtPollingInterval);
             wtPollingInterval = null;
             wtRunning = false;
             resetWtControls();
             if (wtSeenRunning) aiExplainScreen(data.screen || '', 'Demo complete');
         }
-    } catch(e) {
-        // On fetch error, slow down — don't hammer a struggling server
-        if (wtPollingInterval) {
-            clearInterval(wtPollingInterval);
-            wtPollingInterval = setInterval(pollWalkthrough, 5000);
-        }
-    }
+    } catch(e) {}
 }
 
 async function pauseWalkthrough() {
@@ -761,13 +953,13 @@ async function prepareDemo() {
         const data = await res.json();
 
         if (data.error) {
-            showToast(data.error, { type: 'error', title: 'Demo Prep' });
+            showToast(data.error, { type: 'error', title: 'Reboot' });
             btn.innerHTML = origHTML;
             btn.disabled = false;
             return;
         }
 
-        showToast('Mainframe restarting — fresh IPL in progress...', { type: 'info', title: 'Demo Prep' });
+        showToast('Mainframe restarting — fresh IPL in progress...', { type: 'info', title: 'Reboot' });
 
         // Poll for readiness
         let attempts = 0;
@@ -779,7 +971,7 @@ async function prepareDemo() {
                 if (sd.running) {
                     clearInterval(poll);
                     btn.innerHTML = '<span class="idx-cp-icon">&#9989;</span><span>Ready!</span>';
-                    showToast('Mainframe is up — clean demo environment ready.', { type: 'success', title: 'Demo Prep' });
+                    showToast('Mainframe is up — clean demo environment ready.', { type: 'success', title: 'Reboot' });
                     setTimeout(() => {
                         btn.innerHTML = origHTML;
                         btn.disabled = false;
@@ -791,11 +983,11 @@ async function prepareDemo() {
                 clearInterval(poll);
                 btn.innerHTML = origHTML;
                 btn.disabled = false;
-                showToast('Timeout waiting for mainframe. Check manually.', { type: 'warning', title: 'Demo Prep' });
+                showToast('Timeout waiting for mainframe. Check manually.', { type: 'warning', title: 'Reboot' });
             }
         }, 3000);
     } catch (e) {
-        showToast('Failed to start demo prep: ' + e.message, { type: 'error', title: 'Demo Prep' });
+        showToast('Failed to start demo prep: ' + e.message, { type: 'error', title: 'Reboot' });
         btn.innerHTML = origHTML;
         btn.disabled = false;
     }
@@ -972,6 +1164,123 @@ async function loadIdxModels() {
                 row.appendChild(rightSpan);
                 listEl.appendChild(row);
             });
+        }
+
+        // ── Cloud: Grok (xAI) ──
+        try {
+            const llmR = await fetch('/api/llm/status');
+            const llmStatus = await llmR.json();
+            const grok = llmStatus.grok || {};
+            const isGrokActive = llmStatus.active_provider === 'grok';
+
+            const grokHdr = document.createElement('div');
+            grokHdr.style.cssText = 'padding:6px 12px 4px; color:#e040fb; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px; display:flex; justify-content:space-between; align-items:center;';
+            const grokTitle = document.createElement('span');
+            grokTitle.textContent = grok.configured ? (grok.available ? '☁ Cloud — Grok (xAI)' : '☁ Grok (offline)') : '☁ Grok (not configured)';
+            grokHdr.appendChild(grokTitle);
+
+            if (grok.configured) {
+                const provBadge = document.createElement('span');
+                provBadge.style.cssText = `font-size:9px; padding:1px 6px; border-radius:3px; font-weight:bold; font-family:IBM Plex Mono,monospace; cursor:pointer; ${isGrokActive ? 'background:#e040fb; color:#000;' : 'border:1px solid #e040fb; color:#e040fb;'}`;
+                provBadge.textContent = isGrokActive ? 'ACTIVE' : 'STANDBY';
+                provBadge.title = isGrokActive ? 'Click to switch to Ollama' : 'Click to switch to Grok';
+                provBadge.onclick = async (e) => {
+                    e.stopPropagation();
+                    const newProv = isGrokActive ? 'ollama' : 'grok';
+                    await fetch('/api/llm/provider/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:newProv})});
+                    document.getElementById('tsModel').textContent = newProv === 'grok' ? (grok.model || 'grok-3-mini-fast') : currentModel;
+                    await loadIdxModels();
+                };
+                grokHdr.appendChild(provBadge);
+            }
+            listEl.appendChild(grokHdr);
+
+            if (!grok.configured) {
+                const keyRow = document.createElement('div');
+                keyRow.style.cssText = 'padding:6px 12px 10px; display:flex; gap:6px; align-items:center;';
+                const keyInput = document.createElement('input');
+                keyInput.type = 'password';
+                keyInput.placeholder = 'Paste your Grok API key';
+                keyInput.style.cssText = 'flex:1; background:#111; border:1px solid #333; border-radius:3px; padding:4px 8px; color:#e040fb; font-size:11px; font-family:IBM Plex Mono,monospace; outline:none;';
+                keyInput.onfocus = () => keyInput.style.borderColor = '#e040fb';
+                keyInput.onblur = () => keyInput.style.borderColor = '#333';
+                keyInput.onclick = (e) => e.stopPropagation();
+                const keyBtn = document.createElement('button');
+                keyBtn.textContent = 'Connect';
+                keyBtn.style.cssText = 'background:#e040fb; color:#000; border:none; border-radius:3px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; white-space:nowrap;';
+                keyBtn.onmouseenter = () => keyBtn.style.background = '#f060ff';
+                keyBtn.onmouseleave = () => keyBtn.style.background = '#e040fb';
+                const keyStatus = document.createElement('div');
+                keyStatus.style.cssText = 'padding:0 12px 6px; font-size:10px; font-family:IBM Plex Mono,monospace; display:none;';
+                keyBtn.onclick = async (e) => {
+                    e.stopPropagation();
+                    const key = keyInput.value.trim();
+                    if (!key) { keyInput.style.borderColor = '#f44'; return; }
+                    keyBtn.textContent = 'Verifying...';
+                    keyBtn.disabled = true;
+                    keyBtn.style.background = '#666';
+                    keyStatus.style.display = 'block';
+                    keyStatus.style.color = '#888';
+                    keyStatus.textContent = 'Testing connection to xAI API...';
+                    try {
+                        const kr = await fetch('/api/llm/grok/set-key', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key:key})});
+                        const kd = await kr.json();
+                        if (kd.success) {
+                            keyStatus.style.color = '#0f0';
+                            keyStatus.textContent = '✓ ' + kd.message;
+                            setTimeout(() => loadIdxModels(), 800);
+                        } else {
+                            keyStatus.style.color = '#f44';
+                            keyStatus.textContent = '✕ ' + (kd.error || 'Failed');
+                            keyBtn.textContent = 'Connect'; keyBtn.disabled = false; keyBtn.style.background = '#e040fb';
+                        }
+                    } catch(err) {
+                        keyStatus.style.color = '#f44';
+                        keyStatus.textContent = '✕ ' + err.message;
+                        keyBtn.textContent = 'Connect'; keyBtn.disabled = false; keyBtn.style.background = '#e040fb';
+                    }
+                };
+                keyInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); keyBtn.click(); } };
+                keyRow.appendChild(keyInput);
+                keyRow.appendChild(keyBtn);
+                listEl.appendChild(keyRow);
+                listEl.appendChild(keyStatus);
+                const keyHint = document.createElement('div');
+                keyHint.style.cssText = 'padding:0 12px 8px; color:#555; font-size:9px; font-family:IBM Plex Mono,monospace;';
+                keyHint.innerHTML = 'Get key at <span style="color:#e040fb;">console.x.ai</span> — memory only, not saved';
+                listEl.appendChild(keyHint);
+            } else {
+                const grokModels = grok.models || [];
+                const grokCurrent = grok.model || '';
+                grokModels.forEach(gm => {
+                    const isActive = gm.id === grokCurrent && isGrokActive;
+                    const row = document.createElement('div');
+                    row.style.cssText = `padding:5px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:${isActive ? '#e040fb' : '#ccc'}; background:${isActive ? 'rgba(224,64,251,0.05)' : 'transparent'};`;
+                    row.onmouseenter = () => { if (!isActive) row.style.background = 'rgba(255,255,255,0.05)'; };
+                    row.onmouseleave = () => { if (!isActive) row.style.background = isActive ? 'rgba(224,64,251,0.05)' : 'transparent'; };
+                    const left = document.createElement('span');
+                    left.innerHTML = `${isActive ? '▸ ' : '  '}${gm.name || gm.id} <span style="color:#666; font-size:10px;">${gm.description || ''}</span>`;
+                    const useBtn = document.createElement('button');
+                    useBtn.textContent = isActive ? '✓ Active' : 'Use';
+                    useBtn.style.cssText = `border:none; border-radius:3px; padding:1px 8px; font-size:10px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; ${isActive ? 'background:#e040fb; color:#000;' : 'background:#555; color:#fff;'}`;
+                    if (!isActive) {
+                        useBtn.onmouseenter = () => useBtn.style.background = '#e040fb';
+                        useBtn.onmouseleave = () => useBtn.style.background = '#555';
+                    }
+                    useBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        await fetch('/api/llm/grok/switch-model', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:gm.id})});
+                        await fetch('/api/llm/provider/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:'grok'})});
+                        document.getElementById('tsModel').textContent = gm.name || gm.id;
+                        await loadIdxModels();
+                    };
+                    row.appendChild(left);
+                    row.appendChild(useBtn);
+                    listEl.appendChild(row);
+                });
+            }
+        } catch(grokErr) {
+            console.debug('Grok status unavailable:', grokErr);
         }
 
         // Download section

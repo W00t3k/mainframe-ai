@@ -327,53 +327,289 @@ main {
     .desk-hero-frame { width: 98%; }
 }
 
-/* ── Navigation Grid — DOS Menu Grid ── */
-.idx-nav {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1px;
-    max-width: 560px;
+/* ══════════════════════════════════════════════════════════════════
+   OS/2 WARP 2 — Programs Window (Icon View)
+   Authentic IBM OS/2 Workplace Shell aesthetic
+   ══════════════════════════════════════════════════════════════════ */
+
+/* ── Window Frame ── */
+.os2w {
+    max-width: 700px;
     width: 100%;
-    background: #1a2030;
-    border: 1px solid #1e2a36;
-    overflow: hidden;
     margin: 0.75rem auto 1rem;
+    background: #c0c0c0;
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+    box-shadow:
+        inset 1px 1px 0 #dfdfdf,
+        inset -1px -1px 0 #808080,
+        2px 2px 8px rgba(0,0,0,0.5);
+    font-family: 'IBM Plex Mono', 'Courier New', monospace;
 }
 
-.idx-nav-item {
+/* ── Title Bar ── */
+.os2w-titlebar {
+    display: flex;
+    align-items: center;
+    height: 22px;
+    background: linear-gradient(90deg, #000060 0%, #000080 30%, #0040a0 70%, #0060b0 100%);
+    padding: 0 2px;
+    gap: 2px;
+    user-select: none;
+}
+
+.os2w-sysmenu {
+    width: 18px;
+    height: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #404040;
+    border-bottom: 1px solid #404040;
+    font-size: 10px;
+    color: #000080;
+    cursor: pointer;
+}
+
+.os2w-title {
+    flex: 1;
+    font-size: 11px;
+    font-weight: 700;
+    color: #ffffff;
+    padding: 0 6px;
+    text-shadow: 1px 1px 0 rgba(0,0,0,0.5);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.os2w-btns {
+    display: flex;
+    gap: 2px;
+}
+
+.os2w-btn {
+    width: 18px;
+    height: 18px;
+    background: #c0c0c0;
+    border-top: 1px solid #ffffff;
+    border-left: 1px solid #ffffff;
+    border-right: 1px solid #404040;
+    border-bottom: 1px solid #404040;
+    font-size: 8px;
+    color: #000;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    font-family: inherit;
+}
+
+.os2w-btn:active {
+    border-top: 1px solid #404040;
+    border-left: 1px solid #404040;
+    border-right: 1px solid #ffffff;
+    border-bottom: 1px solid #ffffff;
+}
+
+/* ── Menu Bar ── */
+.os2w-menubar {
+    display: flex;
+    align-items: center;
+    height: 20px;
+    background: #c0c0c0;
+    padding: 0 4px;
+    border-bottom: 1px solid #808080;
+    gap: 0;
+}
+
+.os2w-menu-item {
+    font-size: 11px;
+    color: #000;
+    padding: 1px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.os2w-menu-item:hover {
+    background: #000080;
+    color: #fff;
+}
+
+.os2w-menu-item u {
+    text-decoration: underline;
+}
+
+/* ── Client Area (Icon View) ── */
+.os2w-client {
+    background:
+        repeating-linear-gradient(
+            45deg,
+            transparent,
+            transparent 1px,
+            rgba(0,0,60,0.06) 1px,
+            rgba(0,0,60,0.06) 2px
+        ),
+        linear-gradient(180deg, #000070 0%, #000088 40%, #0000a0 70%, #000078 100%);
+    border-top: 2px solid #404040;
+    border-left: 2px solid #404040;
+    border-right: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    margin: 2px;
+    padding: 8px;
+    min-height: 200px;
+}
+
+/* ── Icon Grid ── */
+.os2w-icons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 4px;
+    justify-items: center;
+}
+
+/* ── Individual Icon ── */
+.os2w-icon {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
-    gap: 0.25rem;
-    padding: 0.75rem 0.5rem;
-    background: #0f1520;
+    gap: 4px;
+    padding: 6px 4px 4px;
     text-decoration: none;
-    color: #8d99a8;
-    border: none;
     cursor: pointer;
-    transition: background 0.15s;
+    border: 1px solid transparent;
+    min-width: 80px;
+    text-align: center;
+    transition: none;
 }
 
-.idx-nav-item:hover {
-    background: #1a2535;
-    color: #c6cdd5;
+.os2w-icon:hover {
+    background: rgba(255,255,255,0.08);
+    border: 1px dotted rgba(255,255,255,0.5);
 }
 
-.idx-nav-icon {
-    font-size: 1.25rem;
-    line-height: 1;
+.os2w-icon:active {
+    background: rgba(0,0,128,0.4);
+    border: 1px solid rgba(255,255,255,0.3);
 }
 
-.idx-nav-label {
-    font-size: 12px;
+/* Icon graphic — OS/2 gray 3D raised plate with SVG icon */
+.os2w-icon-gfx {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    /* Classic OS/2 gray raised button */
+    background: linear-gradient(135deg, #d4d4d4 0%, #c0c0c0 40%, #b0b0b0 100%);
+    border-top: 2px solid #ffffff;
+    border-left: 2px solid #ffffff;
+    border-right: 2px solid #404040;
+    border-bottom: 2px solid #404040;
+    box-shadow:
+        inset 1px 1px 0 #e8e8e8,
+        inset -1px -1px 0 #808080,
+        2px 2px 4px rgba(0,0,0,0.4);
+    padding: 2px;
+    image-rendering: pixelated;
+}
+
+.os2w-icon-gfx svg {
+    display: block;
+    width: 40px;
+    height: 40px;
+    image-rendering: optimizeSpeed;
+}
+
+.os2w-icon:hover .os2w-icon-gfx {
+    background: linear-gradient(135deg, #e0e0e0 0%, #d0d0d0 40%, #c0c0c0 100%);
+    border-top-color: #ffffff;
+    border-left-color: #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #f0f0f0,
+        inset -1px -1px 0 #909090,
+        3px 3px 6px rgba(0,0,0,0.5);
+}
+
+.os2w-icon:active .os2w-icon-gfx {
+    background: linear-gradient(135deg, #a0a0a0 0%, #b0b0b0 40%, #a8a8a8 100%);
+    border-top: 2px solid #404040;
+    border-left: 2px solid #404040;
+    border-right: 2px solid #ffffff;
+    border-bottom: 2px solid #ffffff;
+    box-shadow:
+        inset 1px 1px 0 #808080,
+        inset -1px -1px 0 #d0d0d0;
+}
+
+/* Icon label — white text below the icon */
+.os2w-icon-lbl {
+    font-size: 10px;
     font-weight: 700;
-    letter-spacing: 1px;
+    letter-spacing: 0.3px;
     text-transform: uppercase;
+    font-family: 'IBM Plex Mono', monospace;
+    color: #ffffff;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.9);
+    line-height: 1.2;
 }
 
-.idx-nav-item:hover .idx-nav-label { opacity: 1; }
+.os2w-icon:hover .os2w-icon-lbl {
+    color: #ffff80;
+    text-shadow: 1px 1px 1px rgba(0,0,0,0.9), 0 0 6px rgba(255,255,128,0.3);
+}
 
+/* ── Status Bar ── */
+.os2w-statusbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 18px;
+    padding: 0 6px;
+    background: #c0c0c0;
+    border-top: 1px solid #808080;
+    font-size: 10px;
+    color: #333;
+}
+
+/* ── Collapse animation (reuse existing toggle) ── */
+.os2w.collapsed {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    margin: 0 auto;
+    border: none;
+    box-shadow: none;
+    transition: max-height 0.3s ease, opacity 0.3s ease;
+}
+
+.os2w:not(.collapsed) {
+    max-height: 800px;
+    opacity: 1;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+}
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .os2w-icons { grid-template-columns: repeat(4, 1fr); }
+    .os2w-icon { min-width: 65px; }
+    .os2w { max-width: 95%; }
+}
+
+@media (max-width: 480px) {
+    .os2w-icons { grid-template-columns: repeat(3, 1fr); }
+    .os2w-icon { min-width: 55px; }
+    .os2w-icon-gfx { font-size: 9px; padding: 2px 4px; }
+    .os2w-icon-lbl { font-size: 8px; }
+}
+
+/* ── Legacy classes (keep for backward compat) ── */
 .idx-nav-restart {
     color: var(--ibm-red);
 }
@@ -449,7 +685,6 @@ main {
 }
 
 .cp-grid.collapsed,
-.idx-nav.collapsed,
 .idx-video-panel.collapsed {
     max-height: 0;
     overflow: hidden;
@@ -461,7 +696,6 @@ main {
 }
 
 .cp-grid:not(.collapsed),
-.idx-nav:not(.collapsed),
 .idx-video-panel:not(.collapsed) {
     max-height: 600px;
     opacity: 1;
@@ -1208,12 +1442,12 @@ footer a { color: var(--ibm-blue); font-weight: 700; }
 
 @media (max-width: 768px) {
     .hero h2 { font-size: 1.5rem; }
-    .idx-nav { grid-template-columns: repeat(3, 1fr); max-width: 400px; }
+    .idx-nav { grid-template-columns: repeat(3, 1fr); max-width: 450px; }
     .idx-action-bar { flex-direction: column; gap: 0.3rem; }
     .idx-conn-bar { flex-direction: column; gap: 0.3rem; }
     .idx-terminal-section { margin: 0 0.5rem; }
 }
 
 @media (max-width: 480px) {
-    .idx-nav { grid-template-columns: repeat(3, 1fr); max-width: 320px; }
+    .idx-nav { grid-template-columns: repeat(2, 1fr); max-width: 320px; }
 }

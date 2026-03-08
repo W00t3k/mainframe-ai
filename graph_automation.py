@@ -15,9 +15,8 @@ from datetime import datetime
 # Import TN3270 connection
 try:
     from agent_tools import (
-        connect_mainframe, disconnect_mainframe, send_enter, send_pf,
-        send_string, send_clear, get_screen_text, wait_for_screen,
-        connection, TN3270_AVAILABLE
+        connect_mainframe, disconnect_mainframe, send_terminal_key,
+        read_screen, connection, TN3270_AVAILABLE
     )
 except ImportError:
     TN3270_AVAILABLE = False
@@ -97,7 +96,7 @@ class TrustGraphAutomation:
             return None
         
         try:
-            screen_text = get_screen_text()
+            screen_text = read_screen()
             if not screen_text:
                 return None
             
@@ -114,7 +113,8 @@ class TrustGraphAutomation:
                 before_nodes = len(graph.nodes)
                 before_edges = len(graph.edges)
                 
-                update_graph_from_screen(screen_text)
+                source = f"{self.host}:{self.port}"
+                update_graph_from_screen(graph, screen_text, source)
                 
                 self.nodes_added += len(graph.nodes) - before_nodes
                 self.edges_added += len(graph.edges) - before_edges
@@ -137,31 +137,27 @@ class TrustGraphAutomation:
         try:
             if step.action == "connect":
                 host_port = step.value or f"{self.host}:{self.port}"
-                if ":" in host_port:
-                    h, p = host_port.split(":")
-                    result = connect_mainframe(h, int(p))
-                else:
-                    result = connect_mainframe(host_port, self.port)
-                if "error" in result.lower():
-                    self.errors.append(f"Connect failed: {result}")
+                success, message = connect_mainframe(host_port)
+                if not success:
+                    self.errors.append(f"Connect failed: {message}")
                     return False
                 time.sleep(step.wait_seconds)
                 
             elif step.action == "string":
-                send_string(step.value)
+                send_terminal_key("string", step.value)
                 time.sleep(0.3)
                 
             elif step.action == "enter":
-                send_enter()
+                send_terminal_key("enter")
                 time.sleep(step.wait_seconds)
                 
             elif step.action == "pf":
-                pf_num = int(step.value) if step.value else 3
-                send_pf(pf_num)
+                pf_num = step.value if step.value else "3"
+                send_terminal_key("pf", str(pf_num))
                 time.sleep(step.wait_seconds)
                 
             elif step.action == "clear":
-                send_clear()
+                send_terminal_key("clear")
                 time.sleep(step.wait_seconds)
                 
             elif step.action == "wait":

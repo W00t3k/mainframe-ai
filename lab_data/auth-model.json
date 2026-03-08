@@ -1,0 +1,39 @@
+{
+  "id": "auth-model",
+  "title": "RACF: Authorization Plane Analysis",
+  "description": "Examine how RACF evaluates access. Resource profiles, identity footprint, policy enforcement gaps.",
+  "category": "security",
+  "difficulty": "intermediate",
+  "steps": [
+    {
+      "title": "RACF Overview",
+      "screen": "RACF — Resource Access Control Facility\n\nRACF is the z/OS security manager.\nIt controls:\n- Who can log on (user profiles)\n- What they can access (resource profiles)\n- What they can do (authority levels)\n\nAll access decisions flow through RACF.",
+      "expected": "Understand RACF as the authorization plane for z/OS.",
+      "hint": "RACF is not a firewall — it is an identity-bound authorization engine."
+    },
+    {
+      "title": "List User Profile",
+      "screen": "TSO COMMAND: LU HERC01\n\nUSER=HERC01  NAME=HERCULES USER  OWNER=SYS1\nCREATED=99.001  DEFAULT-GROUP=SYS1  PASSDATE=00.000\nPASS-INTERVAL=30  PHRASEDATE=N/A  ATTRIBUTES=SPECIAL\nREVOKECOUNT=00  NOPASSWORD  NOOIDCARD\n\nGROUP=SYS1    AUTH=USE      CONNECT-OWNER=SYS1",
+      "expected": "HERC01 has SPECIAL attribute — equivalent to root on z/OS.",
+      "hint": "SPECIAL = RACF administrator. This user can bypass all resource checks."
+    },
+    {
+      "title": "List Group Members",
+      "screen": "TSO COMMAND: LG SYS1\n\nGROUP=SYS1    OWNER=SYS1    SUPGROUP=\nINSTALLATION DATA=\nTERMINAL ACCESS ALLOWED\n\nUSER       AUTH      CONNECT-OWNER\nHERC01     USE       SYS1\nHERC02     USE       SYS1\nIBMUSER    SPECIAL   SYS1",
+      "expected": "SYS1 group contains privileged users including IBMUSER with SPECIAL.",
+      "hint": "IBMUSER is the default superuser — always check if it exists and is active."
+    },
+    {
+      "title": "Check Dataset Profile",
+      "screen": "TSO COMMAND: LISTDSD DATASET('SYS1.PARMLIB') ALL\n\nDATASET NAME: SYS1.PARMLIB\nLEVEL  OWNER  UNIVERSAL ACCESS  YOUR ACCESS  WARNING\n  00   SYS1   NONE              ALTER        NO\n\nUSER      ACCESS   ACCESS COUNT\nHERC01    ALTER    000003\nSYS1      ALTER    000001",
+      "expected": "SYS1.PARMLIB has UACC=NONE but HERC01 has ALTER access.",
+      "hint": "ALTER on PARMLIB = full system control. This is the highest-value target."
+    },
+    {
+      "title": "Authority Evaluation Gap",
+      "screen": "RACF Authority Evaluation:\n\n1. Check user's SPECIAL/OPERATIONS attributes\n2. Check group authority (CONNECT auth)\n3. Check resource profile UACC\n4. Check user-specific ACL entry\n5. Check group-specific ACL entry\n\nGap: If UACC=READ on sensitive datasets,\nANY authenticated user can read them.",
+      "expected": "Understand the RACF access decision chain.",
+      "hint": "UACC (Universal Access) applies to ALL authenticated users — a common misconfiguration."
+    }
+  ]
+}

@@ -1,22 +1,22 @@
 # Core Python Modules
 
-This document describes the main Python modules in the project root.
+Root-level Python modules outside the `app/` package. These handle TN3270 connectivity, graph analysis, RAG, and external integrations.
 
 ## Module Overview
 
-| Module | Description |
-|--------|-------------|
-| `run.py` | Application entry point (Uvicorn launcher) |
-| `agent_tools.py` | TN3270 connection and tool definitions |
-| `trust_graph.py` | BloodHound-style trust relationship graph |
-| `graph_tools.py` | Graph analysis and parsing utilities |
-| `graph_automation.py` | Automated graph population from screens |
-| `rag_engine.py` | Retrieval-Augmented Generation engine |
-| `recon_engine.py` | TN3270 enumeration and findings engine |
-| `methodology_engine.py` | Assessment methodology and findings framework |
-| `mcp_server.py` | Model Context Protocol server |
-| `ai_bridge.py` | CICS AI bridge (KICKS ↔ Python) |
-| `mainframe_assistant.py` | CLI assistant interface |
+| Module | Purpose |
+|--------|---------|
+| `run.py` | Uvicorn launcher — starts FastAPI on configurable host/port/model |
+| `agent_tools.py` | TN3270 connection, screen reading, keystroke sending, tool definitions for LLM |
+| `trust_graph.py` | BloodHound-style graph — nodes (users, datasets, jobs) + edges (reads, writes, executes) |
+| `graph_tools.py` | JCL/SYSOUT parsers, screen classifiers, graph population utilities |
+| `graph_automation.py` | Auto-populate graph from live terminal navigation |
+| `rag_engine.py` | Local RAG — document chunking, embedding, similarity search (no external DB) |
+| `recon_engine.py` | TSO/CICS/VTAM enumeration, hidden field detection, pentest report generation |
+| `methodology_engine.py` | F1–F5 findings framework, 6 control planes (TSO, JES, RACF, CICS, VTAM, PR/SM) |
+| `mcp_server.py` | Model Context Protocol server for Claude Desktop / external AI clients |
+| `ai_bridge.py` | TCP bridge: KICKS/CICS COBOL transactions ↔ Ollama LLM |
+| `mainframe_assistant.py` | CLI REPL — interactive mainframe Q&A without web UI |
 
 ---
 

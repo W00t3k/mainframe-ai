@@ -11,20 +11,13 @@ from typing import Optional, Any
 from dataclasses import dataclass, field
 from datetime import datetime
 
-# TN3270 emulator - uses py3270 library (requires s3270 binary on PATH)
+# TN3270 emulator - uses py3270 library
 TN3270_AVAILABLE = False
 Emulator = None
-S3270_MISSING = False
 
 try:
     from py3270 import Emulator
-    # Verify s3270 binary is actually on PATH — py3270 imports fine without it
-    import shutil as _shutil
-    if _shutil.which("s3270") is None:
-        S3270_MISSING = True
-        TN3270_AVAILABLE = False
-    else:
-        TN3270_AVAILABLE = True
+    TN3270_AVAILABLE = True
 except ImportError:
     pass
 
@@ -158,13 +151,74 @@ def screen_from_readbuffer(buffer):
 # Emulator Command Execution
 # =============================================================================
 
-def exec_emulator_command(command: bytes, timeout: float = 3):
-    """Execute emulator command serialized to avoid s3270 desync."""
+def exec_emulator_command(command: bytes, timeout: float = 5):
+    """Execute emulator command with timeout to prevent hanging on non-input screens.
+
+    On timeout: kills s3270 (unavoidable — it's blocked on readline) but then
+    automatically reconnects so the next call works instead of leaving everything dead.
+    """
     em = connection.emulator
     if not em:
         return None
-    with connection.command_lock:
-        return em.exec_command(command)
+
+    result_box = [None]
+    exc_box = [None]
+
+    def _run():
+        try:
+            with connection.command_lock:
+                result_box[0] = em.exec_command(command)
+        except BrokenPipeError:
+            exc_box[0] = "broken_pipe"
+        except OSError:
+            exc_box[0] = "os_error"
+        except Exception as e:
+            exc_box[0] = str(e)
+
+    t = threading.Thread(target=_run, daemon=True)
+    t.start()
+    t.join(timeout)
+
+    if t.is_alive():
+        # Command hung — must kill s3270 to unblock readline()
+        _host = connection.host
+        _port = connection.port
+        try:
+            em.app.sp.kill()
+        except Exception:
+            pass
+        connection.connected = False
+        connection.emulator = None
+        # Auto-reconnect so next call works
+        if _host:
+            _auto_reconnect(_host, _port)
+        return None
+
+    if exc_box[0] in ("broken_pipe", "os_error"):
+        _host = connection.host
+        _port = connection.port
+        connection.connected = False
+        connection.emulator = None
+        if _host:
+            _auto_reconnect(_host, _port)
+        return None
+
+    return result_box[0]
+
+
+def _auto_reconnect(host: str, port: int):
+    """Silently reconnect after s3270 crash. No VTAM wait, just raw TCP."""
+    import time as _time
+    try:
+        connection.emulator = Emulator(visible=False)
+        connection.emulator.connect(f"{host}:{port}")
+        connection.host = host
+        connection.port = port
+        connection.connected = True
+        _time.sleep(1)
+    except Exception:
+        connection.connected = False
+        connection.emulator = None
 
 
 # =============================================================================
@@ -183,8 +237,6 @@ def connect_mainframe(target: str) -> tuple[bool, str]:
     global connection
 
     if not TN3270_AVAILABLE:
-        if S3270_MISSING:
-            return False, "s3270 not found. Install with: sudo apt-get install x3270 (Linux) or brew install x3270 (Mac)"
         return False, "py3270 not available. Install with: pip install py3270"
 
     try:
@@ -209,15 +261,45 @@ def connect_mainframe(target: str) -> tuple[bool, str]:
         connection.port = port
         connection.connected = True
 
-        # Wait for 3270 mode and read initial screen
-        try:
-            exec_emulator_command(b'Wait(1,3270Mode)', timeout=5)
-        except Exception:
-            pass
+        import time as _time
+        _time.sleep(2)
+
+        # Read initial screen
         try:
             read_screen()
         except Exception:
             pass
+
+        screen = connection.current_screen or ""
+
+        # If VTAM hasn't claimed the device yet (Hercules banner / connection rejected),
+        # return failure so the frontend retries rather than displaying garbage.
+        if "Connection rejected" in screen or "no available 3270" in screen:
+            try:
+                connection.emulator.terminate()
+            except Exception:
+                pass
+            connection.connected = False
+            connection.emulator = None
+            return False, f"VTAM not ready — device not claimed yet"
+
+        # If we see the TK5 splash (Hercules version banner, no LOGON ==>),
+        # send Enter to trigger SNASOL handoff — with timeout in case kbd locked
+        import threading as _thr
+        if "LOGON ===>" not in screen and "HHC" in screen:
+            def _dismiss():
+                try:
+                    connection.emulator.exec_command(b'Enter()')
+                except Exception:
+                    pass
+            t = _thr.Thread(target=_dismiss, daemon=True)
+            t.start()
+            t.join(5)
+            _time.sleep(2)
+            try:
+                read_screen()
+            except Exception:
+                pass
 
         return True, f"Connected to {host}:{port}"
 
@@ -252,6 +334,9 @@ def disconnect_mainframe() -> str:
 def read_screen() -> str:
     """Read current 3270 screen content.
 
+    Thread-safe: acquires command_lock to prevent concurrent s3270 access
+    with exec_emulator_command. Returns cached screen if lock is busy.
+
     Returns:
         Screen text or error message
     """
@@ -260,8 +345,15 @@ def read_screen() -> str:
     if not connection.connected or not connection.emulator:
         return "[Not connected]"
 
+    # Try to acquire lock — return cached data if busy (keeps UI responsive)
+    acquired = connection.command_lock.acquire(timeout=2)
+    if not acquired:
+        return connection.current_screen or "[Screen busy]"
+
     try:
         em = connection.emulator
+        if not em:
+            return "[Not connected]"
         # Use py3270's string_get to read entire screen as plain text
         # string_get(ypos, xpos, length) - 1-indexed
         lines = []
@@ -271,12 +363,14 @@ def read_screen() -> str:
                 lines.append(line.rstrip() if line else '')
             except Exception:
                 lines.append('')
-        
+
         screen_text = '\n'.join(lines)
         connection.current_screen = screen_text
         return connection.current_screen
     except Exception as e:
         return connection.current_screen or f"[Screen unavailable: {e}]"
+    finally:
+        connection.command_lock.release()
 
 
 def read_screen_with_color() -> str:
@@ -434,23 +528,14 @@ def send_terminal_key(key_type: str, value: str = "") -> dict:
 
     try:
         # Send the key
-        # NOTE: String() must NOT be preceded by Wait(Unlock) — on Linux s3270
-        # the unlock wait causes each character to be echoed twice through the pipe.
-        # Only wait for unlock before action keys (Enter, PF, Clear) that submit data.
         if key_type == "string":
             if value:
                 exec_emulator_command(f'String("{value}")'.encode())
+            # String input: return immediately, no post-wait needed
+            return {"success": True, "screen_data": get_cached_screen_data()}
         elif key_type == "enter":
-            try:
-                exec_emulator_command(b'Wait(1,Unlock)')
-            except Exception:
-                pass
             exec_emulator_command(b'Enter()')
         elif key_type == "pf":
-            try:
-                exec_emulator_command(b'Wait(1,Unlock)')
-            except Exception:
-                pass
             exec_emulator_command(f'PF({value})'.encode())
         elif key_type == "pa":
             exec_emulator_command(f'PA({value})'.encode())
@@ -479,7 +564,8 @@ def send_terminal_key(key_type: str, value: str = "") -> dict:
         elif key_type == "reset":
             exec_emulator_command(b'Reset()')
 
-        # Wait and read updated screen
+        # Wait(1,Unlock): returns immediately if keyboard already unlocked,
+        # waits at most 1s otherwise. Never hangs.
         try:
             exec_emulator_command(b'Wait(1,Unlock)')
         except Exception:
@@ -508,7 +594,7 @@ def start_screen_poller():
                 read_screen()
             except Exception:
                 pass
-            connection.poller_stop.wait(1.0)
+            connection.poller_stop.wait(3.0)
 
     if connection.poller_thread and connection.poller_thread.is_alive():
         return

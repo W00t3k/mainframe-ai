@@ -1,0 +1,57 @@
+{
+  "id": "racf-hashes",
+  "title": "RACF Hash Cracking: DES Password Analysis",
+  "description": "Understand how RACF password hashing works — DES encryption with ASCII-to-EBCDIC conversion. Learn why the algorithm is weak, how to generate and crack hashes, and why password policy alone doesn't protect mainframe credentials. Based on mainframed/pentesting/user_hashes.py.",
+  "category": "security",
+  "difficulty": "advanced",
+  "steps": [
+    {
+      "title": "RACF Password Storage",
+      "screen": "RACF Password Hashing — How Mainframe Passwords Work\n\nRACF stores passwords as DES-encrypted hashes.\nThe algorithm has been the same since the 1980s.\n\nHash generation:\n  1. Convert password to EBCDIC (not ASCII!)\n  2. XOR each byte with 0x55\n  3. Left-shift each byte by 1 bit\n  4. Set odd parity on each byte\n  5. Use result as DES key\n  6. Encrypt the USERID (EBCDIC, padded to 8 bytes)\n  7. Output = 8-byte DES ciphertext = the hash\n\nKey weaknesses:\n  - DES: 56-bit effective key (crackable in seconds)\n  - Password max 8 characters (uppercase only!)\n  - No salt — same password = same hash for same userid\n  - No iteration — single DES operation\n  - EBCDIC reduces effective keyspace\n\nThis is the weakest password hash in use today.",
+      "expected": "Understand the RACF DES password hashing algorithm.",
+      "hint": "Compare this to modern hashing: bcrypt uses 184-bit salt + configurable iterations. RACF DES has no salt and one iteration. A GPU can try billions of DES keys per second."
+    },
+    {
+      "title": "ASCII to EBCDIC Conversion",
+      "screen": "ASCII to EBCDIC — The First Transformation\n\nMainframes use EBCDIC, not ASCII.\nThis is the first step in hash generation.\n\nASCII    EBCDIC   Character\n------   ------   ---------\n0x41  →  0xC1     'A'\n0x42  →  0xC2     'B'\n0x5A  →  0xE9     'Z'\n0x30  →  0xF0     '0'\n0x39  →  0xF9     '9'\n0x40  →  0x7C     '@'\n0x24  →  0x5B     '$'\n0x23  →  0x7B     '#'\n\nRACF passwords are UPPERCASE ONLY (legacy).\nMax 8 characters.\nAllowed: A-Z, 0-9, @, #, $\n\nEffective password space:\n  39 characters ^ 8 positions = ~4.3 trillion\n  Sounds big? A modern GPU does ~10 billion DES/sec.\n  Full keyspace crack: ~7 minutes.",
+      "expected": "Understand the ASCII-to-EBCDIC conversion table used in RACF hashing.",
+      "hint": "The limited character set (39 chars) and max length (8) make the keyspace tiny by modern standards. Even without a GPU, a fast CPU can crack most RACF passwords in under an hour."
+    },
+    {
+      "title": "The DES Key Derivation",
+      "screen": "DES Key Derivation from Password\n\nFor password 'CUL8TR' (HERC01's password):\n\n Step 1: Convert to EBCDIC\n   C → 0xC3, U → 0xE4, L → 0xD3\n   8 → 0xF8, T → 0xE3, R → 0xD9\n   Pad with EBCDIC spaces (0x40) to 8 bytes\n   Result: C3 E4 D3 F8 E3 D9 40 40\n\n Step 2: XOR each byte with 0x55\n   C3^55=96, E4^55=B1, D3^55=86\n   F8^55=AD, E3^55=B6, D9^55=8C\n   40^55=15, 40^55=15\n   Result: 96 B1 86 AD B6 8C 15 15\n\n Step 3: Left-shift each byte by 1\n   96<<1=2C, B1<<1=62, 86<<1=0C\n   AD<<1=5A, B6<<1=6C, 8C<<1=18\n   15<<1=2A, 15<<1=2A\n   Result: 2C 62 0C 5A 6C 18 2A 2A\n\n Step 4: Set odd parity (LSB)\n   Final DES key: 2D 63 0D 5B 6D 19 2B 2B\n\n Step 5: DES-encrypt 'HERC01  ' (EBCDIC)\n   Plaintext: C8 C5 D9 C3 F0 F1 40 40\n   Key:       2D 63 0D 5B 6D 19 2B 2B\n   Hash:      [8 bytes of ciphertext]",
+      "expected": "Trace the key derivation for HERC01's actual password through each step.",
+      "hint": "The userid is the plaintext, the password becomes the DES key. This means the same password produces DIFFERENT hashes for different userids — the userid acts as a weak form of salt."
+    },
+    {
+      "title": "Hash Format and Storage",
+      "screen": "RACF Hash Storage Format\n\nRACF database record format:\n  USERID:$racf$*USERID*HEXHASH\n\nExample:\n  HERC01:$racf$*HERC01*A1B2C3D4E5F6G7H8\n\nWhere the hash is stored:\n  RACF database: SYS1.RACFDB (or IRR.RACF.DB)\n  Backup:        SYS1.RACFDB.BACKUP\n\nExtracting hashes:\n  Option 1: IRRDBU00 utility (unloads RACF DB to flat file)\n  Option 2: Direct VSAM read (requires READ to RACF DB)\n  Option 3: Memory dump (ACEE contains hash pointer)\n\nCracking tools:\n  - John the Ripper: --format=racf\n  - Hashcat: mode 8500 (RACF DES)\n  - Custom: mainframed/pentesting/user_hashes.py\n\nSpeed: ~5 billion hashes/sec on RTX 4090\nFull 8-char keyspace: under 15 minutes",
+      "expected": "Understand where RACF hashes are stored and how they're extracted and cracked.",
+      "hint": "John the Ripper and Hashcat both support RACF hashes natively. The format is well-documented. If you can read SYS1.RACFDB, you have all the password hashes."
+    },
+    {
+      "title": "The Python Implementation",
+      "screen": "user_hashes.py — RACF Hash Generator\n\nfrom Cryptodome.Cipher import DES\n\ndef generate_racf_hash(userid, password):\n    userid = userid.upper()[:8]\n    password = password.upper()[:8]\n\n    # Convert userid to EBCDIC, pad with 0x40\n    userid_ebcdic = bytearray(8)\n    for i, c in enumerate(userid):\n        userid_ebcdic[i] = a2e[ord(c)]\n    for i in range(len(userid), 8):\n        userid_ebcdic[i] = 0x40  # EBCDIC space\n\n    # Convert password to DES key\n    des_key = bytearray(8)\n    for i, c in enumerate(password):\n        ebcdic = a2e[ord(c)]\n        xored = ebcdic ^ 0x55\n        shifted = (xored << 1) & 0xff\n        des_key[i] = set_odd_parity(shifted)\n\n    # Encrypt userid with password-derived key\n    cipher = DES.new(bytes(des_key), DES.MODE_ECB)\n    hash_bytes = cipher.encrypt(bytes(userid_ebcdic))\n    return hash_bytes.hex().upper()\n\nSource: mainframed/pentesting/user_hashes.py\nCredits: Soldier of FORTRAN",
+      "expected": "Read and understand the Python implementation of RACF hash generation.",
+      "hint": "The entire hash algorithm is ~20 lines of Python. DES.MODE_ECB means no initialization vector, no chaining — pure single-block DES encryption."
+    },
+    {
+      "title": "Common Weak Passwords",
+      "screen": "Common Mainframe Passwords Found in Assessments\n\nPassword      Frequency   Notes\n---------     ---------   -----\nPASSWORD      Very High   Default in many shops\nSECURE        High        Ironic\nWELCOME1      High        New employee default\nCHANGEME      High        Temporary password\nMAINFRAM      Medium      8-char limit hit\n[userid]      High        Password = userid\nTESTTEST      Medium      Dev/test accounts\nSYSTEM        Medium      System accounts\nIBMUSER       High        Default IBM userid\nSECRET        Medium      Government/military\n\nRACF password rules (typical):\n  - Min 6 chars (configurable)\n  - Max 8 chars (HARD LIMIT)\n  - Must contain 1 non-alpha (sometimes)\n  - History: last 10-20 (configurable)\n  - Revoke after 3-5 failures\n\nThe 8-character limit is the fundamental weakness.\nNo amount of complexity rules fixes a tiny keyspace.",
+      "expected": "Recognize common weak passwords found in mainframe assessments.",
+      "hint": "The 8-character uppercase-only limit means even 'strong' mainframe passwords are weak by modern standards. Password phrases (z/OS 2.3+) support up to 100 chars but are rarely enabled."
+    },
+    {
+      "title": "Modern Alternatives",
+      "screen": "Beyond DES: Modern RACF Password Options\n\nRACF DES (legacy — still default on many systems):\n  - 56-bit key, no salt, 1 iteration\n  - Crackable in seconds/minutes\n\nRACF KDFAES (z/OS 2.3+, 2017):\n  - AES-256 based key derivation\n  - Uses PBKDF2 with salt\n  - 10,000+ iterations\n  - Supports password phrases (up to 100 chars)\n  - Mixed case, special characters allowed\n  - MUCH harder to crack\n\nTo enable KDFAES:\n  SETROPTS PASSWORD(ALGORITHM(KDFAES))\n  SETROPTS PASSWORD(MIXEDCASE)\n\nReality check:\n  - Many shops still run DES (compatibility)\n  - Password phrases break legacy applications\n  - Migration is complex and risky\n  - TK5/MVS 3.8j: DES only (no KDFAES)\n\nIf you find DES hashes in an assessment:\n  → crack them. It's trivial.\n  → report the finding.\n  → recommend KDFAES migration.",
+      "expected": "Compare legacy RACF DES with modern KDFAES and understand the migration challenge.",
+      "hint": "KDFAES is available since z/OS 2.3 (2017) but adoption is slow because changing the password algorithm can break legacy applications that hardcode password handling."
+    },
+    {
+      "title": "Lab Complete",
+      "screen": "RACF Hash Cracking Lab Complete\n\nKey findings:\n  - RACF uses single DES with no salt\n  - Password → EBCDIC → XOR 0x55 → shift → DES key\n  - Userid (EBCDIC) is the plaintext\n  - Max 8 chars, uppercase only = tiny keyspace\n  - ~4.3 trillion combinations = minutes on GPU\n  - John the Ripper: --format=racf\n  - Hashcat: mode 8500\n\nAttack chain:\n  Extract RACF DB → IRRDBU00 unload → parse hashes\n  → crack with JtR/Hashcat → valid credentials\n  → lateral movement across LPAR/sysplex\n\nRemediation:\n  1. Migrate to KDFAES (SETROPTS PASSWORD(ALGORITHM(KDFAES)))\n  2. Enable password phrases (SETROPTS PASSWORD(MIXEDCASE))\n  3. Enforce minimum 8-char passwords with complexity\n  4. Protect RACF database (SYS1.RACFDB) — READ=NONE\n  5. Monitor IRRDBU00 usage via SMF\n  6. Regular password audits with cracking tools\n\nSource: mainframed/pentesting/user_hashes.py\nCredits: Soldier of FORTRAN (Philip Young)",
+      "expected": "Review all RACF hash cracking findings and remediation steps.",
+      "hint": "The single most important remediation: migrate from DES to KDFAES. Everything else is a band-aid on a fundamentally broken algorithm."
+    }
+  ]
+}

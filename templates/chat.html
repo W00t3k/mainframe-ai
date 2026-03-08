@@ -73,6 +73,20 @@
                 <span class="label">TN3270:</span>
                 <span class="value" id="tn3270Status">Disconnected</span>
             </div>
+            <div class="status-item" style="position:relative;">
+                <span class="label">KICKS:</span>
+                <span class="value" id="kicksStatus" style="cursor:pointer;" onclick="toggleKicksPanel()">—</span>
+                <div id="kicksPanel" style="display:none; position:absolute; top:100%; left:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:10px 14px; min-width:280px; box-shadow:0 4px 12px rgba(0,0,0,0.5);">
+                    <div style="color:#0ff; font-size:10px; text-transform:uppercase; letter-spacing:1px; margin-bottom:8px; border-bottom:1px solid #222; padding-bottom:4px;">KICKS (CICS) Control</div>
+                    <div id="kicksInfo" style="color:#999; font-size:11px; font-family:'IBM Plex Mono',monospace; margin-bottom:8px;">Checking...</div>
+                    <div style="display:flex; gap:6px;">
+                        <button onclick="kicksStart()" style="flex:1; padding:5px 10px; background:#1a3a2a; border:1px solid #3a6a4a; color:#5f5; border-radius:3px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px;">Start</button>
+                        <button onclick="kicksStop()" style="flex:1; padding:5px 10px; background:#3a1a1a; border:1px solid #6a3a3a; color:#f55; border-radius:3px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px;">Stop</button>
+                        <button onclick="kicksCheck()" style="flex:1; padding:5px 10px; background:#1a1a3a; border:1px solid #3a3a6a; color:#88f; border-radius:3px; cursor:pointer; font-family:'IBM Plex Mono',monospace; font-size:11px;">Check</button>
+                    </div>
+                    <div id="kicksLog" style="margin-top:8px; font-size:10px; color:#666; font-family:'IBM Plex Mono',monospace; max-height:120px; overflow-y:auto;"></div>
+                </div>
+            </div>
             <div class="status-item">
                 <span class="label">Agent:</span>
                 <span class="value" id="agentStatus">General Assistant</span>
@@ -257,23 +271,23 @@ or use /connect command.
                     </div>
 
                     <div class="terminal-keys">
-                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('enter')">Enter</button>
-                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('clear')">Clear</button>
-                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('tab')">Tab</button>
-                        <button class="pf-key special" onmousedown="event.preventDefault()" onclick="sendKey('reset')">Reset</button>
+                        <button class="pf-key special" onclick="sendKey('enter')">Enter</button>
+                        <button class="pf-key special" onclick="sendKey('clear')">Clear</button>
+                        <button class="pf-key special" onclick="sendKey('tab')">Tab</button>
+                        <button class="pf-key special" onclick="sendKey('reset')">Reset</button>
                         <span style="width:1rem;"></span>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 1)">PF1</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 2)">PF2</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 3)">PF3</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 4)">PF4</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 5)">PF5</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 6)">PF6</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 7)">PF7</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 8)">PF8</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 9)">PF9</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 10)">PF10</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 11)">PF11</button>
-                        <button class="pf-key" onmousedown="event.preventDefault()" onclick="sendKey('pf', 12)">PF12</button>
+                        <button class="pf-key" onclick="sendKey('pf', 1)">PF1</button>
+                        <button class="pf-key" onclick="sendKey('pf', 2)">PF2</button>
+                        <button class="pf-key" onclick="sendKey('pf', 3)">PF3</button>
+                        <button class="pf-key" onclick="sendKey('pf', 4)">PF4</button>
+                        <button class="pf-key" onclick="sendKey('pf', 5)">PF5</button>
+                        <button class="pf-key" onclick="sendKey('pf', 6)">PF6</button>
+                        <button class="pf-key" onclick="sendKey('pf', 7)">PF7</button>
+                        <button class="pf-key" onclick="sendKey('pf', 8)">PF8</button>
+                        <button class="pf-key" onclick="sendKey('pf', 9)">PF9</button>
+                        <button class="pf-key" onclick="sendKey('pf', 10)">PF10</button>
+                        <button class="pf-key" onclick="sendKey('pf', 11)">PF11</button>
+                        <button class="pf-key" onclick="sendKey('pf', 12)">PF12</button>
                     </div>
                 </div>
             </div>
@@ -412,7 +426,7 @@ or use /connect command.
             document.querySelector(`.header-tab[onclick="showPanel('${name}')"]`).classList.add('active');
 
             if (name === 'terminal') {
-                setTimeout(() => document.getElementById('terminalScreen').focus(), 50);
+                document.getElementById('terminalScreen').focus();
             }
         }
 
@@ -732,6 +746,96 @@ or use /connect command.
         let modelPickerOpen = false;
         let chatPulling = false;
         let gpuRecommendations = null;  // cached from /api/models/recommended
+
+        // ── KICKS Control ──────────────────────────────────
+        let kicksPanelOpen = false;
+
+        function toggleKicksPanel() {
+            kicksPanelOpen = !kicksPanelOpen;
+            document.getElementById('kicksPanel').style.display = kicksPanelOpen ? 'block' : 'none';
+            if (kicksPanelOpen) kicksCheck();
+        }
+
+        async function kicksCheck() {
+            const info = document.getElementById('kicksInfo');
+            const log = document.getElementById('kicksLog');
+            const status = document.getElementById('kicksStatus');
+            info.textContent = 'Checking...';
+            log.textContent = '';
+            try {
+                const r = await fetch('/api/kicks/status');
+                const d = await r.json();
+                if (d.kicks_running) {
+                    status.textContent = 'Running';
+                    status.style.color = '#5f5';
+                    info.innerHTML = '<span style="color:#5f5;">KICKS is running</span>';
+                } else if (d.datasets_exist) {
+                    status.textContent = 'Ready';
+                    status.style.color = '#ff0';
+                    info.innerHTML = 'KICKS installed — click <b>Start</b> to launch';
+                } else if (d.dasd_exists) {
+                    status.textContent = 'DASD OK';
+                    status.style.color = '#f80';
+                    info.innerHTML = 'DASD exists (' + d.dasd_size_mb + 'MB) but datasets not verified';
+                } else {
+                    status.textContent = 'Not Found';
+                    status.style.color = '#f55';
+                    info.innerHTML = 'KICKS DASD not found — run setup.sh';
+                }
+                if (d.log && d.log.length) {
+                    log.innerHTML = d.log.map(l => '<div>' + l + '</div>').join('');
+                }
+            } catch(e) {
+                status.textContent = 'Error';
+                status.style.color = '#f55';
+                info.textContent = 'API error: ' + e.message;
+            }
+        }
+
+        async function kicksStart() {
+            const info = document.getElementById('kicksInfo');
+            const log = document.getElementById('kicksLog');
+            info.textContent = 'Starting KICKS...';
+            log.textContent = '';
+            try {
+                const r = await fetch('/api/kicks/start', { method: 'POST' });
+                const d = await r.json();
+                if (d.success) {
+                    info.innerHTML = '<span style="color:#5f5;">' + d.message + '</span>';
+                    document.getElementById('kicksStatus').textContent = 'Running';
+                    document.getElementById('kicksStatus').style.color = '#5f5';
+                } else {
+                    info.innerHTML = '<span style="color:#f55;">' + d.message + '</span>';
+                }
+                if (d.log && d.log.length) {
+                    log.innerHTML = d.log.map(l => '<div>' + l + '</div>').join('');
+                }
+            } catch(e) {
+                info.textContent = 'Error: ' + e.message;
+            }
+        }
+
+        async function kicksStop() {
+            const info = document.getElementById('kicksInfo');
+            const log = document.getElementById('kicksLog');
+            info.textContent = 'Stopping KICKS...';
+            log.textContent = '';
+            try {
+                const r = await fetch('/api/kicks/stop', { method: 'POST' });
+                const d = await r.json();
+                info.innerHTML = '<span style="color:#ff0;">' + d.message + '</span>';
+                document.getElementById('kicksStatus').textContent = 'Stopped';
+                document.getElementById('kicksStatus').style.color = '#888';
+                if (d.log && d.log.length) {
+                    log.innerHTML = d.log.map(l => '<div>' + l + '</div>').join('');
+                }
+            } catch(e) {
+                info.textContent = 'Error: ' + e.message;
+            }
+        }
+
+        // Auto-check KICKS status on page load (after a delay)
+        setTimeout(kicksCheck, 5000);
 
         async function toggleModelPicker() {
             const picker = document.getElementById('modelPicker');
@@ -1075,13 +1179,189 @@ or use /connect command.
                     });
                 }
 
+                // ── Cloud: Grok (xAI) ──
+                try {
+                    const llmR = await fetch('/api/llm/status');
+                    const llmStatus = await llmR.json();
+                    const grok = llmStatus.grok || {};
+                    const isGrokActive = llmStatus.active_provider === 'grok';
+
+                    const grokHdr = document.createElement('div');
+                    grokHdr.style.cssText = 'padding:6px 12px 4px; color:#e040fb; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px; display:flex; justify-content:space-between; align-items:center;';
+                    const grokTitle = document.createElement('span');
+                    grokTitle.textContent = grok.configured ? (grok.available ? '☁ Cloud — Grok (xAI)' : '☁ Grok (offline)') : '☁ Grok (not configured)';
+                    grokHdr.appendChild(grokTitle);
+
+                    if (grok.configured) {
+                        const provBadge = document.createElement('span');
+                        provBadge.style.cssText = `font-size:9px; padding:1px 6px; border-radius:3px; font-weight:bold; font-family:IBM Plex Mono,monospace; ${isGrokActive ? 'background:#e040fb; color:#000;' : 'border:1px solid #e040fb; color:#e040fb;'}`;
+                        provBadge.textContent = isGrokActive ? 'ACTIVE' : 'STANDBY';
+                        provBadge.style.cursor = 'pointer';
+                        provBadge.title = isGrokActive ? 'Click to switch to Ollama' : 'Click to switch to Grok';
+                        provBadge.onclick = async (e) => {
+                            e.stopPropagation();
+                            const newProv = isGrokActive ? 'ollama' : 'grok';
+                            await fetch('/api/llm/provider/switch', {
+                                method: 'POST',
+                                headers: {'Content-Type': 'application/json'},
+                                body: JSON.stringify({provider: newProv})
+                            });
+                            addMessage(`LLM provider switched to **${newProv.toUpperCase()}**`);
+                            document.getElementById('modelName').textContent = newProv === 'grok' ? (grok.model || 'grok-3-mini-fast') : currentModel;
+                            await loadModels();
+                        };
+                        grokHdr.appendChild(provBadge);
+                    }
+                    listEl.appendChild(grokHdr);
+
+                    if (!grok.configured) {
+                        const keyRow = document.createElement('div');
+                        keyRow.style.cssText = 'padding:6px 12px 10px; display:flex; gap:6px; align-items:center;';
+
+                        const keyInput = document.createElement('input');
+                        keyInput.type = 'password';
+                        keyInput.placeholder = 'Paste your Grok API key';
+                        keyInput.style.cssText = 'flex:1; background:#111; border:1px solid #333; border-radius:3px; padding:4px 8px; color:#e040fb; font-size:11px; font-family:IBM Plex Mono,monospace; outline:none;';
+                        keyInput.onfocus = () => keyInput.style.borderColor = '#e040fb';
+                        keyInput.onblur = () => keyInput.style.borderColor = '#333';
+                        keyInput.onclick = (e) => e.stopPropagation();
+
+                        const keyBtn = document.createElement('button');
+                        keyBtn.textContent = 'Connect';
+                        keyBtn.style.cssText = 'background:#e040fb; color:#000; border:none; border-radius:3px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; white-space:nowrap;';
+                        keyBtn.onmouseenter = () => keyBtn.style.background = '#f060ff';
+                        keyBtn.onmouseleave = () => keyBtn.style.background = '#e040fb';
+
+                        const keyStatus = document.createElement('div');
+                        keyStatus.style.cssText = 'padding:0 12px 6px; font-size:10px; font-family:IBM Plex Mono,monospace; display:none;';
+
+                        keyBtn.onclick = async (e) => {
+                            e.stopPropagation();
+                            const key = keyInput.value.trim();
+                            if (!key) { keyInput.style.borderColor = '#f44'; return; }
+                            keyBtn.textContent = 'Verifying...';
+                            keyBtn.disabled = true;
+                            keyBtn.style.background = '#666';
+                            keyStatus.style.display = 'block';
+                            keyStatus.style.color = '#888';
+                            keyStatus.textContent = 'Testing connection to xAI API...';
+                            try {
+                                const r = await fetch('/api/llm/grok/set-key', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({key: key})
+                                });
+                                const d = await r.json();
+                                if (d.success) {
+                                    keyStatus.style.color = '#0f0';
+                                    keyStatus.textContent = '✓ ' + d.message;
+                                    addMessage('**Grok connected!** Cloud LLM is now available.');
+                                    setTimeout(() => loadModels(), 800);
+                                } else {
+                                    keyStatus.style.color = '#f44';
+                                    keyStatus.textContent = '✕ ' + (d.error || 'Connection failed');
+                                    keyBtn.textContent = 'Connect';
+                                    keyBtn.disabled = false;
+                                    keyBtn.style.background = '#e040fb';
+                                }
+                            } catch(err) {
+                                keyStatus.style.color = '#f44';
+                                keyStatus.textContent = '✕ Network error: ' + err.message;
+                                keyBtn.textContent = 'Connect';
+                                keyBtn.disabled = false;
+                                keyBtn.style.background = '#e040fb';
+                            }
+                        };
+
+                        keyInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); keyBtn.click(); } };
+
+                        keyRow.appendChild(keyInput);
+                        keyRow.appendChild(keyBtn);
+                        listEl.appendChild(keyRow);
+                        listEl.appendChild(keyStatus);
+
+                        const keyHint = document.createElement('div');
+                        keyHint.style.cssText = 'padding:0 12px 8px; color:#555; font-size:9px; font-family:IBM Plex Mono,monospace;';
+                        keyHint.innerHTML = 'Get your key at <span style="color:#e040fb;">console.x.ai</span> — stored in memory only, not saved to disk';
+                        listEl.appendChild(keyHint);
+                    } else {
+                        const grokModels = grok.models || [];
+                        const grokCurrent = grok.model || '';
+                        grokModels.forEach(gm => {
+                            const isActive = gm.id === grokCurrent && isGrokActive;
+                            const row = document.createElement('div');
+                            row.style.cssText = `padding:5px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:${isActive ? '#e040fb' : '#ccc'}; background:${isActive ? 'rgba(224,64,251,0.05)' : 'transparent'};`;
+                            row.onmouseenter = () => { if (!isActive) row.style.background = 'rgba(255,255,255,0.05)'; };
+                            row.onmouseleave = () => { if (!isActive) row.style.background = isActive ? 'rgba(224,64,251,0.05)' : 'transparent'; };
+
+                            const left = document.createElement('span');
+                            const prefix = isActive ? '▸ ' : '  ';
+                            left.innerHTML = `${prefix}${gm.name || gm.id} <span style="color:#666; font-size:10px;">${gm.description || ''}</span>`;
+
+                            const right = document.createElement('span');
+                            right.style.cssText = 'display:flex; align-items:center; gap:6px;';
+                            const ctxSpan = document.createElement('span');
+                            ctxSpan.style.cssText = 'color:#666; font-size:10px;';
+                            ctxSpan.textContent = gm.context_window ? `${(gm.context_window/1024).toFixed(0)}K ctx` : '';
+                            right.appendChild(ctxSpan);
+
+                            const useBtn = document.createElement('button');
+                            useBtn.textContent = isActive ? '✓ Active' : 'Use';
+                            useBtn.style.cssText = `border:none; border-radius:3px; padding:1px 8px; font-size:10px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; ${isActive ? 'background:#e040fb; color:#000;' : 'background:#555; color:#fff;'}`;
+                            if (!isActive) {
+                                useBtn.onmouseenter = () => useBtn.style.background = '#e040fb';
+                                useBtn.onmouseleave = () => useBtn.style.background = '#555';
+                            }
+                            useBtn.onclick = async (e) => {
+                                e.stopPropagation();
+                                // Switch model and provider
+                                await fetch('/api/llm/grok/switch-model', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({model: gm.id})
+                                });
+                                await fetch('/api/llm/provider/switch', {
+                                    method: 'POST',
+                                    headers: {'Content-Type': 'application/json'},
+                                    body: JSON.stringify({provider: 'grok'})
+                                });
+                                document.getElementById('modelName').textContent = gm.name || gm.id;
+                                addMessage(`Switched to **Grok ${gm.name || gm.id}** (cloud)`);
+                                await loadModels();
+                            };
+                            right.appendChild(useBtn);
+
+                            row.appendChild(left);
+                            row.appendChild(right);
+                            listEl.appendChild(row);
+                        });
+
+                        // If no models from API status, show current model only
+                        if (grokModels.length === 0 && grokCurrent) {
+                            const row = document.createElement('div');
+                            row.style.cssText = 'padding:5px 12px; font-size:12px; font-family:IBM Plex Mono,monospace; color:#e040fb;';
+                            row.textContent = `▸ ${grokCurrent}`;
+                            listEl.appendChild(row);
+                        }
+                    }
+                } catch(grokErr) {
+                    // Grok section silently fails if backend routes not available
+                    console.debug('Grok status not available:', grokErr);
+                }
+
                 // ── Download Section (GPU-aware) ──
                 const suggestedModels = (gpuRecommendations && gpuRecommendations.suggested)
                     ? gpuRecommendations.suggested
                     : [
-                        {name:'tinyllama',   desc:'Tiny & fast',    size:'~637MB'},
-                        {name:'llama3.2:3b', desc:'Good balance',   size:'~2.0GB'},
-                        {name:'llama3.1:8b', desc:'Best quality',   size:'~4.7GB'},
+                        {name:'deepseek-r1:8b',       desc:'DeepSeek R1 8B — Reasoning',      size:'~4.9GB'},
+                        {name:'deepseek-r1:14b',      desc:'DeepSeek R1 14B — Best reasoning', size:'~9.0GB'},
+                        {name:'deepseek-coder-v2:16b', desc:'DeepSeek Coder V2 — Code expert', size:'~8.9GB'},
+                        {name:'phi3:mini',             desc:'Microsoft Phi-3 Mini — Fast',     size:'~2.3GB'},
+                        {name:'gemma2:2b',             desc:'Google Gemma 2B — Lightweight',   size:'~1.6GB'},
+                        {name:'qwen2.5-coder:7b',     desc:'Qwen 2.5 Coder — Code expert',    size:'~4.7GB'},
+                        {name:'codellama:7b',          desc:'Meta Code Llama — Code gen',      size:'~3.8GB'},
+                        {name:'llama3.1:8b',           desc:'Meta Llama 3.1 8B — General',     size:'~4.7GB'},
+                        {name:'tinyllama',             desc:'TinyLlama — Minimal',             size:'~637MB'},
                     ];
 
                 const dlHdr = document.createElement('div');

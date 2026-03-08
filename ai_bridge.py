@@ -82,7 +82,7 @@ class AnswerResponse(BaseModel):
     truncated: bool
 
 
-def format_for_3270(text: str, max_chars: int = MAX_RESPONSE_CHARS) -> str:
+def format_for_3270(text: str, max_chars: int = MAX_RESPONSE_CHARS) -> tuple[str, bool]:
     """
     Format AI response for 3270 terminal display.
     - Remove markdown formatting
@@ -184,7 +184,7 @@ async def health():
         async with httpx.AsyncClient(timeout=5.0) as client:
             resp = await client.get(f"{OLLAMA_URL}/api/tags")
             ollama_ok = resp.status_code == 200
-    except:
+    except Exception:
         pass
     
     return {

@@ -1,0 +1,75 @@
+{
+  "id": "jcl-injection",
+  "title": "JCL Library Injection: Deferred Execution Privilege Path",
+  "description": "Demonstrate how a low-privileged user can influence batch execution by controlling a program library resolved at runtime. This is a real control-plane privilege path — no exploits, no vulnerabilities, just normal system behavior.",
+  "category": "security",
+  "difficulty": "advanced",
+  "steps": [
+    {
+      "title": "Attack Overview",
+      "screen": "JCL Library Injection — Attack Chain\n\nObjective: Demonstrate that a low-privileged user can\ninfluence what code runs inside a trusted batch job.\n\nAttack chain:\n  1. Create a user-controlled PDS (library)\n  2. Place a program member in the library\n  3. Write JCL that loads from the user library\n  4. Submit the job — JES executes it later\n  5. The program runs under the submitter's identity\n  6. If a privileged job references the same library...\n     → user-controlled code runs in a trusted context\n\nThis is NOT an exploit. This is normal MVS behavior.\nThe risk: shared libraries + deferred execution + identity\ninheritance = privilege path.",
+      "expected": "Understand the attack chain before executing it.",
+      "hint": "On the mainframe, program libraries are datasets. Whoever can UPDATE a library controls what code runs."
+    },
+    {
+      "title": "Step 1: Connect and Login to TSO",
+      "screen": "Terminal   CUU0C0          MVS 3.8j TK5\n Date  20.02.26\n\n Logon ===> HERC01\n\n IKJ56700A ENTER USERID -\n HERC01\n IKJ56710I ENTER CURRENT PASSWORD\n ********\n\n ... broadcast messages ...\n\n READY",
+      "expected": "Log in as HERC01 and reach the TSO READY prompt. If ISPF appears, press PF3 to exit.",
+      "hint": "HERC01 / CUL8TR — this is the standard TK5 user. PF3 exits ISPF panels."
+    },
+    {
+      "title": "Step 2: Create a User-Controlled PDS",
+      "screen": " READY\n ALLOC DA('HERC01.TESTLIB') NEW CATALOG DSORG(PO)\n   SPACE(5 5) TRACKS DIR(10) RECFM(F B) LRECL(80)\n   BLKSIZE(3120)\n READY\n\n This creates a Partitioned Data Set (PDS) — the mainframe\n equivalent of a directory. It belongs to HERC01 and is\n fully under our control.\n\n PDS = Program library. Members = individual programs.\n DSORG(PO) = Partitioned Organization\n RECFM(FB) = Fixed Block records\n LRECL(80) = 80-byte card image format",
+      "expected": "At TSO READY, type the ALLOC command to create HERC01.TESTLIB. If it already exists, you'll get a message — that's fine.",
+      "hint": "ALLOC DA('HERC01.TESTLIB') NEW CATALOG DSORG(PO) SPACE(5 5) TRACKS DIR(10) RECFM(F B) LRECL(80) BLKSIZE(3120)"
+    },
+    {
+      "title": "Step 3: Write a COBOL Program into the Library",
+      "screen": " READY\n EDIT 'HERC01.TESTLIB(INJPGM)' NEW CNTL\n\n    EDIT       HERC01.TESTLIB(INJPGM)\n 00010  //INJPGM   JOB (ACCT),'INJECT TEST',CLASS=A,\n 00020  //         MSGCLASS=X,MSGLEVEL=(1,1)\n 00030  //STEP1    EXEC PGM=IEFBR14\n 00040  //SYSPRINT DD SYSOUT=*\n 00050  //MARKER   DD DSN=HERC01.INJECTION.PROOF,\n 00060  //         DISP=(NEW,CATLG),UNIT=SYSDA,\n 00070  //         SPACE=(TRK,(1,1)),\n 00080  //         DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120)\n 00090  //",
+      "expected": "Use the EDIT command to create a new member INJPGM in HERC01.TESTLIB. This JCL creates a 'proof' dataset when it runs.",
+      "hint": "Type: EDIT 'HERC01.TESTLIB(INJPGM)' NEW CNTL — then enter the JCL lines. Type SAVE then END to exit."
+    },
+    {
+      "title": "Step 4: Verify the Library Contents",
+      "screen": " READY\n LISTDS 'HERC01.TESTLIB' MEMBERS\n HERC01.TESTLIB\n --RECFM-LRECL-BLKSIZE-DSORG\n   FB    80    3120    PO\n --VOLUMES--\n   PUB001\n --MEMBERS--\n   INJPGM\n READY\n\n The library exists. It contains one member: INJPGM.\n This is a user-controlled dataset.\n Any job that references this library will load our code.",
+      "expected": "Run LISTDS to confirm HERC01.TESTLIB exists with the INJPGM member.",
+      "hint": "LISTDS 'HERC01.TESTLIB' MEMBERS"
+    },
+    {
+      "title": "Step 5: Write the Attack JCL",
+      "screen": " READY\n EDIT 'HERC01.TESTLIB(RUNJOB)' NEW CNTL\n\n    EDIT       HERC01.TESTLIB(RUNJOB)\n 00010  //RUNJOB   JOB (ACCT),'LIB INJECT',CLASS=A,\n 00020  //         MSGCLASS=X,MSGLEVEL=(1,1),\n 00030  //         USER=HERC01,PASSWORD=CUL8TR\n 00040  //*\n 00050  //* STEPLIB forces MVS to search HERC01.TESTLIB\n 00060  //* BEFORE the system libraries (LINKLST)\n 00070  //*\n 00080  //STEP1    EXEC PGM=IEFBR14\n 00090  //STEPLIB  DD DSN=HERC01.TESTLIB,DISP=SHR\n 00100  //SYSPRINT DD SYSOUT=*\n 00110  //PROOF    DD DSN=HERC01.INJECTION.PROOF,\n 00120  //         DISP=(NEW,CATLG),UNIT=SYSDA,\n 00130  //         SPACE=(TRK,(1,1)),\n 00140  //         DCB=(RECFM=FB,LRECL=80,BLKSIZE=3120)\n 00150  //",
+      "expected": "Create RUNJOB — a batch job that uses STEPLIB to load from our user-controlled library. The PROOF dataset proves execution occurred.",
+      "hint": "STEPLIB overrides the system library search order. Whatever is in HERC01.TESTLIB gets loaded FIRST."
+    },
+    {
+      "title": "Step 6: Submit the Job",
+      "screen": " READY\n SUBMIT 'HERC01.TESTLIB(RUNJOB)'\n IKJ56258I JOB RUNJOB(JOB00025) SUBMITTED\n READY\n\n The job is now in the JES queue.\n Identity bound: HERC01\n Execution: deferred — JES decides when to run it.\n\n What happens:\n   JES → STEP1 → load PGM=IEFBR14 → check STEPLIB first\n   → find it in HERC01.TESTLIB (our library!)\n   → but IEFBR14 is a system program, so LINKLST wins\n   → however, the PROOF DD creates our marker dataset\n\n In a real scenario: replace the program name with one\n that ONLY exists in HERC01.TESTLIB → full control.",
+      "expected": "Submit the RUNJOB job. Check that JES accepted it with a JOB number.",
+      "hint": "SUBMIT 'HERC01.TESTLIB(RUNJOB)' — watch for the IKJ56258I message with the job number."
+    },
+    {
+      "title": "Step 7: Verify Execution — Check for Proof Dataset",
+      "screen": " READY\n LISTDS 'HERC01.INJECTION.PROOF'\n HERC01.INJECTION.PROOF\n --RECFM-LRECL-BLKSIZE-DSORG\n   FB    80    3120    PS\n --VOLUMES--\n   PUB001\n READY\n\n The PROOF dataset EXISTS.\n\n This confirms:\n  1. Our job ran successfully\n  2. It created a dataset under our control\n  3. The execution path went through our library\n  4. Identity was HERC01 (the submitter)\n  5. The job ran with whatever authority HERC01 has",
+      "expected": "Run LISTDS to verify that HERC01.INJECTION.PROOF was created — proof the job executed.",
+      "hint": "LISTDS 'HERC01.INJECTION.PROOF' — if it exists, the job ran. If 'NOT IN CATALOG', wait and retry."
+    },
+    {
+      "title": "Step 8: Check Job Output",
+      "screen": " READY\n OUTPUT RUNJOB(JOB00025)\n IKJ56251I JOB RUNJOB(JOB00025) OUTPUT\n\n //RUNJOB  JOB (ACCT),'LIB INJECT'\n  ...\n IEF142I RUNJOB STEP1 - STEP WAS EXECUTED - COND 0000\n IEF285I HERC01.TESTLIB               KEPT\n IEF285I HERC01.INJECTION.PROOF       CATALOGED\n  ...\n\n Return code 0000 = success.\n HERC01.TESTLIB was referenced (KEPT).\n HERC01.INJECTION.PROOF was created (CATALOGED).",
+      "expected": "View the job output to confirm COND CODE 0000 and see the library resolution.",
+      "hint": "OUTPUT RUNJOB(JOB*) — or just OUTPUT to see all pending output."
+    },
+    {
+      "title": "Step 9: The Privilege Path Explained",
+      "screen": "PRIVILEGE PATH ANALYSIS\n\nWhat we demonstrated:\n  User creates library    → HERC01.TESTLIB\n  User adds program       → INJPGM member\n  User writes JCL         → RUNJOB with STEPLIB\n  JES defers execution    → runs under HERC01\n  STEPLIB overrides       → our library searched first\n  Proof of execution      → HERC01.INJECTION.PROOF\n\nThe risk in enterprise environments:\n  Shared STEPLIB datasets writable by developers\n  + Production jobs referencing those STEPLIBs\n  = Developer-controlled code in production context\n\nThis is NOT a vulnerability.\nThis is a trust architecture design flaw.\n\nF1: Identity bound at submission, inherited at execution\nF3: Deferred execution hides the influence chain\nF4: RACF enforces dataset access but NOT library search\nF5: Imported assumption — 'libraries are read-only'",
+      "expected": "Understand the full privilege path and how it maps to the 5 Findings Areas.",
+      "hint": "The key insight: RACF controls WHO can access a dataset, but NOT the library search ORDER. STEPLIB is controlled by JCL, which is controlled by the submitter."
+    },
+    {
+      "title": "Step 10: Cleanup",
+      "screen": " READY\n DELETE 'HERC01.INJECTION.PROOF'\n READY\n DELETE 'HERC01.TESTLIB'\n READY\n\n Cleanup complete. The proof dataset and test library\n are removed.\n\n Lab Summary:\n  - STEPLIB overrides system library search order\n  - JCL is a declaration — the submitter controls it\n  - Identity persists from submission to execution\n  - Deferred execution creates a detection gap\n  - Shared writable libraries = privilege escalation\n\n Remediation:\n  1. Restrict UPDATE access to STEPLIBs in production\n  2. Use RACF PROGRAM control for sensitive programs\n  3. Monitor SMF type 30 for unusual STEPLIB references\n  4. Audit who can UPDATE datasets referenced in JCL\n  5. Separate dev and prod library namespaces",
+      "expected": "Delete the proof dataset and test library. Review the remediation steps.",
+      "hint": "DELETE 'HERC01.INJECTION.PROOF' then DELETE 'HERC01.TESTLIB'"
+    }
+  ]
+}

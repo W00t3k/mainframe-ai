@@ -1,0 +1,1380 @@
+{% extends "base.html" %}
+
+{% block title %}IBM Mainframe AI Assistant{% endblock %}
+
+{% block page_styles %}
+<link rel="stylesheet" href="/static/css/pages/index.css?v=416">
+{% endblock %}
+
+{% block head_extra %}
+<script src="/static/js/vendor/marked.min.js"></script>
+{% endblock %}
+
+{% block body %}
+<div class="idx-layout">
+<div class="idx-main-col">
+
+    <!-- ── Unified Toolbar ── -->
+    <div class="idx-toolbar" id="idxToolbar">
+        <div class="idx-toolbar-items">
+            <div class="idx-toolbar-center">
+                <a href="/tutorials" class="idx-pill idx-pill-outline" data-hint="Tutorial library — step-by-step exercises for TSO, ISPF, JCL, COBOL, KICKS/CICS, and more.">[T] TUTORIALS</a>
+                <a href="/walkthrough" class="idx-pill idx-pill-accent" data-hint="Interactive walkthrough — learn mainframe concepts, control planes, and security fundamentals step by step.">[F1] LEARN</a>
+                <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()" data-hint="Connect to the TN3270 terminal — opens a live session to the MVS 3.8j mainframe via Hercules emulator.">[C] CONNECT</button>
+                <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()" data-hint="Run a guided demo — automatically walks through mainframe screens with AI narration explaining each step.">[D] DEMO</button>
+                <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()" data-hint="Restart the Hercules mainframe emulator — performs an IPL to reset the MVS system to a clean state.">[R] RESTART</button>
+            </div>
+            <div class="idx-toolbar-status" id="toolbarStatus">
+                <span class="ts-item" style="position:relative;"><span class="ts-led" id="tsOllamaLed"></span><span class="ts-label">LLM</span><span class="ts-val" id="tsModel" onclick="toggleIdxModelPicker()" style="cursor:pointer; text-decoration:underline dotted;" title="Click to switch model">—</span>
+                    <div id="idxModelPicker" style="display:none; position:absolute; top:100%; right:0; z-index:999; background:#0a0a1a; border:1px solid #333; border-radius:6px; padding:6px 0; min-width:280px; box-shadow:0 4px 12px rgba(0,0,0,0.5); max-height:300px; overflow-y:auto;">
+                        <div style="padding:4px 12px 6px; color:#888; font-size:11px; border-bottom:1px solid #222;">Available Models (click to switch)</div>
+                        <div id="idxModelList" style="padding:4px 0;"><div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div></div>
+                    </div>
+                </span>
+                <span class="ts-item"><span class="ts-led" id="tsMVSLed"></span><span class="ts-label">MVS</span></span>
+                <span class="ts-item"><span class="ts-label">MEM</span><span class="ts-val" id="tsMem">—</span></span>
+                <span class="ts-clock" id="tsClock">--:--</span>
+            </div>
+        </div>
+        <button class="idx-hamburger" onclick="togglePanel()" title="Menu">☰</button>
+    </div>
+    <!-- Hidden connection target for JS -->
+    <input type="hidden" id="connTarget" value="localhost:3270">
+
+    <!-- Hidden elements for JS compatibility -->
+    <span id="wtRunLabel" style="display:none;"></span>
+    <button id="wtStartBtn" style="display:none;"></button>
+    <button id="connBtn" style="display:none;"></button>
+    <button id="disconnBtn" style="display:none;"></button>
+    <span id="llmStatus" style="display:none;"></span>
+    <span id="modelName" style="display:none;"></span>
+
+    <!-- ── Desk Hero with CRT Terminal Overlay ── -->
+    <div class="desk-hero">
+        <div class="desk-hero-title">
+            <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="hero-logo">
+            <h2><span style="color:#78a9ff;">AI-Powered</span> <strong>Mainframe</strong> <span style="color:#78a9ff;">Operations</span></h2>
+        </div>
+        <!-- Image frame: terminal is positioned relative to THIS -->
+        <div class="desk-hero-frame">
+            <img src="/static/img/ibm-retro-desk.png" alt="Retro IBM Terminal" class="desk-hero-img">
+            <div class="desk-hero-overlay"></div>
+            <!-- Terminal overlaid on the CRT screen -->
+            <div class="crt-terminal" id="terminalSection">
+                <div class="idx-term-header">
+                    <span class="idx-term-title">[>_] LIVE TERMINAL</span>
+                    <span class="idx-demo-badge" id="demoBadge" style="display:none;">DEMO</span>
+                    <div class="idx-term-controls">
+                        <button class="idx-term-btn" id="wtPauseBtn" onclick="pauseWalkthrough()" title="Pause" style="display:none;">&#9646;&#9646;</button>
+                        <button class="idx-term-btn" id="wtStopBtn" onclick="stopWalkthrough()" title="Stop" style="display:none;">&#9632;</button>
+                        <button class="idx-term-btn idx-term-btn-x" id="wtCloseBtn" onclick="restartMainframe()" title="Restart">&#10005;</button>
+                        <a href="/terminal" class="idx-fullscreen-link">Full Screen &rarr;</a>
+                    </div>
+                </div>
+                <div class="idx-term-screen" id="terminalScreen" tabindex="0">
+                    <pre id="terminalText">Connecting...</pre>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ── AI Explanation (separate from terminal) ── -->
+    <div class="idx-term-explain" id="termExplain"></div>
+
+    <main class="idx-bottom-nav" id="bottomNav">
+        <!-- ── Control Planes (collapsible) ── -->
+        <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9654;</span> CONTROL PLANES</div>
+        <div class="cp-grid collapsed" id="cpGrid">
+            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam" style="background:#1a2a4a !important;" data-hint="VTAM — the session fabric. Controls all terminal sessions and network routing on the mainframe. Every logon flows through VTAM first.">
+                <span class="cp-name">VTAM</span>
+                <span class="cp-desc">Session Fabric</span>
+            </a>
+            <a href="/walkthrough?plane=tso" class="cp-card cp-tso" style="background:#1a2a4a !important;" data-hint="TSO — interactive command shell. The mainframe equivalent of SSH. Users submit commands, edit datasets, and manage jobs from here.">
+                <span class="cp-name">TSO</span>
+                <span class="cp-desc">Interactive</span>
+            </a>
+            <a href="/walkthrough?plane=racf" class="cp-card cp-racf" style="background:#1a2a4a !important;" data-hint="RACF — the authorization engine. Controls who can access what. Manages users, groups, profiles, and resource access rules.">
+                <span class="cp-name">RACF</span>
+                <span class="cp-desc">Authorization</span>
+            </a>
+            <a href="/walkthrough?plane=jes" class="cp-card cp-jes" style="background:#1a2a4a !important;" data-hint="JES — batch execution subsystem. Manages job queues, scheduling, and output. All batch work on the mainframe flows through JES.">
+                <span class="cp-name">JES</span>
+                <span class="cp-desc">Batch Execution</span>
+            </a>
+            <a href="/walkthrough?plane=cics" class="cp-card cp-cics" style="background:#1a2a4a !important;" data-hint="CICS/KICKS — transaction processing. Handles real-time interactive applications. Think of it as the mainframe's application server.">
+                <span class="cp-name">CICS/KICKS</span>
+                <span class="cp-desc">Transactions</span>
+            </a>
+        </div>
+
+        <!-- ══ OS/2 Warp 2 — Programs Window ══ -->
+        <div class="cp-heading cp-toggle" onclick="toggleSection('toolsGrid', this)" style="margin-top:1.5rem;"><span class="cp-arrow">&#9654;</span> MORE TOOLS</div>
+        <div class="os2w collapsed" id="toolsGrid">
+            <!-- OS/2 Title Bar -->
+            <div class="os2w-titlebar">
+                <div class="os2w-sysmenu"><span>&#9632;</span></div>
+                <div class="os2w-title">Programs &mdash; Icon View</div>
+                <div class="os2w-btns">
+                    <button class="os2w-btn" title="Minimize">&#9660;</button>
+                    <button class="os2w-btn" title="Maximize">&#9650;</button>
+                </div>
+            </div>
+            <!-- OS/2 Menu Bar -->
+            <div class="os2w-menubar">
+                <span class="os2w-menu-item"><u>F</u>older</span>
+                <span class="os2w-menu-item"><u>E</u>dit</span>
+                <span class="os2w-menu-item"><u>V</u>iew</span>
+                <span class="os2w-menu-item"><u>S</u>elected</span>
+                <span class="os2w-menu-item"><u>H</u>elp</span>
+            </div>
+            <!-- OS/2 Icon View Client Area -->
+            <div class="os2w-client">
+                <nav class="os2w-icons">
+                    <!-- Terminal — black window, green text -->
+                    <a href="/terminal" class="os2w-icon" data-hint="Full-screen TN3270 terminal.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="3" width="28" height="22" fill="#000" stroke="#C0C0C0" stroke-width="1"/><rect x="2" y="3" width="28" height="3" fill="#000080"/><text x="4" y="5.5" fill="#FFF" font-size="2.5" font-family="monospace">_</text><rect x="26" y="3.5" width="3" height="2" fill="#C0C0C0" stroke="#808080" stroke-width=".3"/><text x="4" y="13" fill="#00FF00" font-size="5" font-family="monospace">C:\&gt;_</text><text x="4" y="19" fill="#00FF00" font-size="3.5" font-family="monospace">READY</text><rect x="4" y="27" width="24" height="3" rx="1" fill="#808080"/><rect x="5" y="27.5" width="22" height="2" rx=".5" fill="#C0C0C0"/></svg></span>
+                        <span class="os2w-icon-lbl">Terminal</span>
+                    </a>
+                    <!-- AI Chat — yellow speech bubble -->
+                    <a href="/chat" class="os2w-icon" data-hint="AI Chat.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="3" y="2" width="26" height="18" rx="3" fill="#FFFF00" stroke="#808000" stroke-width="1"/><polygon points="8,20 12,20 7,26" fill="#FFFF00" stroke="#808000" stroke-width="1" stroke-linejoin="round"/><text x="7" y="9" fill="#000080" font-size="5" font-weight="bold" font-family="monospace">AI</text><circle cx="9" cy="14" r="1.5" fill="#000080"/><circle cx="15" cy="14" r="1.5" fill="#000080"/><circle cx="21" cy="14" r="1.5" fill="#000080"/></svg></span>
+                        <span class="os2w-icon-lbl">AI Chat</span>
+                    </a>
+                    <!-- Walkthrough — green play on white doc -->
+                    <a href="/walkthrough" class="os2w-icon" data-hint="Guided walkthrough.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="20" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="24,2 24,8 30,8" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><line x1="24" y1="2" x2="30" y2="8" stroke="#808080" stroke-width="1"/><rect x="4" y="8" width="26" height="22" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="11,12 11,24 23,18" fill="#008000" stroke="#004000" stroke-width="1"/></svg></span>
+                        <span class="os2w-icon-lbl">Walkthrough</span>
+                    </a>
+                    <!-- Scanner — magnifying glass -->
+                    <a href="/scanner" class="os2w-icon" data-hint="Screen scanner.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="14" cy="13" r="9" fill="none" stroke="#000080" stroke-width="2.5"/><circle cx="14" cy="13" r="7" fill="#C0FFFF" stroke="none"/><line x1="20" y1="19" x2="28" y2="28" stroke="#808000" stroke-width="3" stroke-linecap="round"/><line x1="21" y1="20" x2="29" y2="29" stroke="#FFFF00" stroke-width="1.5" stroke-linecap="round"/><text x="9" y="16" fill="#FF0000" font-size="7" font-weight="bold" font-family="monospace">?</text></svg></span>
+                        <span class="os2w-icon-lbl">Scanner</span>
+                    </a>
+                    <!-- Tutor — yellow book with ? -->
+                    <a href="/tutor" class="os2w-icon" data-hint="Red Team Tutor.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="5" y="4" width="22" height="26" rx="1" fill="#FFFF00" stroke="#808000" stroke-width="1"/><rect x="5" y="4" width="4" height="26" fill="#808000"/><rect x="10" y="7" width="14" height="1.5" fill="#800000"/><rect x="10" y="11" width="14" height="1.5" fill="#800000"/><rect x="10" y="15" width="10" height="1.5" fill="#800000"/><text x="12" y="26" fill="#FF0000" font-size="8" font-weight="bold" font-family="sans-serif">F1</text></svg></span>
+                        <span class="os2w-icon-lbl">Tutor</span>
+                    </a>
+                    <!-- Labs — green beaker -->
+                    <a href="/labs" class="os2w-icon" data-hint="Hands-on labs.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="11" y="2" width="10" height="10" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><polygon points="11,12 4,28 28,28 21,12" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><rect x="6" y="20" width="20" height="8" rx="0" fill="#00FF00" opacity=".7"/><circle cx="12" cy="22" r="1.5" fill="#FFFF00"/><circle cx="18" cy="24" r="1" fill="#00FFFF"/><rect x="4" y="28" width="24" height="2" rx="1" fill="#808080"/></svg></span>
+                        <span class="os2w-icon-lbl">Labs</span>
+                    </a>
+                    <!-- Test & Report — red clipboard -->
+                    <a href="/recon" class="os2w-icon" data-hint="Test &amp; Report.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="5" y="5" width="22" height="26" rx="1" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="10" y="2" width="12" height="5" rx="1" fill="#800000" stroke="#400000" stroke-width=".5"/><rect x="12" y="3" width="8" height="3" rx=".5" fill="#C0C0C0"/><rect x="8" y="10" width="10" height="2" fill="#FF0000"/><rect x="8" y="14" width="16" height="1.5" fill="#808080"/><rect x="8" y="18" width="16" height="1.5" fill="#808080"/><rect x="8" y="22" width="12" height="1.5" fill="#808080"/><text x="19" y="12" fill="#008000" font-size="5" font-weight="bold" font-family="monospace">&#x2713;</text></svg></span>
+                        <span class="os2w-icon-lbl">Test &amp; Report</span>
+                    </a>
+                    <!-- Graph — connected nodes -->
+                    <a href="/graph" class="os2w-icon" data-hint="Trust graph.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><line x1="8" y1="8" x2="24" y2="8" stroke="#808080" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="24" stroke="#808080" stroke-width="1.5"/><line x1="24" y1="8" x2="16" y2="24" stroke="#808080" stroke-width="1.5"/><line x1="16" y1="24" x2="8" y2="20" stroke="#808080" stroke-width="1.5"/><line x1="16" y1="24" x2="24" y2="20" stroke="#808080" stroke-width="1.5"/><circle cx="8" cy="8" r="4" fill="#0000FF" stroke="#000080" stroke-width="1"/><circle cx="24" cy="8" r="4" fill="#FF0000" stroke="#800000" stroke-width="1"/><circle cx="16" cy="24" r="4" fill="#00FF00" stroke="#008000" stroke-width="1"/><circle cx="8" cy="20" r="3" fill="#FFFF00" stroke="#808000" stroke-width="1"/><circle cx="24" cy="20" r="3" fill="#FF00FF" stroke="#800080" stroke-width="1"/></svg></span>
+                        <span class="os2w-icon-lbl">Graph</span>
+                    </a>
+                    <!-- Models — gears -->
+                    <a href="/abstract-models" class="os2w-icon" data-hint="Abstract models.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="12" cy="12" r="8" fill="none" stroke="#808080" stroke-width="3"/><circle cx="12" cy="12" r="3" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><circle cx="22" cy="22" r="6" fill="none" stroke="#000080" stroke-width="3"/><circle cx="22" cy="22" r="2" fill="#C0C0C0" stroke="#000080" stroke-width="1"/><rect x="10" y="1" width="4" height="4" fill="#808080"/><rect x="10" y="18" width="4" height="4" fill="#808080"/><rect x="1" y="10" width="4" height="4" fill="#808080"/><rect x="18.5" y="10" width="4" height="4" fill="#808080"/></svg></span>
+                        <span class="os2w-icon-lbl">Models</span>
+                    </a>
+                    <!-- Knowledge — brown book -->
+                    <a href="/rag" class="os2w-icon" data-hint="Knowledge base.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="3" width="24" height="26" rx="1" fill="#800000" stroke="#400000" stroke-width="1"/><rect x="4" y="3" width="5" height="26" fill="#400000"/><rect x="6" y="5" width="1" height="22" fill="#808000"/><rect x="11" y="6" width="14" height="2" fill="#FFFF00"/><rect x="11" y="10" width="14" height="1.5" fill="#C0C0C0"/><rect x="11" y="13" width="14" height="1.5" fill="#C0C0C0"/><rect x="11" y="16" width="10" height="1.5" fill="#C0C0C0"/><text x="13" y="26" fill="#FFFF00" font-size="5" font-weight="bold" font-family="monospace">K</text></svg></span>
+                        <span class="os2w-icon-lbl">Knowledge</span>
+                    </a>
+                    <!-- USS Editor — text editor window -->
+                    <a href="/uss-editor" class="os2w-icon" data-hint="USS logon screen editor.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="2" width="28" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="2" y="2" width="28" height="4" fill="#000080"/><text x="4" y="5" fill="#FFF" font-size="3" font-family="monospace">USS</text><rect x="4" y="9" width="20" height="1.5" fill="#000"/><rect x="4" y="12" width="24" height="1.5" fill="#000"/><rect x="4" y="15" width="16" height="1.5" fill="#000"/><rect x="4" y="18" width="22" height="1.5" fill="#000080"/><rect x="4" y="21" width="18" height="1.5" fill="#000"/><rect x="4" y="24" width="24" height="1.5" fill="#000080"/><rect x="23" y="17" width="6" height="10" fill="#FFFF00" stroke="#808000" stroke-width=".5"/><polygon points="26,14 23,17 29,17" fill="#FFFF00"/></svg></span>
+                        <span class="os2w-icon-lbl">USS Editor</span>
+                    </a>
+                    <!-- FTP Client — globe with arrows -->
+                    <a href="/ftp" class="os2w-icon" data-hint="MVS FTP Client.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><circle cx="15" cy="15" r="12" fill="#0000FF" stroke="#000080" stroke-width="1"/><ellipse cx="15" cy="15" rx="5" ry="12" fill="none" stroke="#00FFFF" stroke-width=".8"/><line x1="3" y1="10" x2="27" y2="10" stroke="#00FFFF" stroke-width=".8"/><line x1="3" y1="20" x2="27" y2="20" stroke="#00FFFF" stroke-width=".8"/><line x1="15" y1="3" x2="15" y2="27" stroke="#00FFFF" stroke-width=".8"/><polygon points="25,5 30,5 30,1 25,1 25,5" fill="#00FF00"/><polygon points="27,1 27.5,0 28,1" fill="#00FF00"/><polygon points="2,25 7,25 7,29 2,29" fill="#FF0000"/><polygon points="4.5,29 4,30 5,30" fill="#FF0000"/></svg></span>
+                        <span class="os2w-icon-lbl">FTP Client</span>
+                    </a>
+                    <!-- Tutorials — open book -->
+                    <a href="/tutorials" class="os2w-icon" data-hint="Tutorial library.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><path d="M16,6 L3,4 L3,26 L16,28 L29,26 L29,4 Z" fill="#FFF" stroke="#808080" stroke-width="1"/><line x1="16" y1="6" x2="16" y2="28" stroke="#808080" stroke-width="1"/><rect x="5" y="8" width="9" height="1.5" fill="#000080"/><rect x="5" y="11" width="9" height="1.5" fill="#808080"/><rect x="5" y="14" width="7" height="1.5" fill="#808080"/><rect x="18" y="8" width="9" height="1.5" fill="#000080"/><rect x="18" y="11" width="9" height="1.5" fill="#808080"/><rect x="18" y="14" width="7" height="1.5" fill="#808080"/><rect x="5" y="18" width="9" height="1.5" fill="#FF0000"/><rect x="18" y="18" width="9" height="1.5" fill="#FF0000"/></svg></span>
+                        <span class="os2w-icon-lbl">Tutorials</span>
+                    </a>
+                    <!-- Architecture — layered system -->
+                    <a href="/architecture" class="os2w-icon" data-hint="Architecture view.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="3" y="22" width="26" height="6" fill="#808080" stroke="#404040" stroke-width="1"/><text x="8" y="27" fill="#FFF" font-size="4" font-family="monospace">HW</text><rect x="5" y="14" width="22" height="7" fill="#000080" stroke="#000040" stroke-width="1"/><text x="8" y="19.5" fill="#00FFFF" font-size="4" font-family="monospace">MVS</text><rect x="7" y="6" width="18" height="7" fill="#008000" stroke="#004000" stroke-width="1"/><text x="9" y="11.5" fill="#FFFF00" font-size="4" font-family="monospace">APP</text><polygon points="3,4 16,1 29,4" fill="none" stroke="#FF0000" stroke-width="1"/><text x="12" y="3.8" fill="#FF0000" font-size="2.5" font-family="monospace">AI</text></svg></span>
+                        <span class="os2w-icon-lbl">Architecture</span>
+                    </a>
+                    <!-- API Docs — blue document -->
+                    <a href="/docs" class="os2w-icon" data-hint="API documentation.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="20" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="24,2 24,8 30,8" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><line x1="24" y1="2" x2="30" y2="8" stroke="#808080" stroke-width="1"/><rect x="4" y="8" width="26" height="22" fill="#FFF" stroke="#808080" stroke-width="1"/><text x="7" y="14" fill="#000080" font-size="4.5" font-weight="bold" font-family="monospace">API</text><rect x="7" y="16" width="18" height="1.5" fill="#808080"/><rect x="7" y="19" width="18" height="1.5" fill="#808080"/><rect x="7" y="22" width="14" height="1.5" fill="#808080"/><rect x="7" y="25" width="18" height="1.5" fill="#000080"/></svg></span>
+                        <span class="os2w-icon-lbl">API Docs</span>
+                    </a>
+                    <!-- Video — red film reel -->
+                    <a href="/video" class="os2w-icon" data-hint="Demo video.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="4" width="28" height="20" rx="2" fill="#000" stroke="#808080" stroke-width="1"/><rect x="4" y="6" width="24" height="16" fill="#000080"/><polygon points="13,9 13,19 22,14" fill="#FF0000" stroke="#800000" stroke-width="1"/><rect x="3" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><rect x="9" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><rect x="19" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/><rect x="25" y="25" width="4" height="5" rx="1" fill="#C0C0C0" stroke="#808080" stroke-width=".5"/></svg></span>
+                        <span class="os2w-icon-lbl">Video</span>
+                    </a>
+                    <!-- Deck — presentation slides -->
+                    <a href="/deck" class="os2w-icon" data-hint="Conference deck.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="6" y="6" width="24" height="18" rx="1" fill="#FFF" stroke="#808080" stroke-width=".5"/><rect x="4" y="4" width="24" height="18" rx="1" fill="#FFF" stroke="#808080" stroke-width=".5"/><rect x="2" y="2" width="24" height="18" rx="1" fill="#FFFF00" stroke="#808000" stroke-width="1"/><rect x="4" y="4" width="20" height="3" fill="#FF0000"/><rect x="4" y="9" width="16" height="1.5" fill="#808080"/><rect x="4" y="12" width="12" height="1.5" fill="#808080"/><rect x="4" y="15" width="18" height="1.5" fill="#808080"/><text x="6" y="27" fill="#808080" font-size="4" font-family="monospace">PPT</text></svg></span>
+                        <span class="os2w-icon-lbl">Deck</span>
+                    </a>
+                    <!-- Abstract — white document with seal -->
+                    <a href="/abstract" class="os2w-icon" data-hint="Conference abstract.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="24" height="28" rx="1" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="7" y="5" width="18" height="2" fill="#000080"/><rect x="7" y="9" width="18" height="1.5" fill="#808080"/><rect x="7" y="12" width="18" height="1.5" fill="#808080"/><rect x="7" y="15" width="14" height="1.5" fill="#808080"/><rect x="7" y="18" width="18" height="1.5" fill="#808080"/><rect x="7" y="21" width="12" height="1.5" fill="#808080"/><circle cx="22" cy="25" r="4" fill="#FF0000" stroke="#800000" stroke-width=".5"/><circle cx="22" cy="25" r="2" fill="#FFFF00"/></svg></span>
+                        <span class="os2w-icon-lbl">Abstract</span>
+                    </a>
+                    <!-- Demo — IBM red play button -->
+                    <a href="/walkthrough?plane=demo" class="os2w-icon" data-hint="Live demo.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="2" width="28" height="28" rx="3" fill="#000080" stroke="#000040" stroke-width="1"/><text x="5" y="10" fill="#FFF" font-size="5" font-weight="bold" font-family="sans-serif">IBM</text><rect x="4" y="12" width="24" height="1" fill="#FFF"/><polygon points="10,16 10,27 24,21.5" fill="#FF0000" stroke="#800000" stroke-width="1"/><circle cx="17" cy="21.5" r="1.5" fill="#FFF"/></svg></span>
+                        <span class="os2w-icon-lbl">Demo</span>
+                    </a>
+                    <!-- Slides — blue projector screen -->
+                    <a href="/slides" class="os2w-icon" data-hint="Slide deck viewer.">
+                        <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="24" height="3" rx="1" fill="#808080" stroke="#404040" stroke-width=".5"/><rect x="4" y="5" width="24" height="20" fill="#FFF" stroke="#808080" stroke-width="1"/><rect x="6" y="7" width="20" height="16" fill="#000080"/><polygon points="13,11 13,19 21,15" fill="#00FFFF" stroke="#008080" stroke-width=".5"/><line x1="16" y1="25" x2="16" y2="30" stroke="#808080" stroke-width="1.5"/><rect x="12" y="29" width="8" height="2" rx="1" fill="#808080"/></svg></span>
+                        <span class="os2w-icon-lbl">Slides</span>
+                    </a>
+                </nav>
+            </div>
+            <!-- OS/2 Status Bar -->
+            <div class="os2w-statusbar">
+                <span>20 objects</span>
+                <span>IBM OS/2 Warp 2</span>
+            </div>
+        </div>
+    </main>
+
+</div><!-- /.idx-main-col -->
+
+<!-- ── Right Control Panel ── -->
+<aside class="idx-control-panel collapsed" id="controlPanel">
+    <div class="idx-cp-title">▓ MENU ▓</div>
+    <a href="/walkthrough" class="idx-cp-item cp-walkthrough">
+        <span class="idx-cp-icon">▶</span>
+        <span>Walkthrough</span>
+    </a>
+    <a href="/abstract-models" class="idx-cp-item cp-models">
+        <span class="idx-cp-icon">◈</span>
+        <span>Models</span>
+    </a>
+    <a href="/tutor" class="idx-cp-item cp-tutor">
+        <span class="idx-cp-icon">⚑</span>
+        <span>Red Team</span>
+    </a>
+    <a href="/labs" class="idx-cp-item cp-labs">
+        <span class="idx-cp-icon">⬡</span>
+        <span>Labs</span>
+    </a>
+    <a href="/terminal" class="idx-cp-item cp-terminal">
+        <span class="idx-cp-icon">█</span>
+        <span>Terminal</span>
+    </a>
+    <a href="/chat" class="idx-cp-item cp-chat">
+        <span class="idx-cp-icon">◉</span>
+        <span>AI Chat</span>
+    </a>
+    <a href="/graph" class="idx-cp-item cp-graph">
+        <span class="idx-cp-icon">◆</span>
+        <span>Graph</span>
+    </a>
+    <a href="/scanner" class="idx-cp-item cp-scanner">
+        <span class="idx-cp-icon">◧</span>
+        <span>Scanner</span>
+    </a>
+    <a href="/recon" class="idx-cp-item cp-recon">
+        <span class="idx-cp-icon">▣</span>
+        <span>Test & Report</span>
+    </a>
+    <a href="/ftp" class="idx-cp-item cp-ftp">
+        <span class="idx-cp-icon">⇅</span>
+        <span>FTP Client</span>
+    </a>
+    <a href="/uss-editor" class="idx-cp-item cp-uss">
+        <span class="idx-cp-icon">✎</span>
+        <span>USS Editor</span>
+    </a>
+    <a href="/tutorials" class="idx-cp-item cp-tutorials">
+        <span class="idx-cp-icon">📖</span>
+        <span>Tutorials</span>
+    </a>
+    <a href="/rag" class="idx-cp-item cp-rag">
+        <span class="idx-cp-icon">▤</span>
+        <span>KB</span>
+    </a>
+    <a href="/architecture" class="idx-cp-item cp-arch">
+        <span class="idx-cp-icon">▦</span>
+        <span>Arch</span>
+    </a>
+    <a href="/docs" class="idx-cp-item cp-docs">
+        <span class="idx-cp-icon">◰</span>
+        <span>API Docs</span>
+    </a>
+    <div class="idx-cp-divider"></div>
+    <button class="idx-cp-item cp-demo-prep" id="demoPrepBtn" onclick="prepareDemo()">
+        <span class="idx-cp-icon">⚙</span>
+        <span>Reboot</span>
+    </button>
+</aside>
+</div><!-- /.idx-layout -->
+{% endblock %}
+
+{% block page_scripts %}
+<script>
+let isConnected = false;
+let wtRunning = false;
+let wtPollingInterval = null;
+let wtLastLogLen = 0;
+
+// ── Matrix-style Boot Status ──
+const BOOT_PHASES = [
+    {msg: 'HERCULES  INITIALIZING CHANNEL SUBSYSTEM',          delay: 400},
+    {msg: 'HHC01417I CHANNEL SET 0: IOCDS LOADED',             delay: 300},
+    {msg: 'HHC00100I THREAD 00000001 STARTED — CPU ENGINE 0',  delay: 250},
+    {msg: 'HHC01023I DASD 0148 CKD   tk5res.390 CYLS=885',     delay: 200},
+    {msg: 'HHC01023I DASD 0149 CKD   tk5dlb.392 CYLS=400',     delay: 200},
+    {msg: 'HHC01023I DASD 014A CKD   tk5spl.393 CYLS=200',     delay: 200},
+    {msg: 'HHC01023I DASD 014B CKD   tk5pag.391 CYLS=50',      delay: 150},
+    {msg: 'HHC00811I 3270 DEVICE 0:0C00 TCP PORT 3270 READY',  delay: 300},
+    {msg: 'HHC00811I HERCULES HTTP SERVER PORT 8038 READY',     delay: 300},
+    {msg: 'IPL       MVS 3.8J — NUCLEUS LOAD FROM 0148',       delay: 600},
+    {msg: 'IEA101A   SPECIFY SYSTEM PARAMETERS',                delay: 400},
+    {msg: 'IEF165I   JES2 CHECKPOINT DATASET DEFINED',          delay: 350},
+    {msg: 'IEF403I   JES2 — STARTED',                           delay: 300},
+    {msg: '$HASP426  JES2 INITIALIZATION COMPLETE',             delay: 400},
+    {msg: 'IEA630I   OPERATOR FACILITY ACTIVE',                 delay: 300},
+    {msg: 'IEE600I   VTAM INITIALIZATION IN PROGRESS',          delay: 500},
+    {msg: 'IST020I   VTAM DOMAIN = APPN — NETWORK ACTIVE',     delay: 400},
+    {msg: 'IST093I   L3274 NODE NOW ACTIVE',                    delay: 300},
+    {msg: 'IST093I   TCAS ACCEPTING LOGONS',                    delay: 400},
+    {msg: 'CONNECT   ESTABLISHING TN3270 SESSION . . .',        delay: 800},
+];
+
+let bootLines = [];
+let bootInterval = null;
+let bootPhase = 0;
+let bootActive = false;
+
+function startBootSequence() {
+    if (bootActive) return;
+    bootActive = true;
+    bootPhase = 0;
+    bootLines = [''];
+    const pre = document.getElementById('terminalText');
+    if (!pre) return;
+
+    function addBootLine() {
+        if (bootPhase >= BOOT_PHASES.length || isConnected) {
+            bootActive = false;
+            return;
+        }
+        const phase = BOOT_PHASES[bootPhase];
+        bootLines.push(phase.msg);
+        // Keep last 20 lines to fit terminal
+        if (bootLines.length > 20) bootLines.shift();
+        // Only update if not yet connected
+        if (!isConnected) {
+            pre.textContent = bootLines.join('\n');
+        }
+        bootPhase++;
+        if (bootPhase < BOOT_PHASES.length && !isConnected) {
+            setTimeout(addBootLine, BOOT_PHASES[bootPhase].delay);
+        } else if (!isConnected) {
+            // All phases done, show waiting message
+            bootLines.push('');
+            bootLines.push('WAITING   POLLING FOR LOGON SCREEN . . .');
+            pre.textContent = bootLines.join('\n');
+            bootActive = false;
+        }
+    }
+    addBootLine();
+}
+
+// ── Toolbar Status ──
+function setLed(id, online) {
+    const el = document.getElementById(id);
+    if (el) el.className = 'ts-led ' + (online ? 'on' : 'off');
+}
+function tsClock() {
+    const el = document.getElementById('tsClock');
+    if (el) el.textContent = new Date().toLocaleTimeString('en-US', {hour12:false, hour:'2-digit', minute:'2-digit'});
+}
+tsClock(); setInterval(tsClock, 30000);
+
+async function loadSysInfo() {
+    try {
+        const r = await fetch('/api/sysinfo');
+        const d = await r.json();
+        const el = id => document.getElementById(id);
+        if (el('tsModel')) el('tsModel').textContent = d.model;
+        setLed('tsOllamaLed', d.ollama === 'online');
+        setLed('tsMVSLed', d.mainframe === 'online');
+        if (el('tsMem')) el('tsMem').textContent = d.memory || '—';
+    } catch(e) {}
+}
+loadSysInfo();
+setInterval(loadSysInfo, 10000);
+
+// ── UI helpers ──
+function updateMfStatus(state) {
+    const dot = document.getElementById('mfDot');
+    const label = document.getElementById('mfLabel');
+    if (!dot || !label) return;
+    if (state === 'online') {
+        dot.className = 'idx-dot on';
+        label.textContent = 'TK5 online';
+    } else if (state === 'offline') {
+        dot.className = 'idx-dot off';
+        label.textContent = 'TK5 offline';
+    } else {
+        dot.className = 'idx-dot off';
+        label.textContent = state === 'restarting' ? 'Restarting...' : 'Starting...';
+    }
+}
+
+function updateConnBtn() {
+    const btn = document.getElementById('connBtn2');
+    if (!btn) return;
+    if (isConnected) {
+        btn.innerHTML = 'Disconnect';
+        btn.className = 'idx-pill idx-pill-danger';
+    } else {
+        btn.innerHTML = 'Connect';
+        btn.className = 'idx-pill idx-pill-success';
+    }
+    btn.disabled = false;
+}
+
+function updateOllamaStatus(running) {
+    const dot = document.getElementById('ollamaDot2');
+    const label = document.getElementById('ollamaLabel2');
+    if (!dot || !label) return;
+    dot.className = 'idx-dot ' + (running ? 'on' : 'off');
+    label.textContent = running ? 'Ollama online' : 'Ollama offline';
+}
+
+// ── Status ──
+async function checkStatus() {
+    try {
+        const res = await fetch('/api/status');
+        const data = await res.json();
+
+        // Don't update connection state during walkthrough — it disconnects/reconnects
+        if (!wtRunning) {
+            isConnected = data.connected;
+            if (data.connected) refreshScreen();
+        }
+
+        updateMfStatus(data.connected || wtRunning ? 'online' : 'offline');
+        updateOllamaStatus(data.ollama_running);
+        if (!wtRunning) updateConnBtn();
+
+        if (data.connected && data.host) document.getElementById('connTarget').value = data.host;
+    } catch (e) {
+        if (!wtRunning) updateMfStatus('offline');
+        updateOllamaStatus(false);
+    }
+}
+checkStatus();
+setInterval(checkStatus, 5000);
+
+// Auto-connect on page load — show boot sequence while waiting, retry until VTAM ready
+(async function autoConnect() {
+    try {
+        const s = await fetch('/api/status');
+        const d = await s.json();
+        if (d.connected) {
+            isConnected = true;
+            showTerminal();
+            updateConnBtn();
+            updateMfStatus('online');
+            await refreshScreen();
+            setTimeout(triggerAiExplain, 500);
+            return;
+        }
+    } catch(e) {}
+
+    // Not connected — show boot animation and retry every 5s until VTAM is ready
+    startBootSequence();
+    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
+    let attempts = 0;
+    const maxAttempts = 60; // 5 minutes max
+    async function tryConnect() {
+        if (isConnected || attempts >= maxAttempts) return;
+        attempts++;
+        try {
+            const res = await fetch('/api/terminal/connect', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({target})
+            });
+            const data = await res.json();
+            if (data.success) {
+                isConnected = true;
+                bootActive = false;
+                showTerminal();
+                if (data.screen_data) updateTerminal(data.screen_data);
+                updateConnBtn();
+                updateMfStatus('online');
+                setTimeout(triggerAiExplain, 500);
+                return;
+            }
+        } catch(e) {}
+        // Not ready yet — keep polling
+        setTimeout(tryConnect, 5000);
+    }
+    setTimeout(tryConnect, 3000);
+})();
+
+// ── Connection ──
+async function quickConnect() {
+    const btn = document.getElementById('connBtn2');
+    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
+    if (isConnected) {
+        try { await fetch('/api/terminal/disconnect', {method:'POST'}); } catch(e) {}
+        isConnected = false;
+        closeTerminal();
+    } else {
+        btn.disabled = true;
+        btn.innerHTML = '&#9203; Connecting...';
+        try {
+            const res = await fetch('/api/terminal/connect', {
+                method:'POST', headers:{'Content-Type':'application/json'},
+                body: JSON.stringify({target})
+            });
+            const data = await res.json();
+            if (data.success) {
+                isConnected = true;
+                showTerminal();
+                if (data.screen_data) updateTerminal(data.screen_data);
+                setTimeout(triggerAiExplain, 500);
+            } else {
+                showToast('Connection failed', {type:'error', title:'Terminal'});
+            }
+        } catch(e) {
+            showToast('Connection failed: ' + e.message, {type:'error', title:'Terminal'});
+        }
+    }
+    btn.disabled = false;
+    updateConnBtn();
+    await checkStatus();
+}
+
+async function toggleConnection() {
+    await quickConnect();
+}
+
+// ── Terminal ──
+function showTerminal() {
+    // Terminal is always visible - just show close button during demo
+    document.getElementById('wtCloseBtn').style.display = 'inline-flex';
+}
+
+function triggerAiExplain() {
+    const pre = document.getElementById('terminalText');
+    const screenText = pre ? pre.textContent : '';
+    aiExplainScreen(screenText, 'connected');
+}
+
+function closeTerminal() {
+    // Don't hide terminal - just reset to default state
+    document.getElementById('terminalText').textContent = 'Disconnected. Click Connect to reconnect.';
+    document.getElementById('wtCloseBtn').style.display = 'none';
+    document.getElementById('demoBadge').style.display = 'none';
+    document.getElementById('wtPauseBtn').style.display = 'none';
+    document.getElementById('wtStopBtn').style.display = 'none';
+    const explain = document.getElementById('termExplain');
+    if (explain) explain.innerHTML = '';
+}
+
+function updateTerminal(data) {
+    if (!data) return;
+    const pre = document.getElementById('terminalText');
+    let screenText = '';
+    if (data.screen_html) {
+        pre.innerHTML = data.screen_html;
+        screenText = pre.textContent;
+    } else if (data.screen || data.connected) {
+        screenText = data.screen || '';
+        // Don't show [Not connected] during walkthrough — it's a transient state
+        if (wtRunning && screenText.startsWith('[Not connected')) return;
+        pre.textContent = screenText;
+    }
+    // Update explanation when screen changes
+    if (screenText && screenText !== lastScreenText) {
+        aiExplainScreen(screenText, 'screen-update');
+    }
+}
+
+async function refreshScreen() {
+    try {
+        const res = await fetch('/api/terminal/screen');
+        const data = await res.json();
+        if (data.screen || data.screen_html) {
+            showTerminal();
+            updateTerminal(data);
+        }
+    } catch(e) {}
+}
+
+// Poll screen every 2 seconds when connected
+setInterval(() => {
+    if (isConnected && !wtRunning) refreshScreen();
+}, 2000);
+
+async function sendKey(keyType, value) {
+    if (!isConnected && !wtRunning) return;
+    try {
+        const res = await fetch('/api/terminal/key', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({key_type: keyType, value: String(value || '')})
+        });
+        const data = await res.json();
+        if (data.success && data.screen_data) updateTerminal(data.screen_data);
+    } catch(e) {}
+}
+
+document.getElementById('terminalScreen').addEventListener('keydown', function(e) {
+    if (!isConnected) return;
+    e.preventDefault();
+    if (e.key === 'Enter') sendKey('enter');
+    else if (e.key === 'Escape') sendKey('clear');
+    else if (e.key === 'Tab') sendKey(e.shiftKey ? 'backtab' : 'tab');
+    else if (e.key === 'Backspace') sendKey('backspace');
+    else if (e.key === 'Home') sendKey('home');
+    else if (e.key.startsWith('F') && e.key.length <= 3) {
+        const n = parseInt(e.key.substring(1));
+        if (n >= 1 && n <= 24) sendKey('pf', e.shiftKey ? n + 12 : n);
+    }
+    else if (e.key.length === 1 && !e.ctrlKey && !e.metaKey) sendKey('string', e.key);
+});
+
+// ── Terminal text selection → AI analysis ──
+document.getElementById('terminalScreen').addEventListener('mouseup', function(e) {
+    const pre = document.getElementById('terminalText');
+    const explainBox = document.getElementById('termExplain');
+    if (!pre || !explainBox) return;
+
+    const rect = this.getBoundingClientRect();
+    const style = getComputedStyle(pre);
+    const lineH = parseFloat(style.lineHeight) || parseFloat(style.fontSize) * 1.15;
+    const padTop = parseFloat(style.paddingTop) || 0;
+    const padLeft = parseFloat(style.paddingLeft) || 0;
+
+    const y = e.clientY - rect.top - padTop + this.scrollTop;
+    const row = Math.max(0, Math.floor(y / lineH));
+    const lines = pre.textContent.split('\n');
+    const lineText = (lines[row] || '').trimEnd();
+    if (!lineText) return;
+
+    // Show selection info immediately
+    explainBox.innerHTML = `<span style="color:#5a6a7a;">Row ${row + 1}:</span> <code style="color:#42be65;">${lineText.substring(0, 80)}</code><br><span class="idx-explain-thinking">Analyzing...</span>`;
+
+    // Ask AI to analyze
+    fetch('/api/tutor/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            question: `User selected row ${row + 1} on a TN3270 mainframe screen. The line reads: "${lineText}". Explain what this line means in the context of mainframe operations. Be concise (2-3 sentences). Cover what subsystem or component it relates to and any security relevance.`,
+            goal: 'screen-analysis',
+            tutor_id: 'mentor'
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.answer) {
+            explainBox.innerHTML = `<span style="color:#5a6a7a;">Row ${row + 1}:</span> <code style="color:#42be65;">${lineText.substring(0, 60)}</code><br>${data.answer}`;
+        }
+    })
+    .catch(() => {
+        explainBox.innerHTML = `<span style="color:#5a6a7a;">Row ${row + 1}:</span> <code style="color:#42be65;">${lineText.substring(0, 80)}</code>`;
+    });
+});
+
+// ── Walkthrough ──
+async function startWalkthrough() {
+    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
+    const demoBtn = document.getElementById('wtStartBtn2');
+    demoBtn.disabled = true;
+    demoBtn.innerHTML = '&#9203; Starting...';
+    try {
+        const res = await fetch('/api/walkthrough/start', {
+            method:'POST', headers:{'Content-Type':'application/json'},
+            body: JSON.stringify({name: 'quick-demo', target, speed: 4.0})
+        });
+        const data = await res.json();
+        if (!data.success) { demoBtn.disabled = false; demoBtn.innerHTML = '&#9654; Demo'; return; }
+    } catch(e) { demoBtn.disabled = false; demoBtn.innerHTML = '&#9654; Demo'; return; }
+
+    wtRunning = true;
+    wtLastLogLen = 0;
+    showTerminal();
+    demoBtn.innerHTML = '&#9654; Running...';
+    document.getElementById('demoBadge').style.display = 'inline-block';
+    document.getElementById('wtPauseBtn').style.display = 'inline-flex';
+    document.getElementById('wtStopBtn').style.display = 'inline-flex';
+    try { document.getElementById('wtStartBtn').disabled = true; } catch(_) {}
+    try { document.getElementById('wtRunLabel').textContent = 'Running Demo...'; } catch(_) {}
+
+    if (wtPollingInterval) clearInterval(wtPollingInterval);
+    wtPollCount = 0;
+    wtSeenRunning = false;
+    // Delay first poll to let backend thread start
+    setTimeout(() => {
+        wtPollingInterval = setInterval(pollWalkthrough, 500);
+        pollWalkthrough();
+    }, 1000);
+}
+
+let lastExplainScreen = '';
+let wtPollCount = 0;
+let wtSeenRunning = false;
+async function pollWalkthrough() {
+    try {
+        wtPollCount++;
+        const res = await fetch('/api/walkthrough/status');
+        const data = await res.json();
+        if (data.screen_html) {
+            updateTerminal({screen_html: data.screen_html});
+        } else if (data.screen) {
+            updateTerminal({screen: data.screen});
+        }
+        if (data.running) {
+            wtSeenRunning = true;
+            const demoBtn = document.getElementById('wtStartBtn2');
+            const p = data.paused ? ' (Paused)' : '';
+            const stepText = data.title ? data.title + p : 'Running...';
+            try { document.getElementById('wtRunLabel').textContent = stepText; } catch(_) {}
+            if (demoBtn) { demoBtn.innerHTML = '&#9654; ' + stepText; demoBtn.className = 'idx-pill idx-pill-primary'; demoBtn.disabled = true; }
+            // Update AI explanation on step changes
+            if (data.title && data.title !== lastExplainScreen) {
+                lastExplainScreen = data.title;
+                aiExplainScreen(data.screen || '', data.title);
+            }
+        }
+        // Only stop polling if we've seen it running first, or after 20 polls (10s grace)
+        if (!data.running && (wtSeenRunning || wtPollCount > 20)) {
+            clearInterval(wtPollingInterval);
+            wtPollingInterval = null;
+            wtRunning = false;
+            resetWtControls();
+            if (wtSeenRunning) aiExplainScreen(data.screen || '', 'Demo complete');
+        }
+    } catch(e) {}
+}
+
+async function pauseWalkthrough() {
+    try {
+        const res = await fetch('/api/walkthrough/pause', {method:'POST'});
+        const data = await res.json();
+        document.getElementById('wtPauseBtn').innerHTML = data.paused ? '&#9654;' : '&#9646;&#9646;';
+    } catch(e) {}
+}
+
+async function stopWalkthrough() {
+    try { await fetch('/api/walkthrough/stop', {method:'POST'}); } catch(e) {}
+    if (wtPollingInterval) { clearInterval(wtPollingInterval); wtPollingInterval = null; }
+    wtRunning = false;
+    resetWtControls();
+}
+
+async function restartMainframe() {
+    if (!confirm('Restart the TK5 mainframe? This will disconnect any active sessions.')) return;
+    const btn = document.getElementById('restartBtn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Restarting...';
+    try { await fetch('/api/terminal/disconnect', {method:'POST'}); } catch(e) {}
+    isConnected = false;
+    closeTerminal();
+    try {
+        const res = await fetch('/api/system/mainframe/restart', {method:'POST'});
+        const data = await res.json();
+        if (data.status === 'restarting' || data.status === 'starting') {
+            showToast(data.message || 'Mainframe restarting…', {type:'info', title:'Mainframe'});
+            updateMfStatus('restarting');
+            setTimeout(async () => { await checkStatus(); btn.disabled = false; btn.textContent = '⏻ Restart Mainframe'; }, 30000);
+        } else {
+            showToast(data.message || 'Restart issued', {type:'info', title:'Mainframe'});
+            btn.disabled = false; btn.textContent = '⏻ Restart Mainframe';
+        }
+    } catch(e) {
+        try {
+            const res2 = await fetch('/api/system/mainframe/start', {method:'POST'});
+            const data2 = await res2.json();
+            showToast(data2.message || 'Starting mainframe…', {type:'info', title:'Mainframe'});
+            updateMfStatus('starting');
+            setTimeout(async () => { await checkStatus(); btn.disabled = false; btn.textContent = '⏻ Restart Mainframe'; }, 30000);
+        } catch(e2) {
+            showToast('Failed to restart mainframe', {type:'error', title:'Mainframe'});
+            btn.disabled = false; btn.textContent = '⏻ Restart Mainframe';
+        }
+    }
+    await checkStatus();
+}
+
+let aiAutoRefreshInterval = null;
+let lastScreenText = '';
+
+// Instant screen detection - no LLM needed for demos
+const SCREEN_PATTERNS = [
+    { match: /VTAM.*ENTER LOGON|ENTER LOGON.*VTAM/i, text: "VTAM login screen. Type LOGON followed by your userid (e.g., LOGON IBMUSER) and press Enter." },
+    { match: /TSO\/E LOGON/i, text: "TSO logon panel. Enter your password and press Enter to access Time Sharing Option." },
+    { match: /ISPF PRIMARY OPTION MENU|ISPF\/PDF/i, text: "ISPF main menu. Select an option (0-11) or type a command. Option 3 for utilities, 6 for commands." },
+    { match: /READY\s*$/m, text: "TSO READY prompt. You can enter TSO commands like LISTCAT, LISTDS, or type ISPF to launch panels." },
+    { match: /IKJ56/i, text: "TSO system message. Check the message ID for details - IKJ messages relate to TSO operations." },
+    { match: /RACF.*LOGON|ICH70/i, text: "RACF security check. Verify your userid and password are correct for this system." },
+    { match: /JES2.*\$D|HASP/i, text: "JES2 spool display. Shows batch job status. Use $DA for active jobs, $DQ for queued." },
+    { match: /EDIT.*DATA SET|BROWSE.*DATA SET/i, text: "Dataset editor/browser. Use PF3 to exit, PF7/8 to scroll, or enter line commands." },
+    { match: /DATA SET LIST|DSLIST/i, text: "Dataset list panel. Enter S to select, D to delete, or I for info on a dataset." },
+    { match: /MEMBER LIST/i, text: "PDS member list. Enter S to select/edit, B to browse, or D to delete members." },
+    { match: /MVS.*3\.8|TK[45]/i, text: "MVS 3.8j Turnkey system. This is a free, open-source mainframe OS running on Hercules emulator." },
+    { match: /CICS.*SIGN|DFHCE/i, text: "CICS region. Use CESN to sign on, CEMT for master terminal, CEDA for resource definitions." },
+    { match: /INPUT NOT RECOGNIZED/i, text: "Invalid command entered. Check spelling and syntax, or press PF1/HELP for assistance." },
+    { match: /NOT AUTHORIZED|ICH408I/i, text: "RACF authorization failure. You lack permission for this resource. Contact security admin." },
+    { match: /ABEND|S0C[147B]|S222|S322|S806/i, text: "Program abend detected. Check the abend code - S0C7 is data exception, S806 is load failure." },
+    { match: /LOGOFF|LOGGED OFF/i, text: "Session ended. The user has logged off from the system." },
+];
+
+let aiExplainPending = false;
+
+async function aiExplainScreen(screenText, context) {
+    const el = document.getElementById('termExplain');
+    if (!el) return;
+    
+    lastScreenText = screenText || '';
+    const text = screenText || '';
+    
+    // Try instant pattern matching first
+    for (const pattern of SCREEN_PATTERNS) {
+        if (pattern.match.test(text)) {
+            el.textContent = pattern.text;
+            return;
+        }
+    }
+    
+    // No pattern matched - fallback to LLM
+    if (aiExplainPending) return;
+    aiExplainPending = true;
+    el.innerHTML = '<span class="idx-explain-thinking">Analyzing...</span>';
+    
+    const first10 = text.split('\n').slice(0, 10).join('\n');
+    try {
+        const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({message: `In ONE short sentence, explain this mainframe screen:\n${first10}`})
+        });
+        if (res.ok) {
+            const data = await res.json();
+            el.textContent = data.response || 'Mainframe terminal active.';
+        } else {
+            el.textContent = 'Mainframe terminal active. Enter commands or use PF keys.';
+        }
+    } catch(e) {
+        el.textContent = 'Mainframe terminal active. Enter commands or use PF keys.';
+    }
+    aiExplainPending = false;
+}
+
+// Auto-refresh AI explanation every 20 seconds when idle
+function startAiAutoRefresh() {
+    if (aiAutoRefreshInterval) return;
+    aiAutoRefreshInterval = setInterval(() => {
+        const pre = document.getElementById('terminalText');
+        const screenText = pre ? pre.textContent : lastScreenText;
+        if (screenText) {
+            aiExplainScreen(screenText, 'auto-refresh');
+        }
+    }, 20000);
+}
+
+function stopAiAutoRefresh() {
+    if (aiAutoRefreshInterval) {
+        clearInterval(aiAutoRefreshInterval);
+        aiAutoRefreshInterval = null;
+    }
+}
+
+// Start auto-refresh when page loads
+document.addEventListener('DOMContentLoaded', startAiAutoRefresh);
+
+// ── Bottom Nav: reveal on any scroll, hide after 3s idle ──
+(function() {
+    const nav = document.getElementById('bottomNav');
+    if (!nav) return;
+    let hideTimer = null;
+    let hovering = false;
+    function reveal() {
+        nav.classList.add('revealed');
+        clearTimeout(hideTimer);
+        if (!hovering) {
+            hideTimer = setTimeout(function() { nav.classList.remove('revealed'); }, 3000);
+        }
+    }
+    window.addEventListener('scroll', function() {
+        if (window.scrollY > 20) { reveal(); } else { nav.classList.remove('revealed'); }
+    }, { passive: true });
+    window.addEventListener('wheel', function(e) {
+        if (e.deltaY > 0) reveal();
+    }, { passive: true });
+    nav.addEventListener('mouseenter', function() { hovering = true; clearTimeout(hideTimer); nav.classList.add('revealed'); });
+    nav.addEventListener('mouseleave', function() { hovering = false; hideTimer = setTimeout(function() { nav.classList.remove('revealed'); }, 3000); });
+})();
+
+// ── Collapsible Sections ──
+function toggleSection(id, heading) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const arrow = heading.querySelector('.cp-arrow');
+    if (el.classList.toggle('collapsed')) {
+        if (arrow) arrow.innerHTML = '&#9654;';
+    } else {
+        if (arrow) arrow.innerHTML = '&#9660;';
+    }
+}
+
+// ── Control Panel Toggle ──
+function togglePanel() {
+    const panel = document.getElementById('controlPanel');
+    if (panel) panel.classList.toggle('collapsed');
+}
+
+function resetWtControls() {
+    document.getElementById('demoBadge').style.display = 'none';
+    document.getElementById('wtPauseBtn').style.display = 'none';
+    document.getElementById('wtStopBtn').style.display = 'none';
+    try { document.getElementById('wtStartBtn').disabled = false; } catch(_) {}
+    try { document.getElementById('wtRunLabel').textContent = 'Connect & Login'; } catch(_) {}
+    const demoBtn = document.getElementById('wtStartBtn2');
+    if (demoBtn) {
+        demoBtn.innerHTML = '&#10003; Done';
+        demoBtn.className = 'idx-pill idx-pill-success';
+        demoBtn.disabled = false;
+        setTimeout(() => {
+            demoBtn.innerHTML = '&#9654; Demo';
+            demoBtn.className = 'idx-pill idx-pill-primary';
+        }, 3000);
+    }
+}
+
+// ── Prepare for Demo ──
+async function prepareDemo() {
+    if (!confirm('This will restart the mainframe with a fresh IPL.\nAll active sessions and history will be cleared.\n\nContinue?')) return;
+
+    const btn = document.getElementById('demoPrepBtn');
+    const origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="idx-cp-icon">&#9203;</span><span>Restarting MVS...</span>';
+
+    try {
+        const res = await fetch('/api/system/mainframe/prepare-demo', { method: 'POST' });
+        const data = await res.json();
+
+        if (data.error) {
+            showToast(data.error, { type: 'error', title: 'Reboot' });
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            return;
+        }
+
+        showToast('Mainframe restarting — fresh IPL in progress...', { type: 'info', title: 'Reboot' });
+
+        // Poll for readiness
+        let attempts = 0;
+        const poll = setInterval(async () => {
+            attempts++;
+            try {
+                const s = await fetch('/api/system/mainframe/status');
+                const sd = await s.json();
+                if (sd.running) {
+                    clearInterval(poll);
+                    btn.innerHTML = '<span class="idx-cp-icon">&#9989;</span><span>Ready!</span>';
+                    showToast('Mainframe is up — clean demo environment ready.', { type: 'success', title: 'Reboot' });
+                    setTimeout(() => {
+                        btn.innerHTML = origHTML;
+                        btn.disabled = false;
+                    }, 3000);
+                    checkStatus();
+                }
+            } catch (e) {}
+            if (attempts > 60) {
+                clearInterval(poll);
+                btn.innerHTML = origHTML;
+                btn.disabled = false;
+                showToast('Timeout waiting for mainframe. Check manually.', { type: 'warning', title: 'Reboot' });
+            }
+        }, 3000);
+    } catch (e) {
+        showToast('Failed to start demo prep: ' + e.message, { type: 'error', title: 'Reboot' });
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+}
+
+// ── Install KICKS/CICS ──
+async function installKicks() {
+    const btn = document.getElementById('kicksInstallBtn');
+    const origHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="idx-cp-icon">&#9203;</span><span>Checking...</span>';
+
+    try {
+        // First check status
+        const statusRes = await fetch('/api/kicks/status');
+        const status = await statusRes.json();
+        
+        if (status.kicks_installed && status.prerequisites.kicks_dasd) {
+            // Show commands needed
+            let msg = "KICKS files are ready!\\n\\n";
+            msg += "=== Hercules Console Commands ===\\n";
+            status.hercules_commands.forEach(cmd => { msg += cmd + "\\n"; });
+            msg += "\\n=== MVS Commands ===\\n";
+            status.mvs_commands.forEach(cmd => { msg += cmd + "\\n"; });
+            
+            alert(msg);
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            return;
+        }
+        
+        // Start installation
+        btn.innerHTML = '<span class="idx-cp-icon">&#9203;</span><span>Installing...</span>';
+        const installRes = await fetch('/api/kicks/install', { method: 'POST' });
+        const result = await installRes.json();
+        
+        if (result.error) {
+            showToast(result.error, { type: 'error', title: 'KICKS Install' });
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+            return;
+        }
+        
+        // Show results
+        let msg = "KICKS Installation Status: " + result.status + "\\n\\n";
+        if (result.log) {
+            result.log.forEach(line => { msg += line + "\\n"; });
+        }
+        msg += "\\n=== Hercules Commands (run at console) ===\\n";
+        result.hercules_commands.forEach(cmd => { msg += cmd + "\\n"; });
+        
+        alert(msg);
+        showToast('KICKS config updated. Restart TK5 to apply.', { type: 'info', title: 'KICKS Install' });
+        
+        btn.innerHTML = '<span class="idx-cp-icon">&#9989;</span><span>Config Ready</span>';
+        setTimeout(() => {
+            btn.innerHTML = origHTML;
+            btn.disabled = false;
+        }, 3000);
+        
+    } catch (e) {
+        showToast('KICKS install failed: ' + e.message, { type: 'error', title: 'KICKS Install' });
+        btn.innerHTML = origHTML;
+        btn.disabled = false;
+    }
+}
+
+/* ── Hover hints → AI explanation box ── */
+(function() {
+    const explainBox = document.getElementById('termExplain');
+    let hintTimeout;
+    document.addEventListener('mouseover', function(e) {
+        const el = e.target.closest('[data-hint]');
+        if (el && explainBox) {
+            clearTimeout(hintTimeout);
+            explainBox.textContent = el.getAttribute('data-hint');
+        }
+    });
+    document.addEventListener('mouseout', function(e) {
+        const el = e.target.closest('[data-hint]');
+        if (el && explainBox) {
+            hintTimeout = setTimeout(() => { explainBox.textContent = ''; }, 300);
+        }
+    });
+})();
+
+/* ── Model Picker (index page) ── */
+const SUGGESTED_MODELS = [
+    {name:'tinyllama',      desc:'Tiny & fast',   size:'~637MB'},
+    {name:'llama3.2:3b',    desc:'Good balance',  size:'~2.0GB'},
+    {name:'llama3.1:8b',    desc:'Best quality',  size:'~4.7GB'},
+    {name:'phi3:mini',      desc:'Microsoft Phi-3',size:'~2.3GB'},
+    {name:'mistral:7b',     desc:'Mistral 7B',    size:'~4.1GB'},
+    {name:'gemma2:2b',      desc:'Google Gemma 2B',size:'~1.6GB'},
+];
+let idxModelPickerOpen = false;
+let idxPulling = false;
+
+function toggleIdxModelPicker() {
+    const picker = document.getElementById('idxModelPicker');
+    idxModelPickerOpen = !idxModelPickerOpen;
+    picker.style.display = idxModelPickerOpen ? 'block' : 'none';
+    if (idxModelPickerOpen) loadIdxModels();
+}
+
+async function loadIdxModels() {
+    const listEl = document.getElementById('idxModelList');
+    listEl.innerHTML = '<div style="padding:8px 12px; color:#666; font-size:12px;">Loading...</div>';
+    let installedNames = [];
+    let currentModel = '';
+    try {
+        const r = await fetch('/api/models');
+        const data = await r.json();
+        currentModel = data.current || '';
+        listEl.innerHTML = '';
+
+        if (data.models && data.models.length > 0) {
+            const hdr = document.createElement('div');
+            hdr.style.cssText = 'padding:4px 12px 4px; color:#0f0; font-size:10px; text-transform:uppercase; letter-spacing:1px;';
+            hdr.textContent = 'Installed';
+            listEl.appendChild(hdr);
+
+            data.models.forEach(m => {
+                installedNames.push(m.name);
+                const isCurrent = m.name === currentModel;
+                const row = document.createElement('div');
+                row.style.cssText = 'padding:5px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
+                row.style.color = isCurrent ? '#0f0' : '#ccc';
+                row.style.background = isCurrent ? 'rgba(0,255,0,0.05)' : 'transparent';
+                row.onmouseenter = () => { if (!isCurrent) row.style.background = 'rgba(255,255,255,0.05)'; };
+                row.onmouseleave = () => { if (!isCurrent) row.style.background = 'transparent'; };
+
+                const leftSpan = document.createElement('span');
+                leftSpan.textContent = `${isCurrent ? '▸ ' : '  '}${m.name}`;
+                leftSpan.onclick = async () => {
+                    try {
+                        const sr = await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:m.name})});
+                        const sd = await sr.json();
+                        if (sd.success) {
+                            document.getElementById('tsModel').textContent = m.name;
+                            toggleIdxModelPicker();
+                        }
+                    } catch(e) {}
+                };
+
+                const rightSpan = document.createElement('span');
+                rightSpan.style.cssText = 'display:flex; align-items:center; gap:6px;';
+                const infoSpan = document.createElement('span');
+                infoSpan.style.cssText = 'color:#666; font-size:11px;';
+                infoSpan.textContent = `${m.params || ''} ${m.size}`;
+                rightSpan.appendChild(infoSpan);
+
+                if (!isCurrent) {
+                    const delBtn = document.createElement('span');
+                    delBtn.textContent = '✕';
+                    delBtn.title = `Delete ${m.name}`;
+                    delBtn.style.cssText = 'color:#555; font-size:11px; cursor:pointer; padding:0 2px; border-radius:2px;';
+                    delBtn.onmouseenter = () => { delBtn.style.color = '#f44'; };
+                    delBtn.onmouseleave = () => { delBtn.style.color = '#555'; };
+                    delBtn.onclick = async (e) => {
+                        e.stopPropagation();
+                        if (!confirm(`Delete model ${m.name}? This cannot be undone.`)) return;
+                        try {
+                            const dr = await fetch('/api/models/delete', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:m.name})});
+                            const dd = await dr.json();
+                            if (dd.success) { loadIdxModels(); }
+                            else { alert(dd.error || 'Delete failed'); }
+                        } catch(e) { alert('Delete failed: ' + e.message); }
+                    };
+                    rightSpan.appendChild(delBtn);
+                }
+
+                row.appendChild(leftSpan);
+                row.appendChild(rightSpan);
+                listEl.appendChild(row);
+            });
+        }
+
+        // Download section
+        const dlHdr = document.createElement('div');
+        dlHdr.style.cssText = 'padding:6px 12px 4px; color:#f80; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px;';
+        dlHdr.textContent = 'Download';
+        listEl.appendChild(dlHdr);
+
+        const dlModels = SUGGESTED_MODELS.filter(s => !installedNames.some(n => n.startsWith(s.name.split(':')[0])));
+        if (dlModels.length === 0) {
+            const noneRow = document.createElement('div');
+            noneRow.style.cssText = 'padding:6px 12px; color:#555; font-size:11px; font-style:italic;';
+            noneRow.textContent = 'All suggested models installed';
+            listEl.appendChild(noneRow);
+        }
+        dlModels.forEach(s => {
+            const row = document.createElement('div');
+            row.style.cssText = 'padding:5px 12px; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:#ccc;';
+
+            const left = document.createElement('span');
+            left.innerHTML = `${s.name} <span style="color:#666; font-size:10px;">${s.desc}</span>`;
+
+            const right = document.createElement('span');
+            right.style.cssText = 'display:flex; align-items:center; gap:6px;';
+            const sizeSpan = document.createElement('span');
+            sizeSpan.style.cssText = 'color:#555; font-size:10px;';
+            sizeSpan.textContent = s.size;
+            right.appendChild(sizeSpan);
+
+            const btn = document.createElement('button');
+            btn.textContent = 'Pull';
+            btn.style.cssText = 'background:#f80; color:#000; border:none; border-radius:3px; padding:1px 8px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold;';
+            btn.onmouseenter = () => btn.style.background = '#fa0';
+            btn.onmouseleave = () => btn.style.background = '#f80';
+            btn.onclick = (e) => { e.stopPropagation(); pullIdxModel(s.name, row); };
+            right.appendChild(btn);
+
+            row.appendChild(left);
+            row.appendChild(right);
+            listEl.appendChild(row);
+        });
+
+    } catch(e) {
+        listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">Ollama offline</div>';
+    }
+}
+
+function fmtBytes(b) {
+    if (b >= 1073741824) return (b/1073741824).toFixed(2) + ' GB';
+    if (b >= 1048576) return (b/1048576).toFixed(1) + ' MB';
+    if (b >= 1024) return (b/1024).toFixed(0) + ' KB';
+    return b + ' B';
+}
+function fmtSpeed(bps) {
+    if (bps >= 1048576) return (bps/1048576).toFixed(1) + ' MB/s';
+    if (bps >= 1024) return (bps/1024).toFixed(0) + ' KB/s';
+    return bps.toFixed(0) + ' B/s';
+}
+
+function fmtEta(seconds) {
+    if (!seconds || seconds <= 0 || !isFinite(seconds)) return '';
+    if (seconds < 60) return Math.ceil(seconds) + 's';
+    if (seconds < 3600) return Math.floor(seconds/60) + 'm ' + Math.ceil(seconds%60) + 's';
+    return Math.floor(seconds/3600) + 'h ' + Math.floor((seconds%3600)/60) + 'm';
+}
+
+async function pullIdxModel(name, rowEl) {
+    if (idxPulling) return;
+    idxPulling = true;
+
+    // Build progress UI
+    rowEl.innerHTML = '';
+    rowEl.style.cssText = 'padding:10px 12px; display:flex; flex-direction:column; gap:5px;';
+
+    const topRow = document.createElement('div');
+    topRow.style.cssText = 'display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace;';
+    const label = document.createElement('span');
+    label.style.color = '#f80';
+    label.textContent = `Downloading ${name}...`;
+    const pctSpan = document.createElement('span');
+    pctSpan.style.cssText = 'color:#f80; font-weight:bold; font-size:13px;';
+    pctSpan.textContent = '0%';
+    topRow.appendChild(label);
+    topRow.appendChild(pctSpan);
+
+    const barOuter = document.createElement('div');
+    barOuter.style.cssText = 'width:100%; height:12px; background:#111; border:1px solid #333; border-radius:6px; overflow:hidden;';
+    const barInner = document.createElement('div');
+    barInner.style.cssText = 'height:100%; width:0%; background:linear-gradient(90deg,#f80,#fa0); border-radius:6px; transition:width 0.3s;';
+    barOuter.appendChild(barInner);
+
+    const bottomRow = document.createElement('div');
+    bottomRow.style.cssText = 'display:flex; justify-content:space-between; font-size:10px; color:#888; font-family:IBM Plex Mono,monospace;';
+    const sizeLabel = document.createElement('span');
+    sizeLabel.textContent = 'Starting...';
+    const etaLabel = document.createElement('span');
+    etaLabel.textContent = '';
+    const speedLabel = document.createElement('span');
+    speedLabel.textContent = '';
+    bottomRow.appendChild(sizeLabel);
+    bottomRow.appendChild(etaLabel);
+    bottomRow.appendChild(speedLabel);
+
+    rowEl.appendChild(topRow);
+    rowEl.appendChild(barOuter);
+    rowEl.appendChild(bottomRow);
+
+    try {
+        const startRes = await fetch('/api/models/pull', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({model: name})
+        });
+        const startData = await startRes.json();
+        if (!startData.success) {
+            label.style.color = '#f44';
+            label.textContent = `Error: ${startData.error}`;
+            idxPulling = false;
+            return;
+        }
+
+        const poll = setInterval(async () => {
+            try {
+                const r = await fetch('/api/models/pull/status');
+                const s = await r.json();
+                const pct = s.pct || 0;
+
+                barInner.style.width = pct + '%';
+                pctSpan.textContent = pct + '%';
+
+                if (s.total && s.completed !== undefined) {
+                    sizeLabel.textContent = fmtBytes(s.completed) + ' / ' + fmtBytes(s.total);
+                }
+                if (s.speed && s.speed > 0) {
+                    speedLabel.textContent = fmtSpeed(s.speed);
+                    const remaining = s.total - (s.completed || 0);
+                    const eta = remaining / s.speed;
+                    etaLabel.textContent = 'ETA ' + fmtEta(eta);
+                    etaLabel.style.color = '#f80';
+                }
+                if (s.status && s.status !== 'done' && s.status !== 'error') {
+                    label.textContent = `Downloading ${name}`;
+                }
+                if (s.status === 'done') {
+                    clearInterval(poll);
+                    label.style.color = '#0f0';
+                    label.textContent = `${name} ready!`;
+                    pctSpan.textContent = '100%';
+                    pctSpan.style.color = '#0f0';
+                    speedLabel.textContent = 'Done';
+                    speedLabel.style.color = '#0f0';
+                    etaLabel.textContent = '';
+                    barInner.style.width = '100%';
+                    barInner.style.background = 'linear-gradient(90deg,#0f0,#0a0)';
+                    sizeLabel.style.color = '#0f0';
+                    await fetch('/api/models/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:name})});
+                    document.getElementById('tsModel').textContent = name;
+                    idxPulling = false;
+                    setTimeout(() => loadIdxModels(), 2000);
+                }
+                if (s.status === 'error') {
+                    clearInterval(poll);
+                    label.style.color = '#f44';
+                    label.textContent = `Error: ${s.error || 'pull failed'}`;
+                    speedLabel.textContent = 'Failed';
+                    speedLabel.style.color = '#f44';
+                    etaLabel.textContent = '';
+                    idxPulling = false;
+                }
+            } catch(pe) {}
+        }, 500);
+    } catch(e) {
+        label.style.color = '#f44';
+        label.textContent = `Error: ${e.message}`;
+        idxPulling = false;
+    }
+}
+
+document.addEventListener('click', (e) => {
+    if (idxModelPickerOpen && !idxPulling && !e.target.closest('#idxModelPicker') && !e.target.closest('#tsModel')) {
+        idxModelPickerOpen = false;
+        document.getElementById('idxModelPicker').style.display = 'none';
+    }
+});
+
+/* ── Toolbar scroll-up reveal ── */
+(function() {
+    let lastY = 0;
+    const toolbar = document.getElementById('idxToolbar');
+    const mainCol = document.querySelector('.idx-main-col');
+    (mainCol || window).addEventListener('scroll', function() {
+        const y = this.scrollTop || window.scrollY;
+        if (y < lastY && y > 50) {
+            toolbar.classList.add('toolbar-revealed');
+        } else {
+            toolbar.classList.remove('toolbar-revealed');
+        }
+        lastY = y;
+    });
+})();
+</script>
+{% endblock %}
