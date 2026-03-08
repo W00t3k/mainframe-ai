@@ -8,7 +8,11 @@ Auto-detects GPU and selects optimal model.
 
 import argparse
 import os
+import sys
 import uvicorn
+
+# Add tools/ directory to Python path so lazy imports (agent_tools, rag_engine, etc.) still resolve
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools"))
 
 from app.config import get_config, update_model
 

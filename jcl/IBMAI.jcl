@@ -17,26 +17,10 @@
 //         SPACE=(TRK,(2,2)),
 //         DCB=(BLKSIZE=80,LRECL=80,RECFM=F)
 //SYSIN   DD *
-         MACRO
-&NAME    SCREEN &MSG=.,&TEXT=.
-         AIF   ('&MSG' EQ '.' OR '&TEXT' EQ '.').END
-         LCLC  &BFNAME,&BFBEGIN,&BFEND
-&BFNAME  SETC  'BUF'.'&MSG'
-&BFBEGIN SETC  '&BFNAME'.'B'
-&BFEND   SETC  '&BFNAME'.'E'
-.BEGIN   DS    0F
-&BFNAME  DC    AL2(&BFEND-&BFBEGIN)   MESSAGE LENGTH
-&BFBEGIN EQU   *                       START OF MESSAGE
-         DC    X'F5C3'                 ERASE/WRITE WCC
-         DC    X'114040'               SBA ROW1 COL1
-         DC    X'1DE8'                 SF PROT HI
-         DC    C&TEXT                   USS MESSAGE
-&BFEND   EQU   *                       END OF MESSAGE
-.END     MEND
 *
 *  AI/OS USS TABLE FOR TK5 MVS 3.8J
 *
-USSTAB   USSTAB TABLE=STDTRANS,FORMAT=DYNAMIC
+USSTAB   USSTAB TABLE=STDTRANS
 *
 TSO      USSCMD CMD=TSO,REP=LOGON,FORMAT=BAL
          USSPARM PARM=APPLID,DEFAULT=TSO
@@ -48,17 +32,17 @@ LOGON    USSCMD CMD=LOGON,REP=LOGON,FORMAT=BAL
 *
 LOGOFF   USSCMD CMD=LOGOFF,REP=LOGOFF,FORMAT=BAL
 *
-         USSMSG MSG=00,BUFFER=(BUF00,SCAN)
-         USSMSG MSG=01,BUFFER=(BUF01,SCAN)
-         USSMSG MSG=02,BUFFER=(BUF02,SCAN)
-         USSMSG MSG=03,BUFFER=(BUF03,SCAN)
-         USSMSG MSG=05,BUFFER=(BUF05,SCAN)
-         USSMSG MSG=06,BUFFER=(BUF06,SCAN)
-         USSMSG MSG=08,BUFFER=(BUF08,SCAN)
-         USSMSG MSG=10,BUFFER=(BUF10,SCAN)
-         USSMSG MSG=11,BUFFER=(BUF11,SCAN)
-         USSMSG MSG=12,BUFFER=(BUF12,SCAN)
-         USSMSG MSG=14,BUFFER=(BUF14,SCAN)
+         USSMSG MSG=00,BUFFER=BUF00
+         USSMSG MSG=01,TEXT='Invalid command syntax'
+         USSMSG MSG=02,TEXT='Command unrecognized'
+         USSMSG MSG=03,TEXT='Parameter extraneous'
+         USSMSG MSG=05,TEXT='Key pressed is inactive'
+         USSMSG MSG=06,TEXT='No such session exists'
+         USSMSG MSG=08,TEXT='Command failed - storage'
+         USSMSG MSG=10,TEXT=' '
+         USSMSG MSG=11,TEXT='Session has ended'
+         USSMSG MSG=12,TEXT='Required parameter missing'
+         USSMSG MSG=14,TEXT='USS message not defined'
 *
 STDTRANS DC X'000102030440060708090A0B0C0D0E0F'
          DC X'101112131415161718191A1B1C1D1E1F'
@@ -155,19 +139,6 @@ BUF00B   EQU *
          DC C'+--------------------------------------'
          DC C'--------------------------------------+'
 BUF00E   EQU *
-***********************************************************
-* USS MESSAGES
-***********************************************************
-         SCREEN MSG=01,TEXT='Invalid command syntax'
-         SCREEN MSG=02,TEXT='Command unrecognized'
-         SCREEN MSG=03,TEXT='Parameter extraneous'
-         SCREEN MSG=05,TEXT='Key pressed is inactive'
-         SCREEN MSG=06,TEXT='No such session exists'
-         SCREEN MSG=08,TEXT='Command failed - storage'
-         SCREEN MSG=10,TEXT=' '
-         SCREEN MSG=11,TEXT='Session has ended'
-         SCREEN MSG=12,TEXT='Required parameter missing'
-         SCREEN MSG=14,TEXT='USS message not defined'
          END
 /*
 //*

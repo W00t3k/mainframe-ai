@@ -30,10 +30,10 @@ HERC_HTTP = "http://localhost:8038"
 USER = "HERC01"
 PASS = "CUL8TR"
 
-PROJECT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 JCL_DIR = os.path.join(PROJECT_DIR, "jcl", "kicks")
 TK5_DIR = os.path.join(PROJECT_DIR, "tk5", "mvs-tk5")
-XMIT_FILE = os.path.join(PROJECT_DIR, "kicks_install", "kicks-master",
+XMIT_FILE = os.path.join(PROJECT_DIR, "tools", "kicks_install", "kicks-master",
                           "kicks-tso-v1r5m0", "kicks-tso-v1r5m0.xmi")
 
 KICKS_HERC_ADDR = "0148"   # Hercules device address (leading zero OK)

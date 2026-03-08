@@ -23,8 +23,8 @@ try:
 except ImportError:
     PDF_SUPPORT = False
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-RAG_DIR = os.path.join(BASE_DIR, "rag_data")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+RAG_DIR = os.path.join(BASE_DIR, "data", "rag_data")
 INDEX_FILE = os.path.join(RAG_DIR, "index.json")
 EMBEDDINGS_FILE = os.path.join(RAG_DIR, "embeddings.json")
 DOCS_DIR = os.path.join(RAG_DIR, "documents")

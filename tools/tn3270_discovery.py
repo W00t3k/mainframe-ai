@@ -34,7 +34,7 @@ from typing import Optional
 TN3270_PORTS = [23, 992, 2323, 3270, 3271, 3272, 3273, 3274, 3275]
 
 # Custom NSE scripts directory (mainframed/nmap-scripts)
-NMAP_SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "nmap-scripts")
+NMAP_SCRIPTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "nmap-scripts")
 
 # ---------------------------------------------------------------------------
 # Stealth Profiles — controls timing, concurrency, jitter
@@ -154,8 +154,8 @@ FINGERPRINTS = {
 # SQLite Database
 # ---------------------------------------------------------------------------
 
-DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "discovery.db")
-SCREENSHOTS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "static", "screenshots")
+DB_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "data", "discovery.db")
+SCREENSHOTS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "static", "screenshots")
 os.makedirs(SCREENSHOTS_DIR, exist_ok=True)
 
 

@@ -611,8 +611,8 @@ def stop_screen_poller():
 # Screen Capture
 # =============================================================================
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-SCREENCAPS_DIR = os.path.join(BASE_DIR, "screencaps")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+SCREENCAPS_DIR = os.path.join(BASE_DIR, "data", "screencaps")
 os.makedirs(SCREENCAPS_DIR, exist_ok=True)
 
 # In-memory screencap store

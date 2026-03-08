@@ -112,10 +112,10 @@ async def lifespan(application):
 app = FastAPI(title="Mainframe AI Assistant", lifespan=lifespan)
 
 # Mount static files and templates
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
-LAB_DATA_DIR = os.path.join(BASE_DIR, "lab_data")
+LAB_DATA_DIR = os.path.join(BASE_DIR, "data", "lab_data")
 DEMO_DATA_DIR = os.path.join(BASE_DIR, "docs", "demo")
 
 # Ollama configuration

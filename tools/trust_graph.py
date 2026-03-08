@@ -12,8 +12,8 @@ from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from collections import deque
 
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-GRAPH_DIR = os.path.join(BASE_DIR, "trust_graph_data")
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+GRAPH_DIR = os.path.join(BASE_DIR, "data", "trust_graph_data")
 GRAPH_FILE = os.path.join(GRAPH_DIR, "graph.json")
 os.makedirs(GRAPH_DIR, exist_ok=True)
 
