@@ -39,11 +39,11 @@ class Config:
     def __post_init__(self):
         self.STATIC_DIR = os.path.join(self.BASE_DIR, "static")
         self.TEMPLATES_DIR = os.path.join(self.BASE_DIR, "templates")
-        self.LAB_DATA_DIR = os.path.join(self.BASE_DIR, "lab_data")
+        self.LAB_DATA_DIR = os.path.join(self.BASE_DIR, "data", "lab_data")
         self.DEMO_DATA_DIR = os.path.join(self.BASE_DIR, "docs", "demo")
-        self.RAG_DIR = os.path.join(self.BASE_DIR, "rag_data")
-        self.SCREENCAPS_DIR = os.path.join(self.BASE_DIR, "screencaps")
-        self.GRAPH_DIR = os.path.join(self.BASE_DIR, "trust_graph_data")
+        self.RAG_DIR = os.path.join(self.BASE_DIR, "data", "rag_data")
+        self.SCREENCAPS_DIR = os.path.join(self.BASE_DIR, "data", "screencaps")
+        self.GRAPH_DIR = os.path.join(self.BASE_DIR, "data", "trust_graph_data")
         
         # Ensure directories exist
         for dir_path in [self.SCREENCAPS_DIR, self.RAG_DIR, self.GRAPH_DIR]:
