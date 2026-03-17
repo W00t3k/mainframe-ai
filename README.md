@@ -1,5 +1,11 @@
 # Mainframe AI Assistant
 
+## See It Running
+
+**[▶ Live Demo & Project Page](https://w00t3k.github.io/mainframe-ai/)**
+
+> Watch the tool connect to a live MVS 3.8j system, navigate control planes, 
+> and map trust relationships in real time. No setup required to explore.
 **A reference implementation for trust-boundary assessment on mainframe systems.**
 
 This tool operationalizes a mental model I've been applying since 2018 — first to Active Directory and enterprise Windows environments, now to mainframe systems. The model isn't new. The tool is.
