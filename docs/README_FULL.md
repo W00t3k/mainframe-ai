@@ -242,7 +242,7 @@ File-based retrieval-augmented generation.
 - JCL templates
 - TSO/ISPF guides
 
-### 6. MCP Server (`mcp_server.py`)
+### 6. MCP Server (`tools/mcp_server.py`)
 
 Model Context Protocol server for Ollama Desktop integration.
 
@@ -254,7 +254,7 @@ Add to `~/.config/ollama/ollama_desktop_config.json`:
   "mcpServers": {
     "mainframe-assistant": {
       "command": "python",
-      "args": ["/path/to/mainframe_ai_assistant/mcp_server.py"]
+      "args": ["/path/to/mainframe-ai/tools/mcp_server.py"]
     }
   }
 }
@@ -278,24 +278,28 @@ Add to `~/.config/ollama/ollama_desktop_config.json`:
 ## File Structure
 
 ```
-mainframe_ai_assistant/
+mainframe-ai/
 ├── run.py                  # Application entry point
 ├── app/                    # Modular FastAPI application
-│   ├── routes/             # API endpoints (14 modules)
-│   ├── services/           # Business logic
+│   ├── routes/             # API endpoints (19 modules)
+│   ├── services/           # Business logic (LLM, chat, FTP, BOF lab)
 │   ├── constants/          # Prompts, walkthroughs, paths
 │   └── models/             # Pydantic schemas
-├── agent_tools.py          # TN3270 connection tools
-├── trust_graph.py          # Graph data model + queries
-├── graph_tools.py          # Parsers + agent loops
-├── rag_engine.py           # RAG with file-based embeddings
-├── recon_engine.py         # Enumeration and findings engine
-├── methodology_engine.py   # Assessment methodology
-├── mcp_server.py           # MCP server for Ollama Desktop
-├── ai_bridge.py            # CICS AI bridge
-├── mainframe_assistant.py  # CLI interface (alternative)
+├── tools/                  # Standalone Python tools and engines
+│   ├── agent_tools.py      # TN3270 connection tools
+│   ├── trust_graph.py      # Graph data model + queries
+│   ├── graph_tools.py      # Parsers + agent loops
+│   ├── rag_engine.py       # RAG with file-based embeddings
+│   ├── recon_engine.py     # Enumeration and findings engine
+│   ├── methodology_engine.py # Assessment methodology
+│   ├── mcp_server.py       # MCP server for Ollama Desktop
+│   ├── ai_bridge.py        # CICS AI bridge
+│   └── mainframe_assistant.py # CLI interface (alternative)
+├── data/                   # Runtime data (lab_data, rag_data, screencaps, graph)
+├── jcl/                    # JCL source files
+├── scripts/                # Shell scripts (install, mvs management)
 │
-├── templates/              # Jinja2 HTML templates (16 pages)
+├── templates/              # Jinja2 HTML templates (24+ pages)
 │   ├── base.html           # Base template
 │   ├── index.html          # Home — retro CRT terminal
 │   ├── terminal.html       # Full-screen TN3270

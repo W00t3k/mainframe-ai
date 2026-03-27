@@ -8,21 +8,21 @@ This document describes the architecture of the Mainframe AI Assistant.
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                         User Interfaces                                  │
 ├─────────────────────┬─────────────────────┬─────────────────────────────┤
-│  Web App (run.py)   │  CLI (mainframe_   │   MCP Server                  │
-│  FastAPI + Jinja2   │  assistant.py)     │   (mcp_server.py)             │
-│  16 HTML templates  │                    │                               │
+│  Web App (run.py)   │  CLI (tools/       │   MCP Server                  │
+│  FastAPI + Jinja2   │  mainframe_        │   (tools/mcp_server.py)       │
+│  24+ HTML templates │  assistant.py)     │                               │
 └──────────┬──────────┴──────────┬──────────┴──────────────┬──────────────┘
            │                     │                          │
            ▼                     ▼                          ▼
 ┌─────────────────────────────────────────────────────────────────────────┐
 │                      AI / RAG Layer                                      │
 ├─────────────────────────────────────────────────────────────────────────┤
-│  LLM Backend             │  rag_engine.py (RAG)                          │
+│  LLM Backend             │  tools/rag_engine.py (RAG)                    │
 │  (Ollama default)        │  - Document embedding                         │
 │  - Q&A                   │  - Semantic search                            │
 │  - Code generation       │  - Context augmentation                       │
 │  - Screen analysis       │                                             │
-│  - Click-to-analyze      │  methodology_engine.py                       │
+│  - Click-to-analyze      │  tools/methodology_engine.py                 │
 │                          │  - F1–F5 findings framework                   │
 └─────────────────────┬───────────────────────────────────────────────────┘
                       │
@@ -54,15 +54,15 @@ This document describes the architecture of the Mainframe AI Assistant.
 
 Modular FastAPI web application with Jinja2 templates.
 
-- 14 API route modules
-- 16 HTML templates with IBM Plex Mono retro theme
+- 19 API route modules
+- 24+ HTML templates with IBM Plex Mono retro theme
 - REST API endpoints
 - WebSocket for real-time updates
 - Click-to-analyze AI on terminal screens
 - Hover hints for contextual descriptions
 - Invisible toolbar with scroll-up reveal
 
-#### mainframe_assistant.py (CLI)
+#### tools/mainframe_assistant.py (CLI)
 
 Command-line interface for conversational mainframe interaction.
 
@@ -71,7 +71,7 @@ Command-line interface for conversational mainframe interaction.
 - Action extraction from LLM responses
 - Uses Ollama for LLM inference
 
-#### mcp_server.py (MCP)
+#### tools/mcp_server.py (MCP)
 
 Model Context Protocol server for external AI tool integration.
 
@@ -89,7 +89,7 @@ Uses an Ollama-compatible `/api/chat` backend for:
 - COBOL code analysis
 - ABEND interpretation
 
-#### RAG Engine (rag_engine.py)
+#### RAG Engine (tools/rag_engine.py)
 
 Retrieval-Augmented Generation for enhanced responses:
 - Document chunking and embedding

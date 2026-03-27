@@ -227,7 +227,7 @@ def get_lab_data() -> Dict[str, Any]:
     """Load the buffer overflow lab data from JSON."""
     lab_path = os.path.join(
         os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
-        "lab_data", "bof_demo.json"
+        "data", "lab_data", "bof_demo.json"
     )
     try:
         with open(lab_path, 'r') as f:

@@ -15,7 +15,7 @@ Thank you for your interest in contributing! This document provides guidelines f
 ```bash
 # Clone the repository
 git clone <repository-url>
-cd mainframe_ai_assistant
+cd mainframe-ai
 
 # Create virtual environment
 python3 -m venv .venv
@@ -71,25 +71,28 @@ mypy app/
 mainframe-ai/
 ├── run.py                   # Application entry point (Uvicorn)
 ├── app/                     # Modular FastAPI application
-│   ├── routes/              # API endpoints (14 modules)
-│   ├── services/            # Business logic (chat, Ollama client)
+│   ├── routes/              # API endpoints (19 modules)
+│   ├── services/            # Business logic (chat, LLM, FTP, BOF lab)
 │   ├── constants/           # Prompts, 13 walkthroughs, 9 learning paths
 │   ├── models/              # Pydantic schemas
 │   └── websocket/           # Real-time terminal/graph updates
-├── agent_tools.py           # TN3270 connection, screen reading, tool definitions
-├── trust_graph.py           # BloodHound-style graph data model
-├── graph_tools.py           # JCL/SYSOUT parsers, screen classifiers
-├── rag_engine.py            # Local RAG with file-based vector store
-├── recon_engine.py          # TSO/CICS/VTAM enumeration + report gen
-├── methodology_engine.py    # F1–F5 findings framework, 6 control planes
-├── mcp_server.py            # Model Context Protocol server
-├── ai_bridge.py             # KICKS/CICS ↔ Ollama bridge
-├── templates/               # Jinja2 HTML templates (24 pages)
+├── tools/                   # Standalone Python tools and engines
+│   ├── agent_tools.py       # TN3270 connection, screen reading, tool defs
+│   ├── trust_graph.py       # BloodHound-style graph data model
+│   ├── graph_tools.py       # JCL/SYSOUT parsers, screen classifiers
+│   ├── rag_engine.py        # Local RAG with file-based vector store
+│   ├── recon_engine.py      # TSO/CICS/VTAM enumeration + report gen
+│   ├── methodology_engine.py # F1–F5 findings framework, 6 control planes
+│   ├── mcp_server.py        # Model Context Protocol server
+│   └── ai_bridge.py         # KICKS/CICS ↔ Ollama bridge
+├── data/                    # Runtime data (lab_data, rag_data, screencaps, graph)
+├── jcl/                     # JCL source files (FTPD, USS, KICKS, etc.)
+├── scripts/                 # Shell scripts (install, mvs management)
+├── templates/               # Jinja2 HTML templates (24+ pages)
 ├── static/                  # CSS, JS, fonts, images
 ├── docs/                    # Documentation
-├── lab_data/                # Lab exercise definitions (JSON)
+├── slides/                  # Presentation assets and demo video
 ├── start.sh                 # One-command launcher (Ollama + TK5 + Web App)
-├── install.sh               # Linux installer (deps, Ollama, venv, TK5)
 └── tk5/                     # TK5 MVS 3.8j emulator + Hercules binaries
 ```
 

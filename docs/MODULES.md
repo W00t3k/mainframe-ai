@@ -1,22 +1,25 @@
 # Core Python Modules
 
-Root-level Python modules outside the `app/` package. These handle TN3270 connectivity, graph analysis, RAG, and external integrations.
+Python modules in `tools/` that power core capabilities. These are imported lazily by `app/` at runtime via `sys.path` (configured in `run.py`).
 
 ## Module Overview
 
-| Module | Purpose |
-|--------|---------|
-| `run.py` | Uvicorn launcher — starts FastAPI on configurable host/port/model |
-| `agent_tools.py` | TN3270 connection, screen reading, keystroke sending, tool definitions for LLM |
-| `trust_graph.py` | BloodHound-style graph — nodes (users, datasets, jobs) + edges (reads, writes, executes) |
-| `graph_tools.py` | JCL/SYSOUT parsers, screen classifiers, graph population utilities |
-| `graph_automation.py` | Auto-populate graph from live terminal navigation |
-| `rag_engine.py` | Local RAG — document chunking, embedding, similarity search (no external DB) |
-| `recon_engine.py` | TSO/CICS/VTAM enumeration, hidden field detection, pentest report generation |
-| `methodology_engine.py` | F1–F5 findings framework, 6 control planes (TSO, JES, RACF, CICS, VTAM, PR/SM) |
-| `mcp_server.py` | Model Context Protocol server for Claude Desktop / external AI clients |
-| `ai_bridge.py` | TCP bridge: KICKS/CICS COBOL transactions ↔ Ollama LLM |
-| `mainframe_assistant.py` | CLI REPL — interactive mainframe Q&A without web UI |
+| Module | Location | Purpose |
+|--------|----------|---------|
+| `run.py` | root | Uvicorn launcher — starts FastAPI on configurable host/port/model |
+| `agent_tools.py` | `tools/` | TN3270 connection, screen reading, keystroke sending, tool definitions for LLM |
+| `trust_graph.py` | `tools/` | BloodHound-style graph — nodes (users, datasets, jobs) + edges (reads, writes, executes) |
+| `graph_tools.py` | `tools/` | JCL/SYSOUT parsers, screen classifiers, graph population utilities |
+| `graph_automation.py` | `tools/` | Auto-populate graph from live terminal navigation |
+| `rag_engine.py` | `tools/` | Local RAG — document chunking, embedding, similarity search (no external DB) |
+| `recon_engine.py` | `tools/` | TSO/CICS/VTAM enumeration, hidden field detection, pentest report generation |
+| `methodology_engine.py` | `tools/` | F1–F5 findings framework, 6 control planes (TSO, JES, RACF, CICS, VTAM, PR/SM) |
+| `mcp_server.py` | `tools/` | Model Context Protocol server for Claude Desktop / external AI clients |
+| `ai_bridge.py` | `tools/` | TCP bridge: KICKS/CICS COBOL transactions ↔ Ollama LLM |
+| `mainframe_assistant.py` | `tools/` | CLI REPL — interactive mainframe Q&A without web UI |
+| `tn3270_discovery.py` | `tools/` | Internet-scale TN3270 scanner (Shodan, nmap, masscan) |
+| `install_kicks.py` | `tools/` | Multi-step KICKS installation automation |
+| `web_app.py` | `tools/` | Legacy monolithic web app (superseded by `app/`) |
 
 ---
 
@@ -31,7 +34,7 @@ python run.py --host 127.0.0.1 --port 8080 --model llama3.1:8b
 
 ---
 
-## `agent_tools.py`
+## `tools/agent_tools.py`
 **TN3270 Connection & Tools**
 
 Manages the TN3270 terminal connection and defines tools for the agentic loop:
@@ -44,7 +47,7 @@ Manages the TN3270 terminal connection and defines tools for the agentic loop:
 
 ---
 
-## `trust_graph.py`
+## `tools/trust_graph.py`
 **Trust Relationship Graph**
 
 BloodHound-inspired graph for mainframe trust relationships:
@@ -55,7 +58,7 @@ BloodHound-inspired graph for mainframe trust relationships:
 
 ---
 
-## `graph_tools.py`
+## `tools/graph_tools.py`
 **Graph Analysis Utilities**
 
 Parsing and analysis tools for populating the trust graph:
@@ -68,7 +71,7 @@ Parsing and analysis tools for populating the trust graph:
 
 ---
 
-## `rag_engine.py`
+## `tools/rag_engine.py`
 **Retrieval-Augmented Generation**
 
 Local vector store for mainframe documentation:
@@ -79,7 +82,7 @@ Local vector store for mainframe documentation:
 
 ---
 
-## `recon_engine.py`
+## `tools/recon_engine.py`
 **Test & Report Engine**
 
 Native Python implementation of mainframe enumeration and findings:
@@ -93,7 +96,7 @@ Native Python implementation of mainframe enumeration and findings:
 
 ---
 
-## `mcp_server.py`
+## `tools/mcp_server.py`
 **Model Context Protocol Server**
 
 MCP server for external AI tool integration:
@@ -103,7 +106,7 @@ MCP server for external AI tool integration:
 
 ---
 
-## `mainframe_assistant.py`
+## `tools/mainframe_assistant.py`
 **CLI Interface**
 
 Command-line chat interface for the assistant:
@@ -113,7 +116,7 @@ Command-line chat interface for the assistant:
 
 ---
 
-## `methodology_engine.py`
+## `tools/methodology_engine.py`
 **Assessment Methodology**
 
 Findings-based assessment framework:
@@ -123,7 +126,7 @@ Findings-based assessment framework:
 
 ---
 
-## `ai_bridge.py`
+## `tools/ai_bridge.py`
 **CICS AI Bridge**
 
 Python bridge connecting KICKS/CICS transactions to the AI backend:
@@ -133,7 +136,7 @@ Python bridge connecting KICKS/CICS transactions to the AI backend:
 
 ---
 
-## `graph_automation.py`
+## `tools/graph_automation.py`
 **Graph Automation**
 
 Automated graph population from live terminal sessions:
@@ -145,7 +148,7 @@ Automated graph population from live terminal sessions:
 
 ## Legacy File
 
-### `web_app.py`
+### `tools/web_app.py`
 **⚠️ Legacy monolithic application**
 
 This file contains an older, monolithic version of the application. The modular `app/` directory structure is now the primary codebase. This file is retained for reference but should not be modified.

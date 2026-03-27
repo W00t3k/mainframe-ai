@@ -96,22 +96,22 @@ The install script handles everything: system deps, Python, Ollama, GitHub CLI a
 ```bash
 # If you already have the repo cloned:
 cd mainframe-ai
-chmod +x install.sh start.sh mvs.sh
-./install.sh
+chmod +x scripts/install.sh start.sh scripts/mvs.sh
+./scripts/install.sh
 
 # If starting fresh on a new server (private repo — requires GitHub access):
 # Option 1: GitHub CLI
 sudo apt install gh -y && gh auth login
 gh repo clone W00t3k/mainframe-ai && cd mainframe-ai
-chmod +x install.sh start.sh mvs.sh && ./install.sh
+chmod +x scripts/install.sh start.sh scripts/mvs.sh && ./scripts/install.sh
 
 # Option 2: Personal Access Token
 git clone https://<YOUR_TOKEN>@github.com/W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x install.sh start.sh mvs.sh && ./install.sh
+cd mainframe-ai && chmod +x scripts/install.sh start.sh scripts/mvs.sh && ./scripts/install.sh
 
 # Option 3: SSH
 git clone git@github.com:W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x install.sh start.sh mvs.sh && ./install.sh
+cd mainframe-ai && chmod +x scripts/install.sh start.sh scripts/mvs.sh && ./scripts/install.sh
 ```
 
 Supported distros: **Ubuntu, Debian, Kali, Fedora, CentOS/RHEL, Arch, openSUSE**.
@@ -210,24 +210,24 @@ Three ways to run TK5, depending on your needs:
 | Script | Mode | Use Case |
 |--------|------|----------|
 | `./start.sh` | Background (all services) | Production — starts Ollama + TK5 + Web App with watchdog |
-| `./mvs.sh start` | Background (TK5 only) | Manage TK5 independently with start/stop/restart/status |
-| `./start_mvs.sh` | Foreground (interactive) | Debug — see Hercules console output directly |
+| `./scripts/mvs.sh start` | Background (TK5 only) | Manage TK5 independently with start/stop/restart/status |
+| `./scripts/start_mvs.sh` | Foreground (interactive) | Debug — see Hercules console output directly |
 
-#### `mvs.sh` — TK5 Management
+#### `scripts/mvs.sh` — TK5 Management
 
 ```bash
-./mvs.sh start          # Start MVS TK5 (background)
-./mvs.sh stop           # Graceful shutdown (SIGTERM, waits 15s)
-./mvs.sh kill           # Force kill all Hercules processes
-./mvs.sh restart        # Stop + Start
-./mvs.sh status         # Show PID, ports, memory, uptime
-./mvs.sh log            # Tail the Hercules log
+./scripts/mvs.sh start          # Start MVS TK5 (background)
+./scripts/mvs.sh stop           # Graceful shutdown (SIGTERM, waits 15s)
+./scripts/mvs.sh kill           # Force kill all Hercules processes
+./scripts/mvs.sh restart        # Stop + Start
+./scripts/mvs.sh status         # Show PID, ports, memory, uptime
+./scripts/mvs.sh log            # Tail the Hercules log
 ```
 
-#### `start_mvs.sh` — Interactive Mode
+#### `scripts/start_mvs.sh` — Interactive Mode
 
 ```bash
-./start_mvs.sh          # Runs Hercules in foreground (Ctrl+C to stop)
+./scripts/start_mvs.sh          # Runs Hercules in foreground (Ctrl+C to stop)
 ```
 
 TK5 defaults:
@@ -315,7 +315,7 @@ The walkthroughs don't just show you how to navigate ISPF. They show you *where 
                           │
 ┌─────────────────────────▼────────────────────────────────┐
 │                    app/ (modular)                         │
-│  routes/     - API endpoints (14 route modules)           │
+│  routes/     - API endpoints (19 route modules)           │
 │  services/   - Business logic (chat, walkthrough, LLM)    │
 │  constants/  - Prompts, paths, walkthrough scripts        │
 │  models/     - Pydantic schemas                           │
@@ -354,43 +354,64 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 
 ```
 mainframe-ai/
-├── app/                    # Modular FastAPI application
-│   ├── routes/             # API endpoints (15 modules)
-│   ├── services/           # Business logic (ollama, chat, ftp, kicks, rag_context)
-│   ├── constants/          # Prompts, walkthroughs, paths
-│   ├── models/             # Pydantic schemas
-│   └── websocket/          # Real-time terminal and graph updates
-├── templates/              # Jinja2 HTML templates (24 pages)
+├── app/                    # FastAPI application
+│   ├── routes/             # API endpoints (19 modules)
+│   ├── services/           # Business logic (ollama, grok, chat, ftp, kicks, bof_lab, rag)
+│   ├── constants/          # LLM prompts, walkthrough scripts, learning paths
+│   ├── models/             # Pydantic request/response schemas
+│   └── websocket/          # Real-time terminal and trust graph updates
+├── tools/                  # Standalone Python tools and engines
+│   ├── agent_tools.py      # TN3270 connection, screen reading, key sending
+│   ├── trust_graph.py      # Trust graph data structures and persistence
+│   ├── graph_tools.py      # Graph analysis, JCL/sysout/screen parsing
+│   ├── graph_automation.py # Automated graph exploration sessions
+│   ├── recon_engine.py     # TSO/CICS/VTAM enumeration engine
+│   ├── rag_engine.py       # RAG with local Ollama embeddings
+│   ├── methodology_engine.py  # Control-plane assessment methodology
+│   ├── tn3270_discovery.py # Network-scale TN3270 scanner (Shodan/nmap/masscan)
+│   ├── mcp_server.py       # Model Context Protocol server
+│   ├── ai_bridge.py        # CICS ↔ AI bridge (TCP socket)
+│   ├── web_app.py          # Legacy standalone web app (superseded by app/)
+│   ├── install_kicks.py    # KICKS installation automation (multi-step)
+│   ├── install_kicks_auto.py  # KICKS auto-installer via py3270
+│   ├── kicks_check.py      # KICKS status verifier
+│   ├── mainframe_assistant.py # CLI-based mainframe assistant
+│   └── kicks_install/      # KICKS XMIT distribution files
+├── data/                   # Runtime data (gitignored where appropriate)
+│   ├── lab_data/           # Lab exercise definitions (JSON)
+│   ├── rag_data/           # RAG document index and embeddings
+│   ├── screencaps/         # Saved terminal screenshots
+│   ├── trust_graph_data/   # Graph persistence (JSON)
+│   └── discovery.db        # TN3270 scanner results (SQLite)
+├── jcl/                    # JCL source files
+│   ├── kicks/              # KICKS CICS installation JCL
+│   ├── ftpd.jcl            # MVS FTP server startup
+│   ├── IBMAI.jcl           # Custom USS logon screen
+│   └── ...                 # Enumeration, buffer overflow, VTAM JCL
+├── scripts/                # Shell scripts
+│   ├── install.sh          # Linux one-command installer
+│   ├── mvs.sh              # TK5 management (start/stop/restart/status)
+│   ├── start_mvs.sh        # TK5 foreground/interactive mode
+│   ├── start_gpu.sh        # GPU-enabled launcher
+│   └── diagnose.sh         # Diagnostic info collector
+├── docs/                   # Documentation
+│   ├── CONTRIBUTING.md     # Contribution guidelines
+│   ├── MODULES.md          # Module reference
+│   ├── README_FULL.md      # Extended README
+│   └── demo/               # Demo data for trust graph seeding
+├── templates/              # Jinja2 HTML templates (24+ pages)
 ├── static/                 # CSS, JS, fonts, images
-│   ├── css/pages/          # Per-page stylesheets
-│   ├── img/                # IBM logos, retro terminal image
-│   └── fonts/              # IBM Plex Mono, IBM Plex Sans
-├── docs/                   # Extended docs, demo data, media
-├── slides/                 # Presentation assets
-│   ├── screenshots/        # Slide images
-│   └── ocr/                # OCR text from slides
-├── lab_data/               # Lab exercise definitions (JSON)
-├── jcl/                    # JCL files (FTPD, USS screen, KICKS)
-├── kicks/                  # CICS/KICKS BMS maps, COBOL, JCL
-├── trust_graph_data/       # Graph persistence
-├── tk5/                    # TK5 MVS 3.8j emulator
+├── slides/                 # Presentation assets and demo video
+├── tk5/                    # TK5 MVS 3.8j emulator (Hercules + DASD)
+├── nmap-scripts/           # Custom NSE scripts (mainframed/nmap-scripts)
+├── rexx/                   # REXX scripts for MVS
 ├── logs/                   # Runtime logs (webapp, ollama, hercules)
 ├── run.py                  # Application entry point
-├── start.sh                # One-script launcher (all services + health checks)
-├── start_mvs.sh            # TK5 foreground/interactive mode
-├── install.sh              # Linux installer (deps, Ollama, venv, TK5)
-├── mvs.sh                  # MVS TK5 management (start/stop/restart/status)
+├── start.sh                # One-script launcher (all services + watchdog)
+├── setup.sh                # First-time setup (downloads TK5, validates DASD)
 ├── kill.sh                 # Stop all services
-├── agent_tools.py          # TN3270 connection tools
-├── trust_graph.py          # Graph data structures
-├── graph_tools.py          # Graph analysis and parsing
-├── recon_engine.py         # Enumeration and findings engine
-├── rag_engine.py           # RAG with local embeddings
-├── methodology_engine.py   # Assessment methodology
-├── tn3270_discovery.py     # TN3270 network discovery engine
-├── mcp_server.py           # Model Context Protocol server
-├── ai_bridge.py            # CICS AI bridge
-└── graph_automation.py     # Graph automation utilities
+├── requirements.txt        # Python dependencies
+└── render.yaml             # Render.com deployment config
 ```
 
 ## CICS AI Assistant
@@ -410,13 +431,13 @@ A demonstration CICS transaction (`AIMP`) that connects a 3270 terminal to an AI
 
 ```bash
 # Start AI Bridge
-python ai_bridge.py --port 5000
+python tools/ai_bridge.py --port 5000
 
 # In KICKS
 AIMP
 ```
 
-See [CICS_AI_ASSISTANT.md](docs/CICS_AI_ASSISTANT.md) for full documentation.
+See `docs/` for full documentation.
 
 ---
 
@@ -428,15 +449,15 @@ KICKS is a CICS-compatible transaction processing system for MVS 3.8j. This proj
 
 ```bash
 # Check status and run all steps interactively
-python install_kicks.py all
+python tools/install_kicks.py all
 
 # Or run individual steps
-python install_kicks.py status    # Check prerequisites
-python install_kicks.py dasd      # Create KICKS0 volume
-python install_kicks.py catalog   # Create user catalog
-python install_kicks.py upload    # Upload XMIT file
-python install_kicks.py unpack    # Unpack 26 datasets
-python install_kicks.py testdata  # Create test VSAM files
+python tools/install_kicks.py status    # Check prerequisites
+python tools/install_kicks.py dasd      # Create KICKS0 volume
+python tools/install_kicks.py catalog   # Create user catalog
+python tools/install_kicks.py upload    # Upload XMIT file
+python tools/install_kicks.py unpack    # Unpack 26 datasets
+python tools/install_kicks.py testdata  # Create test VSAM files
 ```
 
 ### Start KICKS
@@ -451,10 +472,10 @@ EXEC 'KICKS.KICKSSYS.V1R5M0.CLIST(KICKS)'
 |----------|----------|
 | Full installation guide | `docs/KICKS_INSTALLATION.md` |
 | Pre-configured JCL | `jcl/kicks/` |
-| XMIT file | `kicks_install/kicks-master/kicks-tso-v1r5m0/kicks-tso-v1r5m0.xmi` |
-| Automation script | `install_kicks.py` |
+| XMIT file | `tools/kicks_install/kicks-master/kicks-tso-v1r5m0/kicks-tso-v1r5m0.xmi` |
+| Automation script | `tools/install_kicks.py` |
 
-See [KICKS_INSTALLATION.md](docs/KICKS_INSTALLATION.md) for the complete step-by-step guide.
+See `docs/` for the complete step-by-step guide.
 
 ## Related Work
 

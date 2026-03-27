@@ -35,17 +35,18 @@ class Config:
     GPU_OLLAMA_OPTIONS: Dict = field(default_factory=dict)
     GPU_CODE_MODEL: str = ""  # Dedicated code model for ultra tier dual-model
     
-    # Directory paths (computed after BASE_DIR)
+    # Directory paths (computed after BASE_DIR is resolved)
+    # All data dirs live under data/ since the project reorg
     def __post_init__(self):
         self.STATIC_DIR = os.path.join(self.BASE_DIR, "static")
         self.TEMPLATES_DIR = os.path.join(self.BASE_DIR, "templates")
         self.LAB_DATA_DIR = os.path.join(self.BASE_DIR, "data", "lab_data")
-        self.DEMO_DATA_DIR = os.path.join(self.BASE_DIR, "docs", "demo")
+        self.DEMO_DATA_DIR = os.path.join(self.BASE_DIR, "docs", "demo")  # sample JCL/sysout for trust graph seeding
         self.RAG_DIR = os.path.join(self.BASE_DIR, "data", "rag_data")
         self.SCREENCAPS_DIR = os.path.join(self.BASE_DIR, "data", "screencaps")
         self.GRAPH_DIR = os.path.join(self.BASE_DIR, "data", "trust_graph_data")
         
-        # Ensure directories exist
+        # Auto-create writable data directories on startup
         for dir_path in [self.SCREENCAPS_DIR, self.RAG_DIR, self.GRAPH_DIR]:
             os.makedirs(dir_path, exist_ok=True)
         
