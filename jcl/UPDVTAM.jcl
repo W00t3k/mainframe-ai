@@ -60,4 +60,32 @@ N13,                               /* remote 3705 NCP subarea 13     */X
 N14,                               /* local  3705 NCP subarea 14     */X
 N15                                /* remote 3705 NCP subarea 15     */
 /*
+//*
+//* Step 3: Update ATCSTR00 - change NETSOL=YES to NETSOL=NO
+//*
+//STEP3   EXEC PGM=IEBGENER
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//SYSUT2   DD DSN=SYS1.VTAMLST(ATCSTR00),DISP=SHR
+//SYSUT1   DD *
+CONFIG=01,                        /* CONFIG LIST SUFFIX              */+
+SSCPID=01,                        /* THIS VTAMS ID IN NETWORK        */+
+NETSOL=NO,                        /* NETWORK SOLICITOR OPTION        */+
+USSTAB=ISTNSC00,                  /* USS TABLE                       */+
+MAXSUBA=31,                       /* MAXIMUM SUBAREAS IN NETWORK     */+
+NOPROMPT,                         /* OPERATOR PROMPT OPTION          */+
+SUPP=NOSUP,                       /* MESSAGE SUPPRESSION OPTION      */+
+COLD,                             /* RESTART OPTION   - COLD/WARM    */+
+APBUF=(129,,116),                 /* ACE STORAGE POOL                */+
+CRPLBUF=(1024,,768),              /* RPL COPY POOL                   */+
+IOBUF=(50,4016,40,F),             /* FIXED IO                        */+
+LFBUF=(104,,104,F),               /* LARGE FIXED BUFFER POOL         */+
+LPBUF=(064,,64,F),                /* LARGE PAGEBLE BUFFER POOL       */+
+NPBUF=(192,,176,F),               /* NON WS FMCB                     */+
+PPBUF=(90,4016,80,F),             /* PAGEBLE IO                      */+
+SFBUF=(163,,163,F),               /* SMALL FIXED BUFFER POOL         */+
+SPBUF=(064,,64,F),                /* SMALL PGBL BUFFER POOL          */+
+UECBUF=(34,,30,F),                /* USER EXIT CB                    */+
+WPBUF=(78,,78,F)                  /* MESSAGE CONTROL BUFFER POOL     */
+/*
 //

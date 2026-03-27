@@ -1,0 +1,545 @@
+{% extends "base.html" %}
+
+{% block title %}BigIron.ai — Research & Conference Notes{% endblock %}
+
+{% block page_styles %}
+<style>
+:root {
+    --n-bg: #0a0d11;
+    --n-fg: #e0e0e0;
+    --n-muted: #6f6f6f;
+    --n-accent: #4589ff;
+    --n-border: #262626;
+    --n-panel: #141414;
+    --n-green: #42be65;
+    --n-purple: #a78bfa;
+    --n-amber: #f59e0b;
+    --n-red: #fb7185;
+    --n-teal: #2dd4bf;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+.notes-page {
+    min-height: 100vh;
+    background: var(--n-bg);
+    color: var(--n-fg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 3rem 2rem 5rem;
+    background-image:
+        radial-gradient(ellipse 80% 40% at 50% -10%, rgba(69,137,255,0.07) 0%, transparent 70%);
+}
+
+.notes-container {
+    max-width: 760px;
+    width: 100%;
+}
+
+/* ── Scanline overlay on header ── */
+.notes-hero {
+    position: relative;
+    text-align: center;
+    margin-bottom: 3.5rem;
+    padding-bottom: 2.5rem;
+    border-bottom: 1px solid var(--n-border);
+    overflow: hidden;
+}
+
+.notes-hero::before {
+    content: '';
+    pointer-events: none;
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(69,137,255,0.015) 3px,
+        rgba(69,137,255,0.015) 4px
+    );
+    z-index: 0;
+}
+
+.notes-hero > * { position: relative; z-index: 1; }
+
+.n-logo {
+    height: 26px;
+    width: auto;
+    opacity: 0.45;
+    margin-bottom: 2rem;
+    display: inline-block;
+}
+
+.n-eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--n-accent);
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+}
+
+.n-eyebrow::before,
+.n-eyebrow::after {
+    content: '';
+    display: block;
+    height: 1px;
+    width: 40px;
+    background: rgba(69,137,255,0.35);
+}
+
+.n-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 2.6rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin-bottom: 0.6rem;
+    text-shadow: 0 0 40px rgba(69,137,255,0.2);
+}
+
+.n-title .accent { color: var(--n-accent); }
+
+.n-subtitle {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.9rem;
+    color: var(--n-muted);
+    font-style: italic;
+    line-height: 1.5;
+    max-width: 520px;
+    margin: 0 auto 1.5rem;
+}
+
+.n-badges {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.5rem;
+    margin-top: 1.2rem;
+}
+
+.n-badge {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 2px;
+}
+
+.badge-conf  { background: rgba(69,137,255,0.12); color: var(--n-accent); border: 1px solid rgba(69,137,255,0.3); }
+.badge-year  { background: rgba(66,190,101,0.1); color: var(--n-green); border: 1px solid rgba(66,190,101,0.25); }
+.badge-topic { background: rgba(167,139,250,0.1); color: var(--n-purple); border: 1px solid rgba(167,139,250,0.25); }
+
+/* ── Section headers ── */
+.n-section {
+    margin-bottom: 3rem;
+}
+
+.n-section-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--n-accent);
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+}
+
+.n-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--n-border);
+}
+
+.n-section-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1.5rem;
+    letter-spacing: -0.02em;
+}
+
+/* ── Bio card ── */
+.bio-card {
+    background: var(--n-panel);
+    border: 1px solid var(--n-border);
+    border-top: 2px solid var(--n-accent);
+    padding: 2rem;
+    position: relative;
+}
+
+.bio-card::before {
+    content: 'SYS:SPEAKER_BIO';
+    position: absolute;
+    top: -1px;
+    right: 1.5rem;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    color: var(--n-accent);
+    background: var(--n-panel);
+    padding: 0 6px;
+    transform: translateY(-50%);
+    margin-top: 1px;
+}
+
+.bio-name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 0.25rem;
+}
+
+.bio-role {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--n-green);
+    margin-bottom: 1.5rem;
+    letter-spacing: 0.04em;
+}
+
+.bio-text {
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #c6c6c6;
+    margin-bottom: 1rem;
+}
+
+.bio-text:last-child { margin-bottom: 0; }
+
+.bio-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-top: 1.5rem;
+    padding-top: 1.2rem;
+    border-top: 1px solid var(--n-border);
+}
+
+.bio-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 600;
+    padding: 2px 8px;
+    background: rgba(255,255,255,0.04);
+    color: var(--n-muted);
+    border: 1px solid var(--n-border);
+    border-radius: 2px;
+}
+
+/* ── Abstract blocks ── */
+.abstract-type {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--n-muted);
+    padding: 3px 10px;
+    border: 1px solid var(--n-border);
+    border-radius: 2px;
+    display: inline-block;
+    margin-bottom: 1.2rem;
+}
+
+.abstract-block {
+    margin-bottom: 2.5rem;
+}
+
+.abstract-block:last-child { margin-bottom: 0; }
+
+.abstract-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+
+.abstract-title::before {
+    content: '//';
+    color: var(--n-accent);
+    font-size: 0.9rem;
+}
+
+.abstract-body {
+    padding: 1.5rem;
+    background: var(--n-panel);
+    border: 1px solid var(--n-border);
+    border-left: 3px solid var(--n-accent);
+}
+
+.abstract-body p {
+    font-family: 'IBM Plex Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.8;
+    color: #c6c6c6;
+    margin-bottom: 1rem;
+}
+
+.abstract-body p:last-child { margin-bottom: 0; }
+
+/* ── Keyword highlights ── */
+.hl-vtam   { color: var(--n-purple); font-weight: 600; }
+.hl-racf   { color: var(--n-amber);  font-weight: 600; }
+.hl-jes    { color: var(--n-red);    font-weight: 600; }
+.hl-tso    { color: var(--n-accent); font-weight: 600; }
+.hl-cics   { color: var(--n-teal);   font-weight: 600; }
+.hl-ai     { color: var(--n-green);  font-weight: 600; }
+.hl-zos    { color: #fff;            font-weight: 700; }
+
+/* ── Key concepts grid ── */
+.concepts-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-top: 2rem;
+}
+
+.concept-cell {
+    background: var(--n-panel);
+    border: 1px solid var(--n-border);
+    padding: 0.9rem 1rem;
+    position: relative;
+    overflow: hidden;
+    transition: border-color 0.2s, background 0.2s;
+}
+
+.concept-cell:hover {
+    border-color: rgba(69,137,255,0.4);
+    background: #191d24;
+}
+
+.concept-cell::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 100%; height: 1px;
+    background: var(--c-color, var(--n-accent));
+    opacity: 0.5;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.25s;
+}
+
+.concept-cell:hover::after { transform: scaleX(1); }
+
+.concept-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--c-color, var(--n-accent));
+    margin-bottom: 0.3rem;
+}
+
+.concept-desc {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--n-muted);
+    line-height: 1.5;
+}
+
+/* ── Callout ── */
+.n-callout {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.2rem 1.5rem;
+    background: rgba(66,190,101,0.06);
+    border: 1px solid rgba(66,190,101,0.2);
+    margin-top: 2.5rem;
+}
+
+.callout-icon {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 700;
+    color: var(--n-green);
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    padding-top: 2px;
+}
+
+.callout-text {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.82rem;
+    color: #a7f3d0;
+    line-height: 1.65;
+}
+
+/* ── Footer ── */
+.n-footer {
+    text-align: center;
+    padding-top: 2.5rem;
+    margin-top: 3rem;
+    border-top: 1px solid var(--n-border);
+}
+
+.n-footer a {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--n-muted);
+    text-decoration: none;
+    margin: 0 0.75rem;
+    transition: color 0.15s;
+}
+
+.n-footer a:hover { color: var(--n-accent); }
+
+@media (max-width: 640px) {
+    .n-title { font-size: 1.8rem; }
+    .concepts-grid { grid-template-columns: 1fr 1fr; }
+    .notes-page { padding: 2rem 1.2rem 4rem; }
+    .bio-card { padding: 1.5rem; }
+}
+
+@media (max-width: 400px) {
+    .concepts-grid { grid-template-columns: 1fr; }
+}
+</style>
+{% endblock %}
+
+{% block body %}
+<div class="notes-page">
+<div class="notes-container">
+
+    <!-- Hero -->
+    <div class="notes-hero">
+        <a href="/"><img src="/static/img/ibm-logo-official.svg" alt="IBM" class="n-logo"></a>
+        <div class="n-eyebrow">Research &amp; Conference Notes</div>
+        <h1 class="n-title">Big<span class="accent">Iron</span>.ai</h1>
+        <p class="n-subtitle">Hacking Big Iron with AI: Mainframe Security Beyond Modern Assumptions</p>
+        <div class="n-badges">
+            <span class="n-badge badge-conf">Conference Talk</span>
+            <span class="n-badge badge-year">2025</span>
+            <span class="n-badge badge-topic">Mainframe Security</span>
+            <span class="n-badge badge-topic">Red Team</span>
+            <span class="n-badge badge-topic">Offensive AI</span>
+        </div>
+    </div>
+
+    <!-- Speaker Bio -->
+    <div class="n-section">
+        <div class="n-section-label">Speaker Bio</div>
+        <div class="bio-card">
+            <div class="bio-name">Adam Toscher</div>
+            <div class="bio-role">Security Engineer &amp; Red Team Operator // New York</div>
+            <p class="bio-text">
+                Adam Toscher is a New York&ndash;based security engineer and red team operator with over two decades of experience in offensive security, adversary simulation, and automation. He began his career as an IBM intern porting Linux applications to mainframe systems &mdash; work that grounded him in large-scale computing, operating systems, and complex enterprise environments before transitioning into offensive security.
+            </p>
+            <p class="bio-text">
+                Adam has held senior security roles across enterprise software, consulting, and government sectors, focusing on realistic adversary emulation and advanced red-team operations. His work spans penetration testing, red teaming, adversary emulation, and practical automation for both private-sector organizations and public infrastructure.
+            </p>
+            <p class="bio-text">
+                Outside of security, Adam is an avid reader, runner, swimmer, and gamer.
+            </p>
+            <div class="bio-tags">
+                <span class="bio-tag">Offensive Security</span>
+                <span class="bio-tag">Red Team</span>
+                <span class="bio-tag">Adversary Simulation</span>
+                <span class="bio-tag">Automation</span>
+                <span class="bio-tag">IBM Mainframe</span>
+                <span class="bio-tag">z/OS</span>
+                <span class="bio-tag">AI-Assisted Assessment</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Talk Abstracts -->
+    <div class="n-section">
+        <div class="n-section-label">Talk Abstracts</div>
+
+        <!-- Public Abstract -->
+        <div class="abstract-block">
+            <div class="abstract-type">Public Abstract</div>
+            <div class="abstract-title">Full Talk Description</div>
+            <div class="abstract-body">
+                <p>
+                    Mainframes still run critical infrastructure &mdash; banking, airlines, government systems &mdash; yet most modern security teams approach them using assumptions formed around Unix, Windows, and cloud platforms. These assumptions fail on <span class="hl-zos">z/OS</span>, creating blind spots that are difficult to detect and easy to underestimate.
+                </p>
+                <p>
+                    This talk explains how mainframe security actually works and why familiar concepts &mdash; root, shells, ports, and lateral movement &mdash; do not translate cleanly. Focusing on <span class="hl-jes">JES</span>, JCL, <span class="hl-racf">RACF</span>, <span class="hl-cics">CICS</span>, <span class="hl-vtam">VTAM</span>, and PR/SM, we explore where attackers and defenders truly operate: transactions, security managers, and management boundaries.
+                </p>
+                <p>
+                    Using real <span class="hl-tso">TN3270</span> terminal screens and practical examples, attendees will learn a repeatable methodology for assessing mainframe environments and identifying misconfigurations that appear harmless but can have severe impact. The talk also demonstrates an <span class="hl-ai">AI-assisted assessment</span> approach: a local LLM interprets <span class="hl-tso">TN3270</span> screens in real-time, narrates walkthroughs, and tutors interactively &mdash; all running 100% offline with no cloud APIs or data exfiltration risk. No prior mainframe experience is required.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Concepts grid -->
+    <div class="n-section">
+        <div class="n-section-label">Key Concepts Covered</div>
+        <div class="concepts-grid">
+            <div class="concept-cell" style="--c-color: var(--n-purple)">
+                <div class="concept-tag">VTAM</div>
+                <div class="concept-desc">Session fabric &amp; network exposure model beyond TCP/IP</div>
+            </div>
+            <div class="concept-cell" style="--c-color: var(--n-amber)">
+                <div class="concept-tag">RACF</div>
+                <div class="concept-desc">Distributed authority profiles — no root, no sudo</div>
+            </div>
+            <div class="concept-cell" style="--c-color: var(--n-red)">
+                <div class="concept-tag">JES / JCL</div>
+                <div class="concept-desc">Deferred job execution &amp; identity preservation</div>
+            </div>
+            <div class="concept-cell" style="--c-color: var(--n-teal)">
+                <div class="concept-tag">CICS</div>
+                <div class="concept-desc">Transaction routing &amp; lateral movement paths</div>
+            </div>
+            <div class="concept-cell" style="--c-color: var(--n-accent)">
+                <div class="concept-tag">TN3270</div>
+                <div class="concept-desc">Real terminal screens used for live assessment demos</div>
+            </div>
+            <div class="concept-cell" style="--c-color: var(--n-green)">
+                <div class="concept-tag">AI Assist</div>
+                <div class="concept-desc">Local LLM — offline, no cloud, no API keys required</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Callout -->
+    <div class="n-callout">
+        <span class="callout-icon">// NOTE</span>
+        <span class="callout-text">
+            No prior mainframe experience is required. The talk and accompanying tool are designed for offensive security practitioners approaching mainframes for the first time &mdash; as well as seasoned operators who want to add AI-assisted assessment workflows to their toolkit.
+        </span>
+    </div>
+
+    <!-- Footer -->
+    <div class="n-footer">
+        <a href="/">Home</a>
+        <a href="/video">Video</a>
+        <a href="/abstract">Abstract</a>
+        <a href="/deck">Download Deck</a>
+        <a href="/slides">Slides</a>
+        <a href="/architecture">Architecture</a>
+        <a href="/docs">Docs</a>
+    </div>
+
+</div>
+</div>
+{% endblock %}

@@ -11,14 +11,20 @@ import os
 import sys
 import uvicorn
 
-# Add tools/ directory to Python path so lazy imports (agent_tools, rag_engine, etc.) still resolve
+# Add tools/ to Python path so that app/routes/ and app/services/ can import
+# standalone modules (agent_tools, rag_engine, trust_graph, etc.) without
+# requiring every import statement to be prefixed with "tools."
 sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "tools"))
 
 from app.config import get_config, update_model
 
 
 def _load_env():
-    """Load .env file into os.environ (no dependency needed)."""
+    """Load .env file into os.environ (no external dependency needed).
+    
+    Only sets variables that aren't already in the environment,
+    so explicit env vars always take precedence over .env values.
+    """
     env_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
     if not os.path.exists(env_path):
         return

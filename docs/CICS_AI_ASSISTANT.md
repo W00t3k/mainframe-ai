@@ -95,7 +95,7 @@ Transaction ID: `AIMP`
 
 ### 3. Python AI Bridge
 
-Location: `ai_bridge.py`
+Location: `tools/ai_bridge.py`
 
 Endpoint: `POST /api/ask`
 
@@ -169,7 +169,7 @@ Add AIPGM and AIMAPS to PPT, reassemble
 
 ### 7. Start AI Bridge
 ```bash
-python ai_bridge.py
+python tools/ai_bridge.py
 ```
 
 ### 8. Start KICKS and Test
@@ -236,6 +236,6 @@ AIMP
 | Architecture Doc | `docs/CICS_AI_ASSISTANT.md` |
 | BMS Map Source | `kicks/bms/AIMAPS.bms` |
 | COBOL Program | `kicks/cobol/AIPGM.cob` |
-| AI Bridge | `ai_bridge.py` |
+| AI Bridge | `tools/ai_bridge.py` |
 | JCL for Assembly | `kicks/jcl/ASMMAP.jcl` |
 | JCL for Compile | `kicks/jcl/COBCOMP.jcl` |

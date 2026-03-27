@@ -49,6 +49,8 @@
         <button class="tab-btn" data-tab="report">Report</button>
         <button class="tab-btn" data-tab="captures">Captures</button>
         <button class="tab-btn" data-tab="ebcdic">EBCDIC / TN3270</button>
+        <button class="tab-btn" data-tab="scanner">Scanner</button>
+        <button class="tab-btn" data-tab="rakf">RAKF</button>
     </div>
 
     <!-- Main content -->
@@ -852,6 +854,16 @@
                     <button class="btn btn-danger" onclick="deleteCap()">Delete</button>
                 </div>
             </div>
+        </div>
+
+        <!-- ============ SCANNER TAB ============ -->
+        <div class="tab-panel" id="tab-scanner" style="padding:0;flex:1;min-height:0;overflow:hidden;">
+            <iframe id="iframe-scanner" style="width:100%;flex:1;min-height:0;border:none;display:block;background:#0a0d11;" title="Mainframe Scanner"></iframe>
+        </div>
+
+        <!-- ============ RAKF TAB ============ -->
+        <div class="tab-panel" id="tab-rakf" style="padding:0;flex:1;min-height:0;overflow:hidden;">
+            <iframe id="iframe-rakf" style="width:100%;flex:1;min-height:0;border:none;display:block;background:#0a0d11;" title="RAKF Security Manager"></iframe>
         </div>
 
     </div>
@@ -1997,5 +2009,17 @@ function showToast(msg, type) {
         setTimeout(() => toast.remove(), 4000);
     }
 }
+
+// ── Iframe lazy-load for Scanner and RAKF tabs ──
+document.querySelectorAll('.tab-btn[data-tab="scanner"], .tab-btn[data-tab="rakf"]').forEach(btn => {
+    btn.addEventListener('click', () => {
+        const tab = btn.dataset.tab;
+        const frame = document.getElementById('iframe-' + tab);
+        if (frame && !frame.dataset.loaded) {
+            frame.src = '/' + tab;
+            frame.dataset.loaded = '1';
+        }
+    });
+});
 </script>
 {% endblock %}

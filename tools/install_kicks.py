@@ -25,16 +25,16 @@ import time
 import subprocess
 import argparse
 
-# Add project root to path
-PROJECT_ROOT = "/Users/w00tock/Desktop/STuFF /mainframe_ai_assistant"
-sys.path.insert(0, PROJECT_ROOT)
+# Add project root to path (tools/ is one level below root)
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(PROJECT_ROOT, "tools"))
 
 from agent_tools import (
     connect_mainframe, send_terminal_key, read_screen, exec_emulator_command
 )
 
 # Paths
-XMIT_PATH = f"{PROJECT_ROOT}/kicks_install/kicks-master/kicks-tso-v1r5m0/kicks-tso-v1r5m0.xmi"
+XMIT_PATH = f"{PROJECT_ROOT}/tools/kicks_install/kicks-master/kicks-tso-v1r5m0/kicks-tso-v1r5m0.xmi"
 JCL_PATH = f"{PROJECT_ROOT}/jcl/kicks"
 TK5_PATH = f"{PROJECT_ROOT}/tk5/mvs-tk5"
 DASD_PATH = f"{TK5_PATH}/dasd"

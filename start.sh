@@ -329,8 +329,8 @@ start_webapp_svc() {
   _auto_connect_tk5() {
     local hardcopy="$TK5/log/hardcopy.log"
     local waited=0
-    # Phase 1: Wait for VTAM via hardcopy.log (poll every 2s, up to 60s)
-    while [ $waited -lt 60 ]; do
+    # Phase 1: Wait for VTAM via hardcopy.log (poll every 2s, up to 600s)
+    while [ $waited -lt 600 ]; do
       sleep 2; waited=$((waited+2))
       grep -q "TCAS ACCEPTING LOGONS" "$hardcopy" 2>/dev/null && break
     done
@@ -370,39 +370,16 @@ except Exception as e:
       fi
     }
 
-    # Wait a few seconds for JES2 to be fully ready
-    sleep 5
-
-    # Remove SNASOL from VTAM config (safety net — primary fix is in dasd_backup)
-    # SNASOL intercepts logons; UPDVTAM.jcl removes LOGAPPL=NETSOL from L3274
-    _submit_jcl "jcl/UPDVTAM.jcl" "VTAM config (remove SNASOL)"
-    sleep 5
-
+    # Wait for JES2 + submit extra terminals in parallel
+    sleep 3
     _submit_jcl "jcl/terminals.jcl" "Extra terminals (32x VTAM)"
-    sleep 3
-    _submit_jcl "jcl/ftpd.jcl"      "FTPD server (port 2121)"
-    sleep 3
-
-    # Install AI/OS custom USS logon screen (ASM+LKED into SYS1.VTAMLIB)
-    _submit_jcl "jcl/IBMAI.jcl" "AI/OS USS logon screen"
-    sleep 15  # wait for ASM+LKED to complete
-
-    # Restart VTAM via Hercules HTTP console so new ISTNSC00 takes effect
-    "$PYTHON" -c "
-import urllib.request, urllib.parse, time
-def herc_cmd(cmd):
-    data = urllib.parse.urlencode({'command': cmd}).encode()
-    urllib.request.urlopen(
-        urllib.request.Request('http://localhost:8038/cgi-bin/tasks/syslog',
-                               data=data, method='POST'), timeout=10)
-try:
-    herc_cmd('/Z NET,QUICK')
-    time.sleep(25)
-    herc_cmd('/S NET')
-    print('VTAM restarted — AI/OS USS screen active')
-except Exception as e:
-    print(f'VTAM restart skipped: {e}')
-" 2>/dev/null && ok "VTAM restarted — AI/OS USS logon screen active" || info "VTAM restart skipped"
+    
+    # Start FTPD (dasd_backup already has UPDVTAM + custom USS fixes)
+    curl -s --max-time 5 -X POST "http://localhost:8038/cgi-bin/tasks/syslog" \
+      --data "command=%2FS+FTPD" -o /dev/null 2>&1 \
+      && ok "FTPD started" || info "FTPD start skipped"
+    
+    ok "AI/OS USS screen active (from DASD backup)"
 
     ok "VTAM ready — AI/OS TN3270 logon screen available"
   }

@@ -2416,7 +2416,7 @@ async def api_rag_upload(file: UploadFile = File(...)):
     engine = get_rag_engine()
 
     # Save file temporarily
-    temp_path = os.path.join(BASE_DIR, "rag_data", "documents", file.filename)
+    temp_path = os.path.join(BASE_DIR, "data", "rag_data", "documents", file.filename)
     os.makedirs(os.path.dirname(temp_path), exist_ok=True)
 
     content = await file.read()

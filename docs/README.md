@@ -10,11 +10,9 @@ Extended documentation, sample data, media, and installation guides.
 | `ARCHITECTURE.md` | System architecture and design decisions |
 | `CICS_AI_ASSISTANT.md` | KICKS/CICS AI bridge architecture and setup |
 | `KICKS_INSTALLATION.md` | Complete KICKS installation guide for TK5 |
-| `IBM-AI.mp4` | Demo video (served at `/video/file`) |
-| `IBM-MF-A.pdf` | Mainframe AI reference document |
-| `Mainframe-Talk-WIP.pptx` | Conference slide deck (served at `/deck`) |
-| `abstract.html` | Static conference abstract page |
-| `index.html` | Documentation landing page |
+| `CONTRIBUTING.md` | Code style, PRs, and contribution guidelines |
+| `MODULES.md` | Python module reference |
+| `README_FULL.md` | Extended README with full project details |
 | `assets/` | Screenshots, diagrams, and media assets |
 | `demo/` | Sample JCL, SYSOUT, and TN3270 screen captures for testing |
 
@@ -22,11 +20,14 @@ Extended documentation, sample data, media, and installation guides.
 
 | Document | Location | Purpose |
 |----------|----------|---------|
-| Quick start | `/README.md` | Setup, install, run |
-| Module reference | `/MODULES.md` | Python module descriptions |
-| Contributing | `/CONTRIBUTING.md` | Code style, PRs, testing |
+| Quick start | `README.md` (root) | Setup, install, run |
+| Module reference | `docs/MODULES.md` | Python module descriptions |
+| Contributing | `docs/CONTRIBUTING.md` | Code style, PRs, testing |
 | API reference | `docs/API.md` | REST endpoint details |
 | Architecture | `docs/ARCHITECTURE.md` | Design and component layout |
+| App internals | `app/README.md` | Route and service layout |
+| Tools reference | `tools/README.md` | Standalone tool descriptions |
+| Data layout | `data/README.md` | Runtime data directories |
 
 ## Live API Docs
 

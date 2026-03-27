@@ -20,6 +20,30 @@ Singleton `OllamaService` — all Ollama LLM communication:
 - `check_available()` — health check
 - GPU-optimized options merged automatically from `config.py`
 
+### `grok.py`
+Singleton `GrokService` — xAI/Grok cloud LLM client:
+- `generate()` — single-shot prompt completion via OpenAI-compatible API
+- `chat_simple()` — multi-turn chat returning plain text
+- `quick_explain()` — fast screen explanation
+- `check_available()` — API key + endpoint health check
+- `list_models()` — fetch available models from the API
+- Supports any OpenAI-compatible endpoint (Groq, Together, etc.)
+
+### `llm_provider.py`
+Singleton `UnifiedLLMService` — routes requests to the best available LLM:
+- Auto mode: prefers local Ollama, falls back to Grok if Ollama is down
+- Explicit mode: force Ollama or Grok via `LLM_PROVIDER` env var
+- `get_status()` — returns availability of all providers for UI
+- All `generate()`, `chat_simple()`, `quick_explain()` calls route through this
+
+### `bof_lab.py`
+Buffer overflow lab service:
+- De Bruijn pattern generation and offset calculation
+- ASCII ↔ EBCDIC conversion
+- ABEND dump analysis (register extraction, pattern matching)
+- Lab data loading from `data/lab_data/bof_demo.json`
+- Exploit narrative steps for guided walkthrough
+
 ### `ftp.py`
 Singleton `FTPService` — MVS FTP client over `ftplib`:
 - Connect/disconnect to TK5 FTP server (default port 2121)
