@@ -626,46 +626,6 @@ async def slides_page(request: Request):
     return templates.TemplateResponse("slides.html", {"request": request})
 
 
-@app.get("/video", response_class=HTMLResponse)
-async def video_page(request: Request):
-    return templates.TemplateResponse("video.html", {"request": request})
-
-
-@app.get("/ftp", response_class=HTMLResponse)
-async def ftp_page(request: Request):
-    return templates.TemplateResponse("ftp.html", {"request": request})
-
-
-@app.get("/rakf", response_class=HTMLResponse)
-async def rakf_page(request: Request):
-    return templates.TemplateResponse("rakf.html", {"request": request})
-
-
-@app.get("/notes", response_class=HTMLResponse)
-async def notes_page(request: Request):
-    return templates.TemplateResponse("notes.html", {"request": request})
-
-
-@app.get("/tutorials", response_class=HTMLResponse)
-async def tutorials_page(request: Request):
-    return templates.TemplateResponse("tutorials.html", {"request": request})
-
-
-@app.get("/abstract", response_class=HTMLResponse)
-async def abstract_page(request: Request):
-    return templates.TemplateResponse("abstract.html", {"request": request})
-
-
-@app.get("/presentation", response_class=HTMLResponse)
-async def presentation_page(request: Request):
-    return templates.TemplateResponse("presentation.html", {"request": request})
-
-
-@app.get("/uss-editor", response_class=HTMLResponse)
-async def uss_editor_page(request: Request):
-    return templates.TemplateResponse("uss_editor.html", {"request": request})
-
-
 # ============================================================================
 # Red Team Tutor API Endpoints
 # ============================================================================
@@ -1669,101 +1629,9 @@ async def api_status():
     })
 
 
-@app.get("/api/sysinfo")
-async def api_sysinfo():
-    """System information endpoint for UI status updates"""
-    ollama_ok = await check_ollama()
-    mvs_running = connection.connected
-    
-    # Check if MVS is actually ready (bypass connection check, just check if running)
-    mvs_ready = False
-    try:
-        import os
-        hardcopy_log = "/Users/w00tock/Desktop/STuFF /mainframe-ai/tk5/mvs-tk5/log/hardcopy.log"
-        if os.path.exists(hardcopy_log):
-            with open(hardcopy_log, 'r') as f:
-                content = f.read()
-                # Check for any JES2/HASP activity which indicates MVS is running
-                if "HASP" in content:
-                    mvs_ready = True
-                # Also check for VTAM if it's available
-                if "TCAS ACCEPTING LOGONS" in content:
-                    mvs_ready = True
-                # Check if Hercules process is running as fallback
-                import subprocess
-                result = subprocess.run(['pgrep', '-f', 'hercules'], capture_output=True, text=True)
-                if result.returncode == 0:
-                    mvs_ready = True
-    except Exception:
-        pass
-    
-    # Get actual MVS memory size from configuration
-    mvs_memory = "16MB"  # Default MVS/370 memory
-    try:
-        # Read MVS memory from Hercules configuration file
-        config_file = "/Users/w00tock/Desktop/STuFF /mainframe-ai/tk5/mvs-tk5/conf/tk5.cnf"
-        if os.path.exists(config_file):
-            with open(config_file, 'r') as f:
-                content = f.read()
-                # Look for MAINSIZE configuration
-                import re
-                mem_match = re.search(r'MAINSIZE[^:=]*[:=]\s*\$\{MAINSIZE:=(\d+)\}', content)
-                if mem_match:
-                    size = mem_match.group(1)
-                    mvs_memory = f"{size}MB"
-                else:
-                    # Alternative pattern for direct MAINSIZE values
-                    mem_match = re.search(r'MAINSIZE[^:=]*[:=]\s*(\d+)', content)
-                    if mem_match:
-                        size = mem_match.group(1)
-                        mvs_memory = f"{size}MB"
-        
-        # Also try Hercules HTTP interface as backup
-        import httpx
-        async with httpx.AsyncClient(timeout=3.0) as client:
-            response = await client.get("http://localhost:8038/")
-            if response.status_code == 200:
-                content = response.text
-                # Look for memory information in Hercules status
-                if "Main storage" in content:
-                    mem_match = re.search(r'Main storage[:\s]+(\d+)([KMGT])', content, re.IGNORECASE)
-                    if mem_match:
-                        size, unit = mem_match.groups()
-                        if unit.upper() == 'M':
-                            mvs_memory = f"{size}MB"
-                        elif unit.upper() == 'G':
-                            mvs_memory = f"{size}GB"
-                        elif unit.upper() == 'K':
-                            mvs_memory = f"{int(size)//1024}MB"
-    except Exception:
-        pass  # Keep default if all queries fail
-    
-    return JSONResponse({
-        "ollama": "online" if ollama_ok else "offline",
-        "mainframe": "online" if mvs_ready else "offline",
-        "model": OLLAMA_MODEL,
-        "memory": mvs_memory
-    })
-
-
 @app.get("/api/screen")
 async def api_screen():
     return JSONResponse(get_cached_screen_data())
-
-
-@app.get("/api/ftp/status")
-async def api_ftp_status():
-    """FTP service status - check if MVS FTP server is running"""
-    # For now, return FTP status based on MVS connection
-    # In a real implementation, this would check if FTP daemon is running on port 21
-    mvs_connected = connection.connected
-    
-    return JSONResponse({
-        "running": mvs_connected,
-        "port": 21,
-        "host": "localhost" if mvs_connected else None,
-        "users": ["HERC01"] if mvs_connected else []
-    })
 
 
 @app.get("/api/terminal/screen")
@@ -2355,33 +2223,52 @@ async def api_terminal_reset_session():
 
 import time as _time
 from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS
+from app.routes.walkthrough import WalkthroughRunner
 
-# Walkthrough runner disabled - module has missing dependencies
-_walkthrough_runner = None
+# Singleton runner
+_walkthrough_runner = WalkthroughRunner()
 
 
 @app.post("/api/walkthrough/start")
 async def api_walkthrough_start(request: Request):
     """Start an autonomous walkthrough."""
-    return JSONResponse({"success": False, "error": "Walkthrough system temporarily disabled"})
+    data = await request.json()
+    name = data.get("name", "session-stack")
+    target = data.get("target", "localhost:3270")
+    speed = float(data.get("speed", 4.0))
+
+    script = WALKTHROUGH_SCRIPTS.get(name)
+    if not script:
+        return JSONResponse({"success": False, "error": f"Unknown walkthrough: {name}"})
+
+    if _walkthrough_runner.running:
+        _walkthrough_runner.stop()
+
+    _walkthrough_runner.start(name, target, speed)
+    return JSONResponse({"success": True, "walkthrough": script["title"]})
 
 
 @app.post("/api/walkthrough/stop")
 async def api_walkthrough_stop():
     """Stop the running walkthrough."""
-    return JSONResponse({"success": False, "error": "Walkthrough system temporarily disabled"})
+    _walkthrough_runner.stop()
+    return JSONResponse({"success": True})
 
 
 @app.post("/api/walkthrough/pause")
 async def api_walkthrough_pause():
     """Toggle pause/resume on the walkthrough."""
-    return JSONResponse({"success": False, "error": "Walkthrough system temporarily disabled"})
+    if _walkthrough_runner.paused:
+        _walkthrough_runner.resume()
+    else:
+        _walkthrough_runner.pause()
+    return JSONResponse({"success": True, "paused": _walkthrough_runner.paused})
 
 
 @app.get("/api/walkthrough/status")
 async def api_walkthrough_status():
     """Get current walkthrough status (polled by frontend)."""
-    return JSONResponse({"running": False, "paused": False, "step": 0, "total": 0, "error": "Walkthrough system temporarily disabled"})
+    return JSONResponse(_walkthrough_runner.get_status())
 
 
 # Screencap API
@@ -2571,209 +2458,6 @@ async def api_rag_query(request: Request):
     engine = get_rag_engine()
     response = await engine.query(query, n_results, include_highlights)
     return JSONResponse(response)
-
-
-# ============================================================================
-# LLM Provider API Endpoints
-# ============================================================================
-
-@app.get("/api/llm/status")
-async def api_llm_status():
-    """Get status of all LLM providers"""
-    from app.services.ollama import get_ollama_service
-    from app.services.grok import get_grok_service
-    from app.services.llm_provider import get_llm_service
-    
-    ollama = get_ollama_service()
-    grok = get_grok_service()
-    llm = get_llm_service()
-    
-    ollama_ok = await ollama.check_available()
-    grok_ok = await grok.check_available() if grok.is_configured else False
-    
-    return JSONResponse({
-        "active_provider": await llm.get_active_provider(),
-        "configured_provider": str(llm._provider),
-        "ollama": {
-            "available": ollama_ok,
-            "url": ollama.url,
-            "model": ollama.model
-        },
-        "grok": {
-            "configured": grok.is_configured,
-            "available": grok_ok,
-            "model": grok.model if grok.is_configured else None,
-            "models": [
-                {"id": k, "name": v["name"], "description": v["description"]}
-                for k, v in grok.GROK_MODELS.items()
-            ] if grok.is_configured else []
-        }
-    })
-
-
-@app.post("/api/llm/provider/switch")
-async def api_llm_provider_switch(request: Request):
-    """Switch active LLM provider"""
-    from app.services.llm_provider import get_llm_service, LLMProvider
-    
-    data = await request.json()
-    provider = data.get("provider", "auto")
-    
-    llm = get_llm_service()
-    old = str(llm._provider)
-    
-    if provider == "ollama":
-        llm._provider = LLMProvider.OLLAMA
-    elif provider in ["grok", "groq"]:
-        llm._provider = LLMProvider.GROK
-    else:
-        llm._provider = LLMProvider.AUTO
-    
-    return JSONResponse({"success": True, "old": old, "new": provider})
-
-
-@app.post("/api/llm/grok/set-key")
-async def api_llm_grok_set_key(request: Request):
-    """Set Grok API key at runtime"""
-    from app.services.grok import get_grok_service
-    
-    data = await request.json()
-    key = data.get("key", "")
-    
-    if not key:
-        return JSONResponse({"success": False, "error": "No key provided"})
-    
-    grok = get_grok_service()
-    grok._api_key = key
-    
-    available = await grok.check_available()
-    return JSONResponse({"success": available, "configured": True})
-
-
-@app.post("/api/llm/grok/switch-model")
-async def api_llm_grok_switch_model(request: Request):
-    """Switch Grok model"""
-    from app.services.grok import get_grok_service
-    
-    data = await request.json()
-    model = data.get("model", "")
-    
-    if not model:
-        return JSONResponse({"success": False, "error": "No model specified"})
-    
-    grok = get_grok_service()
-    old = grok.model
-    grok.model = model
-    
-    return JSONResponse({"success": True, "old": old, "new": model})
-
-
-# ============================================================================
-# Ollama Model Management API Endpoints
-# ============================================================================
-
-@app.get("/api/models")
-async def api_models_list():
-    """List installed Ollama models"""
-    from app.services.ollama import get_ollama_service
-    
-    ollama = get_ollama_service()
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.get(f"{ollama.url}/api/tags", timeout=10.0)
-            if response.status_code == 200:
-                data = response.json()
-                models = data.get("models", [])
-                return JSONResponse({
-                    "current": ollama.model,
-                    "models": [{"name": m["name"], "size": m.get("size", 0)} for m in models]
-                })
-    except Exception:
-        pass
-    return JSONResponse({"current": ollama.model, "models": []})
-
-
-@app.post("/api/models/switch")
-async def api_models_switch(request: Request):
-    """Switch active Ollama model"""
-    from app.services.ollama import get_ollama_service
-    
-    data = await request.json()
-    model = data.get("model", "")
-    
-    if not model:
-        return JSONResponse({"success": False, "error": "No model specified"})
-    
-    ollama = get_ollama_service()
-    old = ollama.model
-    ollama.config.OLLAMA_MODEL = model
-    
-    return JSONResponse({"success": True, "old": old, "new": model})
-
-
-@app.post("/api/models/pull")
-async def api_models_pull(request: Request):
-    """Start pulling an Ollama model"""
-    from app.services.ollama import get_ollama_service
-    
-    data = await request.json()
-    model = data.get("model", "")
-    
-    if not model:
-        return JSONResponse({"success": False, "error": "No model specified"})
-    
-    ollama = get_ollama_service()
-    
-    # Start pull in background
-    import asyncio
-    asyncio.create_task(_pull_model_background(ollama.url, model))
-    
-    return JSONResponse({"success": True, "model": model})
-
-
-@app.get("/api/models/pull/status")
-async def api_models_pull_status():
-    """Get status of current model pull"""
-    # Return mock status for now - real implementation would track pull progress
-    return JSONResponse({"status": "idle", "pct": 0})
-
-
-@app.post("/api/models/delete")
-async def api_models_delete(request: Request):
-    """Delete an Ollama model"""
-    from app.services.ollama import get_ollama_service
-    
-    data = await request.json()
-    model = data.get("model", "")
-    
-    if not model:
-        return JSONResponse({"success": False, "error": "No model specified"})
-    
-    ollama = get_ollama_service()
-    try:
-        async with httpx.AsyncClient() as client:
-            response = await client.delete(
-                f"{ollama.url}/api/delete",
-                json={"name": model},
-                timeout=30.0
-            )
-            if response.status_code == 200:
-                return JSONResponse({"success": True})
-    except Exception as e:
-        return JSONResponse({"success": False, "error": str(e)})
-    
-    return JSONResponse({"success": False, "error": "Delete failed"})
-
-
-async def _pull_model_background(ollama_url: str, model: str):
-    """Background task to pull a model"""
-    try:
-        async with httpx.AsyncClient(timeout=600.0) as client:
-            async with client.stream("POST", f"{ollama_url}/api/pull", json={"name": model}) as response:
-                async for line in response.aiter_lines():
-                    pass  # Could track progress here
-    except Exception:
-        pass
 
 
 # ============================================================================
