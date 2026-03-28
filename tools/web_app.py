@@ -2596,6 +2596,114 @@ async def api_llm_grok_switch_model(request: Request):
 
 
 # ============================================================================
+# Ollama Model Management API Endpoints
+# ============================================================================
+
+@app.get("/api/models")
+async def api_models_list():
+    """List installed Ollama models"""
+    from app.services.ollama import get_ollama_service
+    
+    ollama = get_ollama_service()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.get(f"{ollama.url}/api/tags", timeout=10.0)
+            if response.status_code == 200:
+                data = response.json()
+                models = data.get("models", [])
+                return JSONResponse({
+                    "current": ollama.model,
+                    "models": [{"name": m["name"], "size": m.get("size", 0)} for m in models]
+                })
+    except Exception:
+        pass
+    return JSONResponse({"current": ollama.model, "models": []})
+
+
+@app.post("/api/models/switch")
+async def api_models_switch(request: Request):
+    """Switch active Ollama model"""
+    from app.services.ollama import get_ollama_service
+    
+    data = await request.json()
+    model = data.get("model", "")
+    
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+    
+    ollama = get_ollama_service()
+    old = ollama.model
+    ollama.config.OLLAMA_MODEL = model
+    
+    return JSONResponse({"success": True, "old": old, "new": model})
+
+
+@app.post("/api/models/pull")
+async def api_models_pull(request: Request):
+    """Start pulling an Ollama model"""
+    from app.services.ollama import get_ollama_service
+    
+    data = await request.json()
+    model = data.get("model", "")
+    
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+    
+    ollama = get_ollama_service()
+    
+    # Start pull in background
+    import asyncio
+    asyncio.create_task(_pull_model_background(ollama.url, model))
+    
+    return JSONResponse({"success": True, "model": model})
+
+
+@app.get("/api/models/pull/status")
+async def api_models_pull_status():
+    """Get status of current model pull"""
+    # Return mock status for now - real implementation would track pull progress
+    return JSONResponse({"status": "idle", "pct": 0})
+
+
+@app.post("/api/models/delete")
+async def api_models_delete(request: Request):
+    """Delete an Ollama model"""
+    from app.services.ollama import get_ollama_service
+    
+    data = await request.json()
+    model = data.get("model", "")
+    
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+    
+    ollama = get_ollama_service()
+    try:
+        async with httpx.AsyncClient() as client:
+            response = await client.delete(
+                f"{ollama.url}/api/delete",
+                json={"name": model},
+                timeout=30.0
+            )
+            if response.status_code == 200:
+                return JSONResponse({"success": True})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+    
+    return JSONResponse({"success": False, "error": "Delete failed"})
+
+
+async def _pull_model_background(ollama_url: str, model: str):
+    """Background task to pull a model"""
+    try:
+        async with httpx.AsyncClient(timeout=600.0) as client:
+            async with client.stream("POST", f"{ollama_url}/api/pull", json={"name": model}) as response:
+                async for line in response.aiter_lines():
+                    pass  # Could track progress here
+    except Exception:
+        pass
+
+
+# ============================================================================
 # Trust Graph API Endpoints
 # ============================================================================
 
