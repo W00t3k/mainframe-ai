@@ -17,7 +17,7 @@ import re
 import hashlib
 import time
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List
 
 from agent_tools import (
     connection, exec_emulator_command, read_screen,
@@ -1976,7 +1976,7 @@ class SystemEnumerator:
     ]
 
     def __init__(self, userid: str = "HERC01", password: str = "CUL8TR",
-                 commands: list[str] | None = None):
+                 commands: Optional[List[str]] = None):
         self.userid = userid
         self.password = password
         self.selected_commands = commands  # None = all
