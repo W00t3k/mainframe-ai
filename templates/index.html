@@ -1177,7 +1177,7 @@ async function loadIdxModels() {
             });
         }
 
-        // ── Cloud: Grok (xAI) ──
+        // ── Cloud: Groq ──
         try {
             const llmR = await fetch('/api/llm/status');
             const llmStatus = await llmR.json();
@@ -1187,14 +1187,14 @@ async function loadIdxModels() {
             const grokHdr = document.createElement('div');
             grokHdr.style.cssText = 'padding:6px 12px 4px; color:#e040fb; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px; display:flex; justify-content:space-between; align-items:center;';
             const grokTitle = document.createElement('span');
-            grokTitle.textContent = grok.configured ? (grok.available ? '☁ Cloud — Grok (xAI)' : '☁ Grok (offline)') : '☁ Grok (not configured)';
+            grokTitle.textContent = grok.configured ? (grok.available ? '☁ Cloud — Groq' : '☁ Groq (offline)') : '☁ Groq (not configured)';
             grokHdr.appendChild(grokTitle);
 
             if (grok.configured) {
                 const provBadge = document.createElement('span');
                 provBadge.style.cssText = `font-size:9px; padding:1px 6px; border-radius:3px; font-weight:bold; font-family:IBM Plex Mono,monospace; cursor:pointer; ${isGrokActive ? 'background:#e040fb; color:#000;' : 'border:1px solid #e040fb; color:#e040fb;'}`;
                 provBadge.textContent = isGrokActive ? 'ACTIVE' : 'STANDBY';
-                provBadge.title = isGrokActive ? 'Click to switch to Ollama' : 'Click to switch to Grok';
+                provBadge.title = isGrokActive ? 'Click to switch to Ollama' : 'Click to switch to Groq';
                 provBadge.onclick = async (e) => {
                     e.stopPropagation();
                     const newProv = isGrokActive ? 'ollama' : 'grok';
@@ -1211,7 +1211,7 @@ async function loadIdxModels() {
                 keyRow.style.cssText = 'padding:6px 12px 10px; display:flex; gap:6px; align-items:center;';
                 const keyInput = document.createElement('input');
                 keyInput.type = 'password';
-                keyInput.placeholder = 'Paste your Grok API key';
+                keyInput.placeholder = 'Paste your Groq API key';
                 keyInput.style.cssText = 'flex:1; background:#111; border:1px solid #333; border-radius:3px; padding:4px 8px; color:#e040fb; font-size:11px; font-family:IBM Plex Mono,monospace; outline:none;';
                 keyInput.onfocus = () => keyInput.style.borderColor = '#e040fb';
                 keyInput.onblur = () => keyInput.style.borderColor = '#333';
@@ -1232,7 +1232,7 @@ async function loadIdxModels() {
                     keyBtn.style.background = '#666';
                     keyStatus.style.display = 'block';
                     keyStatus.style.color = '#888';
-                    keyStatus.textContent = 'Testing connection to xAI API...';
+                    keyStatus.textContent = 'Testing connection to Groq API...';
                     try {
                         const kr = await fetch('/api/llm/grok/set-key', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key:key})});
                         const kd = await kr.json();
@@ -1258,7 +1258,7 @@ async function loadIdxModels() {
                 listEl.appendChild(keyStatus);
                 const keyHint = document.createElement('div');
                 keyHint.style.cssText = 'padding:0 12px 8px; color:#555; font-size:9px; font-family:IBM Plex Mono,monospace;';
-                keyHint.innerHTML = 'Get key at <span style="color:#e040fb;">console.x.ai</span> — memory only, not saved';
+                keyHint.innerHTML = 'Get key at <span style="color:#e040fb;">console.groq.com</span> — memory only, not saved';
                 listEl.appendChild(keyHint);
             } else {
                 const grokModels = grok.models || [];

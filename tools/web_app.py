@@ -626,6 +626,46 @@ async def slides_page(request: Request):
     return templates.TemplateResponse("slides.html", {"request": request})
 
 
+@app.get("/video", response_class=HTMLResponse)
+async def video_page(request: Request):
+    return templates.TemplateResponse("video.html", {"request": request})
+
+
+@app.get("/ftp", response_class=HTMLResponse)
+async def ftp_page(request: Request):
+    return templates.TemplateResponse("ftp.html", {"request": request})
+
+
+@app.get("/rakf", response_class=HTMLResponse)
+async def rakf_page(request: Request):
+    return templates.TemplateResponse("rakf.html", {"request": request})
+
+
+@app.get("/notes", response_class=HTMLResponse)
+async def notes_page(request: Request):
+    return templates.TemplateResponse("notes.html", {"request": request})
+
+
+@app.get("/tutorials", response_class=HTMLResponse)
+async def tutorials_page(request: Request):
+    return templates.TemplateResponse("tutorials.html", {"request": request})
+
+
+@app.get("/abstract", response_class=HTMLResponse)
+async def abstract_page(request: Request):
+    return templates.TemplateResponse("abstract.html", {"request": request})
+
+
+@app.get("/presentation", response_class=HTMLResponse)
+async def presentation_page(request: Request):
+    return templates.TemplateResponse("presentation.html", {"request": request})
+
+
+@app.get("/uss-editor", response_class=HTMLResponse)
+async def uss_editor_page(request: Request):
+    return templates.TemplateResponse("uss_editor.html", {"request": request})
+
+
 # ============================================================================
 # Red Team Tutor API Endpoints
 # ============================================================================
@@ -2458,6 +2498,101 @@ async def api_rag_query(request: Request):
     engine = get_rag_engine()
     response = await engine.query(query, n_results, include_highlights)
     return JSONResponse(response)
+
+
+# ============================================================================
+# LLM Provider API Endpoints
+# ============================================================================
+
+@app.get("/api/llm/status")
+async def api_llm_status():
+    """Get status of all LLM providers"""
+    from app.services.ollama import get_ollama_service
+    from app.services.grok import get_grok_service
+    from app.services.llm_provider import get_llm_service
+    
+    ollama = get_ollama_service()
+    grok = get_grok_service()
+    llm = get_llm_service()
+    
+    ollama_ok = await ollama.check_available()
+    grok_ok = await grok.check_available() if grok.is_configured else False
+    
+    return JSONResponse({
+        "active_provider": await llm.get_active_provider(),
+        "configured_provider": str(llm._provider),
+        "ollama": {
+            "available": ollama_ok,
+            "url": ollama.url,
+            "model": ollama.model
+        },
+        "grok": {
+            "configured": grok.is_configured,
+            "available": grok_ok,
+            "model": grok.model if grok.is_configured else None,
+            "models": [
+                {"id": k, "name": v["name"], "description": v["description"]}
+                for k, v in grok.GROK_MODELS.items()
+            ] if grok.is_configured else []
+        }
+    })
+
+
+@app.post("/api/llm/provider/switch")
+async def api_llm_provider_switch(request: Request):
+    """Switch active LLM provider"""
+    from app.services.llm_provider import get_llm_service, LLMProvider
+    
+    data = await request.json()
+    provider = data.get("provider", "auto")
+    
+    llm = get_llm_service()
+    old = str(llm._provider)
+    
+    if provider == "ollama":
+        llm._provider = LLMProvider.OLLAMA
+    elif provider in ["grok", "groq"]:
+        llm._provider = LLMProvider.GROK
+    else:
+        llm._provider = LLMProvider.AUTO
+    
+    return JSONResponse({"success": True, "old": old, "new": provider})
+
+
+@app.post("/api/llm/grok/set-key")
+async def api_llm_grok_set_key(request: Request):
+    """Set Grok API key at runtime"""
+    from app.services.grok import get_grok_service
+    
+    data = await request.json()
+    key = data.get("key", "")
+    
+    if not key:
+        return JSONResponse({"success": False, "error": "No key provided"})
+    
+    grok = get_grok_service()
+    grok._api_key = key
+    
+    available = await grok.check_available()
+    return JSONResponse({"success": available, "configured": True})
+
+
+@app.post("/api/llm/grok/switch-model")
+async def api_llm_grok_switch_model(request: Request):
+    """Switch Grok model"""
+    from app.services.grok import get_grok_service
+    
+    data = await request.json()
+    model = data.get("model", "")
+    
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+    
+    grok = get_grok_service()
+    old = grok.model
+    grok.model = model
+    
+    return JSONResponse({"success": True, "old": old, "new": model})
 
 
 # ============================================================================
