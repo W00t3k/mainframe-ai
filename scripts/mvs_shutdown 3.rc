@@ -1,0 +1,65 @@
+* MVS Clean Shutdown Script for TK5
+* Source: MVS-sysgen/sysgen/SCRIPTS/SHUTDOWN.RC
+*
+* Usage: From Hercules console, type:
+*   script SCRIPTS/mvs_shutdown.rc
+*
+* Or from herc_automation.py:
+*   h.send_herc('script scripts/mvs_shutdown.rc')
+*
+* This performs a graceful MVS shutdown sequence:
+*   1. Stop JES2 initiators
+*   2. Stop printers/readers/punches
+*   3. Stop TSO
+*   4. Stop VTAM
+*   5. Halt Hercules
+*
+* ─────────────────────────────────────────────────────────
+
+* Set up automated responses for shutdown messages
+hao clear
+hao tgt HASP099
+hao cmd script scripts/pjes2
+hao tgt HASP085
+hao cmd script scripts/zeod
+hao tgt IEE334I
+hao cmd script scripts/quiesce
+hao tgt HHC00814I Processor CP00: SIGP Stop
+hao cmd script scripts/poweroff
+hao tgt HHC00814I Processor CP01: SIGP Stop
+hao cmd script scripts/poweroff
+hao tgt ([0-9]{2}) IKT010D
+hao cmd /R $1,FSTOP
+
+* Cancel all pending automatic commands
+/$CA,ALL
+pause 2
+
+* Switch SMF recording
+/SWITCH SMF
+pause 2
+
+* Prevent new TSO logons
+/MODIFY TSO,USERMAX=0
+pause 2
+
+* Stop JES2 initiators
+/$PI
+pause 2
+
+* Stop JES2 output devices
+/$P PRT1
+/$P PRT2
+/$P PRT3
+/$P PUNCH1
+/$P RDR1
+/$P RDR2
+pause 3
+
+* Stop TSO
+/STOP TSO
+pause 3
+
+* Stop VTAM
+/HALT NET,QUICK
+pause 3
