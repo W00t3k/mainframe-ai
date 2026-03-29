@@ -32,4 +32,4 @@ pause ${IPL_PAUSE:=4}
 hao tgt HHC00010A
 hao cmd script scripts/SCR00010A
 pause ${IPL_PAUSE:=4}
-/d t
+/

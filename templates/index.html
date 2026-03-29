@@ -3,7 +3,7 @@
 {% block title %}IBM Mainframe AI Assistant{% endblock %}
 
 {% block page_styles %}
-<link rel="stylesheet" href="/static/css/pages/index.css?v=416">
+<link rel="stylesheet" href="/static/css/pages/index.css?v=417">
 {% endblock %}
 
 {% block head_extra %}
@@ -462,20 +462,25 @@ function updateOllamaStatus(running) {
 // ── Status ──
 async function checkStatus() {
     try {
-        const res = await fetch('/api/status');
-        const data = await res.json();
+        const [statusRes, sysinfoRes] = await Promise.all([
+            fetch('/api/status'),
+            fetch('/api/sysinfo')
+        ]);
+        const statusData = await statusRes.json();
+        const sysinfoData = await sysinfoRes.json();
 
         // Don't update connection state during walkthrough — it disconnects/reconnects
         if (!wtRunning) {
-            isConnected = data.connected;
-            if (data.connected) refreshScreen();
+            isConnected = statusData.connected;
+            if (statusData.connected) refreshScreen();
         }
 
-        updateMfStatus(data.connected || wtRunning ? 'online' : 'offline');
-        updateOllamaStatus(data.ollama_running);
+        // Use sysinfo for mainframe status (checks JES2/HASP instead of TN3270 connection)
+        updateMfStatus((sysinfoData.mainframe === 'online' || wtRunning) ? 'online' : 'offline');
+        updateOllamaStatus(statusData.ollama_running);
         if (!wtRunning) updateConnBtn();
 
-        if (data.connected && data.host) document.getElementById('connTarget').value = data.host;
+        if (statusData.connected && statusData.host) document.getElementById('connTarget').value = statusData.host;
     } catch (e) {
         if (!wtRunning) updateMfStatus('offline');
         updateOllamaStatus(false);
@@ -1148,7 +1153,7 @@ async function loadIdxModels() {
                 rightSpan.style.cssText = 'display:flex; align-items:center; gap:6px;';
                 const infoSpan = document.createElement('span');
                 infoSpan.style.cssText = 'color:#666; font-size:11px;';
-                infoSpan.textContent = `${m.params || ''} ${m.size}`;
+                infoSpan.textContent = `${(m.params || '')} ${fmtBytes(m.size || 0)}`;
                 rightSpan.appendChild(infoSpan);
 
                 if (!isCurrent) {
@@ -1335,7 +1340,8 @@ async function loadIdxModels() {
         });
 
     } catch(e) {
-        listEl.innerHTML = '<div style="padding:8px 12px; color:#f44;">Ollama offline</div>';
+        console.error('loadIdxModels error:', e);
+        listEl.innerHTML = `<div style="padding:8px 12px; color:#f44;">Failed to load models: ${e.message}</div>`;
     }
 }
 

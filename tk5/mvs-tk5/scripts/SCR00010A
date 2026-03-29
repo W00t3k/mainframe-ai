@@ -11,4 +11,4 @@
 # enter delayed D T command on message HHC00010A
 #
 pause ${IPL_PAUSE:=4}
-/d t
+/
