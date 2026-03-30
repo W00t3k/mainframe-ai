@@ -1673,6 +1673,79 @@ async def api_status():
     })
 
 
+@app.get("/api/llm/status")
+async def api_llm_status():
+    """Get status of all LLM providers."""
+    import sys, os
+    sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+    try:
+        from app.services.llm_provider import get_llm_service
+        service = get_llm_service()
+        return JSONResponse(await service.get_status())
+    except Exception as e:
+        ollama_ok = await check_ollama()
+        return JSONResponse({
+            "active_provider": "ollama",
+            "configured_provider": "auto",
+            "last_used": None,
+            "ollama": {"available": ollama_ok, "url": OLLAMA_URL, "model": OLLAMA_MODEL},
+            "grok": {"configured": False, "available": False, "model": None, "models": []},
+        })
+
+
+@app.post("/api/llm/provider/switch")
+async def api_llm_provider_switch(request: Request):
+    """Switch the active LLM provider."""
+    data = await request.json()
+    provider = data.get("provider", "").strip().lower()
+    if provider not in ("ollama", "grok", "auto"):
+        return JSONResponse({"success": False, "error": f"Unknown provider: {provider}"})
+    try:
+        from app.services.llm_provider import get_llm_service
+        get_llm_service().configured_provider = provider
+    except Exception:
+        pass
+    return JSONResponse({"success": True, "provider": provider})
+
+
+@app.post("/api/llm/grok/set-key")
+async def api_llm_grok_set_key(request: Request):
+    """Set the Groq API key and verify it works."""
+    data = await request.json()
+    key = data.get("key", "").strip()
+    if not key:
+        return JSONResponse({"success": False, "error": "No key provided"})
+    try:
+        from app.services.grok import get_grok_service
+        from app.services.llm_provider import get_llm_service
+        grok = get_grok_service()
+        grok._api_key = key
+        grok.save_key(key)
+        ok = await grok.check_available()
+        if ok:
+            get_llm_service().configured_provider = "grok"
+            return JSONResponse({"success": True, "message": "Connected to Groq — switched to cloud provider"})
+        else:
+            return JSONResponse({"success": False, "error": "Key set but Groq API unreachable — check key and network"})
+    except Exception as e:
+        return JSONResponse({"success": False, "error": str(e)})
+
+
+@app.post("/api/llm/grok/set-model")
+async def api_llm_grok_set_model(request: Request):
+    """Set the active Groq model."""
+    data = await request.json()
+    model = data.get("model", "").strip()
+    if not model:
+        return JSONResponse({"success": False, "error": "No model specified"})
+    try:
+        from app.services.grok import get_grok_service
+        get_grok_service().model = model
+    except Exception:
+        pass
+    return JSONResponse({"success": True, "model": model})
+
+
 @app.get("/api/sysinfo")
 async def api_sysinfo():
     """System information endpoint for UI status updates"""
