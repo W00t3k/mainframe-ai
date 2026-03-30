@@ -58,13 +58,26 @@ fi
 info "Starting Hercules..."
 cd "$TK5"
 
-# Start Hercules without -d flag, pipe IPL commands, keep stdin open
-# Hercules 3.13 needs stdin to stay open to prevent immediate exit
-nohup bash -c "cd '$TK5' && (cat scripts/ipl.rc; tail -f /dev/null) | hercules -f conf/tk5-linux.cnf" > "$LOGDIR/hercules.log" 2>&1 &
+# Start Hercules in daemon mode (no stdin needed)
+nohup hercules -f conf/tk5-linux.cnf -d > "$LOGDIR/hercules.log" 2>&1 &
 HERC_PID=$!
 
 info "Hercules PID: $HERC_PID"
-info "Waiting for MVS to boot (checking every 5s)..."
+info "Waiting for Hercules HTTP API to be ready..."
+sleep 3
+
+# Send IPL commands via HTTP API (Hercules 3.13 HTTP interface)
+info "Sending IPL commands via HTTP API..."
+while IFS= read -r line; do
+    # Skip comments and empty lines
+    [[ "$line" =~ ^#.*$ ]] && continue
+    [[ -z "$line" ]] && continue
+    # Send command to Hercules HTTP API
+    curl -s "http://localhost:8038/cgi-bin/tasks/cmd?cmd=$(echo "$line" | sed 's/ /%20/g')" > /dev/null 2>&1
+    sleep 0.1
+done < scripts/ipl.rc
+
+info "IPL commands sent, waiting for MVS to boot (checking every 5s)..."
 
 # Wait for port 3270 to open
 for i in {1..60}; do
