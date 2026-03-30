@@ -310,6 +310,20 @@ start_tk5_svc() {
   # Different startup for Linux (Hercules 3.x) vs macOS (Hercules 4.x)
   if [ "$(uname -s)" = "Linux" ]; then
     # Linux: Hercules 3.13 - SCRIPT directive in tk5-linux.cnf handles IPL
+    info "Using config: $TK5/conf/tk5-linux.cnf"
+    info "Using binary: $HERC_BIN/hercules"
+    # Verify config exists
+    if [ ! -f "$TK5/conf/tk5-linux.cnf" ]; then
+      fail "tk5-linux.cnf not found! Run: git pull origin master"
+      TK5_OK=0; return 1
+    fi
+    # Verify SCRIPT line in config
+    if grep -q "^SCRIPT" "$TK5/conf/tk5-linux.cnf"; then
+      info "SCRIPT directive found in config"
+    else
+      fail "SCRIPT directive missing from tk5-linux.cnf!"
+      TK5_OK=0; return 1
+    fi
     # Keep stdin open with tail -f to prevent Hercules from exiting
     nohup bash -c "
       cd \"$TK5\"
@@ -319,6 +333,9 @@ start_tk5_svc() {
       tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
     " > "$LOGDIR/hercules.log" 2>&1 &
     disown $!
+    sleep 2
+    info "Hercules log (first 5 lines):"
+    head -5 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
   else
     # macOS: Hercules 4.x - use -r flag
     nohup bash -c "
@@ -333,15 +350,45 @@ start_tk5_svc() {
     disown $!
   fi
 
-  if wait_for "TK5" check_tk5 300; then
-    ok "TK5 started — TN3270 on port 3270"
-    ok "Login: HERC01 / CUL8TR"
-    TK5_OK=1
-  else
-    fail "TK5 failed to start"
-    info "Check log: $LOGDIR/hercules.log"
-    tail -5 "$LOGDIR/hercules.log" 2>/dev/null | while read -r line; do echo "    $line"; done
+  if [ "$(uname -s)" = "Linux" ]; then
+    # Linux: verbose wait loop - show log every 10s
     TK5_OK=0
+    for _i in $(seq 10 10 300); do
+      sleep 10
+      if check_tk5; then
+        ok "TK5 started — TN3270 on port 3270"
+        ok "Login: HERC01 / CUL8TR"
+        TK5_OK=1
+        break
+      fi
+      echo "  … Still waiting (${_i}s) — last log line:"
+      tail -1 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
+      # Show errors immediately
+      grep -q "HHCIN099I\|terminated\|Syntax error\|cannot open" "$LOGDIR/hercules.log" 2>/dev/null && {
+        fail "Hercules error detected — dumping log:"
+        cat "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
+        TK5_OK=0
+        return 1
+      }
+    done
+    if [ "$TK5_OK" = "0" ]; then
+      fail "TK5 failed to start after 300s"
+      echo "  Full Hercules log:"
+      echo "  ─────────────────────────────────────────────────"
+      cat "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
+      echo "  ─────────────────────────────────────────────────"
+    fi
+  else
+    if wait_for "TK5" check_tk5 300; then
+      ok "TK5 started — TN3270 on port 3270"
+      ok "Login: HERC01 / CUL8TR"
+      TK5_OK=1
+    else
+      fail "TK5 failed to start"
+      info "Check log: $LOGDIR/hercules.log"
+      tail -5 "$LOGDIR/hercules.log" 2>/dev/null | while read -r line; do echo "    $line"; done
+      TK5_OK=0
+    fi
   fi
 }
 
