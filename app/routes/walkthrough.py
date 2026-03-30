@@ -20,15 +20,23 @@ router = APIRouter(tags=["walkthrough"])
 
 # Import agent_tools
 try:
+    import sys
+    import os
+    # Add tools directory to path
+    tools_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), 'tools')
+    if tools_dir not in sys.path:
+        sys.path.insert(0, tools_dir)
     from agent_tools import connection, connect_mainframe, read_screen, read_screen_with_color, send_terminal_key
     AGENT_TOOLS_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     AGENT_TOOLS_AVAILABLE = False
     connection = None
     connect_mainframe = None
     read_screen = lambda: "[Not connected]"
     read_screen_with_color = lambda: "[Not connected]"
     send_terminal_key = lambda *args: {"success": False}
+    import logging
+    logging.getLogger(__name__).warning(f"agent_tools import failed: {e}")
 
 
 class WalkthroughRunner:
@@ -105,6 +113,76 @@ class WalkthroughRunner:
     def stop(self):
         self.running = False
 
+    def _sleep(self, seconds: float):
+        """Interruptible sleep — exits early if self.running becomes False."""
+        end = _time.time() + seconds
+        while _time.time() < end:
+            if not self.running:
+                return
+            _time.sleep(0.2)
+
+    def _cancel_stuck_tso_session(self, userid: str = "HERC01"):
+        """Reply CANCEL to all pending IEF238D operator messages that block TSO login.
+        Also attempts to cancel the zombie TSU session by jobname."""
+        import urllib.request, urllib.parse, re, os
+        hardcopy = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            "tk5", "mvs-tk5", "log", "hardcopy.log"
+        )
+        try:
+            if os.path.exists(hardcopy):
+                with open(hardcopy, errors="replace") as f:
+                    content = f.read()
+                nums = set(re.findall(r'\*([0-9A-Fa-f]{2})\s+IEF238D', content))
+                for num in nums:
+                    cmd = urllib.parse.quote(f"/R {num},CANCEL")
+                    url = f"http://localhost:8038/cgi-bin/tasks/cmd?cmd={cmd}"
+                    urllib.request.urlopen(url, timeout=5)
+                    logger.info(f"Replied CANCEL to IEF238D *{num}")
+        except Exception as e:
+            logger.warning(f"IEF238D cancel error: {e}")
+        # Also try cancelling the stuck TSO job by userid
+        try:
+            cmd = urllib.parse.quote(f"/C {userid}")
+            url = f"http://localhost:8038/cgi-bin/tasks/cmd?cmd={cmd}"
+            urllib.request.urlopen(url, timeout=5)
+        except Exception:
+            pass
+        self._sleep(3)
+
+    def _start_ief238d_watcher(self):
+        """Start a daemon thread that continuously replies CANCEL to IEF238D messages.
+        HERC01's ISPFTSO logon proc tries to allocate tape scratch datasets — all OFFLINE
+        in TK5. Without operator replies the TSO session never becomes interactive."""
+        import re, os, urllib.request, urllib.parse
+
+        hardcopy = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
+            "tk5", "mvs-tk5", "log", "hardcopy.log"
+        )
+        replied: set = set()
+
+        def _watch():
+            while self.running:
+                try:
+                    if os.path.exists(hardcopy):
+                        with open(hardcopy, errors="replace") as f:
+                            content = f.read()
+                        nums = set(re.findall(r'\*([0-9A-Fa-f]{2})\s+IEF238D', content))
+                        for num in nums:
+                            if num not in replied:
+                                cmd = urllib.parse.quote(f"/R {num},CANCEL")
+                                url = f"http://localhost:8038/cgi-bin/tasks/cmd?cmd={cmd}"
+                                urllib.request.urlopen(url, timeout=5)
+                                replied.add(num)
+                                logger.info(f"IEF238D watcher: replied CANCEL to *{num}")
+                except Exception as e:
+                    logger.debug(f"IEF238D watcher error: {e}")
+                _time.sleep(3)
+
+        t = threading.Thread(target=_watch, daemon=True, name="ief238d-watcher")
+        t.start()
+
     def pause(self):
         self.paused = True
 
@@ -147,6 +225,10 @@ class WalkthroughRunner:
             self.error = f"Unknown walkthrough: {name}"
             self.running = False
             return
+
+        # Start background watcher to auto-cancel IEF238D operator messages
+        # (ISPFTSO logon proc tries to allocate offline tape units every login)
+        self._start_ief238d_watcher()
 
         self.walkthrough_name = script["title"]
         steps = script["steps"]
@@ -567,6 +649,24 @@ class WalkthroughRunner:
                 return screen
 
             # ---- KNOWN PATTERNS: handle directly, don't ask LLM ----
+            # INPUT NOT RECOGNIZED — keyboard locked / protected field; Reset then Clear
+            if "INPUT NOT RECOGNIZED" in upper or "NOT RECOGNIZED" in upper:
+                logger.info(f"AI escape attempt {attempt+1}: INPUT NOT RECOGNIZED, sending Reset+Clear")
+                send_terminal_key("reset")
+                _time.sleep(0.5)
+                send_terminal_key("clear")
+                _time.sleep(3)
+                continue
+
+            # IKT00300 reconnect / SESSION ESTABLISHED — press Enter to advance
+            if "IKT00300" in upper or "RECONNECT SUCCESSFUL" in upper or "SESSION ESTABLISHED" in upper:
+                logger.info(f"AI escape attempt {attempt+1}: RECONNECT screen, pressing Enter")
+                send_terminal_key("reset")
+                _time.sleep(0.3)
+                send_terminal_key("enter")
+                _time.sleep(3)
+                continue
+
             # REENTER at TSO prompt — CLEAR is the ONLY correct action
             # END is INVALID here and causes an infinite loop
             if "REENTER" in upper:
@@ -737,7 +837,59 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
             _time.sleep(2)
         return self._read_screen_safe()
 
-    def _tso_login(self, userid: str, password: str, target: str):
+    def _ensure_ispf_libraries(self, userid: str):
+        """Allocate ISPF profile libraries if they don't exist.
+        
+        TK5 users often lack ISPPROF, ISPPLIB, ISPTLIB, ISPMLIB datasets,
+        causing ISP004E when trying to enter ISPF.
+        """
+        import time as _t
+        screen = self._read_screen_safe()
+        upper = screen.upper()
+        
+        # Check if we're at READY prompt and need ISPF libraries
+        if "READY" not in upper:
+            return  # Not at READY, can't allocate
+        
+        # Try entering ISPF to see if libraries exist
+        send_terminal_key("string", "ISPF")
+        send_terminal_key("enter")
+        self._sleep(3)
+        screen = self._read_screen_safe()
+        upper = screen.upper()
+        
+        # Check for ISPF library error
+        if "ISP004E" in upper or "UNABLE TO OPEN ISPF LIBRARIES" in upper:
+            logger.info(f"ISPF libraries missing for {userid}, allocating...")
+            
+            # Allocate ISPF profile library
+            self._sleep(1)
+            send_terminal_key("string", f"ALLOCATE DATASET('{userid}.ISPPROF') NEW SPACE(10,5) TRACKS RECFM(F,B) LRECL(80) BLKSIZE(800)")
+            send_terminal_key("enter")
+            self._sleep(2)
+            
+            # Allocate ISPF panel library
+            send_terminal_key("string", f"ALLOCATE DATASET('{userid}.ISPPLIB') NEW SPACE(5,2) TRACKS RECFM(F,B) LRECL(80) BLKSIZE(800)")
+            send_terminal_key("enter")
+            self._sleep(2)
+            
+            # Allocate ISPF message library
+            send_terminal_key("string", f"ALLOCATE DATASET('{userid}.ISPMLIB') NEW SPACE(5,2) TRACKS RECFM(F,B) LRECL(80) BLKSIZE(800)")
+            send_terminal_key("enter")
+            self._sleep(2)
+            
+            # Allocate ISPF table library
+            send_terminal_key("string", f"ALLOCATE DATASET('{userid}.ISPTLIB') NEW SPACE(5,2) TRACKS RECFM(F,B) LRECL(80) BLKSIZE(800)")
+            send_terminal_key("enter")
+            self._sleep(2)
+            
+            # Try ISPF again
+            send_terminal_key("string", "ISPF")
+            send_terminal_key("enter")
+            self._sleep(4)
+            logger.info("ISPF libraries allocated and ISPF entered")
+
+    def _tso_login(self, userid: str, password: str, target: str, _depth: int = 0):
         """Handle TSO login with robust state machine for all TK5 screen states.
         
         TK5 login flow (per featherriver.net):
@@ -747,15 +899,19 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
         4. Broadcast messages screen — press Enter
         5. Fortune screen — press Enter  
         6. TSO Applications Menu (RFE, RPF, IMON, QUEUE, etc.)
+
+        Falls back to HERC02/HERC03 when HERC01 is permanently IN USE.
         """
-        max_attempts = 14
+        _FALLBACK_USERS = {"HERC01": "HERC02", "HERC02": "HERC03"}
+        max_attempts = 8
+        in_use_count = 0
         for attempt in range(max_attempts):
             if not self.running:
                 return
 
             if connection and not connection.connected:
                 connect_mainframe(target)
-                _time.sleep(2)
+                self._sleep(2)
 
             screen = self._read_screen_safe()
             self.current_screen = screen
@@ -763,6 +919,7 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
 
             # ── Success checks ──
             if self._is_logged_in(upper):
+                self._ensure_ispf_libraries(userid)
                 return
 
             # ── ERROR STATE — must check BEFORE post-login ──
@@ -774,158 +931,133 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
                 screen = self._escape_to_ready()
                 upper = screen.upper()
                 if self._is_logged_in(upper):
+                    self._ensure_ispf_libraries(userid)
                     return
                 if "LOGON" in upper and "===>" in screen:
                     continue
                 if "IKJ56400" in upper:
                     continue
+                continue
+
+            # ── INPUT NOT RECOGNIZED — keyboard locked, Reset+Clear first ──
+            if "INPUT NOT RECOGNIZED" in upper or "NOT RECOGNIZED" in upper:
+                logger.info(f"Login attempt {attempt}: INPUT NOT RECOGNIZED, Reset+Clear")
+                send_terminal_key("reset")
+                self._sleep(0.5)
+                send_terminal_key("clear")
+                self._sleep(2)
                 continue
 
             # ── Post-login screen (reconnect success, broadcast, etc.) ──
             if self._is_post_login(upper):
                 screen = self._press_through_screens()
                 if self._is_logged_in(screen.upper()):
+                    self._ensure_ispf_libraries(userid)
                     return
                 continue
 
             # ── IKJ56400A "ENTER LOGON OR LOGOFF" ──
             if "IKJ56400" in upper or "ENTER LOGON OR LOGOFF" in upper:
                 reconnect = "IN USE" in upper or "LOGON REJECTED" in upper
+                if reconnect:
+                    in_use_count += 1
+                    if in_use_count == 1:
+                        logger.info("HERC01 IN USE — auto-cancelling stuck TSO session")
+                        self._cancel_stuck_tso_session(userid)
+                        continue
+                if in_use_count >= 3:
+                    fallback = _FALLBACK_USERS.get(userid.upper())
+                    if fallback and _depth < 2:
+                        logger.warning(f"{userid} IN USE after 3 attempts — trying {fallback}")
+                        self._tso_login(fallback, password, target, _depth=_depth + 1)
+                        return
+                    logger.error(f"{userid} IN USE — all fallbacks exhausted")
+                    self.error = f"TSO login failed: {userid} and fallbacks all in use"
+                    self.running = False
+                    return
                 cmd = f"LOGON {userid} RECONNECT" if reconnect else f"LOGON {userid}"
                 send_terminal_key("home")
-                _time.sleep(0.3)
+                self._sleep(0.3)
                 send_terminal_key("eraseeof")
-                _time.sleep(0.3)
+                self._sleep(0.3)
                 send_terminal_key("string", cmd)
                 send_terminal_key("enter")
-                _time.sleep(4)
+                self._sleep(4)
+                if not self.running:
+                    return
                 screen = self._read_screen_safe()
                 self.current_screen = screen
                 upper = screen.upper()
                 if "PASSWORD" in upper or "IKJ56476" in upper or "ENTER CURRENT" in upper:
                     send_terminal_key("string", password)
                     send_terminal_key("enter")
-                    _time.sleep(4)
-                # Press through broadcast/fortune screens
+                    self._sleep(4)
                 screen = self._press_through_screens()
                 if self._is_logged_in(screen.upper()):
+                    self._ensure_ispf_libraries(userid)
                     return
                 continue
 
             # ── "IN USE" without IKJ56400 prompt ──
             if "IN USE" in upper or "LOGON REJECTED" in upper:
+                in_use_count += 1
+                if in_use_count == 1:
+                    logger.info("HERC01 IN USE (bare) — auto-cancelling stuck TSO session")
+                    self._cancel_stuck_tso_session(userid)
+                    send_terminal_key("clear")
+                    self._sleep(2)
+                    continue
+                if in_use_count >= 3:
+                    fallback = _FALLBACK_USERS.get(userid.upper())
+                    if fallback and _depth < 2:
+                        logger.warning(f"{userid} IN USE (bare) after 3 attempts — trying {fallback}")
+                        self._tso_login(fallback, password, target, _depth=_depth + 1)
+                        return
+                    logger.error(f"{userid} IN USE — all fallbacks exhausted")
+                    self.error = f"TSO login failed: {userid} and fallbacks all in use"
+                    self.running = False
+                    return
                 send_terminal_key("clear")
-                _time.sleep(1)
+                self._sleep(1)
                 send_terminal_key("string", f"LOGON {userid} RECONNECT")
                 send_terminal_key("enter")
-                _time.sleep(4)
+                self._sleep(4)
+                if not self.running:
+                    return
                 screen = self._read_screen_safe()
                 self.current_screen = screen
                 upper = screen.upper()
                 if "PASSWORD" in upper or "IKJ56476" in upper or "ENTER CURRENT" in upper:
                     send_terminal_key("string", password)
                     send_terminal_key("enter")
-                    _time.sleep(4)
+                    self._sleep(4)
                 screen = self._press_through_screens()
                 if self._is_logged_in(screen.upper()):
+                    self._ensure_ispf_libraries(userid)
                     return
-                continue
-
-            # ── "REENTER" / "INVALID KEYWORD" / IKJ56703 / IKJ56429 ──
-            # We might be stuck in an editor or bad command context.
-            # Escape to a known state first, then check if already logged in.
-            if "REENTER" in upper or "INVALID KEYWORD" in upper or "IKJ56703" in upper or "IKJ56429" in upper:
-                logger.info(f"Login attempt {attempt}: error state detected, escaping")
-                screen = self._escape_to_ready()
-                upper = screen.upper()
-                if self._is_logged_in(upper):
-                    return
-                # If we escaped to VTAM/logon, try fresh login
-                if "LOGON" in upper and "===>" in screen:
-                    continue  # will be caught by VTAM handler next iteration
-                # If at IKJ56400 prompt
-                if "IKJ56400" in upper:
-                    continue  # will be caught by IKJ56400 handler
-                # Still stuck — try LLM recovery
-                logger.info("Escape didn't reach known state, trying LLM")
-                dummy_step = {"title": "TSO Login Recovery"}
-                self._llm_recover(screen, dummy_step, target)
-                continue
-
-            # ── "TSO COMMAND NOT ACCEPTED DURING LOGON" (IKJ56410) ──
-            if "IKJ56410" in upper or "NOT ACCEPTED DURING LOGON" in upper:
-                send_terminal_key("clear")
-                _time.sleep(1)
-                send_terminal_key("string", f"LOGON {userid}")
-                send_terminal_key("enter")
-                _time.sleep(3)
-                continue
-
-            # ── VTAM screen with "Logon ===>" prompt ──
-            if "LOGON ===>" in screen or "Logon ===>" in screen:
-                send_terminal_key("home")
-                _time.sleep(0.3)
-                send_terminal_key("eraseeof")
-                _time.sleep(0.3)
-                send_terminal_key("string", userid)
-                send_terminal_key("enter")
-                _time.sleep(4)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-                upper = screen.upper()
-                if "PASSWORD" in upper or "IKJ56476" in upper:
-                    send_terminal_key("string", password)
-                    send_terminal_key("enter")
-                    _time.sleep(4)
-                screen = self._press_through_screens()
-                if self._is_logged_in(screen.upper()):
-                    return
-                continue
-
-            # ── VTAM screen WITHOUT Logon prompt (first connection) ──
-            # Per featherriver.net: first connection may lack Logon ===>
-            if ("MVS" in upper or "TK5" in upper or "HERCULES" in upper) and "LOGON" not in upper:
-                send_terminal_key("enter")
-                _time.sleep(2)
-                continue
-
-            # ── "ENTER USERID" / IKJ56700 prompt ──
-            if "ENTER USERID" in upper or "IKJ56700" in upper:
-                send_terminal_key("clear")
-                _time.sleep(1)
-                send_terminal_key("string", f"LOGON {userid}")
-                send_terminal_key("enter")
-                _time.sleep(4)
-                screen = self._read_screen_safe()
-                self.current_screen = screen
-                upper = screen.upper()
-                # Fall through to password check below
-
-            # ── Password prompt ──
-            if "PASSWORD" in upper or "IKJ56476" in upper:
-                send_terminal_key("string", password)
-                send_terminal_key("enter")
-                _time.sleep(4)
-                screen = self._press_through_screens()
-                upper = screen.upper()
-                if self._is_logged_in(upper):
-                    return
-                continue
-
-            # ── "ENTER CURRENT PASSWORD" ──
-            if "ENTER CURRENT" in upper:
-                send_terminal_key("string", password)
-                send_terminal_key("enter")
-                _time.sleep(3)
-                screen = self._press_through_screens()
-                if self._is_logged_in(screen.upper()):
-                    return
-                continue
 
             # ── "PRESS ENTER TO CONTINUE" / IKJ56455 / broadcast / fortune ──
             if "PRESS ENTER" in upper or "IKJ56455" in upper or "FORTUNE" in upper:
                 screen = self._press_through_screens()
                 if self._is_logged_in(screen.upper()):
+                    self._ensure_ispf_libraries(userid)
+                    return
+                continue
+
+            # ── Blank/frozen screen — ISPLOGON may be processing (IEF238D in flight) ──
+            # Wait patiently instead of immediately reconnecting
+            if not screen.strip():
+                logger.info(f"Login attempt {attempt}: blank screen — waiting for ISPLOGON")
+                deadline = _time.time() + 20
+                while _time.time() < deadline and self.running:
+                    self._sleep(3)
+                    screen = self._read_screen_safe()
+                    self.current_screen = screen
+                    upper = screen.upper()
+                    if screen.strip():
+                        break
+                if self._is_logged_in(upper):
+                    self._ensure_ispf_libraries(userid)
                     return
                 continue
 
@@ -934,8 +1066,9 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
             screen = self._escape_to_ready()
             upper = screen.upper()
             if self._is_logged_in(upper):
+                self._ensure_ispf_libraries(userid)
                 return
-            _time.sleep(3)
+            self._sleep(3)
 
         self.error = f"TSO login failed after {max_attempts} attempts"
         self.running = False
