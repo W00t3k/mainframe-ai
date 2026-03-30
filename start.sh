@@ -317,20 +317,14 @@ start_tk5_svc() {
       fail "tk5-linux.cnf not found! Run: git pull origin master"
       TK5_OK=0; return 1
     fi
-    # Verify SCRIPT line in config
-    if grep -q "^SCRIPT" "$TK5/conf/tk5-linux.cnf"; then
-      info "SCRIPT directive found in config"
-    else
-      fail "SCRIPT directive missing from tk5-linux.cnf!"
-      TK5_OK=0; return 1
-    fi
-    # Keep stdin open with tail -f to prevent Hercules from exiting
+    # Hercules 3.13: no -r flag, no SCRIPT in config → must pipe ipl.rc via stdin
+    # Without -d flag, Hercules reads commands from stdin
     nohup bash -c "
       cd \"$TK5\"
       export PATH=\"$HERC_BIN:\$PATH\"
       export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
       export HERCULES_LIB=\"$HERC_LIB\"
-      tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
+      (cat scripts/ipl.rc; tail -f /dev/null) | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf
     " > "$LOGDIR/hercules.log" 2>&1 &
     disown $!
     sleep 2
