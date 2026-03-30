@@ -173,6 +173,9 @@ kill_all() {
   # Hercules
   pkill -f "hercules" 2>/dev/null && fail "Killed Hercules/TK5" || ok "TK5 not running"
 
+  # Kill stale s3270 processes (they hold 3270 devices and prevent reconnect after restart)
+  pkill -f "s3270" 2>/dev/null
+
   # Cleanup stale tail processes from old TK5 starts
   pkill -f "tail -f /dev/null" 2>/dev/null
 
