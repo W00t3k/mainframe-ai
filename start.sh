@@ -121,13 +121,13 @@ detect_model() {
 
 # ── Detect Hercules binary ─────────────────────────────
 detect_hercules() {
-  # On macOS, prefer system Homebrew Hercules (ARM64 native, has proper device
-  # modules in /opt/homebrew/lib/hercules/). The bundled x86_64 binary has only
-  # .la stubs — no actual .dylib device modules — so all devices fail to load.
-  if [ "$(uname -s)" = "Darwin" ] && command -v hercules &>/dev/null; then
+  # On macOS and Linux, prefer system Hercules over bundled binaries
+  # macOS: Homebrew Hercules (ARM64 native, proper device modules)
+  # Linux: System Hercules 3.13 (bundled binaries have missing shared libraries)
+  if command -v hercules &>/dev/null; then
     HERC_BIN="$(dirname "$(command -v hercules)")"
-    # Homebrew device modules directory
-    if [ -d "/opt/homebrew/lib/hercules" ]; then
+    # Homebrew device modules directory (macOS only)
+    if [ "$(uname -s)" = "Darwin" ] && [ -d "/opt/homebrew/lib/hercules" ]; then
       HERC_LIB="/opt/homebrew/lib/hercules"
     else
       HERC_LIB=""
@@ -135,6 +135,7 @@ detect_hercules() {
     return
   fi
 
+  # Fallback to bundled Hercules if system version not found
   HERC_OS=""
   case "$(uname -s)" in
     Linux)
@@ -151,16 +152,9 @@ detect_hercules() {
     HERC_BIN="$TK5/hercules/$HERC_OS/bin"
     HERC_LIB="$TK5/hercules/$HERC_OS/lib"
     chmod +x "$HERC_BIN/hercules" 2>/dev/null
-  fi
-
-  if [ -z "$HERC_OS" ] || [ ! -f "$HERC_BIN/hercules" ]; then
-    if command -v hercules &>/dev/null; then
-      HERC_BIN="$(dirname "$(command -v hercules)")"
-      HERC_LIB=""
-    else
-      HERC_BIN=""
-      HERC_LIB=""
-    fi
+  else
+    HERC_BIN=""
+    HERC_LIB=""
   fi
 }
 
