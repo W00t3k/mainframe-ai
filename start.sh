@@ -241,11 +241,11 @@ start_ollama_svc() {
   OLLAMA_OK=1
 
   # Check if target model is already pulled
-  if ollama list 2>/dev/null | grep -q "$MODEL"; then
+  if timeout 5 ollama list 2>/dev/null | grep -q "$MODEL"; then
     ok "Model $MODEL ready"
   else
     # Use first available model as fallback while target pulls
-    FALLBACK=$(ollama list 2>/dev/null | tail -n +2 | head -1 | awk '{print $1}')
+    FALLBACK=$(timeout 5 ollama list 2>/dev/null | tail -n +2 | head -1 | awk '{print $1}')
     if [ -n "$FALLBACK" ]; then
       info "Using $FALLBACK while pulling $MODEL in background..."
       MODEL="$FALLBACK"
@@ -309,22 +309,19 @@ start_tk5_svc() {
 
   # Different startup for Linux (Hercules 3.x) vs macOS (Hercules 4.x)
   if [ "$(uname -s)" = "Linux" ]; then
-    # Linux: Hercules 3.13 - SCRIPT directive in tk5-linux.cnf handles IPL
+    # Linux: Hercules 3.13 — use -d (daemon mode, no TTY needed) + pipe ipl.rc via stdin
     info "Using config: $TK5/conf/tk5-linux.cnf"
     info "Using binary: $HERC_BIN/hercules"
-    # Verify config exists
     if [ ! -f "$TK5/conf/tk5-linux.cnf" ]; then
       fail "tk5-linux.cnf not found! Run: git pull origin master"
       TK5_OK=0; return 1
     fi
-    # Hercules 3.13: no -r flag, no SCRIPT in config → must pipe ipl.rc via stdin
-    # Without -d flag, Hercules reads commands from stdin
     nohup bash -c "
       cd \"$TK5\"
       export PATH=\"$HERC_BIN:\$PATH\"
       export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
       export HERCULES_LIB=\"$HERC_LIB\"
-      (cat scripts/ipl.rc; tail -f /dev/null) | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf
+      (cat scripts/ipl.rc; tail -f /dev/null) | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
     " > "$LOGDIR/hercules.log" 2>&1 &
     disown $!
     sleep 2
@@ -358,7 +355,7 @@ start_tk5_svc() {
       echo "  … Still waiting (${_i}s) — last log line:"
       tail -1 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
       # Show errors immediately
-      grep -q "HHCIN099I\|terminated\|Syntax error\|cannot open" "$LOGDIR/hercules.log" 2>/dev/null && {
+      grep -q "HHCIN099I\|Syntax error\|cannot open shared object" "$LOGDIR/hercules.log" 2>/dev/null && {
         fail "Hercules error detected — dumping log:"
         cat "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
         TK5_OK=0
