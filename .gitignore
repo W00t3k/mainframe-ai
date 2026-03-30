@@ -51,3 +51,4 @@ discovery.db-wal
 
 # Screenshots (runtime)
 static/screenshots/
+.groq_key

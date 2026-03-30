@@ -2605,7 +2605,7 @@ async def api_llm_status():
             "model": grok.model if grok.is_configured else None,
             "models": [
                 {"id": k, "name": v["name"], "description": v["description"]}
-                for k, v in grok.GROK_MODELS.items()
+                for k, v in GROK_MODELS.items()
             ] if grok.is_configured else []
         }
     })
@@ -2645,9 +2645,14 @@ async def api_llm_grok_set_key(request: Request):
     
     grok = get_grok_service()
     grok._api_key = key
+    grok.save_key(key)
     
     available = await grok.check_available()
-    return JSONResponse({"success": available, "configured": True})
+    return JSONResponse({
+        "success": available,
+        "configured": True,
+        "message": f"Connected to Groq ({grok.model})" if available else "Key saved but Groq API unreachable"
+    })
 
 
 @app.post("/api/llm/grok/switch-model")
@@ -2676,6 +2681,7 @@ async def api_llm_grok_switch_model(request: Request):
 async def api_models_list():
     """List installed Ollama models"""
     from app.services.ollama import get_ollama_service
+    from app.services.grok import get_grok_service, GROK_MODELS
     
     ollama = get_ollama_service()
     try:
