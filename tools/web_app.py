@@ -111,6 +111,10 @@ async def lifespan(application):
 # Initialize FastAPI
 app = FastAPI(title="Mainframe AI Assistant", lifespan=lifespan)
 
+# Register walkthrough router
+from app.routes.walkthrough import router as walkthrough_router
+app.include_router(walkthrough_router, prefix="/api/walkthrough")
+
 # Mount static files and templates
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
@@ -2353,35 +2357,7 @@ async def api_terminal_reset_session():
 # Autonomous Walkthrough System (imported from app modules)
 # ============================================================================
 
-import time as _time
-from app.constants.walkthrough_scripts import WALKTHROUGH_SCRIPTS
-
-# Walkthrough runner disabled - module has missing dependencies
-_walkthrough_runner = None
-
-
-@app.post("/api/walkthrough/start")
-async def api_walkthrough_start(request: Request):
-    """Start an autonomous walkthrough."""
-    return JSONResponse({"success": False, "error": "Walkthrough system temporarily disabled"})
-
-
-@app.post("/api/walkthrough/stop")
-async def api_walkthrough_stop():
-    """Stop the running walkthrough."""
-    return JSONResponse({"success": False, "error": "Walkthrough system temporarily disabled"})
-
-
-@app.post("/api/walkthrough/pause")
-async def api_walkthrough_pause():
-    """Toggle pause/resume on the walkthrough."""
-    return JSONResponse({"success": False, "error": "Walkthrough system temporarily disabled"})
-
-
-@app.get("/api/walkthrough/status")
-async def api_walkthrough_status():
-    """Get current walkthrough status (polled by frontend)."""
-    return JSONResponse({"running": False, "paused": False, "step": 0, "total": 0, "error": "Walkthrough system temporarily disabled"})
+# Walkthrough endpoints are in app/routes/walkthrough.py
 
 
 # Screencap API
