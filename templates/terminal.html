@@ -325,12 +325,26 @@
             handleTerminalKey(e);
         });
 
-        // Check initial status
+        // Check initial status — auto-connect if not already connected
         fetch('/api/status').then(r => r.json()).then(data => {
             if (data.connected) {
                 connected = true;
                 updateStatus(true, data.host);
                 fetch('/api/terminal/screen').then(r => r.json()).then(s => updateScreen(s));
+            } else {
+                const hostInput = document.getElementById('hostInput');
+                const target = (hostInput && hostInput.value.trim()) || 'localhost:3270';
+                fetch('/api/terminal/connect', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ target })
+                }).then(r => r.json()).then(data => {
+                    if (data.success) {
+                        connected = true;
+                        updateStatus(true, target);
+                        updateScreen(data.screen_data);
+                    }
+                }).catch(() => {});
             }
         });
 
