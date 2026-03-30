@@ -313,17 +313,44 @@ start_tk5_svc() {
 
   info "Starting Hercules ($(uname -s)/$(uname -m))..."
 
-  # tail keeps stdin open — Hercules daemon mode exits on EOF without it
-  nohup bash -c "
-    cd \"$TK5\"
-    export PATH=\"$HERC_BIN:\$PATH\"
-    export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
-    export DYLD_LIBRARY_PATH=\"$HERC_LIB:\$DYLD_LIBRARY_PATH\"
-    export HERCULES_LIB=\"$HERC_LIB\"
-    export HERCULES_PATH=\"$HERC_LIB\"
-    tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5.cnf -r scripts/ipl.rc -d
-  " > "$LOGDIR/hercules.log" 2>&1 &
-  disown $!
+  # Different startup for Linux (Hercules 3.x) vs macOS (Hercules 4.x)
+  if [ "$(uname -s)" = "Linux" ]; then
+    # Linux: Hercules 3.13 - use HTTP API for IPL commands
+    nohup bash -c "
+      cd \"$TK5\"
+      export PATH=\"$HERC_BIN:\$PATH\"
+      export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
+      export HERCULES_LIB=\"$HERC_LIB\"
+      export HERCULES_PATH=\"$HERC_LIB\"
+      \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
+    " > "$LOGDIR/hercules.log" 2>&1 &
+    HERC_PID=$!
+    disown
+    
+    # Wait for HTTP API to be ready
+    sleep 3
+    
+    # Send IPL commands via HTTP API
+    cd "$TK5"
+    while IFS= read -r line; do
+      [[ "$line" =~ ^#.*$ ]] && continue
+      [[ -z "$line" ]] && continue
+      curl -s "http://localhost:8038/cgi-bin/tasks/cmd?cmd=$(echo "$line" | sed 's/ /%20/g')" > /dev/null 2>&1
+      sleep 0.1
+    done < scripts/ipl.rc
+  else
+    # macOS: Hercules 4.x - use -r flag
+    nohup bash -c "
+      cd \"$TK5\"
+      export PATH=\"$HERC_BIN:\$PATH\"
+      export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
+      export DYLD_LIBRARY_PATH=\"$HERC_LIB:\$DYLD_LIBRARY_PATH\"
+      export HERCULES_LIB=\"$HERC_LIB\"
+      export HERCULES_PATH=\"$HERC_LIB\"
+      tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5.cnf -r scripts/ipl.rc -d
+    " > "$LOGDIR/hercules.log" 2>&1 &
+    disown $!
+  fi
 
   if wait_for "TK5" check_tk5 300; then
     ok "TK5 started — TN3270 on port 3270"
