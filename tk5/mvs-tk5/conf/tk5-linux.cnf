@@ -21,6 +21,7 @@ TZOFFSET +0000
 ARCHMODE S/370
 OSTAILOR QUIET
 DIAG8CMD ENABLE ECHO
+SCRIPT scripts/ipl.rc
 # .-----------------------------Device number
 # |    .------------------------Device type
 # |    |   .--------------------File name

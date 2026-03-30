@@ -309,29 +309,16 @@ start_tk5_svc() {
 
   # Different startup for Linux (Hercules 3.x) vs macOS (Hercules 4.x)
   if [ "$(uname -s)" = "Linux" ]; then
-    # Linux: Hercules 3.13 - use HTTP API for IPL commands
+    # Linux: Hercules 3.13 - SCRIPT directive in tk5-linux.cnf handles IPL
+    # Keep stdin open with tail -f to prevent Hercules from exiting
     nohup bash -c "
       cd \"$TK5\"
       export PATH=\"$HERC_BIN:\$PATH\"
       export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
       export HERCULES_LIB=\"$HERC_LIB\"
-      export HERCULES_PATH=\"$HERC_LIB\"
-      \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
+      tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
     " > "$LOGDIR/hercules.log" 2>&1 &
-    HERC_PID=$!
-    disown
-    
-    # Wait for HTTP API to be ready
-    sleep 3
-    
-    # Send IPL commands via HTTP API
-    cd "$TK5"
-    while IFS= read -r line; do
-      [[ "$line" =~ ^#.*$ ]] && continue
-      [[ -z "$line" ]] && continue
-      curl -s "http://localhost:8038/cgi-bin/tasks/cmd?cmd=$(echo "$line" | sed 's/ /%20/g')" > /dev/null 2>&1
-      sleep 0.1
-    done < scripts/ipl.rc
+    disown $!
   else
     # macOS: Hercules 4.x - use -r flag
     nohup bash -c "
