@@ -479,24 +479,24 @@ async def process_chat(user_message: str) -> dict:
 
         return result
 
-    # Check if Ollama is running
-    if not await check_ollama():
-        result["response"] = """⚠️ **Ollama is not running!**
+    # Check if any LLM provider is available
+    _llm = None
+    try:
+        from app.services.llm_provider import get_llm_service
+        _llm = get_llm_service()
+    except Exception:
+        pass
 
-Start Ollama with:
-```bash
-ollama serve
-```
+    if _llm is None or not await _llm.check_available():
+        if not await check_ollama():
+            result["response"] = """⚠️ **No LLM available!**
 
-Or install it:
-```bash
-brew install ollama
-ollama pull llama3.1:8b
-ollama serve
-```"""
-        return result
+Start Ollama: `ollama serve`  
+Or set a Groq API key via the model picker on the home page."""
+            return result
+        _llm = None  # Fall through to direct Ollama call below
 
-    # Regular chat - send to Ollama
+    # Regular chat - route to best available provider
     context = ""
 
     # Query RAG for relevant knowledge
@@ -525,8 +525,11 @@ ollama serve
         "content": full_message
     })
 
-    # Call Ollama
-    assistant_message = await chat_with_ollama(conversation_history)
+    # Call LLM (Groq or Ollama based on provider config)
+    if _llm is not None:
+        assistant_message = await _llm.chat_simple(conversation_history)
+    else:
+        assistant_message = await chat_with_ollama(conversation_history)
 
     conversation_history.append({
         "role": "assistant",
