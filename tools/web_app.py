@@ -2581,7 +2581,7 @@ async def api_rag_query(request: Request):
 async def api_llm_status():
     """Get status of all LLM providers"""
     from app.services.ollama import get_ollama_service
-    from app.services.grok import get_grok_service
+    from app.services.grok import get_grok_service, GROK_MODELS
     from app.services.llm_provider import get_llm_service
     
     ollama = get_ollama_service()
