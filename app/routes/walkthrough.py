@@ -956,6 +956,30 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
                     return
                 continue
 
+            # ── VTAM USS screen "Logon ===>" ──
+            if ("LOGON ===>" in screen or "Logon ===>" in screen) and "IKJ56400" not in upper:
+                logger.info(f"Login attempt {attempt}: VTAM USS screen, typing {userid}")
+                send_terminal_key("home")
+                self._sleep(0.3)
+                send_terminal_key("eraseeof")
+                self._sleep(0.3)
+                send_terminal_key("string", userid)
+                send_terminal_key("enter")
+                self._sleep(4)
+                screen = self._read_screen_safe()
+                self.current_screen = screen
+                upper = screen.upper()
+                # After entering userid, may get password prompt or IKJ56400
+                if "PASSWORD" in upper or "IKJ56476" in upper or "ENTER CURRENT" in upper:
+                    send_terminal_key("string", password)
+                    send_terminal_key("enter")
+                    self._sleep(4)
+                    screen = self._press_through_screens()
+                    if self._is_logged_in(screen.upper()):
+                        self._ensure_ispf_libraries(userid)
+                        return
+                continue
+
             # ── IKJ56400A "ENTER LOGON OR LOGOFF" ──
             if "IKJ56400" in upper or "ENTER LOGON OR LOGOFF" in upper:
                 reconnect = "IN USE" in upper or "LOGON REJECTED" in upper
