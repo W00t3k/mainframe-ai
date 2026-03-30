@@ -288,6 +288,7 @@ start_tk5_svc() {
   fi
 
   pkill -9 s3270 2>/dev/null
+  mkdir -p "$TK5/log" 2>/dev/null
   > "$TK5/log/hardcopy.log" 2>/dev/null || true
 
   # Restore fresh DASD — kill -9 on Hercules corrupts disk images
