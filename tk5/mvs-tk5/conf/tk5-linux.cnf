@@ -21,7 +21,6 @@ TZOFFSET +0000
 ARCHMODE S/370
 OSTAILOR QUIET
 DIAG8CMD ENABLE ECHO
-SCRIPT scripts/ipl.rc
 # .-----------------------------Device number
 # |    .------------------------Device type
 # |    |   .--------------------File name
@@ -99,7 +98,7 @@ INCLUDE ${CNF101A:=conf}/tk5_${REP101A:=default}${CMD101A}.cnf
 #
 # TK5 updates
 #
-INCLUDE conf/tk5_updates.cnf
+INCLUDE conf/tk5_updates_linux.cnf
 #
 # local updates
 #

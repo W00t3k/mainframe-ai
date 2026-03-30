@@ -1,0 +1,7 @@
+#
+# Hercules 3.13 compatible TK5 updates
+# Excludes 03 (facility enable - Hercules 4.x only)
+#
+INCLUDE conf/tk5_updates/01
+INCLUDE conf/tk5_updates/02
+# SKIP 03: facility enable is not supported in Hercules 3.13
