@@ -555,119 +555,119 @@ class TerminalKeyRequest(BaseModel):
 # Routes
 @app.get("/", response_class=HTMLResponse)
 async def landing_page(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @app.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
     embed = request.query_params.get("embed") == "1"
-    return templates.TemplateResponse("chat.html", {"request": request, "embed": embed})
+    return templates.TemplateResponse(request, "chat.html", {"embed": embed})
 
 
 @app.get("/connect", response_class=HTMLResponse)
 async def connect_page(request: Request):
-    return templates.TemplateResponse("chat.html", {"request": request})
+    return templates.TemplateResponse(request, "chat.html")
 
 
 @app.get("/terminal", response_class=HTMLResponse)
 async def terminal_page(request: Request):
-    return templates.TemplateResponse("terminal.html", {"request": request})
+    return templates.TemplateResponse(request, "terminal.html")
 
 @app.get("/labs", response_class=HTMLResponse)
 async def labs_page(request: Request):
-    return templates.TemplateResponse("labs.html", {"request": request})
+    return templates.TemplateResponse(request, "labs.html")
 
 
 @app.get("/scanner", response_class=HTMLResponse)
 async def scanner_page(request: Request):
-    return templates.TemplateResponse("scanner.html", {"request": request})
+    return templates.TemplateResponse(request, "scanner.html")
 
 
 @app.get("/screencaps", response_class=HTMLResponse)
 async def screencaps_page(request: Request):
-    return templates.TemplateResponse("screencaps.html", {"request": request})
+    return templates.TemplateResponse(request, "screencaps.html")
 
 
 @app.get("/rag", response_class=HTMLResponse)
 async def rag_page(request: Request):
-    return templates.TemplateResponse("rag.html", {"request": request})
+    return templates.TemplateResponse(request, "rag.html")
 
 @app.get("/architecture", response_class=HTMLResponse)
 async def architecture_page(request: Request):
-    return templates.TemplateResponse("architecture.html", {"request": request})
+    return templates.TemplateResponse(request, "architecture.html")
 
 @app.get("/docs", response_class=HTMLResponse)
 async def docs_page(request: Request):
-    return templates.TemplateResponse("docs.html", {"request": request})
+    return templates.TemplateResponse(request, "docs.html")
 
 
 @app.get("/abstract-models", response_class=HTMLResponse)
 async def abstract_models_page(request: Request):
-    return templates.TemplateResponse("abstract_models.html", {"request": request})
+    return templates.TemplateResponse(request, "abstract_models.html")
 
 
 @app.get("/tutor", response_class=HTMLResponse)
 async def tutor_page(request: Request):
     """Red Team Tutor - guided mainframe learning"""
-    return templates.TemplateResponse("tutor.html", {"request": request})
+    return templates.TemplateResponse(request, "tutor.html")
 
 
 @app.get("/recon", response_class=HTMLResponse)
 async def recon_page(request: Request):
     """Recon & Assessment dashboard"""
-    return templates.TemplateResponse("recon.html", {"request": request})
+    return templates.TemplateResponse(request, "recon.html")
 
 
 @app.get("/walkthrough", response_class=HTMLResponse)
 async def walkthrough_page(request: Request):
     """Autonomous mainframe walkthrough"""
-    return templates.TemplateResponse("walkthrough.html", {"request": request})
+    return templates.TemplateResponse(request, "walkthrough.html")
 
 
 @app.get("/slides", response_class=HTMLResponse)
 async def slides_page(request: Request):
     """Conference slide deck"""
-    return templates.TemplateResponse("slides.html", {"request": request})
+    return templates.TemplateResponse(request, "slides.html")
 
 
 @app.get("/video", response_class=HTMLResponse)
 async def video_page(request: Request):
-    return templates.TemplateResponse("video.html", {"request": request})
+    return templates.TemplateResponse(request, "video.html")
 
 
 @app.get("/ftp", response_class=HTMLResponse)
 async def ftp_page(request: Request):
-    return templates.TemplateResponse("ftp.html", {"request": request})
+    return templates.TemplateResponse(request, "ftp.html")
 
 
 @app.get("/rakf", response_class=HTMLResponse)
 async def rakf_page(request: Request):
-    return templates.TemplateResponse("rakf.html", {"request": request})
+    return templates.TemplateResponse(request, "rakf.html")
 
 
 @app.get("/notes", response_class=HTMLResponse)
 async def notes_page(request: Request):
-    return templates.TemplateResponse("notes.html", {"request": request})
+    return templates.TemplateResponse(request, "notes.html")
 
 
 @app.get("/tutorials", response_class=HTMLResponse)
 async def tutorials_page(request: Request):
-    return templates.TemplateResponse("tutorials.html", {"request": request})
+    return templates.TemplateResponse(request, "tutorials.html")
 
 
 @app.get("/abstract", response_class=HTMLResponse)
 async def abstract_page(request: Request):
-    return templates.TemplateResponse("abstract.html", {"request": request})
+    return templates.TemplateResponse(request, "abstract.html")
 
 
 @app.get("/presentation", response_class=HTMLResponse)
 async def presentation_page(request: Request):
-    return templates.TemplateResponse("presentation.html", {"request": request})
+    return templates.TemplateResponse(request, "presentation.html")
 
 
 @app.get("/uss-editor", response_class=HTMLResponse)
 async def uss_editor_page(request: Request):
-    return templates.TemplateResponse("uss_editor.html", {"request": request})
+    return templates.TemplateResponse(request, "uss_editor.html")
 
 
 # ============================================================================
@@ -2765,7 +2765,7 @@ async def _pull_model_background(ollama_url: str, model: str):
 @app.get("/graph", response_class=HTMLResponse)
 async def graph_page(request: Request):
     """Trust Graph visualization page"""
-    return templates.TemplateResponse("graph.html", {"request": request})
+    return templates.TemplateResponse(request, "graph.html")
 
 
 @app.get("/api/graph/stats")

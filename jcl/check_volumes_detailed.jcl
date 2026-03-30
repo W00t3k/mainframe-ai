@@ -1,0 +1,9 @@
+//VOLDET  JOB (1),VOLDET,CLASS=A,MSGCLASS=X,
+//         USER=HERC01,PASSWORD=CUL8TR
+//* Check detailed volume status
+//STEP1    EXEC PGM=IKJEFT01
+//SYSTSPRT DD  SYSOUT=*
+//SYSTSIN  DD  *
+D U,ALL
+D M=ALL
+/*

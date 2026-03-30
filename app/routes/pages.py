@@ -23,38 +23,38 @@ templates = Jinja2Templates(directory=config.TEMPLATES_DIR)
 @router.get("/", response_class=HTMLResponse)
 async def landing_page(request: Request):
     """Landing page."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request, "index.html")
 
 
 @router.get("/chat", response_class=HTMLResponse)
 async def chat_page(request: Request):
     """Chat interface page."""
     embed = request.query_params.get("embed") == "1"
-    return templates.TemplateResponse("chat.html", {"request": request, "embed": embed})
+    return templates.TemplateResponse(request, "chat.html", {"embed": embed})
 
 
 @router.get("/connect", response_class=HTMLResponse)
 async def connect_page(request: Request):
     """Connection page (alias for chat)."""
-    return templates.TemplateResponse("chat.html", {"request": request})
+    return templates.TemplateResponse(request, "chat.html")
 
 
 @router.get("/terminal", response_class=HTMLResponse)
 async def terminal_page(request: Request):
     """Terminal emulator page."""
-    return templates.TemplateResponse("terminal.html", {"request": request})
+    return templates.TemplateResponse(request, "terminal.html")
 
 
 @router.get("/labs", response_class=HTMLResponse)
 async def labs_page(request: Request):
     """Labs page."""
-    return templates.TemplateResponse("labs.html", {"request": request})
+    return templates.TemplateResponse(request, "labs.html")
 
 
 @router.get("/scanner", response_class=HTMLResponse)
 async def scanner_page(request: Request):
     """Scanner page."""
-    return templates.TemplateResponse("scanner.html", {"request": request})
+    return templates.TemplateResponse(request, "scanner.html")
 
 
 @router.get("/screencaps")
@@ -67,19 +67,19 @@ async def screencaps_page():
 @router.get("/rag", response_class=HTMLResponse)
 async def rag_page(request: Request):
     """RAG knowledge base page."""
-    return templates.TemplateResponse("rag.html", {"request": request})
+    return templates.TemplateResponse(request, "rag.html")
 
 
 @router.get("/architecture", response_class=HTMLResponse)
 async def architecture_page(request: Request):
     """Architecture documentation page."""
-    return templates.TemplateResponse("architecture.html", {"request": request})
+    return templates.TemplateResponse(request, "architecture.html")
 
 
 @router.get("/docs", response_class=HTMLResponse)
 async def docs_page(request: Request):
     """Documentation page."""
-    return templates.TemplateResponse("docs.html", {"request": request})
+    return templates.TemplateResponse(request, "docs.html")
 
 
 @router.get("/deck")
@@ -92,7 +92,7 @@ async def deck_download():
 @router.get("/video", response_class=HTMLResponse)
 async def video_page(request: Request):
     """Video demo page."""
-    return templates.TemplateResponse("video.html", {"request": request})
+    return templates.TemplateResponse(request, "video.html")
 
 
 @router.get("/video/file")
@@ -106,49 +106,49 @@ async def video_file():
 @router.get("/abstract", response_class=HTMLResponse)
 async def abstract_page(request: Request):
     """Conference abstract page."""
-    return templates.TemplateResponse("abstract.html", {"request": request})
+    return templates.TemplateResponse(request, "abstract.html")
 
 
 @router.get("/abstract-models", response_class=HTMLResponse)
 async def abstract_models_page(request: Request):
     """Abstract models documentation page."""
-    return templates.TemplateResponse("abstract_models.html", {"request": request})
+    return templates.TemplateResponse(request, "abstract_models.html")
 
 
 @router.get("/tutor", response_class=HTMLResponse)
 async def tutor_page(request: Request):
     """Red Team Tutor page."""
-    return templates.TemplateResponse("tutor.html", {"request": request})
+    return templates.TemplateResponse(request, "tutor.html")
 
 
 @router.get("/recon", response_class=HTMLResponse)
 async def recon_page(request: Request):
     """Recon & Assessment dashboard."""
-    return templates.TemplateResponse("recon.html", {"request": request})
+    return templates.TemplateResponse(request, "recon.html")
 
 
 @router.get("/walkthrough", response_class=HTMLResponse)
 async def walkthrough_page(request: Request):
     """Autonomous walkthrough page."""
-    return templates.TemplateResponse("walkthrough.html", {"request": request})
+    return templates.TemplateResponse(request, "walkthrough.html")
 
 
 @router.get("/slides", response_class=HTMLResponse)
 async def slides_page(request: Request):
     """Conference slide deck."""
-    return templates.TemplateResponse("slides.html", {"request": request})
+    return templates.TemplateResponse(request, "slides.html")
 
 
 @router.get("/graph", response_class=HTMLResponse)
 async def graph_page(request: Request):
     """Trust Graph visualization page."""
-    return templates.TemplateResponse("graph.html", {"request": request})
+    return templates.TemplateResponse(request, "graph.html")
 
 
 @router.get("/presentation", response_class=HTMLResponse)
 async def presentation_page(request: Request):
     """Teaching presentation slide deck."""
-    return templates.TemplateResponse("presentation.html", {"request": request})
+    return templates.TemplateResponse(request, "presentation.html")
 
 
 @router.get("/api/sysinfo")
