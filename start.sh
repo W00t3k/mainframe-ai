@@ -121,9 +121,22 @@ detect_model() {
 
 # ── Detect Hercules binary ─────────────────────────────
 detect_hercules() {
+  # On macOS, prefer system Homebrew Hercules (ARM64 native, has proper device
+  # modules in /opt/homebrew/lib/hercules/). The bundled x86_64 binary has only
+  # .la stubs — no actual .dylib device modules — so all devices fail to load.
+  if [ "$(uname -s)" = "Darwin" ] && command -v hercules &>/dev/null; then
+    HERC_BIN="$(dirname "$(command -v hercules)")"
+    # Homebrew device modules directory
+    if [ -d "/opt/homebrew/lib/hercules" ]; then
+      HERC_LIB="/opt/homebrew/lib/hercules"
+    else
+      HERC_LIB=""
+    fi
+    return
+  fi
+
   HERC_OS=""
   case "$(uname -s)" in
-    Darwin) HERC_OS="darwin" ;;
     Linux)
       case "$(uname -m)" in
         x86_64)  HERC_OS="linux/64" ;;
@@ -134,12 +147,13 @@ detect_hercules() {
       esac ;;
   esac
 
-  HERC_BIN="$TK5/hercules/$HERC_OS/bin"
-  HERC_LIB="$TK5/hercules/$HERC_OS/lib"
+  if [ -n "$HERC_OS" ]; then
+    HERC_BIN="$TK5/hercules/$HERC_OS/bin"
+    HERC_LIB="$TK5/hercules/$HERC_OS/lib"
+    chmod +x "$HERC_BIN/hercules" 2>/dev/null
+  fi
 
-  chmod +x "$HERC_BIN/hercules" 2>/dev/null
-
-  if [ ! -f "$HERC_BIN/hercules" ]; then
+  if [ -z "$HERC_OS" ] || [ ! -f "$HERC_BIN/hercules" ]; then
     if command -v hercules &>/dev/null; then
       HERC_BIN="$(dirname "$(command -v hercules)")"
       HERC_LIB=""
@@ -304,13 +318,13 @@ start_tk5_svc() {
     export PATH=\"$HERC_BIN:\$PATH\"
     export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
     export DYLD_LIBRARY_PATH=\"$HERC_LIB:\$DYLD_LIBRARY_PATH\"
-    export HERCULES_LIB=\"$HERC_LIB/hercules\"
-    export HERCULES_PATH=\"$HERC_LIB/hercules\"
+    export HERCULES_LIB=\"$HERC_LIB\"
+    export HERCULES_PATH=\"$HERC_LIB\"
     tail -f /dev/null | \"$HERC_BIN/hercules\" -f conf/tk5.cnf -r scripts/ipl.rc -d
   " > "$LOGDIR/hercules.log" 2>&1 &
   disown $!
 
-  if wait_for "TK5" check_tk5 30; then
+  if wait_for "TK5" check_tk5 300; then
     ok "TK5 started — TN3270 on port 3270"
     ok "Login: HERC01 / CUL8TR"
     TK5_OK=1
