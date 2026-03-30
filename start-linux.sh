@@ -58,16 +58,9 @@ fi
 info "Starting Hercules..."
 cd "$TK5"
 
-# Create a simple startup script that pipes IPL commands
-cat > /tmp/herc-start.sh <<'EOF'
-#!/bin/bash
-cd "$1"
-cat scripts/ipl.rc - | hercules -f conf/tk5.cnf -d
-EOF
-chmod +x /tmp/herc-start.sh
-
-# Start Hercules with IPL commands piped to stdin (use Linux-compatible config)
-nohup bash -c "cd '$TK5' && cat scripts/ipl.rc - | hercules -f conf/tk5-linux.cnf -d" > "$LOGDIR/hercules.log" 2>&1 &
+# Start Hercules with IPL commands piped to stdin, then keep stdin open with tail -f
+# This prevents Hercules from exiting when it reaches EOF on stdin
+nohup bash -c "cd '$TK5' && (cat scripts/ipl.rc; tail -f /dev/null) | hercules -f conf/tk5-linux.cnf -d" > "$LOGDIR/hercules.log" 2>&1 &
 HERC_PID=$!
 
 info "Hercules PID: $HERC_PID"
