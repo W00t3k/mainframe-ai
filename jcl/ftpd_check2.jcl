@@ -1,0 +1,6 @@
+//FTPCHK2  JOB (1),'CHECK SYS2.LOADLIB',CLASS=A,MSGCLASS=X,
+//         USER=HERC01,PASSWORD=CUL8TR
+//* Try to allocate SYS2.LOADLIB - will fail with JCL error if missing
+//STEP1    EXEC PGM=IEFBR14
+//DD1      DD   DSN=SYS2.LOADLIB,DISP=SHR
+/*

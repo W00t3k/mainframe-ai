@@ -52,3 +52,4 @@ discovery.db-wal
 # Screenshots (runtime)
 static/screenshots/
 .groq_key
+tk5-files.tar.gz
