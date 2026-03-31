@@ -85,7 +85,7 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 | **Tested on** | macOS 14+ (Apple Silicon) | Ubuntu 24.04, Debian 12, Kali, Fedora, Arch |
 | **Shared lib path** | `DYLD_LIBRARY_PATH` | `LD_LIBRARY_PATH` |
 
-`start.sh` auto-detects the platform and uses the correct Hercules binary, library paths, and Python environment. No manual configuration needed.
+`start.sh` and `start-linux.sh` are kept in sync and use the same launcher logic. Both auto-detect the platform and use the correct Hercules binary, library paths, and Python environment.
 
 ---
 
@@ -96,22 +96,22 @@ The install script handles everything: system deps, Python, Ollama, GitHub CLI a
 ```bash
 # If you already have the repo cloned:
 cd mainframe-ai
-chmod +x scripts/install.sh start.sh scripts/mvs.sh
+chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh
 ./scripts/install.sh
 
 # If starting fresh on a new server (private repo — requires GitHub access):
 # Option 1: GitHub CLI
 sudo apt install gh -y && gh auth login
 gh repo clone W00t3k/mainframe-ai && cd mainframe-ai
-chmod +x scripts/install.sh start.sh scripts/mvs.sh && ./scripts/install.sh
+chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh && ./scripts/install.sh
 
 # Option 2: Personal Access Token
 git clone https://<YOUR_TOKEN>@github.com/W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x scripts/install.sh start.sh scripts/mvs.sh && ./scripts/install.sh
+cd mainframe-ai && chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh && ./scripts/install.sh
 
 # Option 3: SSH
 git clone git@github.com:W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x scripts/install.sh start.sh scripts/mvs.sh && ./scripts/install.sh
+cd mainframe-ai && chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh && ./scripts/install.sh
 ```
 
 Supported distros: **Ubuntu, Debian, Kali, Fedora, CentOS/RHEL, Arch, openSUSE**.
@@ -152,13 +152,14 @@ pip install -r requirements.txt
 
 ```bash
 ./start.sh                # Start ALL services (Ollama + TK5 + Web App)
+./start-linux.sh          # Same launcher as start.sh (Linux-friendly name)
 ./start.sh --no-mvs       # Start without TK5 mainframe
 ./start.sh --no-ollama    # Start without Ollama AI
 ./start.sh --kill         # Stop all services
 ./start.sh --status       # Health check dashboard
 ```
 
-`start.sh` does everything:
+`start.sh` / `start-linux.sh` does everything:
 1. **Kills** any existing processes
 2. **Starts Ollama** with memory-saving settings (`OLLAMA_KEEP_ALIVE=5m`)
 3. **Starts TK5 Hercules** with correct binary for your OS/arch
@@ -408,6 +409,7 @@ mainframe-ai/
 ├── logs/                   # Runtime logs (webapp, ollama, hercules)
 ├── run.py                  # Application entry point
 ├── start.sh                # One-script launcher (all services + watchdog)
+├── start-linux.sh          # Linux-named launcher (same logic as start.sh)
 ├── setup.sh                # First-time setup (downloads TK5, validates DASD)
 ├── kill.sh                 # Stop all services
 ├── requirements.txt        # Python dependencies
