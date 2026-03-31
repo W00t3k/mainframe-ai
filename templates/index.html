@@ -489,17 +489,31 @@ async function checkStatus() {
 checkStatus();
 setInterval(checkStatus, 5000);
 
-// Auto-connect on page load — show boot sequence while waiting
+// Auto-connect on page load — retry until MVS is ready (up to 5 min)
 (async function autoConnect() {
+    const target = 'localhost:3270';
+    const maxWait = 300000;
+    const retryMs = 10000;
+    let elapsed = 0;
     try {
         const s = await fetch('/api/status');
         const d = await s.json();
-        if (!d.connected) {
-            // Show matrix boot sequence while connecting
-            startBootSequence();
+        if (d.connected) {
+            isConnected = true;
+            showTerminal();
+            updateConnBtn();
+            updateMfStatus('online');
+            await refreshScreen();
+            setTimeout(triggerAiExplain, 500);
+            return;
+        }
+    } catch(e) {}
+    startBootSequence();
+    while (elapsed < maxWait) {
+        try {
             const res = await fetch('/api/terminal/connect', {
                 method:'POST', headers:{'Content-Type':'application/json'},
-                body: JSON.stringify({target: 'localhost:3270'})
+                body: JSON.stringify({target})
             });
             const data = await res.json();
             if (data.success) {
@@ -510,17 +524,13 @@ setInterval(checkStatus, 5000);
                 updateConnBtn();
                 updateMfStatus('online');
                 setTimeout(triggerAiExplain, 500);
+                return;
             }
-        } else {
-            isConnected = true;
-            showTerminal();
-            updateConnBtn();
-            updateMfStatus('online');
-            await refreshScreen();
-            setTimeout(triggerAiExplain, 500);
-        }
-    } catch(e) {
-        // Connection failed — boot sequence will show waiting state
+            const msg = (data.message || '').toLowerCase();
+            if (!msg.includes('3270') && !msg.includes('rejected') && !msg.includes('refused')) break;
+        } catch(e) {}
+        await new Promise(r => setTimeout(r, retryMs));
+        elapsed += retryMs;
     }
 })();
 
