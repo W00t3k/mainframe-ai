@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from app.config import get_config
-from app.services.ollama import get_ollama_service
+from app.services.llm_provider import get_llm_service
 from app.constants.prompts import RECON_AI_PROMPT, EXPLAIN_SCREEN_PROMPT
 
 router = APIRouter(tags=["recon"])
@@ -238,8 +238,8 @@ async def api_recon_ai_analyze(request: Request):
     context = "\n".join(sections)
     prompt = RECON_AI_PROMPT + "\n\n---\n\n" + context
 
-    ollama = get_ollama_service()
-    ai_response = await ollama.generate(prompt, temperature=0.4, num_predict=2048)
+    llm = get_llm_service()
+    ai_response = await llm.generate(prompt, temperature=0.4, max_tokens=2048)
 
     return JSONResponse({"analysis": ai_response})
 
@@ -267,7 +267,7 @@ async def api_recon_explain_screen(request: Request):
 
     prompt += f"\n\n---\n\nCurrent TN3270 Screen:\n```\n{screen_text}\n```"
 
-    ollama = get_ollama_service()
-    explanation = await ollama.generate(prompt, temperature=0.5, num_predict=1500)
+    llm = get_llm_service()
+    explanation = await llm.generate(prompt, temperature=0.5, max_tokens=1500)
 
     return JSONResponse({"explanation": explanation, "screen": screen_text})

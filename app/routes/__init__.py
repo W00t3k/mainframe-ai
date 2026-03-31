@@ -21,6 +21,7 @@ from .system import router as system_router
 from .methodology import router as methodology_router
 from .kicks import router as kicks_router
 from .llm import router as llm_router
+from .ftp import router as ftp_router
 
 
 def register_routes(app):
@@ -40,3 +41,4 @@ def register_routes(app):
     app.include_router(methodology_router)
     app.include_router(kicks_router, prefix="/api")
     app.include_router(llm_router, prefix="/api")
+    app.include_router(ftp_router, prefix="/api")
