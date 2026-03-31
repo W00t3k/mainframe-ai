@@ -124,6 +124,9 @@ DASD_ARCHIVE_URL="${DASD_ARCHIVE_URL:-}"
 if dasd_has_real_set "$TK5/dasd"; then
   ok "DASD already present in repo"
 else
+  if [ ! -s "$DASD_CACHE" ] && dasd_assemble_bundled_archive "$DASD_CACHE"; then
+    ok "DASD archive assembled from bundled repo parts"
+  fi
   info "Trying DASD archive fallback..."
   DASD_ARCHIVE_USED="$(
     dasd_restore_from_candidates "$TK5/dasd" "$TK5/dasd_backup" \
