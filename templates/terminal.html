@@ -325,28 +325,45 @@
             handleTerminalKey(e);
         });
 
-        // Check initial status — auto-connect if not already connected
-        fetch('/api/status').then(r => r.json()).then(data => {
-            if (data.connected) {
-                connected = true;
-                updateStatus(true, data.host);
-                fetch('/api/terminal/screen').then(r => r.json()).then(s => updateScreen(s));
-            } else {
-                const hostInput = document.getElementById('hostInput');
-                const target = (hostInput && hostInput.value.trim()) || 'localhost:3270';
-                fetch('/api/terminal/connect', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ target })
-                }).then(r => r.json()).then(data => {
+        // Auto-connect with retry — MVS takes 2-5 min to boot on Linux
+        (async function autoConnectWithRetry() {
+            const target = (document.getElementById('hostInput').value.trim()) || 'localhost:3270';
+            const maxWait = 300000; // 5 min
+            const retryMs = 10000;
+            let elapsed = 0;
+            try {
+                const s = await fetch('/api/status');
+                const d = await s.json();
+                if (d.connected) {
+                    connected = true;
+                    updateStatus(true, d.host || target);
+                    fetch('/api/terminal/screen').then(r => r.json()).then(s => updateScreen(s));
+                    return;
+                }
+            } catch(e) {}
+            while (elapsed < maxWait) {
+                try {
+                    const res = await fetch('/api/terminal/connect', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ target })
+                    });
+                    const data = await res.json();
                     if (data.success) {
                         connected = true;
                         updateStatus(true, target);
                         updateScreen(data.screen_data);
+                        return;
                     }
-                }).catch(() => {});
+                    const msg = (data.message || '').toLowerCase();
+                    if (!msg.includes('3270') && !msg.includes('rejected') && !msg.includes('refused')) break;
+                    const sb = document.getElementById('termStatusBar');
+                    if (sb) sb.textContent = 'Waiting for MVS to boot… (' + Math.round(elapsed/1000) + 's)';
+                } catch(e) {}
+                await new Promise(r => setTimeout(r, retryMs));
+                elapsed += retryMs;
             }
-        });
+        })();
 
         async function pollScreen() {
             if (!connected) return;
