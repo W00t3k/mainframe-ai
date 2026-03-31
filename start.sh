@@ -35,6 +35,8 @@ ok()   { echo -e "  ${GRN}✓${RST} $1"; }
 fail() { echo -e "  ${RED}✗${RST} $1"; }
 info() { echo -e "  ${YEL}…${RST} $1"; }
 
+. "$DIR/scripts/dasd.sh"
+
 # ── Auto-detect Python ─────────────────────────────────
 detect_python() {
   if [ -f "$DIR/.venv/bin/python" ]; then
@@ -394,34 +396,20 @@ start_tk5_svc() {
 
   # Restore fresh DASD — kill -9 on Hercules corrupts disk images
   DASD_BACKUP="$TK5/dasd_backup"
-  DASD_CACHE="$DIR/.cache/tk5-files.tar.gz"
-  if [ -d "$DASD_BACKUP" ] && [ "$(ls "$DASD_BACKUP"/*.390 2>/dev/null | wc -l)" -gt 0 ]; then
+  if dasd_has_real_set "$DASD_BACKUP"; then
+    mkdir -p "$TK5/dasd"
     cp -f "$DASD_BACKUP"/* "$TK5/dasd/" 2>/dev/null
     ok "DASD restored from dasd_backup/"
-  elif [ -f "$DASD_CACHE" ]; then
-    mkdir -p "$TK5/dasd" "$TK5/dasd_backup"
-    tar xzf "$DASD_CACHE" -C "$TK5/dasd_backup/" 2>/dev/null
-    cp -f "$TK5/dasd_backup/"* "$TK5/dasd/" 2>/dev/null || true
-    ok "DASD restored from cache"
+  elif dasd_has_real_set "$TK5/dasd"; then
+    dasd_seed_backup "$TK5/dasd" "$DASD_BACKUP"
+    ok "DASD verified from repo checkout"
   else
-    info "Downloading DASD from GitHub release (public)..."
-    mkdir -p "$DIR/.cache"
-    rm -f "$DASD_CACHE"
-    DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-dasd/tk5-dasd.tar.gz"
-    if command -v curl &>/dev/null; then
-      curl -fsSL "$DASD_URL" -o "$DASD_CACHE" 2>/dev/null
-    elif command -v wget &>/dev/null; then
-      wget -q "$DASD_URL" -O "$DASD_CACHE" 2>/dev/null
-    fi
-    if [ -f "$DASD_CACHE" ] && [ -s "$DASD_CACHE" ]; then
-      mkdir -p "$TK5/dasd" "$TK5/dasd_backup"
-      tar xzf "$DASD_CACHE" -C "$TK5/dasd_backup/" 2>/dev/null
-      cp -f "$TK5/dasd_backup/"* "$TK5/dasd/" 2>/dev/null || true
-      ok "DASD restored from GitHub release"
-    else
-      fail "Could not download DASD"
-      info "Run: sudo ./setup.sh"
-    fi
+    fail "DASD images missing from repo checkout"
+    info "This repo now expects DASD files via Git LFS, not a release tarball."
+    info "Run: git lfs pull"
+    info "Expected: $(dasd_expected_count) configured DASD images in tk5/mvs-tk5/dasd/"
+    TK5_OK=0
+    return 1
   fi
 
   info "Starting Hercules ($(uname -s)/$(uname -m))..."
@@ -444,7 +432,7 @@ start_tk5_svc() {
     " > "$LOGDIR/hercules.log" 2>&1 &
     disown $!
     sleep 3
-    info "DASD check: $(ls "$TK5/dasd/"*.390 2>/dev/null | wc -l) .390 files in dasd/"
+    info "DASD check: $(dasd_real_count "$TK5/dasd")/$(dasd_expected_count) configured images present"
     info "Hercules log (first 10 lines):"
     head -10 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
     detect_python
