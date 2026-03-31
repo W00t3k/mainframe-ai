@@ -13,8 +13,6 @@ set +e
 
 DIR="$(cd "$(dirname "$0")" && pwd)"
 TK5="$DIR/tk5/mvs-tk5"
-DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-dasd/tk5-dasd.tar.gz"
-DASD_TMP="/tmp/tk5-dasd.tar.gz"
 
 RED='\033[0;31m'; GRN='\033[0;32m'; YEL='\033[0;33m'
 CYN='\033[0;36m'; BLD='\033[1m'; RST='\033[0m'
@@ -22,6 +20,8 @@ CYN='\033[0;36m'; BLD='\033[1m'; RST='\033[0m'
 ok()   { echo -e "  ${GRN}✓${RST} $1"; }
 fail() { echo -e "  ${RED}✗${RST} $1"; }
 info() { echo -e "  ${YEL}…${RST} $1"; }
+
+. "$DIR/scripts/dasd.sh"
 
 OS=$(uname -s)
 ARCH=$(uname -m)
@@ -40,7 +40,7 @@ if [ "$OS" = "Darwin" ]; then
     fail "Homebrew not found — install from https://brew.sh"
     exit 1
   fi
-  for pkg in python3 s3270 hercules; do
+  for pkg in python3 s3270 hercules git-lfs; do
     if command -v "$pkg" &>/dev/null; then
       ok "$pkg already installed"
     else
@@ -60,7 +60,7 @@ elif [ "$OS" = "Linux" ]; then
   fi
   apt-get update -qq
   apt-get install -y -qq \
-    hercules python3 python3-pip python3-venv \
+    git git-lfs hercules python3 python3-pip python3-venv \
     curl wget s3270 lsof 2>/dev/null
   ok "Packages installed"
 else
@@ -78,52 +78,64 @@ else
   ok "Virtual env created at .venv/"
 fi
 
-"$DIR/.venv/bin/pip" install -q --upgrade pip
+PIP="$DIR/.venv/bin/pip"
+
+requirements_installed() {
+  local pkg
+  while IFS= read -r pkg; do
+    [ -n "$pkg" ] || continue
+    "$PIP" show "$pkg" >/dev/null 2>&1 || return 1
+  done < <(
+    awk '
+      {
+        sub(/#.*/, "", $0)
+        gsub(/^[[:space:]]+|[[:space:]]+$/, "", $0)
+        if ($0 != "") {
+          split($0, parts, /[<>=!~]/)
+          print parts[1]
+        }
+      }
+    ' "$DIR/requirements.txt"
+  )
+  return 0
+}
+
 if [ -f "$DIR/requirements.txt" ]; then
-  "$DIR/.venv/bin/pip" install -q -r "$DIR/requirements.txt"
-  ok "Python dependencies installed"
+  if requirements_installed; then
+    ok "Python dependencies already satisfied"
+  else
+    info "Installing Python dependencies..."
+    if "$PIP" install -q --disable-pip-version-check -r "$DIR/requirements.txt"; then
+      ok "Python dependencies installed"
+    else
+      fail "Python dependency install failed"
+      info "If offline, rerun setup where PyPI is reachable."
+      exit 1
+    fi
+  fi
 fi
 
 # ── [3/4] DASD Images ─────────────────────────────────
 echo -e "\n${BLD}[3/4] DASD Images${RST}"
 
-# Check if real DASD files already present (>1MB = real, not LFS pointer)
-_dasd_real() {
-  local f
-  for f in "$TK5/dasd/"*.390 "$TK5/dasd/"*.392; do
-    [ -f "$f" ] && [ "$(wc -c < "$f" 2>/dev/null)" -gt 1048576 ] && return 0
-  done
-  return 1
-}
-
-if _dasd_real; then
-  ok "DASD already present"
+if dasd_has_real_set "$TK5/dasd"; then
+  ok "DASD already present in repo"
 else
-  info "Downloading DASD images (~254 MB from public GitHub release)..."
-  if command -v curl &>/dev/null; then
-    curl -fL "$DASD_URL" -o "$DASD_TMP"
+  info "Syncing DASD images from Git LFS..."
+  if dasd_sync_from_lfs && dasd_has_real_set "$TK5/dasd"; then
+    ok "DASD synced from Git LFS"
   else
-    wget "$DASD_URL" -O "$DASD_TMP"
-  fi
-
-  if [ -f "$DASD_TMP" ] && [ -s "$DASD_TMP" ]; then
-    mkdir -p "$TK5/dasd" "$TK5/dasd_backup"
-    tar xzf "$DASD_TMP" -C "$TK5/dasd_backup/" 2>/dev/null
-    cp -f "$TK5/dasd_backup/"* "$TK5/dasd/" 2>/dev/null || true
-    rm -f "$DASD_TMP"
-    ok "DASD extracted and dasd_backup/ seeded"
-  else
-    fail "DASD download failed"
-    info "URL: $DASD_URL"
+    fail "DASD images missing or incomplete after Git LFS sync"
+    info "Run: git lfs pull"
+    info "Expected: $(dasd_expected_count) configured DASD images in tk5/mvs-tk5/dasd/"
     exit 1
   fi
 fi
 
-# Seed dasd_backup/ if empty
-if [ -d "$TK5/dasd" ] && [ ! "$(ls "$TK5/dasd_backup/" 2>/dev/null)" ]; then
-  mkdir -p "$TK5/dasd_backup"
-  cp -f "$TK5/dasd/"* "$TK5/dasd_backup/" 2>/dev/null || true
-  ok "dasd_backup/ seeded"
+# Seed dasd_backup/ if missing or incomplete
+if dasd_has_real_set "$TK5/dasd" && ! dasd_has_real_set "$TK5/dasd_backup"; then
+  dasd_seed_backup "$TK5/dasd" "$TK5/dasd_backup"
+  ok "dasd_backup/ seeded from repo DASD"
 fi
 
 # ── [4/4] Hercules + Permissions ──────────────────────
