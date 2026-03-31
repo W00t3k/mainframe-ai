@@ -49,6 +49,78 @@ dasd_seed_backup() {
   cp -f "$source_dir/"* "$backup_dir/" 2>/dev/null || true
 }
 
+dasd_restore_from_archive() {
+  local archive="$1"
+  local source_dir="${2:-$TK5/dasd}"
+  local backup_dir="${3:-$TK5/dasd_backup}"
+  local tmp_template tmp_dir extracted=""
+
+  [ -f "$archive" ] && [ -s "$archive" ] || return 1
+
+  tmp_template="${TMPDIR:-/tmp}"
+  tmp_template="${tmp_template%/}/mainframe-ai-dasd.XXXXXX"
+  tmp_dir=$(mktemp -d "$tmp_template") || return 1
+
+  if ! tar xzf "$archive" -C "$tmp_dir" >/dev/null 2>&1; then
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  if [ -d "$tmp_dir/dasd" ]; then
+    extracted="$tmp_dir/dasd"
+  elif [ -d "$tmp_dir/tk5/mvs-tk5/dasd" ]; then
+    extracted="$tmp_dir/tk5/mvs-tk5/dasd"
+  fi
+
+  if [ -z "$extracted" ]; then
+    rm -rf "$tmp_dir"
+    return 1
+  fi
+
+  mkdir -p "$source_dir" "$backup_dir"
+  cp -f "$extracted/"* "$backup_dir/" 2>/dev/null || true
+  cp -f "$backup_dir/"* "$source_dir/" 2>/dev/null || true
+  rm -rf "$tmp_dir"
+
+  dasd_has_real_set "$source_dir"
+}
+
+dasd_restore_from_candidates() {
+  local source_dir="${1:-$TK5/dasd}"
+  local backup_dir="${2:-$TK5/dasd_backup}"
+  local archive
+
+  shift 2
+  for archive in "$@"; do
+    [ -n "$archive" ] || continue
+    if dasd_restore_from_archive "$archive" "$source_dir" "$backup_dir"; then
+      printf '%s\n' "$archive"
+      return 0
+    fi
+  done
+
+  return 1
+}
+
+dasd_download_archive() {
+  local url="$1"
+  local output="$2"
+
+  [ -n "$url" ] || return 1
+  mkdir -p "$(dirname "$output")"
+  rm -f "$output"
+
+  if command -v curl >/dev/null 2>&1; then
+    curl -fsSL "$url" -o "$output" >/dev/null 2>&1 || return 1
+  elif command -v wget >/dev/null 2>&1; then
+    wget -q "$url" -O "$output" >/dev/null 2>&1 || return 1
+  else
+    return 1
+  fi
+
+  [ -s "$output" ]
+}
+
 dasd_sync_from_lfs() {
   command -v git >/dev/null 2>&1 || return 1
   git -C "$DIR" rev-parse --show-toplevel >/dev/null 2>&1 || return 1
