@@ -44,7 +44,9 @@ apt-get install -y -qq \
   curl wget \
   s3270 \
   lsof \
+  git-lfs \
   2>/dev/null
+git lfs install --skip-smudge 2>/dev/null || true
 ok "Packages installed"
 
 # ── Python venv + dependencies ────────────────────────
@@ -66,36 +68,37 @@ fi
 
 # ── Download DASD images ──────────────────────────────
 echo -e "\n${BLD}[3/4] DASD images${RST}"
-DASD_CACHE="$DIR/.cache/tk5-files.tar.gz"
 DASD_BACKUP="$TK5/dasd_backup"
-DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-tk5/tk5-files.tar.gz"
 
-if [ -d "$DASD_BACKUP" ] && [ "$(ls "$DASD_BACKUP"/*.298 2>/dev/null | wc -l)" -gt 0 ]; then
-  ok "dasd_backup/ already present — skipping download"
-elif [ -f "$DASD_CACHE" ] && [ -s "$DASD_CACHE" ]; then
-  ok "DASD cache already present at .cache/tk5-files.tar.gz"
+# Check if real DASD already present (not LFS pointers)
+_dasd_real() {
+  local f
+  for f in "$TK5/dasd/"*.390 "$TK5/dasd/"*.392; do
+    [ -f "$f" ] && [ "$(wc -c < "$f" 2>/dev/null)" -gt 1048576 ] && return 0
+  done
+  return 1
+}
+
+if _dasd_real; then
+  ok "DASD already present (real images)"
 else
-  info "Downloading DASD from GitHub (public release, ~65 MB)..."
-  mkdir -p "$DIR/.cache"
-  if command -v curl &>/dev/null; then
-    curl -fL "$DASD_URL" -o "$DASD_CACHE"
+  info "Fetching DASD via git LFS (public repo, ~200 MB)..."
+  git lfs pull 2>&1 | tail -3
+  if _dasd_real; then
+    ok "DASD fetched via git LFS"
   else
-    wget "$DASD_URL" -O "$DASD_CACHE"
+    fail "git lfs pull did not produce real DASD files"
+    info "Try manually: git lfs install && git lfs pull"
+    exit 1
   fi
-  ok "Downloaded to .cache/tk5-files.tar.gz"
 fi
 
-# Extract into dasd/ and seed dasd_backup/
-if [ -f "$DASD_CACHE" ] && [ -s "$DASD_CACHE" ]; then
-  mkdir -p "$TK5/dasd" "$TK5/dasd_backup"
-  tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
-  cp -f "$TK5"/dasd/*.390 "$TK5/dasd_backup/" 2>/dev/null || true
-  cp -f "$TK5"/dasd/*.391 "$TK5/dasd_backup/" 2>/dev/null || true
-  cp -f "$TK5"/dasd/*.392 "$TK5/dasd_backup/" 2>/dev/null || true
-  cp -f "$TK5"/dasd/*.393 "$TK5/dasd_backup/" 2>/dev/null || true
-  cp -f "$TK5"/dasd/*.298 "$TK5/dasd_backup/" 2>/dev/null || true
-  ok "DASD extracted and dasd_backup/ seeded"
-fi
+# Seed dasd_backup/ from live dasd/
+mkdir -p "$TK5/dasd_backup"
+for ext in 190 191 248 249 290 291 292 293 350 380 390 391 392 393; do
+  cp -f "$TK5"/dasd/*.${ext} "$TK5/dasd_backup/" 2>/dev/null || true
+done
+ok "dasd_backup/ seeded from dasd/"
 
 # ── Permissions ───────────────────────────────────────
 echo -e "\n${BLD}[4/4] Permissions${RST}"
