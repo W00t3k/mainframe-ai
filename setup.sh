@@ -118,17 +118,37 @@ fi
 # ── [3/4] DASD Images ─────────────────────────────────
 echo -e "\n${BLD}[3/4] DASD Images${RST}"
 
+DASD_CACHE="$DIR/.cache/tk5-files.tar.gz"
+DASD_ARCHIVE_URL="${DASD_ARCHIVE_URL:-}"
+
 if dasd_has_real_set "$TK5/dasd"; then
   ok "DASD already present in repo"
 else
-  info "Syncing DASD images from Git LFS..."
-  if dasd_sync_from_lfs && dasd_has_real_set "$TK5/dasd"; then
-    ok "DASD synced from Git LFS"
+  info "Trying DASD archive fallback..."
+  DASD_ARCHIVE_USED="$(
+    dasd_restore_from_candidates "$TK5/dasd" "$TK5/dasd_backup" \
+      "$DIR/tk5-files.tar.gz" \
+      "$DASD_CACHE" \
+      "$DIR/tk5-dasd.tar.gz"
+  )"
+  if [ -n "$DASD_ARCHIVE_USED" ]; then
+    ok "DASD restored from archive: $(basename "$DASD_ARCHIVE_USED")"
+  elif [ -n "$DASD_ARCHIVE_URL" ] && \
+       dasd_download_archive "$DASD_ARCHIVE_URL" "$DASD_CACHE" && \
+       dasd_restore_from_archive "$DASD_CACHE" "$TK5/dasd" "$TK5/dasd_backup"; then
+    ok "DASD restored from downloaded archive"
   else
-    fail "DASD images missing or incomplete after Git LFS sync"
-    info "Run: git lfs pull"
-    info "Expected: $(dasd_expected_count) configured DASD images in tk5/mvs-tk5/dasd/"
-    exit 1
+    info "Archive fallback unavailable — trying Git LFS..."
+    if dasd_sync_from_lfs && dasd_has_real_set "$TK5/dasd"; then
+      ok "DASD synced from Git LFS"
+    else
+      fail "DASD images missing after archive and Git LFS fallback"
+      info "Place tk5-files.tar.gz in the repo root or .cache/"
+      [ -n "$DASD_ARCHIVE_URL" ] || info "Optional: set DASD_ARCHIVE_URL to a downloadable DASD .tar.gz"
+      info "Run: git lfs pull"
+      info "Expected: $(dasd_expected_count) configured DASD images in tk5/mvs-tk5/dasd/"
+      exit 1
+    fi
   fi
 fi
 

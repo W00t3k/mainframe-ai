@@ -396,6 +396,8 @@ start_tk5_svc() {
 
   # Restore fresh DASD — kill -9 on Hercules corrupts disk images
   DASD_BACKUP="$TK5/dasd_backup"
+  DASD_CACHE="$DIR/.cache/tk5-files.tar.gz"
+  DASD_ARCHIVE_URL="${DASD_ARCHIVE_URL:-}"
   if dasd_has_real_set "$DASD_BACKUP"; then
     mkdir -p "$TK5/dasd"
     cp -f "$DASD_BACKUP"/* "$TK5/dasd/" 2>/dev/null
@@ -404,12 +406,35 @@ start_tk5_svc() {
     dasd_seed_backup "$TK5/dasd" "$DASD_BACKUP"
     ok "DASD verified from repo checkout"
   else
-    fail "DASD images missing from repo checkout"
-    info "This repo now expects DASD files via Git LFS, not a release tarball."
-    info "Run: git lfs pull"
-    info "Expected: $(dasd_expected_count) configured DASD images in tk5/mvs-tk5/dasd/"
-    TK5_OK=0
-    return 1
+    info "Repo DASD incomplete — trying DASD archive fallback..."
+    DASD_ARCHIVE_USED="$(
+      dasd_restore_from_candidates "$TK5/dasd" "$DASD_BACKUP" \
+        "$DIR/tk5-files.tar.gz" \
+        "$DASD_CACHE" \
+        "$DIR/tk5-dasd.tar.gz"
+    )"
+    if [ -n "$DASD_ARCHIVE_USED" ]; then
+      ok "DASD restored from archive: $(basename "$DASD_ARCHIVE_USED")"
+    elif [ -n "$DASD_ARCHIVE_URL" ] && \
+         dasd_download_archive "$DASD_ARCHIVE_URL" "$DASD_CACHE" && \
+         dasd_restore_from_archive "$DASD_CACHE" "$TK5/dasd" "$DASD_BACKUP"; then
+      ok "DASD restored from downloaded archive"
+    else
+      info "Archive fallback unavailable — trying Git LFS..."
+      dasd_sync_from_lfs >/dev/null 2>&1 || true
+      if dasd_has_real_set "$TK5/dasd"; then
+        dasd_seed_backup "$TK5/dasd" "$DASD_BACKUP"
+        ok "DASD synced from Git LFS"
+      else
+        fail "DASD images missing from repo checkout"
+        info "Or place tk5-files.tar.gz in the repo root or .cache/"
+        [ -n "$DASD_ARCHIVE_URL" ] || info "Optional: set DASD_ARCHIVE_URL to a downloadable DASD .tar.gz"
+        info "Run: git lfs pull"
+        info "Expected: $(dasd_expected_count) configured DASD images in tk5/mvs-tk5/dasd/"
+        TK5_OK=0
+        return 1
+      fi
+    fi
   fi
 
   info "Starting Hercules ($(uname -s)/$(uname -m))..."
