@@ -82,13 +82,25 @@ _dasd_real() {
 if _dasd_real; then
   ok "DASD already present (real images)"
 else
-  info "Fetching DASD via git LFS (public repo, ~200 MB)..."
-  git lfs pull 2>&1 | tail -3
-  if _dasd_real; then
-    ok "DASD fetched via git LFS"
+  DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-dasd/tk5-dasd.tar.gz"
+  DASD_TMP="/tmp/tk5-dasd.tar.gz"
+  info "Downloading DASD (~254 MB)..."
+  if command -v curl &>/dev/null; then
+    curl -fL "$DASD_URL" -o "$DASD_TMP"
   else
-    fail "git lfs pull did not produce real DASD files"
-    info "Try manually: git lfs install && git lfs pull"
+    wget "$DASD_URL" -O "$DASD_TMP"
+  fi
+  if [ -f "$DASD_TMP" ] && [ -s "$DASD_TMP" ]; then
+    mkdir -p "$TK5/dasd"
+    tar xzf "$DASD_TMP" -C "$TK5/dasd_backup/" 2>/dev/null || tar xzf "$DASD_TMP" -C "$TK5/dasd/" 2>/dev/null
+    cp -f "$TK5"/dasd_backup/* "$TK5/dasd/" 2>/dev/null || true
+    rm -f "$DASD_TMP"
+  fi
+  if _dasd_real; then
+    ok "DASD downloaded and extracted"
+  else
+    fail "DASD download failed"
+    info "URL: $DASD_URL"
     exit 1
   fi
 fi
