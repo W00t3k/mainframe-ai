@@ -295,24 +295,28 @@ start_tk5_svc() {
     cp -f "$DASD_BACKUP"/* "$TK5/dasd/" 2>/dev/null
     ok "DASD restored from dasd_backup/"
   elif [ -f "$DASD_CACHE" ]; then
-    tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
+    mkdir -p "$TK5/dasd" "$TK5/dasd_backup"
+    tar xzf "$DASD_CACHE" -C "$TK5/dasd_backup/" 2>/dev/null
+    cp -f "$TK5/dasd_backup/"* "$TK5/dasd/" 2>/dev/null || true
     ok "DASD restored from cache"
   else
     info "Downloading DASD from GitHub release (public)..."
     mkdir -p "$DIR/.cache"
     rm -f "$DASD_CACHE"
-    DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-tk5/tk5-files.tar.gz"
+    DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-dasd/tk5-dasd.tar.gz"
     if command -v curl &>/dev/null; then
       curl -fsSL "$DASD_URL" -o "$DASD_CACHE" 2>/dev/null
     elif command -v wget &>/dev/null; then
       wget -q "$DASD_URL" -O "$DASD_CACHE" 2>/dev/null
     fi
     if [ -f "$DASD_CACHE" ] && [ -s "$DASD_CACHE" ]; then
-      tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
+      mkdir -p "$TK5/dasd" "$TK5/dasd_backup"
+      tar xzf "$DASD_CACHE" -C "$TK5/dasd_backup/" 2>/dev/null
+      cp -f "$TK5/dasd_backup/"* "$TK5/dasd/" 2>/dev/null || true
       ok "DASD restored from GitHub release"
     else
       fail "Could not download DASD"
-      info "Manual: curl -fsSL $DASD_URL -o .cache/tk5-files.tar.gz"
+      info "Run: sudo ./setup.sh"
     fi
   fi
 
