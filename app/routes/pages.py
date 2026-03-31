@@ -151,6 +151,36 @@ async def presentation_page(request: Request):
     return templates.TemplateResponse(request, "presentation.html")
 
 
+@router.get("/ftp", response_class=HTMLResponse)
+async def ftp_page(request: Request):
+    """FTP client page."""
+    return templates.TemplateResponse(request, "ftp.html")
+
+
+@router.get("/rakf", response_class=HTMLResponse)
+async def rakf_page(request: Request):
+    """RAKF security page."""
+    return templates.TemplateResponse(request, "rakf.html")
+
+
+@router.get("/notes", response_class=HTMLResponse)
+async def notes_page(request: Request):
+    """Notes page."""
+    return templates.TemplateResponse(request, "notes.html")
+
+
+@router.get("/tutorials", response_class=HTMLResponse)
+async def tutorials_page(request: Request):
+    """Tutorials page."""
+    return templates.TemplateResponse(request, "tutorials.html")
+
+
+@router.get("/uss-editor", response_class=HTMLResponse)
+async def uss_editor_page(request: Request):
+    """USS editor page."""
+    return templates.TemplateResponse(request, "uss_editor.html")
+
+
 @router.get("/api/sysinfo")
 async def sysinfo():
     """System info for sidebar panel."""

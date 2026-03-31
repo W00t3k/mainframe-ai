@@ -98,7 +98,7 @@ def main():
     """)
 
     uvicorn.run(
-        "tools.web_app:app",
+        "app.main:app",
         host=args.host,
         port=args.port,
         reload=args.reload
