@@ -28,14 +28,6 @@ CYN='\033[0;36m'
 RST='\033[0m'
 
 REPO_URL="https://github.com/W00t3k/mainframe-ai.git"
-# NOTE: This is a private repo. You need GitHub access to clone.
-# Options:
-#   1. Use a GitHub Personal Access Token (PAT):
-#      git clone https://<YOUR_TOKEN>@github.com/W00t3k/mainframe-ai.git
-#   2. Use SSH (if you have keys configured):
-#      git clone git@github.com:W00t3k/mainframe-ai.git
-#   3. Use GitHub CLI:
-#      gh auth login && gh repo clone W00t3k/mainframe-ai
 MODEL="llama3.1:8b"   # Default — overridden by GPU detection
 GPU_DETECTED=0
 GPU_VRAM_GB=0
@@ -146,14 +138,6 @@ install_system_deps() {
         x3270 c3270 s3270 3270-common \
         hercules \
         lsof net-tools unzip
-      # GitHub CLI
-      if ! command -v gh &>/dev/null; then
-        info "Installing GitHub CLI..."
-        curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | $SUDO dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg 2>/dev/null
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | $SUDO tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-        $SUDO apt-get update -qq
-        $SUDO apt-get install -y -qq gh
-      fi
       ;;
     fedora)
       $SUDO dnf install -y \
@@ -162,12 +146,6 @@ install_system_deps() {
         libffi-devel openssl-devel \
         x3270 unzip \
         lsof net-tools
-      if ! command -v gh &>/dev/null; then
-        $SUDO dnf install -y gh 2>/dev/null || \
-          ($SUDO dnf install -y 'dnf-command(config-manager)' && \
-           $SUDO dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo && \
-           $SUDO dnf install -y gh)
-      fi
       ;;
     centos|rhel|rocky|alma)
       $SUDO dnf install -y epel-release 2>/dev/null || true
@@ -176,16 +154,12 @@ install_system_deps() {
         git curl wget gcc gcc-c++ make \
         libffi-devel openssl-devel \
         lsof net-tools unzip
-      if ! command -v gh &>/dev/null; then
-        $SUDO dnf config-manager --add-repo https://cli.github.com/packages/rpm/gh-cli.repo 2>/dev/null
-        $SUDO dnf install -y gh 2>/dev/null || warn "Could not install GitHub CLI"
-      fi
       ;;
     arch|manjaro|endeavouros)
       $SUDO pacman -Sy --noconfirm \
         python python-pip \
         git curl wget base-devel \
-        x3270 github-cli unzip \
+        x3270 unzip \
         lsof net-tools
       ;;
     opensuse*|sles)
@@ -194,9 +168,6 @@ install_system_deps() {
         git curl wget gcc gcc-c++ make \
         libffi-devel libopenssl-devel \
         lsof net-tools unzip
-      if ! command -v gh &>/dev/null; then
-        $SUDO zypper install -y gh 2>/dev/null || warn "Could not install GitHub CLI"
-      fi
       ;;
     *)
       warn "Unknown distro '$DISTRO'. Attempting apt-get..."
@@ -304,41 +275,6 @@ install_ollama() {
   fi
 }
 
-# ── GitHub Auth ────────────────────────────────────────────
-setup_gh_auth() {
-  if ! command -v gh &>/dev/null; then
-    warn "GitHub CLI not available — you'll need to authenticate manually for git clone."
-    return
-  fi
-
-  # Check if already authenticated
-  if gh auth status &>/dev/null 2>&1; then
-    ok "GitHub CLI already authenticated"
-    return
-  fi
-
-  echo ""
-  echo -e "${CYN}┌──────────────────────────────────────────────────┐${RST}"
-  echo -e "${CYN}│  GitHub Authentication Required                  │${RST}"
-  echo -e "${CYN}│                                                  │${RST}"
-  echo -e "${CYN}│  This is a private repo. You need to log in      │${RST}"
-  echo -e "${CYN}│  to GitHub to clone it.                          │${RST}"
-  echo -e "${CYN}│                                                  │${RST}"
-  echo -e "${CYN}│  Choose HTTPS when prompted.                     │${RST}"
-  echo -e "${CYN}│  Choose 'Login with a web browser' or paste      │${RST}"
-  echo -e "${CYN}│  a Personal Access Token.                        │${RST}"
-  echo -e "${CYN}└──────────────────────────────────────────────────┘${RST}"
-  echo ""
-
-  gh auth login --hostname github.com
-
-  if gh auth status &>/dev/null 2>&1; then
-    ok "GitHub authentication successful"
-  else
-    warn "GitHub auth may have failed — clone might prompt for credentials"
-  fi
-}
-
 # ── Clone Repo ────────────────────────────────────────────
 setup_repo() {
   # Check if we're already inside the repo
@@ -357,12 +293,8 @@ setup_repo() {
     return
   fi
 
-  info "Cloning repository..."
-  if command -v gh &>/dev/null && gh auth status &>/dev/null 2>&1; then
-    gh repo clone W00t3k/mainframe-ai
-  else
-    git clone "$REPO_URL" mainframe-ai
-  fi
+  info "Cloning public repository..."
+  git clone "$REPO_URL" mainframe-ai
   INSTALL_DIR="$(pwd)/mainframe-ai"
   cd "$INSTALL_DIR"
   ok "Cloned to $INSTALL_DIR"
@@ -573,7 +505,6 @@ install_system_deps
 install_gpu_deps
 check_python
 install_ollama
-setup_gh_auth
 setup_repo
 setup_venv
 install_tk5
