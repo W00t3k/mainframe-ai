@@ -291,7 +291,7 @@ start_tk5_svc() {
   # Restore fresh DASD — kill -9 on Hercules corrupts disk images
   DASD_BACKUP="$TK5/dasd_backup"
   DASD_CACHE="$DIR/.cache/tk5-files.tar.gz"
-  if [ -d "$DASD_BACKUP" ] && [ "$(ls "$DASD_BACKUP"/*.298 2>/dev/null | wc -l)" -gt 0 ]; then
+  if [ -d "$DASD_BACKUP" ] && [ "$(ls "$DASD_BACKUP"/*.390 2>/dev/null | wc -l)" -gt 0 ]; then
     cp -f "$DASD_BACKUP"/* "$TK5/dasd/" 2>/dev/null
     ok "DASD restored from dasd_backup/"
   elif [ -f "$DASD_CACHE" ]; then
@@ -336,12 +336,13 @@ start_tk5_svc() {
       export PATH=\"$HERC_BIN:\$PATH\"
       export LD_LIBRARY_PATH=\"$HERC_LIB:\$LD_LIBRARY_PATH\"
       export HERCULES_LIB=\"$HERC_LIB\"
-      (cat scripts/ipl.rc; tail -f /dev/null) | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf -d
+      (cat scripts/ipl.rc; tail -f /dev/null) | \"$HERC_BIN/hercules\" -f conf/tk5-linux.cnf
     " > "$LOGDIR/hercules.log" 2>&1 &
     disown $!
-    sleep 2
-    info "Hercules log (first 5 lines):"
-    head -5 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
+    sleep 3
+    info "DASD check: $(ls "$TK5/dasd/"*.390 2>/dev/null | wc -l) .390 files in dasd/"
+    info "Hercules log (first 10 lines):"
+    head -10 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
   else
     # macOS: Hercules 4.x - use -r flag
     nohup bash -c "
@@ -370,7 +371,7 @@ start_tk5_svc() {
       echo "  … Still waiting (${_i}s) — last log line:"
       tail -1 "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
       # Show errors immediately
-      grep -q "HHCIN099I\|Syntax error\|cannot open shared object" "$LOGDIR/hercules.log" 2>/dev/null && {
+      grep -q "HHCIN099I\|Syntax error\|cannot open shared object\|HHCDA020E\|HHCDA001E\|open error" "$LOGDIR/hercules.log" 2>/dev/null && {
         fail "Hercules error detected — dumping log:"
         cat "$LOGDIR/hercules.log" 2>/dev/null | sed 's/^/    /'
         TK5_OK=0
