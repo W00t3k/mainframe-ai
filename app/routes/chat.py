@@ -294,3 +294,80 @@ async def api_pull_model(request: Request):
 async def api_pull_status():
     """Poll the current model pull progress."""
     return JSONResponse(_pull_state)
+
+
+@router.get("/screen")
+async def api_screen():
+    """Get current terminal screen data (alias for /api/terminal/screen)."""
+    try:
+        from agent_tools import get_cached_screen_data
+        return JSONResponse(get_cached_screen_data())
+    except ImportError:
+        return JSONResponse({"connected": False, "screen": "", "screen_html": "", "rows": 24, "cols": 80})
+
+
+@router.get("/ftp/status")
+async def api_ftp_status():
+    """FTP service status — checks if MVS FTP server is reachable."""
+    try:
+        from agent_tools import connection
+        connected = connection.connected if connection else False
+    except ImportError:
+        connected = False
+    return JSONResponse({
+        "running": connected,
+        "port": 21,
+        "host": "localhost" if connected else None,
+        "users": ["HERC01"] if connected else [],
+    })
+
+
+@router.post("/demo/load")
+async def api_demo_load(request: Request):
+    """Load demo data (sample JCL/sysout/screen) into the trust graph."""
+    try:
+        from trust_graph import get_trust_graph
+        from graph_tools import (
+            parse_jcl, parse_sysout,
+            update_graph_from_jcl, update_graph_from_sysout, update_graph_from_screen,
+        )
+    except ImportError:
+        return JSONResponse({"success": False, "error": "Trust graph not available"}, status_code=400)
+
+    try:
+        payload = await request.json()
+    except Exception:
+        payload = {}
+
+    config = get_config()
+    load_type = payload.get("type", "all")
+    graph = get_trust_graph()
+    results = {}
+
+    def _read(path):
+        with open(path, "r") as f:
+            return f.read()
+
+    import os
+    demo_dir = config.DEMO_DATA_DIR
+    try:
+        if load_type in ("jcl", "all"):
+            jcl_text = _read(os.path.join(demo_dir, "sample_jcl.txt"))
+            results["jcl"] = update_graph_from_jcl(graph, parse_jcl(jcl_text), {"type": "demo", "source": "sample_jcl"})
+        if load_type in ("sysout", "all"):
+            sysout_text = _read(os.path.join(demo_dir, "sample_sysout.txt"))
+            parsed = parse_sysout(sysout_text)
+            if not parsed.get("jobname"):
+                parsed["jobname"] = "DEMOJOB"
+            if not parsed.get("jobid"):
+                parsed["jobid"] = "JOB00012"
+            results["sysout"] = update_graph_from_sysout(graph, parsed, {"type": "demo", "source": "sample_sysout"})
+        if load_type in ("screen", "all"):
+            screen_text = _read(os.path.join(demo_dir, "sample_screen.txt"))
+            results["screen"] = update_graph_from_screen(graph, screen_text, "demo:3270")
+        graph.save()
+        return JSONResponse({"success": True, "results": results})
+    except FileNotFoundError as exc:
+        return JSONResponse({"success": False, "error": f"Missing demo file: {exc}"}, status_code=404)
+    except Exception as exc:
+        return JSONResponse({"success": False, "error": str(exc)}, status_code=500)

@@ -1902,3 +1902,11 @@ WALKTHROUGH_SCRIPTS["prsm-lpars"] = {
             },
         ],
 }
+
+# Extract walkthroughs that were accidentally nested inside "system-enum"
+# and promote them to top-level WALKTHROUGH_SCRIPTS entries.
+_nested_keys = ("apf-privesc", "dc30-hello-world", "dc30-buffer-overflow",
+                "dc30-arbauth-privesc", "dc30-ftp-overflow")
+for _k in _nested_keys:
+    if _k in WALKTHROUGH_SCRIPTS.get("system-enum", {}):
+        WALKTHROUGH_SCRIPTS[_k] = WALKTHROUGH_SCRIPTS["system-enum"].pop(_k)

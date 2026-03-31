@@ -56,13 +56,15 @@ async def api_llm_grok_set_key(request: Request):
 
 
 @router.post("/llm/grok/set-model")
+@router.post("/llm/grok/switch-model")
 async def api_llm_grok_set_model(request: Request):
-    """Set the active Groq model."""
+    """Set the active Groq model (accepts both set-model and switch-model paths)."""
     data = await request.json()
     model = data.get("model", "").strip()
     if not model:
         return JSONResponse({"success": False, "error": "No model specified"})
     from app.services.grok import get_grok_service
     grok = get_grok_service()
+    old = grok.model
     grok.model = model
-    return JSONResponse({"success": True, "model": model})
+    return JSONResponse({"success": True, "old": old, "new": model})
