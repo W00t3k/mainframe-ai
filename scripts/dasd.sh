@@ -121,6 +121,23 @@ dasd_download_archive() {
   [ -s "$output" ]
 }
 
+dasd_assemble_bundled_archive() {
+  local output="$1"
+  local prefix="${2:-$DIR/bundles/tk5-files.tar.gz.part-}"
+  local tmp
+
+  [ -f "${prefix}aa" ] || return 1
+  mkdir -p "$(dirname "$output")"
+  tmp="${output}.tmp"
+  rm -f "$tmp"
+  if ! cat "${prefix}"* > "$tmp"; then
+    rm -f "$tmp"
+    return 1
+  fi
+  mv "$tmp" "$output"
+  [ -s "$output" ]
+}
+
 dasd_sync_from_lfs() {
   command -v git >/dev/null 2>&1 || return 1
   git -C "$DIR" rev-parse --show-toplevel >/dev/null 2>&1 || return 1

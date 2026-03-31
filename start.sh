@@ -406,6 +406,9 @@ start_tk5_svc() {
     dasd_seed_backup "$TK5/dasd" "$DASD_BACKUP"
     ok "DASD verified from repo checkout"
   else
+    if [ ! -s "$DASD_CACHE" ] && dasd_assemble_bundled_archive "$DASD_CACHE"; then
+      ok "DASD archive assembled from bundled repo parts"
+    fi
     info "Repo DASD incomplete — trying DASD archive fallback..."
     DASD_ARCHIVE_USED="$(
       dasd_restore_from_candidates "$TK5/dasd" "$DASD_BACKUP" \
