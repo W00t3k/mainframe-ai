@@ -297,15 +297,23 @@ start_tk5_svc() {
   elif [ -f "$DASD_CACHE" ]; then
     tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
     ok "DASD restored from cache"
-  elif command -v gh &>/dev/null; then
-    info "Downloading DASD from GitHub release..."
+  else
+    info "Downloading DASD from GitHub release (public)..."
     mkdir -p "$DIR/.cache"
     rm -f "$DASD_CACHE"
-    gh release download v1.0-tk5 -R W00t3k/mainframe-ai -p "tk5-files.tar.gz" -D "$(dirname "$DASD_CACHE")" 2>/dev/null
-    tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
-    ok "DASD restored from GitHub release"
-  else
-    info "No DASD backup or cache — run setup.sh first"
+    DASD_URL="https://github.com/W00t3k/mainframe-ai/releases/download/v1.0-tk5/tk5-files.tar.gz"
+    if command -v curl &>/dev/null; then
+      curl -fsSL "$DASD_URL" -o "$DASD_CACHE" 2>/dev/null
+    elif command -v wget &>/dev/null; then
+      wget -q "$DASD_URL" -O "$DASD_CACHE" 2>/dev/null
+    fi
+    if [ -f "$DASD_CACHE" ] && [ -s "$DASD_CACHE" ]; then
+      tar xzf "$DASD_CACHE" -C "$TK5/" dasd/ 2>/dev/null
+      ok "DASD restored from GitHub release"
+    else
+      fail "Could not download DASD"
+      info "Manual: curl -fsSL $DASD_URL -o .cache/tk5-files.tar.gz"
+    fi
   fi
 
   info "Starting Hercules ($(uname -s)/$(uname -m))..."
