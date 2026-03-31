@@ -1,19 +1,19 @@
 """
 Unified LLM Provider
 
-Routes requests to either local Ollama or cloud Grok (xAI) based on
+Routes requests to either cloud Groq or local Ollama based on
 configuration and availability. Provides automatic fallback.
 
-Provider priority:
+Provider priority (AUTO mode):
 1. If user explicitly selects a provider, use that
-2. If Ollama is available locally, prefer it (no API cost, no data leaves machine)
-3. If Ollama is down and Grok is configured, fall back to Grok
-4. If neither is available, return error
+2. If Groq is configured AND available (internet), use it (faster, smarter models)
+3. If Groq unavailable, fall back to local Ollama
+4. If neither is available, return error with Ollama message
 
 Environment variables:
     LLM_PROVIDER=ollama|grok|auto   (default: auto)
-    XAI_API_KEY=xai-...             (required for Grok)
-    XAI_MODEL=grok-3-mini-fast      (optional)
+    GROQ_API_KEY=gsk_...            (required for Groq)
+    GROQ_MODEL=llama-3.3-70b-versatile (optional)
     OLLAMA_URL=http://localhost:11434
     OLLAMA_MODEL=llama3.1:8b
 """
@@ -55,7 +55,10 @@ class UnifiedLLMService:
         return self._last_provider_used
 
     async def get_active_provider(self) -> str:
-        """Determine which provider to use right now."""
+        """Determine which provider to use right now.
+
+        AUTO mode priority: Groq (internet) first, Ollama (local) fallback.
+        """
         from app.services.ollama import get_ollama_service
         from app.services.grok import get_grok_service
 
@@ -66,16 +69,18 @@ class UnifiedLLMService:
             if grok.is_configured:
                 return "grok"
             return "ollama"  # fallback if no API key
-        else:  # AUTO
-            ollama = get_ollama_service()
-            if await ollama.check_available():
-                return "ollama"
+        else:  # AUTO - prefer Groq (internet) over Ollama (local)
             grok = get_grok_service()
             if grok.is_configured:
                 available = await grok.check_available()
                 if available:
                     return "grok"
-            return "ollama"  # will fail gracefully with Ollama error
+            # Groq unavailable or not configured — fall back to local Ollama
+            ollama = get_ollama_service()
+            if await ollama.check_available():
+                return "ollama"
+            # Neither available — return ollama (will error gracefully)
+            return "ollama"
 
     async def generate(
         self,

@@ -9,7 +9,7 @@ from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
 from app.config import get_config
-from app.services.ollama import get_ollama_service
+from app.services.llm_provider import get_llm_service
 from app.constants.prompts import (
     TUTOR_PERSONAS, WALKTHROUGH_PROMPTS, build_tutor_prompt,
     PATH_SYSTEM_PROMPT, PATH_SESSION_PROMPT
@@ -119,8 +119,8 @@ Environment: {panel_info.get('environment', 'Unknown')}
 
 Provide your analysis in the structured format. Be educational and thorough."""
 
-    ollama = get_ollama_service()
-    result = await ollama.generate(prompt, temperature=0.7, num_predict=1500)
+    llm = get_llm_service()
+    result = await llm.generate(prompt, temperature=0.7, max_tokens=1500)
 
     # Parse structured response
     sections = {}
@@ -200,8 +200,8 @@ Screen:
 
 What should the learner do next to progress toward their goal? Be specific about what to type or which key to press."""
 
-    ollama = get_ollama_service()
-    suggestion = await ollama.generate(prompt, temperature=0.7, num_predict=500)
+    llm = get_llm_service()
+    suggestion = await llm.generate(prompt, temperature=0.7, max_tokens=500)
 
     return JSONResponse({"suggestion": suggestion})
 
@@ -232,8 +232,8 @@ Learner's question: {question}
 
 Answer in an educational, thorough manner. Relate concepts to modern security thinking where relevant."""
 
-    ollama = get_ollama_service()
-    answer = await ollama.generate(prompt, temperature=0.7, num_predict=500)
+    llm = get_llm_service()
+    answer = await llm.generate(prompt, temperature=0.7, max_tokens=500)
 
     return JSONResponse({"answer": answer})
 
@@ -336,8 +336,8 @@ What should the learner do next to progress? Be specific about keystrokes or tex
     else:
         prompt = f"{build_tutor_prompt(tutor_id)}\n\n{question}"
 
-    ollama = get_ollama_service()
-    llm_response = await ollama.generate(prompt, temperature=0.7, num_predict=1200)
+    llm = get_llm_service()
+    llm_response = await llm.generate(prompt, temperature=0.7, max_tokens=1200)
 
     result["diagnostics"]["llmUsed"] = True
     result["messages"].append({
@@ -383,8 +383,8 @@ Respond with:
 4) Suggested next step: Start / Preview / Ask (1 short sentence)
 """
 
-    ollama = get_ollama_service()
-    explanation = await ollama.generate(prompt, temperature=0.6, num_predict=400)
+    llm = get_llm_service()
+    explanation = await llm.generate(prompt, temperature=0.6, max_tokens=400)
 
     return JSONResponse({"explanation": explanation})
 
@@ -443,7 +443,7 @@ Screen:
 {screen[:1500]}
 """
 
-    ollama = get_ollama_service()
-    help_text = await ollama.generate(prompt, temperature=0.5, num_predict=250)
+    llm = get_llm_service()
+    help_text = await llm.generate(prompt, temperature=0.5, max_tokens=250)
 
     return JSONResponse({"help": help_text})
