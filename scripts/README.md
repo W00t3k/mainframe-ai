@@ -7,9 +7,9 @@ Shell scripts for installation, MVS management, and utility Python scripts for m
 ### `install.sh`
 Linux one-command installer — handles everything:
 - Detects distro (Ubuntu, Debian, Kali, Fedora, CentOS, Arch, openSUSE)
-- Installs Python 3.11+, s3270/x3270, GitHub CLI
+- Installs Python 3.11+, s3270/x3270, and other system dependencies
 - Installs Ollama + auto-selects model based on available RAM
-- Downloads TK5 from GitHub release via `gh`
+- Clones the public repo with `git` when needed
 - Creates Python venv and installs requirements
 - Validates DASD files against known-good sizes
 

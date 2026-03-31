@@ -91,7 +91,7 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 
 ### Linux — One-Command Install
 
-The install script handles everything: system deps, Python, Ollama, GitHub CLI auth, repo clone, venv, and TK5.
+The install script handles everything: system deps, Python, Ollama, public repo clone, venv, and TK5.
 
 ```bash
 # If you already have the repo cloned:
@@ -99,18 +99,8 @@ cd mainframe-ai
 chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh
 ./scripts/install.sh
 
-# If starting fresh on a new server (private repo — requires GitHub access):
-# Option 1: GitHub CLI
-sudo apt install gh -y && gh auth login
-gh repo clone W00t3k/mainframe-ai && cd mainframe-ai
-chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh && ./scripts/install.sh
-
-# Option 2: Personal Access Token
-git clone https://<YOUR_TOKEN>@github.com/W00t3k/mainframe-ai.git
-cd mainframe-ai && chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh && ./scripts/install.sh
-
-# Option 3: SSH
-git clone git@github.com:W00t3k/mainframe-ai.git
+# If starting fresh on a new server:
+git clone https://github.com/W00t3k/mainframe-ai.git
 cd mainframe-ai && chmod +x scripts/install.sh start.sh start-linux.sh scripts/mvs.sh && ./scripts/install.sh
 ```
 
@@ -119,7 +109,6 @@ Supported distros: **Ubuntu, Debian, Kali, Fedora, CentOS/RHEL, Arch, openSUSE**
 The install script installs:
 - Python 3.11+ with virtual environment
 - Ollama + auto-selected model based on RAM
-- GitHub CLI (`gh`) with interactive auth
 - s3270/x3270/c3270 (TN3270 clients)
 - Hercules + TK5 MVS emulator
 - All Python dependencies
