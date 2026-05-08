@@ -10,18 +10,19 @@ from typing import List, Dict, Any, Optional
 from app.config import get_config
 from app.services.ollama import get_ollama_service
 from app.services.llm_provider import get_llm_service
-from app.constants.prompts import SYSTEM_PROMPT
+from app.constants.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_FAST
 
 
 class ChatService:
     """Service for chat processing and conversation management."""
-    
+
     def __init__(self):
         self.config = get_config()
         self.ollama = get_ollama_service()
         self.llm = get_llm_service()
         self.conversation_history: List[Dict[str, str]] = []
         self.max_history = 40
+        self.fast_mode = True  # Fast mode on by default
         
         # Import optional modules
         self._rag_engine = None
@@ -139,6 +140,11 @@ class ChatService:
             else:
                 result["response"] = f"Current model: `{self.config.OLLAMA_MODEL}`\n\nUsage: `/model llama3.1:8b`"
         
+        elif command == "/fast":
+            self.fast_mode = not self.fast_mode
+            mode = "ON (brief responses)" if self.fast_mode else "OFF (detailed responses)"
+            result["response"] = f"⚡ Fast mode: **{mode}**"
+
         elif command == "/help":
             result["response"] = """## Commands
 
@@ -148,6 +154,7 @@ class ChatService:
 | `/disconnect` | Disconnect from mainframe |
 | `/screen` | Show current 3270 screen |
 | `/model [name]` | Show/change Ollama model |
+| `/fast` | Toggle fast mode (brief responses) |
 | `/clear` | Clear conversation history |
 | `/help` | Show this help |
 
@@ -190,36 +197,33 @@ class ChatService:
         if not await self.llm.check_available():
             result["response"] = """⚠️ **No LLM provider available!**
 
-**Option 1 — Local (Ollama):**
+**Setup (Ollama):**
 ```bash
 ollama serve
 ollama pull llama3.1:8b
 ```
-
-**Option 2 — Cloud (Grok):**
-Set `XAI_API_KEY` environment variable with your xAI API key.
-Then switch provider: `POST /api/llm/provider/switch {"provider": "grok"}`
 """
             return result
-        
+
         # Build context
         context = ""
         rag_context = await self.get_rag_context(user_message)
-        
+
         if self.is_connected and self._read_screen:
             screen = self._read_screen()
             result["screen"] = screen
             context = f"\n\n[Current 3270 Screen]\n```\n{screen}\n```"
-        
+
         full_message = user_message + rag_context + context
-        
+
         self.conversation_history.append({
             "role": "user",
             "content": full_message
         })
-        
-        # Call LLM (routes to Ollama or Grok based on provider config)
-        assistant_message = await self.llm.chat_simple(self.conversation_history)
+
+        # Call LLM via Ollama
+        sys_prompt = SYSTEM_PROMPT_FAST if self.fast_mode else SYSTEM_PROMPT
+        assistant_message = await self.llm.chat_simple(self.conversation_history, sys_prompt)
         
         self.conversation_history.append({
             "role": "assistant",

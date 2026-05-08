@@ -76,28 +76,28 @@ select_gpu_model() {
   if [ "$GPU_VRAM_GB" -ge 80 ]; then
     # ULTRA tier: H100/H200/A100-80GB
     GPU_TIER="ULTRA"
-    DEFAULT_MODEL="llama3.1:70b"
-    AVAILABLE_MODELS="deepseek-coder-v2:236b llama3.1:70b deepseek-v2.5:236b qwen2.5:72b codellama:70b mixtral:8x22b"
+    DEFAULT_MODEL="codellama:70b"
+    AVAILABLE_MODELS="codellama:70b codellama:34b deepseek-coder-v2:16b"
   elif [ "$GPU_VRAM_GB" -ge 40 ]; then
     # HIGH tier: A100-40GB, A6000
     GPU_TIER="HIGH"
-    DEFAULT_MODEL="llama3.1:70b-instruct-q4_0"
-    AVAILABLE_MODELS="llama3.1:70b-instruct-q4_0 deepseek-coder-v2:16b qwen2.5:32b codellama:34b"
+    DEFAULT_MODEL="codellama:34b"
+    AVAILABLE_MODELS="codellama:34b codellama:13b deepseek-coder-v2:16b"
   elif [ "$GPU_VRAM_GB" -ge 20 ]; then
     # MEDIUM tier: RTX 4090/3090
     GPU_TIER="MEDIUM"
-    DEFAULT_MODEL="deepseek-coder-v2:16b"
-    AVAILABLE_MODELS="deepseek-coder-v2:16b llama3.1:8b codellama:13b"
+    DEFAULT_MODEL="codellama:13b"
+    AVAILABLE_MODELS="codellama:13b codellama:7b deepseek-coder-v2:16b"
   elif [ "$GPU_VRAM_GB" -ge 8 ]; then
     # LOW tier: RTX 4070/3060
     GPU_TIER="LOW"
-    DEFAULT_MODEL="llama3.1:8b"
-    AVAILABLE_MODELS="llama3.1:8b deepseek-coder:6.7b"
+    DEFAULT_MODEL="codellama:7b"
+    AVAILABLE_MODELS="codellama:7b codellama:13b"
   else
     # MINIMAL tier
     GPU_TIER="MINIMAL"
-    DEFAULT_MODEL="llama3.2:3b"
-    AVAILABLE_MODELS="llama3.2:3b tinyllama"
+    DEFAULT_MODEL="codellama:7b"
+    AVAILABLE_MODELS="codellama:7b"
   fi
 
   # Use override if provided

@@ -51,6 +51,7 @@ discovery.db-wal
 
 # Screenshots (runtime)
 static/screenshots/
+.qwen_key
 .groq_key
 tk5-files.tar.gz
 tk5-dasd.tar.gz

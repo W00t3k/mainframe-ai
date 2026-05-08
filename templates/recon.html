@@ -48,8 +48,7 @@
         <button class="tab-btn" data-tab="findings">Findings</button>
         <button class="tab-btn" data-tab="report">Report</button>
         <button class="tab-btn" data-tab="captures">Captures</button>
-        <button class="tab-btn" data-tab="ebcdic">EBCDIC / TN3270</button>
-        <button class="tab-btn" data-tab="scanner">Scanner</button>
+        <button class="tab-btn" data-tab="ebcdic">Tools</button>
         <button class="tab-btn" data-tab="rakf">RAKF</button>
     </div>
 
@@ -728,7 +727,16 @@
                     <button class="btn btn-primary" onclick="generateReport('html')">Generate HTML</button>
                     <button class="btn btn-secondary" onclick="generateReport('json')">Generate JSON</button>
                     <button class="btn btn-secondary" onclick="generateReport('markdown')">Generate Markdown</button>
-                    <button class="btn btn-secondary" onclick="generateAIReport()">AI Summary Report</button>
+                    <button class="btn btn-secondary" onclick="generateReport('csv')">Export CSV</button>
+                    <button class="btn btn-secondary" onclick="generateAIReport()">AI Summary</button>
+                </div>
+
+                <div class="report-controls" style="margin-top:0.5rem;">
+                    <button class="btn btn-secondary" onclick="saveAssessmentToHistory()">Save to History</button>
+                    <select id="historyDropdown" class="form-select" style="width:auto;display:inline-block;" onchange="if(this.value) loadAssessmentFromHistory(parseInt(this.value))">
+                        <option value="">Load previous assessment...</option>
+                    </select>
+                    <button class="btn btn-secondary" onclick="clearHistory()" style="margin-left:0.5rem;">Clear History</button>
                 </div>
 
                 <div id="reportPreviewWrap" style="display:none;">
@@ -856,11 +864,6 @@
             </div>
         </div>
 
-        <!-- ============ SCANNER TAB ============ -->
-        <div class="tab-panel" id="tab-scanner" style="padding:0;flex:1;min-height:0;overflow:hidden;">
-            <iframe id="iframe-scanner" style="width:100%;flex:1;min-height:0;border:none;display:block;background:#0a0d11;" title="Mainframe Scanner"></iframe>
-        </div>
-
         <!-- ============ RAKF TAB ============ -->
         <div class="tab-panel" id="tab-rakf" style="padding:0;flex:1;min-height:0;overflow:hidden;">
             <iframe id="iframe-rakf" style="width:100%;flex:1;min-height:0;border:none;display:block;background:#0a0d11;" title="RAKF Security Manager"></iframe>
@@ -874,14 +877,80 @@
 // ==========================================================================
 // State
 // ==========================================================================
-let assessResults = { vtam: [], tso: [], cics: [], screen: { hidden: [], findings: [] }, map: [] };
+let assessResults = { vtam: [], tso: [], cics: [], screen: { hidden: [], findings: [] }, map: [], sysenum: [] };
 let enumRunning = false;
 let mapRunning = false;
 let lastReportContent = '';
 let lastReportFormat = '';
+
 // Backward compat aliases used by report generation
 function getEnumResults() {
     return [...assessResults.vtam, ...assessResults.tso, ...assessResults.cics];
+}
+
+// ==========================================================================
+// Assessment History (localStorage)
+// ==========================================================================
+const HISTORY_KEY = 'recon_assessment_history';
+const MAX_HISTORY = 10;
+
+function saveAssessmentToHistory() {
+    const timestamp = new Date().toISOString();
+    const summary = {
+        timestamp,
+        vtam: assessResults.vtam.length,
+        tso: assessResults.tso.length,
+        cics: assessResults.cics.length,
+        hidden: assessResults.screen.hidden?.length || 0,
+        findings: assessResults.screen.findings?.length || 0,
+        sysenum: assessResults.sysenum?.length || 0,
+    };
+    const entry = { summary, data: JSON.parse(JSON.stringify(assessResults)) };
+
+    let history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    history.unshift(entry);
+    if (history.length > MAX_HISTORY) history = history.slice(0, MAX_HISTORY);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(history));
+    showToast('Assessment saved to history', 'success');
+    updateHistoryDropdown();
+}
+
+function loadAssessmentFromHistory(index) {
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (history[index]) {
+        assessResults = history[index].data;
+        showToast('Loaded assessment from ' + history[index].summary.timestamp.slice(0, 16).replace('T', ' '), 'success');
+        // Refresh UI with loaded data
+        updateFindingsTab();
+    }
+}
+
+function clearHistory() {
+    localStorage.removeItem(HISTORY_KEY);
+    updateHistoryDropdown();
+    showToast('History cleared', 'info');
+}
+
+function updateHistoryDropdown() {
+    const dropdown = document.getElementById('historyDropdown');
+    if (!dropdown) return;
+    const history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+    if (history.length === 0) {
+        dropdown.innerHTML = '<option value="">No saved assessments</option>';
+        return;
+    }
+    dropdown.innerHTML = '<option value="">Load previous assessment...</option>';
+    history.forEach((entry, i) => {
+        const s = entry.summary;
+        const label = `${s.timestamp.slice(0, 16).replace('T', ' ')} — ${s.tso + s.vtam + s.cics} enum, ${s.findings} findings`;
+        dropdown.innerHTML += `<option value="${i}">${label}</option>`;
+    });
+}
+
+function updateFindingsTab() {
+    // Trigger UI refresh for findings tab based on assessResults
+    // This is a simplified refresh - full implementation would update all tables
+    console.log('Assessment loaded, findings tab should be refreshed');
 }
 
 // ==========================================================================
@@ -1718,6 +1787,20 @@ async function generateReport(format) {
         if (data.report) {
             lastReportContent = data.report;
             lastReportFormat = format;
+
+            // CSV: download as file instead of preview
+            if (format === 'csv') {
+                const blob = new Blob([data.report], {type: 'text/csv'});
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `recon-report-${new Date().toISOString().slice(0,10)}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showToast('CSV exported', 'success');
+                return;
+            }
+
             const previewWrap = document.getElementById('reportPreviewWrap');
             const preview = document.getElementById('reportPreview');
             previewWrap.style.display = 'block';
@@ -2021,5 +2104,8 @@ document.querySelectorAll('.tab-btn[data-tab="scanner"], .tab-btn[data-tab="rakf
         }
     });
 });
+
+// Initialize on page load
+updateHistoryDropdown();
 </script>
 {% endblock %}

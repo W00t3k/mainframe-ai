@@ -119,12 +119,13 @@
     },
     {
       "id": "racf-hashes",
-      "title": "RACF Hash Cracking: DES Password Analysis",
-      "description": "How RACF password hashing works — DES + EBCDIC. Why the algorithm is weak and how to crack hashes. Based on mainframed/user_hashes.py.",
+      "title": "RAKF Passwords: Plaintext Credential Exposure",
+      "description": "On TK5, RAKF stores passwords in plaintext (not DES hashes). Browse SYS1.SECURE.CNTL(USERS) to see all credentials. Compares TK5 RAKF to real z/OS RACF password security.",
       "category": "security",
-      "difficulty": "advanced",
-      "walkthrough": false,
-      "steps": 8
+      "difficulty": "intermediate",
+      "walkthrough": true,
+      "steps": 6,
+      "note": "TK5 uses RAKF (plaintext), not real RACF (DES hashes)"
     },
     {
       "id": "reverse-shell",

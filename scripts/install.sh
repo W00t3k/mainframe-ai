@@ -11,7 +11,7 @@
 #  What this does:
 #    1. Installs system dependencies (Python 3.11+, git, curl, etc.)
 #    2. Installs Ollama (local LLM backend)
-#    3. Pulls the llama3.1:8b model
+#    3. Pulls the codellama:7b model
 #    4. Clones the repo (or uses current directory)
 #    5. Creates Python virtual environment
 #    6. Installs Python dependencies
@@ -28,7 +28,7 @@ CYN='\033[0;36m'
 RST='\033[0m'
 
 REPO_URL="https://github.com/W00t3k/mainframe-ai.git"
-MODEL="llama3.1:8b"   # Default — overridden by GPU detection
+MODEL="codellama:7b"   # Default — overridden by GPU detection
 GPU_DETECTED=0
 GPU_VRAM_GB=0
 GPU_NAME=""
@@ -86,19 +86,19 @@ detect_gpu() {
 
   # Select model based on VRAM tier
   if [ "$GPU_VRAM_GB" -ge 80 ]; then
-    MODEL="llama3.1:70b"
+    MODEL="codellama:34b"
     GPU_TIER="ULTRA"
   elif [ "$GPU_VRAM_GB" -ge 40 ]; then
-    MODEL="llama3.1:70b-instruct-q4_0"
+    MODEL="codellama:34b"
     GPU_TIER="HIGH"
   elif [ "$GPU_VRAM_GB" -ge 20 ]; then
-    MODEL="qwen2.5:32b"
+    MODEL="codellama:34b"
     GPU_TIER="MEDIUM"
   elif [ "$GPU_VRAM_GB" -ge 8 ]; then
-    MODEL="llama3.1:8b"
+    MODEL="codellama:7b"
     GPU_TIER="LOW"
   else
-    MODEL="llama3.2:3b"
+    MODEL="codellama:7b"
     GPU_TIER="MINIMAL"
   fi
 
@@ -487,7 +487,7 @@ banner() {
   echo -e "${CYN}║  Components:                                            ║${RST}"
   echo -e "${CYN}║    • Python 3.11+ virtual environment                   ║${RST}"
   echo -e "${CYN}║    • Ollama (local LLM backend)                         ║${RST}"
-  echo -e "${CYN}║    • llama3.1:8b model (~4.7 GB)                        ║${RST}"
+  echo -e "${CYN}║    • codellama:7b model (~3.8 GB)                       ║${RST}"
   echo -e "${CYN}║    • FastAPI web application                            ║${RST}"
   echo -e "${CYN}║    • TK5 MVS mainframe emulator (optional)              ║${RST}"
   echo -e "${CYN}╠══════════════════════════════════════════════════════════╣${RST}"

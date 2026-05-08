@@ -1102,12 +1102,13 @@ async function installKicks() {
 
 /* ── Model Picker (index page) ── */
 const SUGGESTED_MODELS = [
-    {name:'tinyllama',      desc:'Tiny & fast',   size:'~637MB'},
-    {name:'llama3.2:3b',    desc:'Good balance',  size:'~2.0GB'},
-    {name:'llama3.1:8b',    desc:'Best quality',  size:'~4.7GB'},
-    {name:'phi3:mini',      desc:'Microsoft Phi-3',size:'~2.3GB'},
-    {name:'mistral:7b',     desc:'Mistral 7B',    size:'~4.1GB'},
-    {name:'gemma2:2b',      desc:'Google Gemma 2B',size:'~1.6GB'},
+    {name:'codellama:7b',   desc:'Code expert (recommended)', size:'~3.8GB'},
+    {name:'codellama:13b',  desc:'Code expert (better)',      size:'~7.4GB'},
+    {name:'codellama:34b',  desc:'Code expert (best)',        size:'~19GB'},
+    {name:'gemma2:2b',      desc:'Google Gemma 2B',           size:'~1.6GB'},
+    {name:'gemma2:9b',      desc:'Google Gemma 9B',           size:'~5.4GB'},
+    {name:'gemma2:27b',     desc:'Google Gemma 27B',          size:'~16GB'},
+    {name:'mistral:7b',     desc:'Mistral 7B',                size:'~4.1GB'},
 ];
 let idxModelPickerOpen = false;
 let idxPulling = false;
@@ -1190,123 +1191,6 @@ async function loadIdxModels() {
                 row.appendChild(rightSpan);
                 listEl.appendChild(row);
             });
-        }
-
-        // ── Cloud: Groq ──
-        try {
-            const llmR = await fetch('/api/llm/status');
-            const llmStatus = await llmR.json();
-            const grok = llmStatus.grok || {};
-            const isGrokActive = llmStatus.active_provider === 'grok';
-
-            const grokHdr = document.createElement('div');
-            grokHdr.style.cssText = 'padding:6px 12px 4px; color:#e040fb; font-size:10px; text-transform:uppercase; letter-spacing:1px; border-top:1px solid #222; margin-top:4px; display:flex; justify-content:space-between; align-items:center;';
-            const grokTitle = document.createElement('span');
-            grokTitle.textContent = grok.configured ? (grok.available ? '☁ Cloud — Groq' : '☁ Groq (offline)') : '☁ Groq (not configured)';
-            grokHdr.appendChild(grokTitle);
-
-            if (grok.configured) {
-                const provBadge = document.createElement('span');
-                provBadge.style.cssText = `font-size:9px; padding:1px 6px; border-radius:3px; font-weight:bold; font-family:IBM Plex Mono,monospace; cursor:pointer; ${isGrokActive ? 'background:#e040fb; color:#000;' : 'border:1px solid #e040fb; color:#e040fb;'}`;
-                provBadge.textContent = isGrokActive ? 'ACTIVE' : 'STANDBY';
-                provBadge.title = isGrokActive ? 'Click to switch to Ollama' : 'Click to switch to Groq';
-                provBadge.onclick = async (e) => {
-                    e.stopPropagation();
-                    const newProv = isGrokActive ? 'ollama' : 'grok';
-                    await fetch('/api/llm/provider/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:newProv})});
-                    document.getElementById('tsModel').textContent = newProv === 'grok' ? (grok.model || 'grok-3-mini-fast') : currentModel;
-                    await loadIdxModels();
-                };
-                grokHdr.appendChild(provBadge);
-            }
-            listEl.appendChild(grokHdr);
-
-            if (!grok.configured) {
-                const keyRow = document.createElement('div');
-                keyRow.style.cssText = 'padding:6px 12px 10px; display:flex; gap:6px; align-items:center;';
-                const keyInput = document.createElement('input');
-                keyInput.type = 'password';
-                keyInput.placeholder = 'Paste your Groq API key';
-                keyInput.style.cssText = 'flex:1; background:#111; border:1px solid #333; border-radius:3px; padding:4px 8px; color:#e040fb; font-size:11px; font-family:IBM Plex Mono,monospace; outline:none;';
-                keyInput.onfocus = () => keyInput.style.borderColor = '#e040fb';
-                keyInput.onblur = () => keyInput.style.borderColor = '#333';
-                keyInput.onclick = (e) => e.stopPropagation();
-                const keyBtn = document.createElement('button');
-                keyBtn.textContent = 'Connect';
-                keyBtn.style.cssText = 'background:#e040fb; color:#000; border:none; border-radius:3px; padding:4px 12px; font-size:11px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; white-space:nowrap;';
-                keyBtn.onmouseenter = () => keyBtn.style.background = '#f060ff';
-                keyBtn.onmouseleave = () => keyBtn.style.background = '#e040fb';
-                const keyStatus = document.createElement('div');
-                keyStatus.style.cssText = 'padding:0 12px 6px; font-size:10px; font-family:IBM Plex Mono,monospace; display:none;';
-                keyBtn.onclick = async (e) => {
-                    e.stopPropagation();
-                    const key = keyInput.value.trim();
-                    if (!key) { keyInput.style.borderColor = '#f44'; return; }
-                    keyBtn.textContent = 'Verifying...';
-                    keyBtn.disabled = true;
-                    keyBtn.style.background = '#666';
-                    keyStatus.style.display = 'block';
-                    keyStatus.style.color = '#888';
-                    keyStatus.textContent = 'Testing connection to Groq API...';
-                    try {
-                        const kr = await fetch('/api/llm/grok/set-key', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({key:key})});
-                        const kd = await kr.json();
-                        if (kd.success) {
-                            keyStatus.style.color = '#0f0';
-                            keyStatus.textContent = '✓ ' + kd.message;
-                            setTimeout(() => loadIdxModels(), 800);
-                        } else {
-                            keyStatus.style.color = '#f44';
-                            keyStatus.textContent = '✕ ' + (kd.error || 'Failed');
-                            keyBtn.textContent = 'Connect'; keyBtn.disabled = false; keyBtn.style.background = '#e040fb';
-                        }
-                    } catch(err) {
-                        keyStatus.style.color = '#f44';
-                        keyStatus.textContent = '✕ ' + err.message;
-                        keyBtn.textContent = 'Connect'; keyBtn.disabled = false; keyBtn.style.background = '#e040fb';
-                    }
-                };
-                keyInput.onkeydown = (e) => { if (e.key === 'Enter') { e.preventDefault(); keyBtn.click(); } };
-                keyRow.appendChild(keyInput);
-                keyRow.appendChild(keyBtn);
-                listEl.appendChild(keyRow);
-                listEl.appendChild(keyStatus);
-                const keyHint = document.createElement('div');
-                keyHint.style.cssText = 'padding:0 12px 8px; color:#555; font-size:9px; font-family:IBM Plex Mono,monospace;';
-                keyHint.innerHTML = 'Get key at <span style="color:#e040fb;">console.groq.com</span> — memory only, not saved';
-                listEl.appendChild(keyHint);
-            } else {
-                const grokModels = grok.models || [];
-                const grokCurrent = grok.model || '';
-                grokModels.forEach(gm => {
-                    const isActive = gm.id === grokCurrent && isGrokActive;
-                    const row = document.createElement('div');
-                    row.style.cssText = `padding:5px 12px; cursor:pointer; display:flex; justify-content:space-between; align-items:center; font-size:12px; font-family:IBM Plex Mono,monospace; color:${isActive ? '#e040fb' : '#ccc'}; background:${isActive ? 'rgba(224,64,251,0.05)' : 'transparent'};`;
-                    row.onmouseenter = () => { if (!isActive) row.style.background = 'rgba(255,255,255,0.05)'; };
-                    row.onmouseleave = () => { if (!isActive) row.style.background = isActive ? 'rgba(224,64,251,0.05)' : 'transparent'; };
-                    const left = document.createElement('span');
-                    left.innerHTML = `${isActive ? '▸ ' : '  '}${gm.name || gm.id} <span style="color:#666; font-size:10px;">${gm.description || ''}</span>`;
-                    const useBtn = document.createElement('button');
-                    useBtn.textContent = isActive ? '✓ Active' : 'Use';
-                    useBtn.style.cssText = `border:none; border-radius:3px; padding:1px 8px; font-size:10px; cursor:pointer; font-family:IBM Plex Mono,monospace; font-weight:bold; ${isActive ? 'background:#e040fb; color:#000;' : 'background:#555; color:#fff;'}`;
-                    if (!isActive) {
-                        useBtn.onmouseenter = () => useBtn.style.background = '#e040fb';
-                        useBtn.onmouseleave = () => useBtn.style.background = '#555';
-                    }
-                    useBtn.onclick = async (e) => {
-                        e.stopPropagation();
-                        await fetch('/api/llm/grok/switch-model', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({model:gm.id})});
-                        await fetch('/api/llm/provider/switch', {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({provider:'grok'})});
-                        document.getElementById('tsModel').textContent = gm.name || gm.id;
-                        await loadIdxModels();
-                    };
-                    row.appendChild(left);
-                    row.appendChild(useBtn);
-                    listEl.appendChild(row);
-                });
-            }
-        } catch(grokErr) {
-            console.debug('Grok status unavailable:', grokErr);
         }
 
         // Download section

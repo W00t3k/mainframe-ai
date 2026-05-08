@@ -8,7 +8,7 @@ import httpx
 from typing import List, Dict, Any, Optional
 
 from app.config import get_config
-from app.constants.prompts import SYSTEM_PROMPT
+from app.constants.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_FAST
 
 
 class OllamaService:
@@ -43,7 +43,7 @@ class OllamaService:
         except Exception:
             return False
     
-    def _build_options(self, temperature: float = 0.7, num_predict: int = 2048) -> dict:
+    def _build_options(self, temperature: float = 0.7, num_predict: int = 128) -> dict:
         """Build Ollama options dict, merging GPU-optimized settings."""
         options = {}
         # Start with GPU-optimized base options (num_gpu, num_ctx, num_batch, etc.)
@@ -51,15 +51,19 @@ class OllamaService:
             options.update(self.gpu_options)
         # Override with per-request settings
         options["temperature"] = temperature
+        # Limit output tokens for FAST responses (128 ≈ 1 paragraph)
         options["num_predict"] = num_predict
+        # Small context window for speed
+        if "num_ctx" not in options:
+            options["num_ctx"] = 2048
         return options
     
     async def generate(
         self,
         prompt: str,
         temperature: float = 0.7,
-        num_predict: int = 2048,
-        timeout: float = 120.0
+        num_predict: int = 128,
+        timeout: float = 20.0
     ) -> str:
         """Generate a response from Ollama."""
         try:
@@ -70,6 +74,7 @@ class OllamaService:
                         "model": self.model,
                         "prompt": prompt,
                         "stream": False,
+                        "think": False,  # Disable thinking mode for faster responses
                         "options": self._build_options(temperature, num_predict),
                     },
                     timeout=timeout
@@ -91,8 +96,8 @@ class OllamaService:
         messages: List[Dict[str, str]],
         tools: Optional[List[Dict]] = None,
         temperature: float = 0.7,
-        num_predict: int = 2048,
-        timeout: float = 120.0
+        num_predict: int = 128,
+        timeout: float = 20.0
     ) -> Dict[str, Any]:
         """Chat with Ollama using the chat API (supports tools)."""
         try:
@@ -100,9 +105,10 @@ class OllamaService:
                 "model": self.model,
                 "messages": messages,
                 "stream": False,
+                "think": False,  # Disable thinking mode for faster responses
                 "options": self._build_options(temperature, num_predict),
             }
-            
+
             if tools:
                 payload["tools"] = tools
             
@@ -123,9 +129,9 @@ class OllamaService:
         except Exception as e:
             return {"error": f"Error communicating with Ollama: {str(e)}"}
     
-    async def chat_simple(self, messages: List[Dict[str, str]]) -> str:
+    async def chat_simple(self, messages: List[Dict[str, str]], system_prompt: str = None) -> str:
         """Simple chat that returns just the response text."""
-        prompt = SYSTEM_PROMPT + "\n\n"
+        prompt = (system_prompt or SYSTEM_PROMPT) + "\n\n"
         for msg in messages:
             role = msg["role"]
             content = msg["content"]

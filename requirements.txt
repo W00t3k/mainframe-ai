@@ -1,6 +1,6 @@
 # AI/LLM (Ollama is the primary backend — no API keys needed)
-# Grok (xAI) cloud LLM — set XAI_API_KEY env var to enable
-# Uses OpenAI-compatible API at api.x.ai — no extra package needed (httpx handles it)
+# Qwen cloud LLM — set QWEN_API_KEY env var to enable
+# Uses OpenAI-compatible API at dashscope.aliyuncs.com — no extra package needed (httpx handles it)
 openai>=1.0.0  # Optional: for GPT fallback
 
 # Mainframe connectivity
@@ -20,7 +20,7 @@ httpx>=0.24.0  # HTTP client for Ollama API
 
 # Web interface
 fastapi>=0.100.0
-uvicorn>=0.20.0
+uvicorn[standard]>=0.20.0  # Includes websockets support
 python-multipart>=0.0.6  # For file uploads
 jinja2>=3.0.0  # Templates
 pydantic>=2.0.0

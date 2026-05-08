@@ -4,6 +4,9 @@ System Prompts and Tutor Personas
 All LLM system prompts and persona definitions used throughout the application.
 """
 
+# Fast mode - minimal prompt for quick responses
+SYSTEM_PROMPT_FAST = """Mainframe expert. Be brief. Answer directly."""
+
 SYSTEM_PROMPT = """You are an expert mainframe systems programmer and mainframe administrator assistant.
 
 ## Your Capabilities

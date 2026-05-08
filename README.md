@@ -346,7 +346,7 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 mainframe-ai/
 ├── app/                    # FastAPI application
 │   ├── routes/             # API endpoints (19 modules)
-│   ├── services/           # Business logic (ollama, grok, chat, ftp, kicks, bof_lab, rag)
+│   ├── services/           # Business logic (ollama, qwen, chat, ftp, kicks, bof_lab, rag)
 │   ├── constants/          # LLM prompts, walkthrough scripts, learning paths
 │   ├── models/             # Pydantic request/response schemas
 │   └── websocket/          # Real-time terminal and trust graph updates

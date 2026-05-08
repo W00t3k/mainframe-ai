@@ -38,33 +38,75 @@ class FTPService:
 
     def connect(self, host: str = "localhost", port: int = 2121,
                 user: str = "HERC01", password: str = "CUL8TR",
-                timeout: float = 15.0) -> Dict:
-        """Connect and authenticate to the MVS FTP server."""
+                timeout: float = 15.0, max_retries: int = 3) -> Dict:
+        """Connect and authenticate to the MVS FTP server.
+
+        Retries on connection failures (FTPD may take time to start).
+        Falls back to alternate credentials if login fails.
+        """
+        import time
+        import socket
+
+        # Fallback credentials if primary fails
+        fallback_creds = [
+            (user, password),
+            ("HERC02", password),
+            ("HERC03", password),
+        ]
+
         with self._lock:
             self._disconnect_locked()
-            try:
-                ftp = ftplib.FTP()
-                ftp.connect(host, port, timeout=timeout)
-                welcome = ftp.getwelcome() or ""
-                ftp.login(user, password)
-                self._ftp = ftp
-                self.host = host
-                self.port = port
-                self.user = user
-                self.connected = True
-                self.last_error = ""
-                self._cached_listing = []
-                logger.info(f"FTP connected to {host}:{port} as {user}")
-                return {
-                    "success": True,
-                    "message": f"Connected to {host}:{port} as {user}",
-                    "welcome": welcome,
-                }
-            except Exception as e:
-                self.connected = False
-                self.last_error = str(e)
-                logger.error(f"FTP connect failed: {e}")
-                return {"success": False, "error": str(e)}
+            last_error = ""
+
+            for attempt in range(max_retries):
+                for cred_user, cred_pass in fallback_creds:
+                    try:
+                        ftp = ftplib.FTP()
+                        ftp.connect(host, port, timeout=timeout)
+                        welcome = ftp.getwelcome() or ""
+                        ftp.login(cred_user, cred_pass)
+                        self._ftp = ftp
+                        self.host = host
+                        self.port = port
+                        self.user = cred_user
+                        self.connected = True
+                        self.last_error = ""
+                        self._cached_listing = []
+                        logger.info(f"FTP connected to {host}:{port} as {cred_user}")
+                        return {
+                            "success": True,
+                            "message": f"Connected to {host}:{port} as {cred_user}",
+                            "welcome": welcome,
+                        }
+                    except ftplib.error_perm as e:
+                        # Login rejected (530) - try next credential
+                        last_error = str(e)
+                        logger.warning(f"FTP login failed for {cred_user}: {e}")
+                        try:
+                            ftp.quit()
+                        except Exception:
+                            pass
+                        continue
+                    except (socket.timeout, ConnectionRefusedError, OSError) as e:
+                        # Connection failed - retry after delay
+                        last_error = str(e)
+                        logger.warning(f"FTP connect attempt {attempt+1} failed: {e}")
+                        break  # Don't try other creds, retry connection
+                    except Exception as e:
+                        last_error = str(e)
+                        logger.error(f"FTP connect error: {e}")
+                        break
+
+                # Wait before retry (exponential backoff)
+                if attempt < max_retries - 1:
+                    wait_time = 2 ** attempt
+                    logger.info(f"FTP retrying in {wait_time}s...")
+                    time.sleep(wait_time)
+
+            self.connected = False
+            self.last_error = last_error
+            logger.error(f"FTP connect failed after {max_retries} attempts: {last_error}")
+            return {"success": False, "error": last_error}
 
     def disconnect(self) -> Dict:
         """Disconnect from the FTP server."""

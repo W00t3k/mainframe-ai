@@ -1910,3 +1910,86 @@ _nested_keys = ("apf-privesc", "dc30-hello-world", "dc30-buffer-overflow",
 for _k in _nested_keys:
     if _k in WALKTHROUGH_SCRIPTS.get("system-enum", {}):
         WALKTHROUGH_SCRIPTS[_k] = WALKTHROUGH_SCRIPTS["system-enum"].pop(_k)
+
+
+# RAKF Passwords walkthrough — TK5's plaintext password store
+# This is what "racf-hashes" maps to on MVS 3.8j (no real RACF, uses RAKF)
+WALKTHROUGH_SCRIPTS["rakf-passwords"] = {
+    "title": "RAKF Passwords: Plaintext Credential Exposure on TK5",
+    "steps": [
+        {
+            "title": "Connect & Login",
+            "control_plane": "tso",
+            "narration": "**RAKF Password Exposure Lab**\n\nOn TK5/MVS 3.8j, authentication uses **RAKF** (not IBM RACF).\n\n**Critical difference:**\n- IBM RACF: DES-encrypted password hashes in SYS1.RACFDB\n- TK5 RAKF: **Plaintext passwords** in SYS1.SECURE.CNTL(USERS)\n\nThis walkthrough demonstrates the password exposure risk on TK5.\n\n**Note:** On real z/OS, you'd need RACF database access and hash cracking tools. Here, we just... read the file.",
+            "actions": [{"type": "connect"}, {"type": "wait", "seconds": 2}, {"type": "tso_login"}],
+            "expect": ["READY", "ISPF", "IKJ", "RFE", "TSOAPPLS"],
+            "display_seconds": 6,
+        },
+        {
+            "title": "Enter RFE (ISPF)",
+            "control_plane": "tso",
+            "narration": "**Navigating to RAKF Security Tables**\n\nWe enter RFE to use the BROWSE utility. The RAKF security tables are stored in:\n\n- `SYS1.SECURE.CNTL(USERS)` — User definitions with **plaintext passwords**\n- `SYS1.SECURE.CNTL(PROFILES)` — Resource access rules\n\n**On real z/OS:** Passwords are DES-encrypted in RACF database. Extraction requires:\n1. APF-authorized access to SYS1.RACFDB\n2. IRRDBU00 unload utility\n3. john/hashcat for cracking\n\n**On TK5:** Just browse the file.",
+            "actions": [{"type": "enter_rfe"}, {"type": "wait", "seconds": 2}],
+            "expect": ["ISPF", "OPTION", "BROWSE", "EDIT", "UTILITIES", "RFE"],
+            "display_seconds": 5,
+        },
+        {
+            "title": "Browse RAKF Users — Plaintext Passwords",
+            "control_plane": "racf",
+            "narration": "**Accessing SYS1.SECURE.CNTL(USERS)**\n\nThis file contains **every user on the system with their passwords in cleartext**.\n\nFormat: `USERNAME GROUP    *PASSWORD O`\n- `*` before password = never expires\n- `O` column = Operations authority: `Y` = bypass most checks\n\n**What you'll see:**\n```\nHERC01   ADMIN    *CUL8TR   Y    ← Admin with OPERATIONS\nHERC02   USER     *CUL8TR   N    ← Normal user\nIBMUSER  ADMIN    *SYS1     Y    ← Default IBM account\n```\n\n**Critical finding:** Anyone who can READ this file owns every account on the system.",
+            "actions": [
+                {"type": "string", "value": "1"},
+                {"type": "enter"},
+                {"type": "wait", "seconds": 3},
+                {"type": "home"}, {"type": "tab"},
+                {"type": "eraseeof"}, {"type": "string", "value": "SYS1"}, {"type": "tab"},
+                {"type": "eraseeof"}, {"type": "string", "value": "SECURE"}, {"type": "tab"},
+                {"type": "eraseeof"}, {"type": "string", "value": "CNTL"}, {"type": "tab"},
+                {"type": "eraseeof"}, {"type": "string", "value": "USERS"},
+                {"type": "enter"},
+                {"type": "wait", "seconds": 3},
+            ],
+            "expect": ["HERC01", "ADMIN", "CUL8TR", "IBMUSER"],
+            "display_seconds": 10,
+        },
+        {
+            "title": "Analyze Password Weaknesses",
+            "control_plane": "racf",
+            "narration": "**Password Analysis**\n\nLooking at the USERS file, identify:\n\n1. **Default passwords** — CUL8TR, SYS1, PASS4U (common TK5 defaults)\n2. **Shared passwords** — Multiple users with same password\n3. **Operations users** — Column O=Y has bypass authority\n4. **No expiration** — * prefix means password never expires\n\n**On real z/OS with RACF:**\n- Passwords are DES-encrypted (weak by modern standards)\n- Extract with: `IRRDBU00 UNLOAD` → produces flat file\n- Crack with: `john --format=racf hashes.txt`\n- Or: `hashcat -m 8500 hashes.txt wordlist.txt`\n\n**DES weakness:** Only uses first 8 characters, case-insensitive.\n`PASSWORD` and `password` and `PaSsWoRd` = same hash.",
+            "actions": [
+                {"type": "pf", "value": "8"},
+                {"type": "wait", "seconds": 2},
+            ],
+            "expect": ["HERC", "ADMIN", "USER"],
+            "display_seconds": 10,
+        },
+        {
+            "title": "Compare to Real RACF",
+            "control_plane": "racf",
+            "narration": "**TK5 RAKF vs Real z/OS RACF**\n\n| Feature | TK5 RAKF | Real z/OS RACF |\n|---------|----------|----------------|\n| Storage | Text file | VSAM database |\n| Passwords | Plaintext | DES encrypted |\n| Hash length | N/A | 8 bytes |\n| Case sensitive | Yes | **No** |\n| Max length | Unlimited | 8 chars used |\n| Extraction | BROWSE | IRRDBU00 |\n| Cracking | Just read | john/hashcat |\n\n**Why RACF DES is weak:**\n1. Only 8 characters matter\n2. Uppercase conversion before hashing\n3. DES key = folded userid + password\n4. No salt — same password = same hash\n5. Rainbow tables exist\n\n**Modern z/OS:** KDFAES password hashing available (much stronger).",
+            "actions": [
+                {"type": "pf", "value": "3"},
+                {"type": "wait", "seconds": 2},
+            ],
+            "expect": ["BROWSE", "ISPF", "RFE"],
+            "display_seconds": 12,
+        },
+        {
+            "title": "Logoff — Findings Summary",
+            "control_plane": "vtam",
+            "narration": "**RAKF Password Exposure — Lab Complete**\n\n**TK5 Findings:**\n- Plaintext passwords in SYS1.SECURE.CNTL(USERS)\n- Any READ access = credential theft\n- Default/weak passwords (CUL8TR, SYS1)\n- Operations authority visible (O=Y column)\n\n**Real z/OS Remediation:**\n1. Protect SYS1.RACFDB with UACC(NONE)\n2. Enable KDFAES password hashing\n3. Set SETROPTS PASSWORD(MINCHANGE HISTORY REVOKE)\n4. Monitor SMF Type 80 for IRRDBU00 usage\n5. Audit who has READ to RACF database\n\n**Key insight:** Password storage security differs between TK5 and production z/OS, but the principle is the same: protect the credential store.\n\n**Warning:** Never disconnect while logged in — recover with `/C U=userid`.",
+            "actions": [
+                {"type": "pf", "value": "3"},
+                {"type": "wait", "seconds": 2},
+                {"type": "pf", "value": "3"},
+                {"type": "wait", "seconds": 2},
+                {"type": "tso_logoff"},
+            ],
+            "expect": ["LOGOFF", "VTAM"],
+            "display_seconds": 10,
+        },
+    ],
+}
+
+# Alias: racf-hashes → rakf-passwords (TK5 doesn't have real RACF)
+WALKTHROUGH_SCRIPTS["racf-hashes"] = WALKTHROUGH_SCRIPTS["rakf-passwords"]

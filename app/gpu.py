@@ -51,6 +51,9 @@ class GPUInfo:
     @property
     def tier(self) -> str:
         """Classify GPU into performance tiers."""
+        # Apple Silicon uses Metal, needs special handling
+        if "Apple" in self.name or "M1" in self.name or "M2" in self.name or "M3" in self.name or "M4" in self.name or "M5" in self.name:
+            return "apple_silicon"
         vram_gb = self.vram_total_gb
         if vram_gb >= 80:
             return "ultra"      # H100/H200/A100-80GB — run 70B+ models
@@ -109,9 +112,9 @@ GPU_MODEL_TIERS = {
                 "use_case": "general_expert",
             },
             {
-                "name": "qwen2.5:72b",
+                "name": "codellama:70b",
                 "vram_gb": 42,
-                "description": "Qwen 2.5 72B — Strong multilingual and code capabilities",
+                "description": "CodeLlama 70B — Code expert",
                 "use_case": "general",
             },
             {
@@ -167,18 +170,18 @@ GPU_MODEL_TIERS = {
             },
             {
                 "name": "Dual General + Code",
-                "models": ["llama3.1:70b", "qwen2.5:72b", "deepseek-coder-v2:16b", "llama3.1:8b"],
+                "models": ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "llama3.1:8b"],
                 "total_vram_gb": 97,
-                "description": "4 models: two 70B generals (Llama+Qwen) + code + fast fallback",
-                "roles": {"llama3.1:70b": "general", "qwen2.5:72b": "general_alt", "deepseek-coder-v2:16b": "code", "llama3.1:8b": "fast"},
+                "description": "4 models: two CodeLlama models + code + fast fallback",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code_alt", "deepseek-coder-v2:16b": "code", "llama3.1:8b": "fast"},
             },
             # ── 3-MODEL COMBOS (balanced) ──
             {
                 "name": "Triple 70B",
-                "models": ["llama3.1:70b", "codellama:70b", "qwen2.5:72b"],
+                "models": ["llama3.1:70b", "codellama:70b", "codellama:70b"],
                 "total_vram_gb": 122,
-                "description": "3 heavyweight 70B models: Llama general + CodeLlama + Qwen — max quality",
-                "roles": {"llama3.1:70b": "general", "codellama:70b": "code", "qwen2.5:72b": "general_alt"},
+                "description": "3 heavyweight 70B models: Llama + CodeLlama models — max quality",
+                "roles": {"llama3.1:70b": "general", "codellama:70b": "code", "codellama:70b": "code_alt"},
             },
             {
                 "name": "Best Quality + Fast",
@@ -195,11 +198,11 @@ GPU_MODEL_TIERS = {
                 "roles": {"mixtral:8x22b": "general", "codellama:70b": "code", "llama3.1:8b": "fast"},
             },
             {
-                "name": "Qwen + Code + Fast",
-                "models": ["qwen2.5:72b", "codellama:70b", "mistral:7b"],
+                "name": "CodeLlama + Mistral",
+                "models": ["codellama:70b", "codellama:70b", "mistral:7b"],
                 "total_vram_gb": 86,
-                "description": "3 models: Qwen 72B general + 70B code + Mistral fast",
-                "roles": {"qwen2.5:72b": "general", "codellama:70b": "code", "mistral:7b": "fast"},
+                "description": "3 models: CodeLlama 70B + Mistral fast",
+                "roles": {"codellama:70b": "general", "codellama:70b": "code", "mistral:7b": "fast"},
             },
             {
                 "name": "Llama + DeepSeek Code + Fast",
@@ -224,11 +227,11 @@ GPU_MODEL_TIERS = {
                 "roles": {"mixtral:8x22b": "general", "codellama:70b": "code"},
             },
             {
-                "name": "Qwen + Code",
-                "models": ["qwen2.5:72b", "codellama:70b"],
+                "name": "CodeLlama Duo",
+                "models": ["codellama:70b", "codellama:70b"],
                 "total_vram_gb": 82,
-                "description": "2 models: Qwen 72B multilingual + 70B code",
-                "roles": {"qwen2.5:72b": "general", "codellama:70b": "code"},
+                "description": "2 models: CodeLlama 70B + 34B",
+                "roles": {"codellama:70b": "general", "codellama:70b": "code"},
             },
             # ── SOLO (max single-model quality) ──
             {
@@ -250,13 +253,13 @@ GPU_MODEL_TIERS = {
         "compatibility": {
             "deepseek-coder-v2:236b": ["mistral:7b", "llama3.1:8b"],
             "deepseek-v2.5:236b":     ["mistral:7b", "llama3.1:8b"],
-            "mixtral:8x22b":          ["qwen2.5:72b", "llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b"],
-            "qwen2.5:72b":            ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
-            "llama3.1:70b":           ["qwen2.5:72b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
-            "codellama:70b":          ["llama3.1:70b", "qwen2.5:72b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
-            "deepseek-coder-v2:16b":  ["llama3.1:70b", "qwen2.5:72b", "codellama:70b", "mixtral:8x22b", "mistral:7b", "llama3.1:8b"],
-            "mistral:7b":             ["llama3.1:70b", "qwen2.5:72b", "codellama:70b", "mixtral:8x22b", "deepseek-coder-v2:16b", "llama3.1:8b", "deepseek-coder-v2:236b", "deepseek-v2.5:236b"],
-            "llama3.1:8b":            ["llama3.1:70b", "qwen2.5:72b", "codellama:70b", "mixtral:8x22b", "deepseek-coder-v2:16b", "mistral:7b", "deepseek-coder-v2:236b", "deepseek-v2.5:236b"],
+            "mixtral:8x22b":          ["codellama:70b", "llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b"],
+            "codellama:70b":            ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
+            "llama3.1:70b":           ["codellama:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
+            "codellama:70b":          ["llama3.1:70b", "codellama:70b", "deepseek-coder-v2:16b", "mistral:7b", "llama3.1:8b", "mixtral:8x22b"],
+            "deepseek-coder-v2:16b":  ["llama3.1:70b", "codellama:70b", "codellama:70b", "mixtral:8x22b", "mistral:7b", "llama3.1:8b"],
+            "mistral:7b":             ["llama3.1:70b", "codellama:70b", "codellama:70b", "mixtral:8x22b", "deepseek-coder-v2:16b", "llama3.1:8b", "deepseek-coder-v2:236b", "deepseek-v2.5:236b"],
+            "llama3.1:8b":            ["llama3.1:70b", "codellama:70b", "codellama:70b", "mixtral:8x22b", "deepseek-coder-v2:16b", "mistral:7b", "deepseek-coder-v2:236b", "deepseek-v2.5:236b"],
         },
         "ollama_options": {
             "num_gpu": 99,          # Offload all layers to GPU
@@ -285,9 +288,9 @@ GPU_MODEL_TIERS = {
                 "use_case": "code",
             },
             {
-                "name": "qwen2.5:32b",
+                "name": "codellama:34b",
                 "vram_gb": 20,
-                "description": "Qwen 2.5 32B — Strong general purpose",
+                "description": "CodeLlama 34B — Code expert",
                 "use_case": "general",
             },
             {
@@ -334,7 +337,7 @@ GPU_MODEL_TIERS = {
         "ollama_options": {
             "num_gpu": 99,
             "num_thread": 8,
-            "num_ctx": 8192,
+            "num_ctx": 4096,
             "num_batch": 512,
             "f16_kv": True,
             "use_mmap": True,
@@ -443,15 +446,79 @@ GPU_MODEL_TIERS = {
             "num_batch": 256,
         },
     },
+    "apple_silicon": {
+        "description": "Apple Silicon (M1/M2/M3/M4/M5) — Metal GPU acceleration with unified memory",
+        "recommended": [
+            {
+                "name": "codellama:7b",
+                "vram_gb": 5,
+                "description": "CodeLlama 7B — Fast, great for JCL/COBOL",
+                "use_case": "code",
+            },
+            {
+                "name": "codellama:13b",
+                "vram_gb": 8,
+                "description": "CodeLlama 13B — Better quality, still fast",
+                "use_case": "code",
+            },
+            {
+                "name": "codellama:34b",
+                "vram_gb": 19,
+                "description": "CodeLlama 34B — Best code quality",
+                "use_case": "code",
+            },
+            {
+                "name": "deepseek-coder-v2:16b",
+                "vram_gb": 10,
+                "description": "DeepSeek Coder V2 16B — Great for code tasks",
+                "use_case": "code",
+            },
+        ],
+        "default": "codellama:7b",
+        "ollama_options": {
+            "num_gpu": 999,  # Force all layers to Metal
+            "num_ctx": 2048,
+            "num_batch": 512,
+        },
+    },
 }
 
 
 def detect_gpu() -> GPUInfo:
     """
-    Detect NVIDIA GPU using nvidia-smi.
+    Detect GPU: Apple Silicon (Metal) or NVIDIA (cuda).
     Returns GPUInfo with all available metrics.
     """
     gpu = GPUInfo()
+
+    # Check for Apple Silicon first (macOS with ARM)
+    import platform
+    if platform.system() == "Darwin" and platform.machine() == "arm64":
+        try:
+            # Get chip name
+            result = subprocess.run(
+                ["sysctl", "-n", "machdep.cpu.brand_string"],
+                capture_output=True, text=True, timeout=5
+            )
+            chip_name = result.stdout.strip() if result.returncode == 0 else "Apple Silicon"
+
+            # Get total memory (unified memory = GPU memory on Apple Silicon)
+            result = subprocess.run(
+                ["sysctl", "-n", "hw.memsize"],
+                capture_output=True, text=True, timeout=5
+            )
+            total_mem_bytes = int(result.stdout.strip()) if result.returncode == 0 else 0
+            total_mem_mb = total_mem_bytes // (1024 * 1024)
+
+            gpu.name = chip_name
+            gpu.vram_total_mb = total_mem_mb  # Unified memory - triggers is_available=True
+            gpu.vram_free_mb = total_mem_mb // 2  # Estimate
+            # tier property auto-detects "apple_silicon" from name
+
+            logger.info(f"Apple Silicon detected: {chip_name} with {total_mem_mb // 1024}GB unified memory")
+            return gpu
+        except Exception as e:
+            logger.warning(f"Apple Silicon detection failed: {e}")
 
     if not shutil.which("nvidia-smi"):
         logger.info("nvidia-smi not found — no NVIDIA GPU detected")

@@ -15,23 +15,27 @@ config = get_config()
 
 # Import graph modules
 try:
-    from trust_graph import get_trust_graph, TrustGraph
-    from graph_tools import (
+    from tools.trust_graph import get_trust_graph, TrustGraph
+    from tools.graph_tools import (
         classify_panel, extract_identifiers, parse_jcl, parse_sysout,
         update_graph_from_jcl, update_graph_from_sysout, update_graph_from_screen,
         generate_finding
     )
     GRAPH_AVAILABLE = True
-except ImportError:
+except ImportError as e:
     GRAPH_AVAILABLE = False
     get_trust_graph = None
+    print(f"[graph] Trust graph not available: {e}")
 
-# Import agent_tools for screen reading
+# Import agent_tools for screen reading - try absolute import first
 try:
     from agent_tools import connection, read_screen
 except ImportError:
-    connection = None
-    read_screen = lambda: "[Not connected]"
+    try:
+        from tools.agent_tools import connection, read_screen
+    except ImportError:
+        connection = None
+        read_screen = lambda: "[Not connected]"
 
 
 @router.get("/stats")
@@ -319,7 +323,7 @@ async def api_graph_load_demo():
 
 # Import automation
 try:
-    from graph_automation import TrustGraphAutomation, run_session_stack_exploration
+    from tools.graph_automation import TrustGraphAutomation, run_session_stack_exploration
     AUTOMATION_AVAILABLE = True
 except ImportError:
     AUTOMATION_AVAILABLE = False

@@ -80,6 +80,7 @@ INCLUDE conf/${TK5CONS:=intcons}.cnf
 00C5 3270
 00C6 3270
 00C7 3287
+0400-041F 3270
 #
 # local 3270 terminals (TCAM)
 #

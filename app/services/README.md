@@ -20,19 +20,19 @@ Singleton `OllamaService` — all Ollama LLM communication:
 - `check_available()` — health check
 - GPU-optimized options merged automatically from `config.py`
 
-### `grok.py`
-Singleton `GrokService` — xAI/Grok cloud LLM client:
+### `qwen.py`
+Singleton `QwenService` — Alibaba Qwen cloud LLM client:
 - `generate()` — single-shot prompt completion via OpenAI-compatible API
 - `chat_simple()` — multi-turn chat returning plain text
 - `quick_explain()` — fast screen explanation
 - `check_available()` — API key + endpoint health check
 - `list_models()` — fetch available models from the API
-- Supports any OpenAI-compatible endpoint (Groq, Together, etc.)
+- Uses Alibaba DashScope API (OpenAI-compatible)
 
 ### `llm_provider.py`
 Singleton `UnifiedLLMService` — routes requests to the best available LLM:
-- Auto mode: prefers local Ollama, falls back to Grok if Ollama is down
-- Explicit mode: force Ollama or Grok via `LLM_PROVIDER` env var
+- Auto mode: prefers local Ollama, falls back to Qwen if Ollama is down
+- Explicit mode: force Ollama or Qwen via `LLM_PROVIDER` env var
 - `get_status()` — returns availability of all providers for UI
 - All `generate()`, `chat_simple()`, `quick_explain()` calls route through this
 

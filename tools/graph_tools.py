@@ -15,7 +15,7 @@ TSO_HELPER = None
 CICS_HELPER = None
 JES_PARSER = None
 
-from trust_graph import get_trust_graph, TrustGraph
+from .trust_graph import get_trust_graph, TrustGraph
 
 
 # =============================================================================

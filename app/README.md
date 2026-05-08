@@ -27,7 +27,7 @@ app/
 │   ├── methodology.py   # Control-plane assessment methodology engine
 │   ├── kicks.py         # KICKS (CICS) status, start, stop
 │   ├── ftp.py           # MVS FTP client, card reader submit
-│   ├── llm.py           # LLM provider switch (Ollama/Grok/auto), API key config
+│   ├── llm.py           # LLM provider switch (Ollama/Qwen/auto), API key config
 │   ├── bof_lab.py       # Buffer overflow lab (De Bruijn, EBCDIC, dump analysis)
 │   ├── rakf.py          # RAKF security manager (users, profiles, rules)
 │   ├── labs.py          # Lab index and detail endpoints
@@ -35,8 +35,8 @@ app/
 │   └── screencaps.py    # Terminal screenshot capture and management
 ├── services/            # Business logic
 │   ├── ollama.py        # Ollama LLM client (generate, chat, quick_explain)
-│   ├── grok.py          # Grok/xAI cloud LLM client
-│   ├── llm_provider.py  # Unified LLM router (Ollama ↔ Grok with auto-fallback)
+│   ├── qwen.py          # Qwen cloud LLM client (Alibaba DashScope)
+│   ├── llm_provider.py  # Unified LLM router (Ollama ↔ Qwen with auto-fallback)
 │   ├── chat.py          # Chat processing, conversation history, slash commands
 │   ├── ftp.py           # MVS FTP client over ftplib
 │   ├── bof_lab.py       # Buffer overflow lab logic (De Bruijn, dump analysis)
@@ -51,7 +51,7 @@ app/
 - **LLM-driven simulation** — The PR/SM walkthrough uses the LLM to emulate an IBM z16 HMC with 6 LPARs.
 - **Walkthrough engine** — 13 scripted walkthroughs drive s3270 autonomously with per-step narration.
 - **Shared helpers** — Card reader submission and VTAM restart are centralized in `system.py`. RAG context building is in `services/rag_context.py`.
-- **Dual LLM support** — Ollama for local inference (default), Grok/xAI for cloud. Auto-fallback between providers.
+- **Dual LLM support** — Ollama for local inference (default), Qwen for cloud. Auto-fallback between providers.
 
 ## Entry Point
 

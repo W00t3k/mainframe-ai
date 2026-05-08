@@ -12,20 +12,26 @@ from typing import Dict, List, Optional, Callable
 from dataclasses import dataclass, field
 from datetime import datetime
 
-# Import TN3270 connection
+# Import TN3270 connection - try absolute import first to share connection state
 try:
     from agent_tools import (
         connect_mainframe, disconnect_mainframe, send_terminal_key,
         read_screen, connection, TN3270_AVAILABLE
     )
 except ImportError:
-    TN3270_AVAILABLE = False
-    connection = None
+    try:
+        from .agent_tools import (
+            connect_mainframe, disconnect_mainframe, send_terminal_key,
+            read_screen, connection, TN3270_AVAILABLE
+        )
+    except ImportError:
+        TN3270_AVAILABLE = False
+        connection = None
 
 # Import trust graph
 try:
-    from trust_graph import get_trust_graph, TrustGraph
-    from graph_tools import update_graph_from_screen, classify_panel, extract_identifiers
+    from .trust_graph import get_trust_graph, TrustGraph
+    from .graph_tools import update_graph_from_screen, classify_panel, extract_identifiers
     GRAPH_AVAILABLE = True
 except ImportError:
     GRAPH_AVAILABLE = False

@@ -738,7 +738,7 @@ class WalkthroughRunner:
     def _ask_llm_recovery_action(self, screen: str) -> str:
         """Ask the LLM to analyze the screen and return a single recovery action.
 
-        Uses unified provider logic: Groq (internet) first, Ollama (local) fallback.
+        Uses unified provider logic: Ollama.
         Returns one of: CLEAR, PF3, ENTER, LOGOFF, END, CANCEL
         Falls back to pattern matching if all LLMs unavailable."""
         config = get_config()
@@ -766,55 +766,26 @@ IMPORTANT: CLEAR is almost always the safest action for TSO error prompts. It cl
 What SINGLE action should we take RIGHT NOW?
 Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
 
-        # Try Groq first (internet), then Ollama (local)
+        # Use Ollama for recovery decision
         answer = None
-
-        # 1. Try Groq if configured
         try:
-            from app.services.grok import get_grok_service
-            grok = get_grok_service()
-            if grok.is_configured:
-                resp = httpx.post(
-                    f"{grok._api_url}/chat/completions",
-                    headers={
-                        "Authorization": f"Bearer {grok._api_key}",
-                        "Content-Type": "application/json",
-                    },
-                    json={
-                        "model": grok._model,
-                        "messages": [{"role": "user", "content": prompt}],
-                        "temperature": 0.1,
-                        "max_tokens": 10,
-                    },
-                    timeout=10.0,
-                )
-                if resp.status_code == 200:
-                    data = resp.json()
-                    answer = data.get("choices", [{}])[0].get("message", {}).get("content", "").strip().upper()
-                    logger.debug(f"Groq recovery response: {answer}")
+            resp = httpx.post(
+                f"{config.OLLAMA_URL}/api/generate",
+                json={
+                    "model": config.OLLAMA_MODEL,
+                    "prompt": prompt,
+                    "stream": False,
+                    "options": {"temperature": 0.1, "num_predict": 10},
+                },
+                timeout=15.0,
+            )
+            if resp.status_code == 200:
+                answer = resp.json().get("response", "").strip().upper()
+                logger.debug(f"Ollama recovery response: {answer}")
         except Exception as e:
-            logger.debug(f"Groq unavailable for recovery: {e}")
+            logger.warning(f"Ollama unavailable for recovery: {e}")
 
-        # 2. Try Ollama if Groq didn't work
-        if not answer:
-            try:
-                resp = httpx.post(
-                    f"{config.OLLAMA_URL}/api/generate",
-                    json={
-                        "model": config.OLLAMA_MODEL,
-                        "prompt": prompt,
-                        "stream": False,
-                        "options": {"temperature": 0.1, "num_predict": 10},
-                    },
-                    timeout=15.0,
-                )
-                if resp.status_code == 200:
-                    answer = resp.json().get("response", "").strip().upper()
-                    logger.debug(f"Ollama recovery response: {answer}")
-            except Exception as e:
-                logger.warning(f"Ollama unavailable for recovery: {e}")
-
-        # 3. Extract action from LLM response
+        # Extract action from LLM response
         if answer:
             for cmd in ["LOGOFF", "CANCEL", "CLEAR", "ENTER", "END", "PF3"]:
                 if cmd in answer:

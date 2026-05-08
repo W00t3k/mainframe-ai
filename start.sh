@@ -55,62 +55,13 @@ detect_model() {
   GPU_DETECTED=false
   GPU_VRAM_GB=0
 
-  # Check for NVIDIA GPU first
-  if command -v nvidia-smi &>/dev/null; then
-    GPU_VRAM_MB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
-    if [ -n "$GPU_VRAM_MB" ] && [ "$GPU_VRAM_MB" -gt 0 ] 2>/dev/null; then
-      GPU_DETECTED=true
-      GPU_VRAM_GB=$((GPU_VRAM_MB / 1024))
-      GPU_NAME=$(nvidia-smi --query-gpu=name --format=csv,noheader 2>/dev/null | head -1)
-      ok "GPU detected: $GPU_NAME (${GPU_VRAM_GB}GB VRAM)"
-
-      if [ "$GPU_VRAM_GB" -ge 80 ]; then
-        MODEL="deepseek-r1:70b"
-        ok "GPU tier: ULTRA — using $MODEL"
-      elif [ "$GPU_VRAM_GB" -ge 40 ]; then
-        MODEL="deepseek-r1:32b"
-        ok "GPU tier: HIGH — using $MODEL"
-      elif [ "$GPU_VRAM_GB" -ge 20 ]; then
-        MODEL="deepseek-coder-v2:16b"
-        ok "GPU tier: MEDIUM — using $MODEL"
-      elif [ "$GPU_VRAM_GB" -ge 8 ]; then
-        MODEL="deepseek-r1:8b"
-        ok "GPU tier: LOW — using $MODEL"
-      else
-        MODEL="phi3:mini"
-        ok "GPU tier: MINIMAL — using $MODEL"
-      fi
-
-      # Set GPU-optimized Ollama env vars
-      export CUDA_VISIBLE_DEVICES="0"
-      if [ "$GPU_VRAM_GB" -ge 80 ]; then
-        export OLLAMA_FLASH_ATTENTION="1"
-        export OLLAMA_NUM_PARALLEL="4"
-        export OLLAMA_MAX_LOADED_MODELS="4"
-      elif [ "$GPU_VRAM_GB" -ge 40 ]; then
-        export OLLAMA_FLASH_ATTENTION="1"
-        export OLLAMA_NUM_PARALLEL="2"
-        export OLLAMA_MAX_LOADED_MODELS="2"
-      fi
-
-      # Set RAM for status display
-      TOTAL_RAM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')
-      [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
-      [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=0
-      return
-    fi
-  fi
-
-  # Fallback: RAM-based model selection (no GPU)
   TOTAL_RAM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')
   # macOS fallback
   [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
   [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=16000
 
   if [ "$TOTAL_RAM_MB" -ge 32000 ]; then
-    MODEL="deepseek-r1:14b"
-  elif [ "$TOTAL_RAM_MB" -ge 16000 ]; then
-    MODEL="deepseek-r1:8b"
+    MODEL="codellama-fast"  # codellama:34b with 2K context — best for JCL/COBOL
   elif [ "$TOTAL_RAM_MB" -ge 8000 ]; then
     MODEL="phi3:mini"
   elif [ "$TOTAL_RAM_MB" -ge 4000 ]; then
@@ -118,7 +69,7 @@ detect_model() {
   else
     MODEL="tinyllama"
   fi
-  info "No GPU detected — CPU mode with $MODEL"
+  info "Selected model: $MODEL"
 }
 
 # ── Detect Hercules binary ─────────────────────────────
@@ -170,7 +121,7 @@ kill_all() {
   lsof -ti :$PORT 2>/dev/null | xargs kill -9 2>/dev/null && fail "Killed web app on :$PORT" || ok "Web app not running"
 
   # Ollama
-  pkill -f "ollama serve" 2>/dev/null && fail "Killed Ollama" || ok "Ollama not running"
+  #pkill -f "ollama serve" 2>/dev/null && fail "Killed Ollama" || ok "Ollama not running"
 
   # Hercules
   pkill -f "hercules" 2>/dev/null && fail "Killed Hercules/TK5" || ok "TK5 not running"
@@ -323,13 +274,19 @@ start_ollama_svc() {
   export OLLAMA_KEEP_ALIVE="5m"
   export OLLAMA_MAX_LOADED_MODELS=1
   export OLLAMA_NUM_PARALLEL=1
+  export OLLAMA_NUM_GPU=999  # Force all layers to Metal (Apple Silicon)
 
   if check_ollama; then
     ok "Ollama already running"
   else
     info "Starting Ollama..."
-    nohup ollama serve >> "$LOGDIR/ollama.log" 2>&1 &
-    disown $!
+    if [ "$(uname -s)" = "Darwin" ]; then
+      # macOS: Start Ollama app (includes menubar icon + server)
+      open -a Ollama 2>/dev/null || nohup ollama serve >> "$LOGDIR/ollama.log" 2>&1 &
+    else
+      nohup ollama serve >> "$LOGDIR/ollama.log" 2>&1 &
+    fi
+    disown $! 2>/dev/null
     if wait_for "Ollama" check_ollama 10; then
       ok "Ollama started (pid $(pgrep -x ollama 2>/dev/null))"
     else
@@ -343,21 +300,50 @@ start_ollama_svc() {
   info "RAM: ${TOTAL_RAM_MB}MB → target model: ${BLD}$MODEL${RST}"
   OLLAMA_OK=1
 
-  # Check if target model is already pulled
-  if timeout 5 ollama list 2>/dev/null | grep -q "$MODEL"; then
-    ok "Model $MODEL ready"
-  else
-    # Use first available model as fallback while target pulls
-    FALLBACK=$(timeout 5 ollama list 2>/dev/null | tail -n +2 | head -1 | awk '{print $1}')
-    if [ -n "$FALLBACK" ]; then
-      info "Using $FALLBACK while pulling $MODEL in background..."
-      MODEL="$FALLBACK"
-    else
-      info "No models installed — pulling $MODEL (this may take a while)..."
-    fi
-    # Pull target model in background
-    ( ollama pull "$MODEL" ) >> "$LOGDIR/ollama.log" 2>&1 &
+  # Create codellama-fast: 7B with tiny context for SPEED
+  #if ! timeout 5 ollama list 2>/dev/null | grep -q "codellama-fast"; then
+  #  info "Creating codellama-fast (7B, 2K context, 128 tokens)..."
+  #  if ! timeout 5 ollama list 2>/dev/null | grep -q "codellama:7b"; then
+      #info "Pulling base model codellama:7b..."
+      #ollama pull codellama:7b 2>&1 | tee -a "$LOGDIR/ollama.log"
+   # fi
+    cat > /tmp/Modelfile << 'MFEOF'
+FROM codellama:7b
+PARAMETER num_ctx 2048
+PARAMETER num_predict 128
+MFEOF
+    ollama create codellama-fast -f /tmp/Modelfile >> "$LOGDIR/ollama.log" 2>&1
+    ok "Created codellama-fast model"
+  #fi
+
+  # Check if target model is already pulled (skip for local custom models)
+  if [ "$MODEL" != "codellama-fast" ] && ! timeout 5 ollama list 2>/dev/null | grep -q "$MODEL"; then
+    info "Pulling $MODEL (this may take a while)..."
+    ollama pull "$MODEL" 2>&1 | tee -a "$LOGDIR/ollama.log"
   fi
+
+  # Unload other models to free memory
+  for other in codellama-fast codellama:34b llama-fast llama3.1:8b; do
+    [ "$other" != "$MODEL" ] && curl -s http://localhost:11434/api/generate -d "{\"model\":\"$other\",\"keep_alive\":0}" > /dev/null 2>&1
+  done
+
+  # Warm up model — load into memory for faster first response
+  info "Loading $MODEL into memory..."
+  # Use API with keep_alive to ensure model stays loaded
+  curl -s http://localhost:11434/api/generate \
+    -d "{\"model\":\"$MODEL\",\"prompt\":\"hi\",\"stream\":false,\"keep_alive\":\"5m\"}" \
+    >> "$LOGDIR/ollama.log" 2>&1
+  sleep 2
+  # Retry check a few times (model may take a moment to appear in ps)
+  for _try in 1 2 3 4 5; do
+    if ollama ps 2>/dev/null | grep -qi "$MODEL"; then
+      ok "Model $MODEL loaded"
+      return 0
+    fi
+    sleep 2
+  done
+  # Even if ps check fails, model might work - don't block startup
+  warn "Model warmup check inconclusive (ollama ps), continuing anyway"
 }
 
 start_tk5_svc() {

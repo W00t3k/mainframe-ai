@@ -61,7 +61,7 @@ async def api_status():
 
 @router.get("/models")
 async def api_list_models():
-    """List available Ollama models."""
+    """List available Ollama models (excludes qwen)."""
     config = get_config()
     models = []
     try:
@@ -71,6 +71,9 @@ async def api_list_models():
                 data = r.json()
                 for m in data.get("models", []):
                     name = m.get("name", "")
+                    # Filter out qwen models
+                    if "qwen" in name.lower():
+                        continue
                     size_gb = m.get("size", 0) / (1024**3)
                     models.append({
                         "name": name,
@@ -81,22 +84,34 @@ async def api_list_models():
                     })
     except Exception as e:
         return JSONResponse({"models": [], "current": config.OLLAMA_MODEL, "error": str(e)})
-    
+
     return JSONResponse({"models": models, "current": config.OLLAMA_MODEL})
 
 
 @router.post("/models/switch")
 async def api_switch_model(request: Request):
     """Switch the active Ollama model."""
+    import httpx
     data = await request.json()
     model = data.get("model", "").strip()
     if not model:
         return JSONResponse({"success": False, "error": "No model specified"})
-    
+
     config = get_config()
     old_model = config.OLLAMA_MODEL
+
+    # Unload old model to free memory
+    if old_model and old_model != model:
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                await client.post(
+                    f"{config.OLLAMA_URL}/api/generate",
+                    json={"model": old_model, "keep_alive": 0}
+                )
+        except Exception:
+            pass  # Best effort unload
+
     config.OLLAMA_MODEL = model
-    
     return JSONResponse({"success": True, "old": old_model, "new": model})
 
 
