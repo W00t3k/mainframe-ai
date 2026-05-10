@@ -151,54 +151,56 @@ def screen_from_readbuffer(buffer):
 # Emulator Command Execution
 # =============================================================================
 
-def exec_emulator_command(command: bytes, timeout: float = 3):
-    """Execute emulator command with timeout to prevent hanging.
+def exec_emulator_command(command: bytes, timeout: float = 5):
+    """Execute emulator command with timeout to prevent hanging on non-input screens.
 
-    Uses a separate lock that gets force-released on timeout to prevent
-    deadlocks when em.exec_command hangs indefinitely.
+    On timeout: kills s3270 (unavoidable — it's blocked on readline) but then
+    automatically reconnects so the next call works instead of leaving everything dead.
     """
     em = connection.emulator
-    if not em or not connection.connected:
+    if not em:
         return None
-
-    # Skip Wait commands entirely - they cause hangs
-    cmd_str = command.decode('utf-8', errors='ignore').upper()
-    if 'WAIT(' in cmd_str:
-        return None
-
-    # Check if main lock is held - if so, fail fast
-    if not connection.command_lock.acquire(blocking=False):
-        return None
-    connection.command_lock.release()
 
     result_box = [None]
     exc_box = [None]
-    done_event = threading.Event()
 
     def _run():
         try:
-            result_box[0] = em.exec_command(command)
+            with connection.command_lock:
+                result_box[0] = em.exec_command(command)
         except BrokenPipeError:
             exc_box[0] = "broken_pipe"
         except OSError:
             exc_box[0] = "os_error"
         except Exception as e:
             exc_box[0] = str(e)
-        finally:
-            done_event.set()
 
     t = threading.Thread(target=_run, daemon=True)
     t.start()
+    t.join(timeout)
 
-    # Wait with timeout
-    finished = done_event.wait(timeout=timeout)
-
-    if not finished:
-        # Command hung - the daemon thread will eventually die
-        # Mark connection as possibly broken
+    if t.is_alive():
+        # Command hung — must kill s3270 to unblock readline()
+        _host = connection.host
+        _port = connection.port
+        try:
+            em.app.sp.kill()
+        except Exception:
+            pass
+        connection.connected = False
+        connection.emulator = None
+        # Auto-reconnect so next call works
+        if _host:
+            _auto_reconnect(_host, _port)
         return None
 
-    if exc_box[0]:
+    if exc_box[0] in ("broken_pipe", "os_error"):
+        _host = connection.host
+        _port = connection.port
+        connection.connected = False
+        connection.emulator = None
+        if _host:
+            _auto_reconnect(_host, _port)
         return None
 
     return result_box[0]
@@ -332,8 +334,8 @@ def disconnect_mainframe() -> str:
 def read_screen() -> str:
     """Read current 3270 screen content.
 
-    Uses timeout-protected read to prevent deadlocks if emulator hangs.
-    Returns cached screen if read times out.
+    Thread-safe: acquires command_lock to prevent concurrent s3270 access
+    with exec_emulator_command. Returns cached screen if lock is busy.
 
     Returns:
         Screen text or error message
@@ -343,45 +345,32 @@ def read_screen() -> str:
     if not connection.connected or not connection.emulator:
         return "[Not connected]"
 
-    # Quick check if lock is available (non-blocking)
-    if not connection.command_lock.acquire(blocking=False):
+    # Try to acquire lock — return cached data if busy (keeps UI responsive)
+    acquired = connection.command_lock.acquire(timeout=2)
+    if not acquired:
         return connection.current_screen or "[Screen busy]"
-    connection.command_lock.release()
 
-    em = connection.emulator
-    if not em:
-        return "[Not connected]"
+    try:
+        em = connection.emulator
+        if not em:
+            return "[Not connected]"
+        # Use py3270's string_get to read entire screen as plain text
+        # string_get(ypos, xpos, length) - 1-indexed
+        lines = []
+        for row in range(1, 25):  # 24 rows, 1-indexed
+            try:
+                line = em.string_get(row, 1, 80)
+                lines.append(line.rstrip() if line else '')
+            except Exception:
+                lines.append('')
 
-    # Run string_get in a timeout-protected thread
-    result_box = [None]
-    done_event = threading.Event()
-
-    def _read():
-        try:
-            lines = []
-            for row in range(1, 25):  # 24 rows, 1-indexed
-                try:
-                    line = em.string_get(row, 1, 80)
-                    lines.append(line.rstrip() if line else '')
-                except Exception:
-                    lines.append('')
-            result_box[0] = '\n'.join(lines)
-        except Exception:
-            pass
-        finally:
-            done_event.set()
-
-    t = threading.Thread(target=_read, daemon=True)
-    t.start()
-
-    # Wait up to 2 seconds for screen read
-    finished = done_event.wait(timeout=2.0)
-
-    if not finished or result_box[0] is None:
-        return connection.current_screen or "[Screen timeout]"
-
-    connection.current_screen = result_box[0]
-    return connection.current_screen
+        screen_text = '\n'.join(lines)
+        connection.current_screen = screen_text
+        return connection.current_screen
+    except Exception as e:
+        return connection.current_screen or f"[Screen unavailable: {e}]"
+    finally:
+        connection.command_lock.release()
 
 
 def read_screen_with_color() -> str:

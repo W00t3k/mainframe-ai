@@ -29,15 +29,9 @@ import argparse
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, os.path.join(PROJECT_ROOT, "tools"))
 
-# Import agent_tools - try absolute import first to share connection state
-try:
-    from agent_tools import (
-        connect_mainframe, send_terminal_key, read_screen, exec_emulator_command
-    )
-except ImportError:
-    from .agent_tools import (
-        connect_mainframe, send_terminal_key, read_screen, exec_emulator_command
-    )
+from agent_tools import (
+    connect_mainframe, send_terminal_key, read_screen, exec_emulator_command
+)
 
 # Paths
 XMIT_PATH = f"{PROJECT_ROOT}/tools/kicks_install/kicks-master/kicks-tso-v1r5m0/kicks-tso-v1r5m0.xmi"

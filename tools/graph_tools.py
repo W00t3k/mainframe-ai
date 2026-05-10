@@ -15,7 +15,11 @@ TSO_HELPER = None
 CICS_HELPER = None
 JES_PARSER = None
 
-from .trust_graph import get_trust_graph, TrustGraph
+# Import trust_graph - try absolute import first (when used as module), then relative (standalone)
+try:
+    from tools.trust_graph import get_trust_graph, TrustGraph
+except ImportError:
+    from trust_graph import get_trust_graph, TrustGraph
 
 
 # =============================================================================

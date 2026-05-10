@@ -10,6 +10,27 @@ import re
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
+try:
+    from tools.agent_tools import (
+        Emulator as ScreenEmulator,
+        TN3270_AVAILABLE as SCREEN_CAPTURE_AVAILABLE,
+        connection as live_connection,
+        read_screen as read_live_screen,
+    )
+except ImportError:
+    try:
+        from agent_tools import (
+            Emulator as ScreenEmulator,
+            TN3270_AVAILABLE as SCREEN_CAPTURE_AVAILABLE,
+            connection as live_connection,
+            read_screen as read_live_screen,
+        )
+    except ImportError:
+        ScreenEmulator = None
+        SCREEN_CAPTURE_AVAILABLE = False
+        live_connection = None
+        read_live_screen = None
+
 router = APIRouter(tags=["scanner"])
 
 # Telnet protocol constants
@@ -44,6 +65,127 @@ EBCDIC_TO_ASCII = {
 
 # Reverse table: ASCII to EBCDIC
 ASCII_TO_EBCDIC = {v: k for k, v in EBCDIC_TO_ASCII.items()}
+
+
+def tn3270_host_attempts(host: str) -> list[str]:
+    """Return candidate hosts for TN3270 probes, preferring IPv4 localhost."""
+    attempts = [host]
+    if host in {"localhost", "localhost.localdomain"}:
+        attempts.append("127.0.0.1")
+    return attempts
+
+
+def _clean_screen_text(text: str) -> str:
+    """Normalize captured 3270 text while preserving screen structure."""
+    if not text:
+        return ""
+    lines = [line.rstrip() for line in text.splitlines()]
+    return "\n".join(lines).strip()
+
+
+def _extract_tn3270_application_hints(text: str) -> list[str]:
+    """Extract application hints from a decoded 3270 screen."""
+    if not text:
+        return []
+
+    upper = text.upper()
+    hints: list[str] = []
+
+    def add(name: str) -> None:
+        if name not in hints:
+            hints.append(name)
+
+    if any(pattern in upper for pattern in ("LOGON ===>", "LOGON ==>", "USS", "VTAM", "APPLICATION")):
+        add("VTAM")
+
+    if any(pattern in upper for pattern in ("TSO", "IKJ56700A", "ENTER USERID", "ENTER CURRENT PASSWORD", "READY", "TSO/E")):
+        add("TSO")
+
+    if any(pattern in upper for pattern in ("CICS", "DFH", "CESN", "SIGN ON TO CICS", "TRANSACTION")):
+        add("CICS")
+
+    if "IMS" in upper:
+        add("IMS")
+
+    if "NVAS" in upper:
+        add("NVAS")
+
+    if "ISPF" in upper:
+        add("ISPF")
+
+    applids = re.findall(r"\b([A-Z][A-Z0-9]{2,7})\b", upper)
+    for applid in applids:
+        if applid in {"TSO", "CICS", "IMS", "NVAS", "VTAM", "USS", "ISPF"}:
+            add(applid)
+
+    return hints[:10]
+
+
+def _read_emulator_screen(emulator) -> str:
+    """Read a full 24x80 screen from a py3270 emulator instance."""
+    lines = []
+    for row in range(1, 25):
+        try:
+            line = emulator.string_get(row, 1, 80)
+        except Exception:
+            line = ""
+        lines.append((line or "").rstrip())
+    return _clean_screen_text("\n".join(lines))
+
+
+def _capture_tn3270_screen_snapshot_sync(host: str, port: int) -> dict:
+    """Capture a visible 3270 screen using an active or temporary emulator session."""
+    result = {"screen_text": "", "source": "", "error": ""}
+    candidates = set(tn3270_host_attempts(host))
+
+    if live_connection and getattr(live_connection, "connected", False):
+        live_host = getattr(live_connection, "host", "")
+        live_port = getattr(live_connection, "port", None)
+        if live_port == port and live_host in candidates and read_live_screen:
+            try:
+                screen_text = _clean_screen_text(read_live_screen())
+                if screen_text and not screen_text.startswith("["):
+                    result["screen_text"] = screen_text
+                    result["source"] = "active_connection"
+                    return result
+            except Exception as exc:
+                result["error"] = str(exc)
+
+    if not SCREEN_CAPTURE_AVAILABLE or ScreenEmulator is None:
+        return result
+
+    last_error = None
+    for candidate in tn3270_host_attempts(host):
+        emulator = None
+        try:
+            emulator = ScreenEmulator(visible=False)
+            emulator.connect(f"{candidate}:{port}")
+
+            import time
+            time.sleep(2)
+
+            screen_text = _read_emulator_screen(emulator)
+            if screen_text:
+                result["screen_text"] = screen_text
+                result["source"] = "snapshot"
+                return result
+        except Exception as exc:
+            last_error = exc
+        finally:
+            if emulator is not None:
+                try:
+                    emulator.terminate()
+                except Exception:
+                    pass
+
+    if last_error:
+        result["error"] = str(last_error)
+    return result
+
+
+async def capture_tn3270_screen_snapshot(host: str, port: int) -> dict:
+    """Capture a structured 3270 screen snapshot without blocking the event loop."""
+    return await asyncio.to_thread(_capture_tn3270_screen_snapshot_sync, host, port)
 
 
 def ebcdic_encode(text: str) -> list[int]:
@@ -142,16 +284,18 @@ def parse_scan_ports(ports: str, max_ports: int = 32) -> list[int]:
 
 async def check_tcp_port(host: str, port: int, timeout: float = 1.5) -> bool:
     """Check if a TCP port is open."""
-    try:
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port), timeout=timeout
-        )
-        writer.close()
-        if hasattr(writer, "wait_closed"):
-            await writer.wait_closed()
-        return True
-    except Exception:
-        return False
+    for candidate in tn3270_host_attempts(host):
+        try:
+            reader, writer = await asyncio.wait_for(
+                asyncio.open_connection(candidate, port), timeout=timeout
+            )
+            writer.close()
+            if hasattr(writer, "wait_closed"):
+                await writer.wait_closed()
+            return True
+        except Exception:
+            continue
+    return False
 
 
 async def grab_tn3270_banner(host: str, port: int, timeout: float = 5.0) -> dict:
@@ -167,13 +311,24 @@ async def grab_tn3270_banner(host: str, port: int, timeout: float = 5.0) -> dict
         "applids": [],
         "is_tn3270": False,
         "ssl": False,
-        "raw_bytes": ""
+        "raw_bytes": "",
+        "screen_source": "",
     }
     
     try:
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port), timeout=timeout
-        )
+        last_error = None
+        reader = writer = None
+        for candidate in tn3270_host_attempts(host):
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(candidate, port), timeout=timeout
+                )
+                break
+            except Exception as exc:
+                last_error = exc
+                reader = writer = None
+        if reader is None or writer is None:
+            raise last_error or RuntimeError("Could not connect to target")
         
         # Read initial telnet negotiation and respond
         all_data = b""
@@ -248,18 +403,120 @@ async def grab_tn3270_banner(host: str, port: int, timeout: float = 5.0) -> dict
             
             # Extract printable text from 3270 data stream
             text = extract_3270_text(screen_data if screen_data else all_data)
-            result["screen_text"] = text[:1000]
-            result["banner"] = text[:200]
-            
-            # Look for VTAM APPLIDs
-            applids = re.findall(r'\b([A-Z][A-Z0-9]{2,7})\b', text)
-            common_applids = ['TSO', 'CICS', 'IMS', 'NVAS', 'VTAM', 'USS', 'ISPF']
-            result["applids"] = [a for a in applids if a in common_applids or len(a) >= 4][:10]
+            normalized = _clean_screen_text(text)
+            result["screen_text"] = normalized[:2000]
+            result["banner"] = normalized[:200]
+            result["applids"] = _extract_tn3270_application_hints(normalized)
+
+        needs_snapshot = (
+            not result["screen_text"]
+            or "LOGON ===>" not in result["screen_text"].upper()
+            or not result["applids"]
+        )
+        if needs_snapshot:
+            snapshot = await capture_tn3270_screen_snapshot(host, port)
+            snapshot_text = _clean_screen_text(snapshot.get("screen_text", ""))
+            if snapshot_text:
+                result["screen_text"] = snapshot_text[:2000]
+                result["banner"] = snapshot_text[:200]
+                result["screen_source"] = snapshot.get("source", "")
+                result["applids"] = _extract_tn3270_application_hints(snapshot_text)
+                result["is_tn3270"] = True
+            if snapshot.get("error") and not result.get("error"):
+                result["error"] = snapshot["error"]
             
     except Exception as e:
         result["error"] = str(e)
     
     return result
+
+
+async def check_tn3270_ssl(host: str, port: int, timeout: float = 5.0) -> bool:
+    """Check whether a TN3270 service accepts SSL/TLS."""
+    try:
+        import ssl
+
+        ssl_context = ssl.create_default_context()
+        ssl_context.check_hostname = False
+        ssl_context.verify_mode = ssl.CERT_NONE
+
+        for candidate in tn3270_host_attempts(host):
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(candidate, port, ssl=ssl_context),
+                    timeout=timeout,
+                )
+                writer.close()
+                if hasattr(writer, "wait_closed"):
+                    await writer.wait_closed()
+                return True
+            except Exception:
+                continue
+        return False
+    except Exception:
+        return False
+
+
+def build_tn3270_fingerprint(
+    host: str,
+    port: int,
+    banner_result: dict,
+    ssl_enabled: bool = False,
+) -> dict:
+    """Build a service fingerprint from banner-grab results."""
+    result = {
+        "host": host,
+        "port": port,
+        "service": "unknown",
+        "ssl": ssl_enabled,
+        "vtam": False,
+        "applications": [],
+        "security_issues": [],
+        "banner": "",
+        "screen_text": "",
+    }
+
+    if not ssl_enabled:
+        result["security_issues"].append(
+            "NO SSL/TLS - credentials transmitted in PLAINTEXT"
+        )
+
+    if not banner_result:
+        return result
+
+    if banner_result.get("error"):
+        result["error"] = banner_result["error"]
+
+    if banner_result.get("is_tn3270"):
+        result["service"] = "TN3270-SSL" if ssl_enabled else "TN3270"
+        result["banner"] = banner_result.get("banner", "")
+        result["screen_text"] = banner_result.get("screen_text", "")
+
+        text = result["screen_text"].upper()
+        hinted_apps = _extract_tn3270_application_hints(text)
+
+        if any(app == "VTAM" for app in hinted_apps):
+            result["vtam"] = True
+            result["applications"].append("VTAM")
+
+        for app_name in hinted_apps:
+            if app_name == "VTAM":
+                continue
+            if app_name not in result["applications"]:
+                result["applications"].append(app_name)
+
+        if not ssl_enabled:
+            result["security_issues"].append("TN3270 session can be intercepted")
+            result["security_issues"].append("Login credentials visible on network")
+
+    return result
+
+
+async def fingerprint_tn3270_service(host: str, port: int) -> dict:
+    """Fingerprint a TN3270 service - detect VTAM, TSO, CICS, etc."""
+    ssl_enabled = await check_tn3270_ssl(host, port)
+    banner_result = await grab_tn3270_banner(host, port)
+    return build_tn3270_fingerprint(host, port, banner_result, ssl_enabled=ssl_enabled)
 
 
 def extract_3270_text(data: bytes) -> str:
@@ -326,9 +583,19 @@ async def sniff_credentials(host: str, port: int, duration: float = 10.0) -> dic
     }
     
     try:
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port), timeout=5.0
-        )
+        last_error = None
+        reader = writer = None
+        for candidate in tn3270_host_attempts(host):
+            try:
+                reader, writer = await asyncio.wait_for(
+                    asyncio.open_connection(candidate, port), timeout=5.0
+                )
+                break
+            except Exception as exc:
+                last_error = exc
+                reader = writer = None
+        if reader is None or writer is None:
+            raise last_error or RuntimeError("Could not connect to target")
         
         all_data = b""
         start_time = asyncio.get_event_loop().time()
@@ -450,66 +717,7 @@ async def api_scanner_fingerprint(request: Request):
     if not host:
         return JSONResponse({"error": "Host is required"}, status_code=400)
     
-    result = {
-        "host": host,
-        "port": port,
-        "service": "unknown",
-        "ssl": False,
-        "vtam": False,
-        "applications": [],
-        "security_issues": []
-    }
-    
-    # First check if SSL/TLS
-    try:
-        import ssl
-        ssl_context = ssl.create_default_context()
-        ssl_context.check_hostname = False
-        ssl_context.verify_mode = ssl.CERT_NONE
-        
-        reader, writer = await asyncio.wait_for(
-            asyncio.open_connection(host, port, ssl=ssl_context),
-            timeout=5.0
-        )
-        writer.close()
-        if hasattr(writer, "wait_closed"):
-            await writer.wait_closed()
-        result["ssl"] = True
-        result["service"] = "TN3270-SSL"
-    except Exception:
-        result["ssl"] = False
-        result["security_issues"].append("NO SSL/TLS - credentials transmitted in PLAINTEXT")
-    
-    # Grab banner
-    banner_result = await grab_tn3270_banner(host, port)
-    
-    if banner_result.get("is_tn3270"):
-        result["service"] = "TN3270"
-        result["banner"] = banner_result.get("banner", "")
-        result["screen_text"] = banner_result.get("screen_text", "")
-        
-        text = banner_result.get("screen_text", "").upper()
-        
-        # Detect VTAM
-        if "VTAM" in text or "USS" in text or "APPLICATION" in text:
-            result["vtam"] = True
-            result["applications"].append("VTAM")
-        
-        # Detect available applications
-        if "TSO" in text:
-            result["applications"].append("TSO")
-        if "CICS" in text:
-            result["applications"].append("CICS")
-        if "IMS" in text:
-            result["applications"].append("IMS")
-        if "NVAS" in text:
-            result["applications"].append("NVAS")
-        
-        # Security observations
-        if not result["ssl"]:
-            result["security_issues"].append("TN3270 session can be intercepted")
-            result["security_issues"].append("Login credentials visible on network")
-    
+    result = await fingerprint_tn3270_service(host, port)
     return JSONResponse(result)
 
 

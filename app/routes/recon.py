@@ -5,17 +5,22 @@ Endpoints for mainframe reconnaissance and security assessment.
 """
 
 import asyncio
+import os
+import sys
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from app.config import get_config
-from app.services.llm_provider import get_llm_service
+from app.services.ollama import get_ollama_service
 from app.constants.prompts import RECON_AI_PROMPT, EXPLAIN_SCREEN_PROMPT
+from app.services.rag_context import build_rag_context
 
 router = APIRouter(tags=["recon"])
-config = get_config()
 
-# Import recon engine - try both import paths for compatibility
+TOOLS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "tools")
+if TOOLS_DIR not in sys.path:
+    sys.path.insert(0, TOOLS_DIR)
+
+# Import recon engine
 try:
     from recon_engine import (
         TSOEnumerator, CICSEnumerator, VTAMEnumerator,
@@ -25,50 +30,19 @@ try:
     )
     RECON_AVAILABLE = True
 except ImportError:
-    try:
-        from tools.recon_engine import (
-            TSOEnumerator, CICSEnumerator, VTAMEnumerator,
-            HiddenFieldDetector, ScreenAnalyzer, ApplicationMapper,
-            SystemEnumerator,
-            generate_report as generate_recon_report,
-        )
-        RECON_AVAILABLE = True
-    except ImportError:
-        RECON_AVAILABLE = False
+    RECON_AVAILABLE = False
 
-# Import agent_tools - MUST match terminal.py import path to share connection state
+# Import agent_tools
 try:
     from agent_tools import connection, read_screen, connect_mainframe
 except ImportError:
-    try:
-        from tools.agent_tools import connection, read_screen, connect_mainframe
-    except ImportError:
-        connection = None
-        read_screen = lambda: "[Not connected]"
-        connect_mainframe = None
+    connection = None
+    read_screen = lambda: "[Not connected]"
+    connect_mainframe = None
 
 # Active enumerator/mapper references for stop support
 _active_enumerator = None
 _active_mapper = None
-
-
-async def build_rag_context(query: str, n_results: int = 2) -> str:
-    """Build RAG context for prompts."""
-    try:
-        try:
-            from rag_engine import get_rag_engine
-        except ImportError:
-            from tools.rag_engine import get_rag_engine
-        engine = get_rag_engine()
-        results = await engine.query_simple(query, n_results=n_results)
-        if results:
-            context = "\n\n[Relevant Knowledge Base Information]\n"
-            for r in results:
-                context += f"---\n{r['content']}\n"
-            return context
-    except Exception:
-        pass
-    return ""
 
 
 @router.post("/enumerate")
@@ -98,16 +72,8 @@ async def api_recon_enumerate(request: Request):
 
         _active_enumerator = enumerator
 
-        loop = asyncio.get_event_loop()
-        try:
-            results = await asyncio.wait_for(
-                loop.run_in_executor(None, enumerator.enumerate),
-                timeout=90.0
-            )
-        except asyncio.TimeoutError:
-            enumerator.stop()
-            _active_enumerator = None
-            return JSONResponse({"error": "Enumeration timed out"}, status_code=500)
+        loop = asyncio.get_running_loop()
+        results = await loop.run_in_executor(None, enumerator.enumerate)
 
         _active_enumerator = None
         return JSONResponse({"results": results})
@@ -115,16 +81,6 @@ async def api_recon_enumerate(request: Request):
     except Exception as e:
         _active_enumerator = None
         return JSONResponse({"error": str(e)}, status_code=500)
-
-
-@router.post("/enumerate/stop")
-async def api_recon_enumerate_stop():
-    """Stop a running enumeration."""
-    global _active_enumerator
-    if _active_enumerator:
-        _active_enumerator.stop()
-        _active_enumerator = None
-    return JSONResponse({"success": True})
 
 
 @router.post("/enumerate/system")
@@ -172,24 +128,24 @@ async def api_recon_enumerate_system(request: Request):
         _active_enumerator = enumerator
 
         loop = asyncio.get_running_loop()
-        # Add timeout to prevent infinite hangs
-        try:
-            results = await asyncio.wait_for(
-                loop.run_in_executor(None, enumerator.enumerate),
-                timeout=120.0  # 2 minute max
-            )
-        except asyncio.TimeoutError:
-            enumerator.stop()
-            _active_enumerator = None
-            return JSONResponse({"error": "Enumeration timed out after 2 minutes"}, status_code=500)
+        results = await loop.run_in_executor(None, enumerator.enumerate)
 
         _active_enumerator = None
         return JSONResponse({"results": results})
 
     except Exception as e:
         _active_enumerator = None
-        import traceback
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@router.post("/enumerate/stop")
+async def api_recon_enumerate_stop():
+    """Stop a running enumeration."""
+    global _active_enumerator
+    if _active_enumerator:
+        _active_enumerator.stop()
+        _active_enumerator = None
+    return JSONResponse({"success": True})
 
 
 @router.post("/hidden-fields")
@@ -202,7 +158,7 @@ async def api_recon_hidden_fields():
 
     try:
         detector = HiddenFieldDetector()
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         fields = await loop.run_in_executor(None, detector.detect)
         return JSONResponse({"fields": fields})
     except Exception as e:
@@ -219,7 +175,7 @@ async def api_recon_analyze_screen():
 
     try:
         analyzer = ScreenAnalyzer()
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         findings = await loop.run_in_executor(None, analyzer.analyze_current_screen)
         return JSONResponse({"findings": findings})
     except Exception as e:
@@ -243,7 +199,7 @@ async def api_recon_map(request: Request):
         mapper = ApplicationMapper(max_depth=max_depth)
         _active_mapper = mapper
 
-        loop = asyncio.get_event_loop()
+        loop = asyncio.get_running_loop()
         tree = await loop.run_in_executor(None, mapper.map)
 
         stats = mapper.stats
@@ -328,8 +284,8 @@ async def api_recon_ai_analyze(request: Request):
     context = "\n".join(sections)
     prompt = RECON_AI_PROMPT + "\n\n---\n\n" + context
 
-    llm = get_llm_service()
-    ai_response = await llm.generate(prompt, temperature=0.4, max_tokens=2048)
+    ollama = get_ollama_service()
+    ai_response = await ollama.generate(prompt, temperature=0.4, num_predict=2048)
 
     return JSONResponse({"analysis": ai_response})
 
@@ -357,43 +313,7 @@ async def api_recon_explain_screen(request: Request):
 
     prompt += f"\n\n---\n\nCurrent TN3270 Screen:\n```\n{screen_text}\n```"
 
-    llm = get_llm_service()
-    explanation = await llm.generate(prompt, temperature=0.5, max_tokens=1500)
+    ollama = get_ollama_service()
+    explanation = await ollama.generate(prompt, temperature=0.5, num_predict=1500)
 
     return JSONResponse({"explanation": explanation, "screen": screen_text})
-
-
-@router.get("/debug")
-async def api_recon_debug():
-    """Debug endpoint to check recon connection state."""
-    import sys
-
-    # Check module identity
-    try:
-        import agent_tools as at_direct
-        from tools import agent_tools as at_tools
-        same_module = at_direct is at_tools
-    except ImportError:
-        same_module = "import_error"
-
-    # Check connection objects
-    try:
-        import recon_engine
-        recon_conn_id = id(recon_engine.connection)
-    except Exception as e:
-        recon_conn_id = f"error: {e}"
-
-    conn_id = id(connection) if connection else None
-
-    return JSONResponse({
-        "recon_available": RECON_AVAILABLE,
-        "connection_exists": connection is not None,
-        "connection_connected": connection.connected if connection else False,
-        "connection_has_emulator": connection.emulator is not None if connection else False,
-        "connection_id": conn_id,
-        "recon_engine_connection_id": recon_conn_id,
-        "same_connection": conn_id == recon_conn_id if isinstance(recon_conn_id, int) else False,
-        "agent_tools_same_module": same_module,
-        "connect_mainframe_available": connect_mainframe is not None,
-        "sys_path_tools": any("tools" in p for p in sys.path),
-    })
