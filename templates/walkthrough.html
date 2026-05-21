@@ -428,15 +428,38 @@ function updateNarrationEntry(data) {
 function addCompletionEntry(data) {
     const log = document.getElementById('wtNarrationLog');
     const entry = document.createElement('div');
-    entry.className = 'wt-narration-entry wt-completion';
+
+    // Check validation status
+    const hasWarnings = data.expect_warnings && data.expect_warnings.length > 0;
+    const statusClass = hasWarnings ? 'wt-completion-warning' : 'wt-completion';
+    entry.className = 'wt-narration-entry ' + statusClass;
+
+    // Build status message
+    let statusMsg = '';
+    if (data.all_validated) {
+        statusMsg = '<p><strong>' + data.walkthrough_name + '</strong> completed successfully.</p>';
+    } else if (hasWarnings) {
+        statusMsg = '<p><strong>' + data.walkthrough_name + '</strong> completed with validation warnings.</p>';
+        statusMsg += '<div class="wt-validation-warnings">';
+        statusMsg += '<p style="color: #ffaa00; margin-top: 0.5rem;"><strong>Expected output not found:</strong></p>';
+        statusMsg += '<ul style="margin: 0.5rem 0; padding-left: 1.5rem; color: #ffaa00;">';
+        data.expect_warnings.forEach(w => {
+            statusMsg += '<li>Step ' + w.step + ' (' + w.title + '): expected ' + w.expected.join(' or ') + '</li>';
+        });
+        statusMsg += '</ul>';
+        statusMsg += '<p style="font-size: 0.85rem; color: #888; margin-top: 0.5rem;">The walkthrough ran but some expected output was not detected on screen. This may indicate the program did not run as expected.</p>';
+        statusMsg += '</div>';
+    } else {
+        statusMsg = '<p><strong>' + data.walkthrough_name + '</strong> completed.</p>';
+    }
 
     entry.innerHTML = `
         <div class="wt-entry-header">
-            <span class="wt-entry-step">Done</span>
-            <span class="wt-entry-title">Walkthrough Complete</span>
+            <span class="wt-entry-step">${hasWarnings ? '⚠' : 'Done'}</span>
+            <span class="wt-entry-title">${hasWarnings ? 'Completed with Warnings' : 'Walkthrough Complete'}</span>
         </div>
         <div class="wt-entry-body">
-            <p><strong>${data.walkthrough_name}</strong> completed successfully.</p>
+            ${statusMsg}
             <p>Control planes traversed: ${[...new Set(data.log.map(l => l.control_plane))].filter(Boolean).map(cp =>
                 '<span class="cp-tag cp-' + cp + '">' + cp.toUpperCase() + '</span>'
             ).join(' ')}</p>
