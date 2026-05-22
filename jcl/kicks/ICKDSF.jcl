@@ -6,7 +6,7 @@
 //ICKDSF EXEC PGM=ICKDSF,REGION=4096K                                   
 //SYSPRINT DD  SYSOUT=*                                                 
 //SYSIN    DD  *                                                        
-  INIT UNITADDRESS(351) VERIFY(111111) -                                
+  INIT UNITADDRESS(148) VERIFY(111111) -                                
                VOLID(KICKS0) OWNER(HERCULES) -                          
                VTOC(0,1,15)                                             
 //                                                                      
