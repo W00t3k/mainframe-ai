@@ -219,3 +219,73 @@ async def api_redbooks_query(request: Request):
     result = await rag.query(question, n_results=n_results)
 
     return JSONResponse(result)
+
+
+@router.get("/redbooks/manifest")
+async def api_redbooks_manifest():
+    """Get the scraped manifest of available Redbooks."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"entries": [], "error": "Redbooks module not available"})
+
+    entries = RedbooksScraper.load_manifest()
+    return JSONResponse({
+        "total": len(entries),
+        "downloadable": sum(1 for e in entries if e.get("should_download")),
+        "entries": entries[:100]  # Limit response size
+    })
+
+
+@router.post("/redbooks/download")
+async def api_redbooks_download(request: Request, background_tasks: BackgroundTasks):
+    """Download Redbooks PDFs (runs in background for large downloads)."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"success": False, "error": "Redbooks module not available"})
+
+    data = await request.json() if request.headers.get("content-type") == "application/json" else {}
+    limit = min(data.get("limit", 5), 50)  # Cap at 50 to avoid very long downloads
+    force = data.get("force", False)
+
+    # Load manifest
+    records = RedbooksScraper.load_manifest()
+    if not records:
+        return JSONResponse({
+            "success": False,
+            "error": "No manifest found. Run scrape first via CLI: python tools/redbooks_rag.py scrape"
+        })
+
+    # For small downloads, run synchronously
+    if limit <= 3:
+        downloader = RedbooksDownloader()
+        result = downloader.download_pdfs(records, limit=limit, force=force)
+        return JSONResponse({
+            "success": True,
+            "downloaded": result.get("success", 0),
+            "failed": result.get("failed", 0),
+            "skipped": result.get("skipped", 0)
+        })
+
+    # For larger downloads, provide CLI instructions
+    return JSONResponse({
+        "success": True,
+        "message": f"For {limit} PDFs, use CLI to avoid timeout",
+        "command": f"python tools/redbooks_rag.py download --limit {limit}",
+        "then_ingest": f"python tools/redbooks_rag.py ingest --limit {limit}"
+    })
+
+
+@router.get("/redbooks/pdfs")
+async def api_redbooks_list_pdfs():
+    """List downloaded PDF files."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"pdfs": [], "error": "Redbooks module not available"})
+
+    pdfs = []
+    if PDFS_DIR.exists():
+        for pdf in sorted(PDFS_DIR.glob("*.pdf")):
+            pdfs.append({
+                "name": pdf.stem,
+                "filename": pdf.name,
+                "size_mb": round(pdf.stat().st_size / (1024 * 1024), 2)
+            })
+
+    return JSONResponse({"pdfs": pdfs, "total": len(pdfs)})
