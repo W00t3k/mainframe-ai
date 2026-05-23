@@ -2,10 +2,13 @@
 RAG API Routes
 
 Endpoints for the Retrieval-Augmented Generation knowledge base.
+Includes Redbooks integration for IBM mainframe documentation.
 """
 
 import os
-from fastapi import APIRouter, Request, UploadFile, File
+import asyncio
+from pathlib import Path
+from fastapi import APIRouter, Request, UploadFile, File, BackgroundTasks
 from fastapi.responses import JSONResponse
 
 from app.config import get_config
@@ -15,12 +18,26 @@ config = get_config()
 
 # Import RAG engine
 try:
-    from rag_engine import get_rag_engine, initialize_builtin_knowledge
+    from tools.rag_engine import get_rag_engine, initialize_builtin_knowledge
     RAG_AVAILABLE = True
 except ImportError:
-    RAG_AVAILABLE = False
-    get_rag_engine = None
-    initialize_builtin_knowledge = None
+    try:
+        from rag_engine import get_rag_engine, initialize_builtin_knowledge
+        RAG_AVAILABLE = True
+    except ImportError:
+        RAG_AVAILABLE = False
+        get_rag_engine = None
+        initialize_builtin_knowledge = None
+
+# Import Redbooks RAG
+try:
+    from tools.redbooks_rag import RedbooksScraper, RedbooksDownloader, RedbooksRAG, MANIFEST_FILE, PDFS_DIR
+    REDBOOKS_AVAILABLE = True
+except ImportError:
+    REDBOOKS_AVAILABLE = False
+    RedbooksScraper = None
+    RedbooksDownloader = None
+    RedbooksRAG = None
 
 
 @router.get("/stats")
@@ -112,3 +129,93 @@ async def api_rag_query(request: Request):
     engine = get_rag_engine()
     response = await engine.query(query, n_results, include_highlights)
     return JSONResponse(response)
+
+
+# =============================================================================
+# Redbooks RAG Endpoints
+# =============================================================================
+
+@router.get("/redbooks/status")
+async def api_redbooks_status():
+    """Get Redbooks RAG status."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"available": False, "error": "Redbooks module not available"})
+
+    manifest_count = 0
+    if MANIFEST_FILE.exists():
+        with open(MANIFEST_FILE) as f:
+            manifest_count = sum(1 for _ in f)
+
+    pdf_count = len(list(PDFS_DIR.glob("*.pdf"))) if PDFS_DIR.exists() else 0
+
+    rag = RedbooksRAG()
+    stats = rag.get_stats()
+
+    return JSONResponse({
+        "available": True,
+        "manifest_entries": manifest_count,
+        "pdfs_downloaded": pdf_count,
+        "documents_indexed": stats.get("documents", 0),
+        "chunks": stats.get("chunks", 0)
+    })
+
+
+@router.post("/redbooks/scrape")
+async def api_redbooks_scrape(background_tasks: BackgroundTasks):
+    """Scrape Redbooks website for document metadata (runs in background)."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"success": False, "error": "Redbooks module not available"})
+
+    def run_scrape():
+        scraper = RedbooksScraper()
+        records = scraper.scrape_all()
+        scraper.save_manifest()
+        return len(records)
+
+    # This is a long-running task, ideally would use a task queue
+    # For now, just return immediately with info
+    return JSONResponse({
+        "success": True,
+        "message": "Use CLI: python tools/redbooks_rag.py scrape",
+        "note": "Web scraping runs via CLI to avoid timeouts"
+    })
+
+
+@router.post("/redbooks/ingest")
+async def api_redbooks_ingest(request: Request):
+    """Ingest downloaded PDFs into RAG."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"success": False, "error": "Redbooks module not available"})
+
+    data = await request.json() if request.headers.get("content-type") == "application/json" else {}
+    limit = data.get("limit", 5)  # Default to 5 to avoid timeout
+    force = data.get("force", False)
+
+    rag = RedbooksRAG()
+    result = await rag.ingest_pdfs(limit=limit, force=force)
+
+    return JSONResponse({
+        "success": True,
+        "ingested": result.get("success", 0),
+        "failed": result.get("failed", 0),
+        "skipped": result.get("skipped", 0)
+    })
+
+
+@router.post("/redbooks/query")
+async def api_redbooks_query(request: Request):
+    """Query Redbooks RAG."""
+    if not REDBOOKS_AVAILABLE or not RAG_AVAILABLE:
+        return JSONResponse({"results": [], "error": "Redbooks RAG not available"})
+
+    data = await request.json()
+    question = data.get("query", data.get("question", ""))
+    n_results = data.get("n_results", 5)
+
+    if not question:
+        return JSONResponse({"results": [], "error": "No query provided"})
+
+    rag = RedbooksRAG()
+    result = await rag.query(question, n_results=n_results)
+
+    return JSONResponse(result)
