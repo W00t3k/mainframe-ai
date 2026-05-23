@@ -273,6 +273,21 @@ async def api_redbooks_download(request: Request, background_tasks: BackgroundTa
     })
 
 
+def clean_pdf_name(filename: str) -> str:
+    """Clean up PDF filename for display."""
+    import re
+    name = filename.replace(".pdf", "")
+    # Remove common prefixes
+    name = re.sub(r"^(ation_|classic_\w+_|Applying_|Starter_)", "", name)
+    # Replace underscores with spaces
+    name = name.replace("_", " ")
+    # Remove form numbers like GC26-4056-1
+    name = re.sub(r"^[A-Z]{1,3}[0-9]{2}-[0-9]{4}-[0-9]\s*", "", name)
+    # Capitalize properly
+    name = name.strip()
+    return name if name else filename
+
+
 @router.get("/redbooks/pdfs")
 async def api_redbooks_list_pdfs():
     """List downloaded PDF files."""
@@ -280,12 +295,29 @@ async def api_redbooks_list_pdfs():
         return JSONResponse({"pdfs": [], "error": "Redbooks module not available"})
 
     pdfs = []
+
+    # Get Redbooks PDFs
     if PDFS_DIR.exists():
         for pdf in sorted(PDFS_DIR.glob("*.pdf")):
             pdfs.append({
-                "name": pdf.stem,
+                "name": clean_pdf_name(pdf.name),
                 "filename": pdf.name,
-                "size_mb": round(pdf.stat().st_size / (1024 * 1024), 2)
+                "size_mb": round(pdf.stat().st_size / (1024 * 1024), 2),
+                "source": "redbooks"
             })
+
+    # Also include classics if available
+    try:
+        from tools.redbooks_rag import CLASSICS_DIR
+        if CLASSICS_DIR.exists():
+            for pdf in sorted(CLASSICS_DIR.glob("*.pdf")):
+                pdfs.append({
+                    "name": clean_pdf_name(pdf.name),
+                    "filename": pdf.name,
+                    "size_mb": round(pdf.stat().st_size / (1024 * 1024), 2),
+                    "source": "classics"
+                })
+    except ImportError:
+        pass
 
     return JSONResponse({"pdfs": pdfs, "total": len(pdfs)})

@@ -81,7 +81,7 @@ PDFS_DIR.mkdir(parents=True, exist_ok=True)
 
 # HTTP settings
 HEADERS = {
-    "User-Agent": "Mainframe-AI-RAG/1.0 (+educational research; respectful crawling)"
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 }
 REQUEST_DELAY = 1.0  # Seconds between requests
 MAX_RETRIES = 3
@@ -90,23 +90,26 @@ DOWNLOAD_TIMEOUT = 120  # seconds
 # Keywords for filtering relevant documents
 KEYWORDS = [
     # z/OS core
-    "z/os", "zos", "ibm z", "mainframe", "mvs",
+    "z/os", "zos", "ibm z", "mainframe", "mvs", "os/390", "mvs/esa", "mvs/xa",
     # Security
-    "racf", "security", "zsecure", "audit", "encryption", "compliance",
+    "racf", "security", "zsecure", "audit", "encryption", "compliance", "saf",
     # Transaction processing
-    "cics", "ims", "transaction",
+    "cics", "ims", "transaction", "tpns",
     # Job processing
-    "jes", "jes2", "jes3", "jcl", "batch",
+    "jes", "jes2", "jes3", "jcl", "batch", "initiator",
     # Networking & terminals
-    "vtam", "tcp/ip", "tn3270", "sna",
+    "vtam", "tcp/ip", "tn3270", "sna", "ncp", "3270", "lu6.2", "appc",
     # Development
-    "tso", "ispf", "cobol", "assembler", "rexx",
+    "tso", "ispf", "cobol", "assembler", "rexx", "clist", "hlasm",
     # Database
-    "db2", "vsam", "dataset", "data set",
+    "db2", "vsam", "dataset", "data set", "catalog", "sms",
     # Systems management
-    "sysplex", "gdps", "parallel sysplex", "workload",
+    "sysplex", "gdps", "parallel sysplex", "workload", "wlm", "rmf",
     # Storage
-    "dasd", "tape", "sms", "dfsms",
+    "dasd", "tape", "sms", "dfsms", "dfhsm", "3390", "3380",
+    # Classic/Architecture
+    "abcs", "system programming", "cross memory", "address space",
+    "supervisor", "nucleus", "csect", "linkage editor",
 ]
 
 
@@ -425,6 +428,139 @@ class RedbooksDownloader:
 
 
 # =============================================================================
+# Bitsavers Classic IBM Documentation
+# =============================================================================
+
+BITSAVERS_BASE = "https://bitsavers.org/pdf/ibm/370"
+
+# Classic MVS/TSO directories to scrape
+BITSAVERS_DIRS = [
+    "MVS",
+    "MVS_ESA",
+    "MVS_XA",
+    "ISPF",
+    "RACF",
+    "TSO_Extensions",
+    "OS_VS2",
+    "CICS",
+    "CICS_MVS",
+    "VTAM",
+    "SNA",
+    "JES2",
+    "JES3",
+]
+
+CLASSICS_DIR = DATA_DIR / "classics"
+CLASSICS_DIR.mkdir(parents=True, exist_ok=True)
+
+
+class ClassicsDownloader:
+    """Downloads classic IBM documentation from bitsavers.org"""
+
+    def __init__(self):
+        self.download_log = self._load_log()
+
+    def _load_log(self) -> Dict:
+        log_file = DATA_DIR / "classics_log.json"
+        if log_file.exists():
+            with open(log_file, "r") as f:
+                return json.load(f)
+        return {"downloaded": {}, "failed": {}}
+
+    def _save_log(self):
+        log_file = DATA_DIR / "classics_log.json"
+        with open(log_file, "w") as f:
+            json.dump(self.download_log, f, indent=2)
+
+    def list_available(self, directories: List[str] = None) -> List[Dict]:
+        """List available PDFs from bitsavers."""
+        if directories is None:
+            directories = BITSAVERS_DIRS
+
+        all_pdfs = []
+
+        for dir_name in directories:
+            url = f"{BITSAVERS_BASE}/{dir_name}/"
+            print(f"[*] Scanning {dir_name}...")
+
+            try:
+                html = fetch_page(url)
+                if not html:
+                    continue
+
+                soup = BeautifulSoup(html, "html.parser")
+
+                for a in soup.find_all("a", href=True):
+                    href = a["href"]
+                    if href.endswith(".pdf"):
+                        pdf_url = f"{BITSAVERS_BASE}/{dir_name}/{href}"
+                        title = href.replace("_", " ").replace(".pdf", "")
+
+                        all_pdfs.append({
+                            "title": title,
+                            "pdf_url": pdf_url,
+                            "category": dir_name,
+                            "filename": href,
+                            "source": "bitsavers"
+                        })
+
+            except Exception as e:
+                print(f"  Error scanning {dir_name}: {e}")
+
+        print(f"\n[+] Found {len(all_pdfs)} classic PDFs")
+        return all_pdfs
+
+    def download(self, limit: int = None, categories: List[str] = None, force: bool = False) -> Dict:
+        """Download classic PDFs."""
+        pdfs = self.list_available(categories)
+
+        if limit:
+            pdfs = pdfs[:limit]
+
+        print(f"\n[*] Downloading {len(pdfs)} classic PDFs")
+
+        stats = {"success": 0, "failed": 0, "skipped": 0}
+
+        for i, pdf in enumerate(pdfs, 1):
+            pdf_url = pdf["pdf_url"]
+            filename = f"classic_{pdf['category']}_{pdf['filename']}"
+            pdf_path = CLASSICS_DIR / filename
+
+            # Skip if exists
+            if not force and pdf_path.exists():
+                print(f"[{i}/{len(pdfs)}] Skipped (exists): {pdf['title'][:50]}...")
+                stats["skipped"] += 1
+                continue
+
+            print(f"[{i}/{len(pdfs)}] Downloading: {pdf['title'][:50]}...")
+
+            success, msg = download_file(pdf_url, pdf_path)
+
+            if success:
+                self.download_log["downloaded"][pdf_url] = {
+                    "path": str(pdf_path),
+                    "title": pdf["title"],
+                    "category": pdf["category"],
+                    "downloaded_at": datetime.now().isoformat()
+                }
+                stats["success"] += 1
+                print(f"  ✓ Saved")
+            else:
+                self.download_log["failed"][pdf_url] = {
+                    "error": msg,
+                    "title": pdf["title"],
+                    "failed_at": datetime.now().isoformat()
+                }
+                stats["failed"] += 1
+                print(f"  ✗ Failed: {msg}")
+
+            self._save_log()
+
+        print(f"\n[+] Complete: {stats['success']} success, {stats['failed']} failed, {stats['skipped']} skipped")
+        return stats
+
+
+# =============================================================================
 # RAG Integration
 # =============================================================================
 
@@ -434,10 +570,14 @@ class RedbooksRAG:
     def __init__(self):
         self.engine = get_rag_engine()
 
-    async def ingest_pdfs(self, limit: int = None, force: bool = False) -> Dict:
+    async def ingest_pdfs(self, limit: int = None, force: bool = False, include_classics: bool = True) -> Dict:
         """Ingest downloaded PDFs into RAG."""
-        # Find all PDFs
+        # Find all PDFs from both directories
         pdf_files = sorted(PDFS_DIR.glob("*.pdf"))
+
+        # Also include classics if available
+        if include_classics and CLASSICS_DIR.exists():
+            pdf_files.extend(sorted(CLASSICS_DIR.glob("*.pdf")))
 
         if limit:
             pdf_files = pdf_files[:limit]
@@ -592,6 +732,26 @@ def cmd_list(args):
         print(f"      Type: {doc['type']} | Chunks: {doc['chunks']} | Added: {doc['added']}")
 
 
+def cmd_classics(args):
+    """Download classic IBM documentation from bitsavers."""
+    downloader = ClassicsDownloader()
+
+    if args.list_only:
+        pdfs = downloader.list_available()
+        print("\nAvailable Classic PDFs:")
+        for cat in BITSAVERS_DIRS:
+            cat_pdfs = [p for p in pdfs if p["category"] == cat]
+            if cat_pdfs:
+                print(f"\n{cat} ({len(cat_pdfs)} PDFs):")
+                for p in cat_pdfs[:5]:
+                    print(f"  - {p['title'][:60]}")
+                if len(cat_pdfs) > 5:
+                    print(f"  ... and {len(cat_pdfs) - 5} more")
+        return
+
+    downloader.download(limit=args.limit, force=args.force)
+
+
 def cmd_stats(args):
     """Show RAG statistics."""
     rag = RedbooksRAG()
@@ -611,6 +771,12 @@ def cmd_stats(args):
         print(f"  PDFs downloaded: {rb['pdfs_downloaded']}")
         print(f"  Manifest entries: {rb['manifest_entries']}")
         print(f"  PDFs directory: {rb['pdfs_dir']}")
+
+    # Classics stats
+    classics_count = len(list(CLASSICS_DIR.glob("*.pdf"))) if CLASSICS_DIR.exists() else 0
+    print(f"\nClassics (bitsavers):")
+    print(f"  PDFs downloaded: {classics_count}")
+    print(f"  Directory: {CLASSICS_DIR}")
 
 
 def main():
@@ -651,6 +817,12 @@ def main():
     # Stats command
     sp_stats = subparsers.add_parser("stats", help="Show RAG statistics")
 
+    # Classics command (bitsavers)
+    sp_classics = subparsers.add_parser("classics", help="Download classic IBM docs from bitsavers")
+    sp_classics.add_argument("--limit", type=int, help="Max PDFs to download")
+    sp_classics.add_argument("--force", action="store_true", help="Re-download existing")
+    sp_classics.add_argument("--list", dest="list_only", action="store_true", help="List available only")
+
     args = parser.parse_args()
 
     if args.command == "scrape":
@@ -667,6 +839,8 @@ def main():
         cmd_list(args)
     elif args.command == "stats":
         cmd_stats(args)
+    elif args.command == "classics":
+        cmd_classics(args)
     else:
         parser.print_help()
 
