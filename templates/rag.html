@@ -79,6 +79,32 @@
         </div>
     </div>
 
+    <!-- IBM Redbooks Library -->
+    <div class="section">
+        <div class="section-header">
+            <h2>IBM Redbooks Library</h2>
+            <div style="display: flex; gap: 0.5rem;">
+                <button class="btn secondary" onclick="loadRedbooks()">Refresh</button>
+                <button class="btn success" onclick="ingestRedbooks()">Ingest All to RAG</button>
+            </div>
+        </div>
+        <div class="section-body">
+            <div class="redbooks-stats" id="redbooksStats">
+                <span class="stat"><strong id="rbPdfCount">0</strong> PDFs downloaded</span>
+                <span class="stat"><strong id="rbIndexed">0</strong> indexed in RAG</span>
+            </div>
+            <div class="redbooks-list" id="redbooksList">
+                <div class="loading">
+                    <div class="spinner"></div>
+                    Loading Redbooks...
+                </div>
+            </div>
+            <p style="color: var(--ibm-gray-50); margin-top: 1rem; font-size: 0.85rem;">
+                To download more Redbooks, run: <code>python tools/redbooks_rag.py download --limit 10</code>
+            </p>
+        </div>
+    </div>
+
     <!-- Upload Documents -->
     <div class="section">
         <div class="section-header">
@@ -135,6 +161,7 @@
     // Load stats and documents on page load
     loadStats();
     loadDocuments();
+    loadRedbooks();
 
     // Drag and drop handling
     const uploadZone = document.getElementById('uploadZone');
@@ -276,6 +303,73 @@
             }
         } catch (e) {
             showToast('Delete failed: ' + e.message, { type: 'error', title: 'RAG' });
+        }
+    }
+
+    async function loadRedbooks() {
+        const list = document.getElementById('redbooksList');
+        list.innerHTML = '<div class="loading"><div class="spinner"></div>Loading...</div>';
+
+        try {
+            // Get status
+            const statusRes = await fetch('/api/rag/redbooks/status');
+            const status = await statusRes.json();
+
+            document.getElementById('rbPdfCount').textContent = status.pdfs_downloaded || 0;
+            document.getElementById('rbIndexed').textContent = status.documents_indexed || 0;
+
+            // Get PDF list
+            const pdfsRes = await fetch('/api/rag/redbooks/pdfs');
+            const pdfs = await pdfsRes.json();
+
+            if (!pdfs.pdfs || pdfs.pdfs.length === 0) {
+                list.innerHTML = `
+                    <div class="empty-state">
+                        No Redbooks downloaded yet.<br>
+                        Run: <code>python tools/redbooks_rag.py build --limit 10</code>
+                    </div>`;
+                return;
+            }
+
+            list.innerHTML = `
+                <div class="redbooks-grid">
+                    ${pdfs.pdfs.map(pdf => `
+                        <div class="redbook-item">
+                            <span class="icon">📕</span>
+                            <div class="info">
+                                <div class="name" title="${pdf.name}">${pdf.name.substring(0, 40)}${pdf.name.length > 40 ? '...' : ''}</div>
+                                <div class="meta">${pdf.size_mb} MB</div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } catch (e) {
+            list.innerHTML = `<div class="empty-state">Error: ${e.message}</div>`;
+        }
+    }
+
+    async function ingestRedbooks() {
+        showToast('Ingesting Redbooks into RAG...', { type: 'info', title: 'RAG' });
+
+        try {
+            const response = await fetch('/api/rag/redbooks/ingest', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ limit: 50 })
+            });
+            const data = await response.json();
+
+            if (data.success) {
+                showToast(`Ingested ${data.ingested} PDFs (${data.skipped} already indexed)`, { type: 'success', title: 'RAG' });
+                loadStats();
+                loadDocuments();
+                loadRedbooks();
+            } else {
+                showToast('Error: ' + (data.error || 'Unknown error'), { type: 'error', title: 'RAG' });
+            }
+        } catch (e) {
+            showToast('Error: ' + e.message, { type: 'error', title: 'RAG' });
         }
     }
 

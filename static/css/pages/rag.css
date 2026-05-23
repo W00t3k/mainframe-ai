@@ -455,6 +455,70 @@ body {
     font-weight: 600;
 }
 
+/* ── Redbooks Library ── */
+.redbooks-stats {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 12px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #5a6a7a;
+}
+
+.redbooks-stats .stat strong {
+    color: #4589ff;
+}
+
+.redbooks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 6px;
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.redbook-item {
+    background: #0c1016;
+    border: 1px solid #1e2a36;
+    border-left: 2px solid #42be65;
+    padding: 10px 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.redbook-item .icon {
+    font-size: 1.2rem;
+}
+
+.redbook-item .info {
+    flex: 1;
+    min-width: 0;
+}
+
+.redbook-item .name {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    color: #dde1e6;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.redbook-item .meta {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 9px;
+    color: #5a6a7a;
+}
+
+.empty-state code {
+    background: rgba(69, 137, 255, 0.1);
+    padding: 2px 6px;
+    color: #4589ff;
+    font-size: 10px;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
     .stats-row {
@@ -468,5 +532,9 @@ body {
     .query-meta {
         flex-wrap: wrap;
         gap: 6px;
+    }
+
+    .redbooks-grid {
+        grid-template-columns: 1fr;
     }
 }
