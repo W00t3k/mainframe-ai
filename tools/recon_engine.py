@@ -19,10 +19,16 @@ import time
 from datetime import datetime
 from typing import Optional, List
 
-from agent_tools import (
-    connection, exec_emulator_command, read_screen,
-    normalize_screen_text
-)
+try:
+    from tools.agent_tools import (
+        connection, exec_emulator_command, read_screen,
+        normalize_screen_text
+    )
+except ImportError:
+    from agent_tools import (
+        connection, exec_emulator_command, read_screen,
+        normalize_screen_text
+    )
 
 
 # =============================================================================
