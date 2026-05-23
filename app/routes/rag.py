@@ -336,14 +336,22 @@ async def api_redbooks_serve_pdf(filename: str):
     # Check in Redbooks directory
     pdf_path = PDFS_DIR / filename
     if pdf_path.exists():
-        return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+        return FileResponse(
+            pdf_path,
+            media_type="application/pdf",
+            headers={"Content-Disposition": f"inline; filename=\"{filename}\""}
+        )
 
     # Check in Classics directory
     try:
         from tools.redbooks_rag import CLASSICS_DIR
         classics_path = CLASSICS_DIR / filename
         if classics_path.exists():
-            return FileResponse(classics_path, media_type="application/pdf", filename=filename)
+            return FileResponse(
+                classics_path,
+                media_type="application/pdf",
+                headers={"Content-Disposition": f"inline; filename=\"{filename}\""}
+            )
     except ImportError:
         pass
 
