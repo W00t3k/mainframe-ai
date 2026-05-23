@@ -485,6 +485,23 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.15s ease;
+}
+
+.redbook-item.clickable {
+    cursor: pointer;
+}
+
+.redbook-item.clickable:hover {
+    background: rgba(66, 190, 101, 0.08);
+    border-color: #42be65;
+    transform: translateX(2px);
+}
+
+.redbook-item.clickable:hover .name {
+    color: #42be65;
 }
 
 .redbook-item .icon {

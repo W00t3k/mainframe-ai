@@ -9,7 +9,7 @@ import os
 import asyncio
 from pathlib import Path
 from fastapi import APIRouter, Request, UploadFile, File, BackgroundTasks
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, FileResponse
 
 from app.config import get_config
 
@@ -321,3 +321,30 @@ async def api_redbooks_list_pdfs():
         pass
 
     return JSONResponse({"pdfs": pdfs, "total": len(pdfs)})
+
+
+@router.get("/redbooks/pdf/{filename}")
+async def api_redbooks_serve_pdf(filename: str):
+    """Serve a PDF file for viewing."""
+    if not REDBOOKS_AVAILABLE:
+        return JSONResponse({"error": "Redbooks module not available"}, status_code=404)
+
+    # Security: only allow .pdf files
+    if not filename.endswith(".pdf"):
+        return JSONResponse({"error": "Invalid file type"}, status_code=400)
+
+    # Check in Redbooks directory
+    pdf_path = PDFS_DIR / filename
+    if pdf_path.exists():
+        return FileResponse(pdf_path, media_type="application/pdf", filename=filename)
+
+    # Check in Classics directory
+    try:
+        from tools.redbooks_rag import CLASSICS_DIR
+        classics_path = CLASSICS_DIR / filename
+        if classics_path.exists():
+            return FileResponse(classics_path, media_type="application/pdf", filename=filename)
+    except ImportError:
+        pass
+
+    return JSONResponse({"error": "PDF not found"}, status_code=404)

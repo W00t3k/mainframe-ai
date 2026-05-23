@@ -334,13 +334,16 @@
             list.innerHTML = `
                 <div class="redbooks-grid">
                     ${pdfs.pdfs.map(pdf => `
-                        <div class="redbook-item">
-                            <span class="icon">📕</span>
+                        <a href="/api/rag/redbooks/pdf/${encodeURIComponent(pdf.filename)}"
+                           target="_blank"
+                           class="redbook-item clickable"
+                           title="Click to open: ${pdf.name}">
+                            <span class="icon">${pdf.source === 'classics' ? '📜' : '📕'}</span>
                             <div class="info">
-                                <div class="name" title="${pdf.name}">${pdf.name.substring(0, 40)}${pdf.name.length > 40 ? '...' : ''}</div>
-                                <div class="meta">${pdf.size_mb} MB</div>
+                                <div class="name">${pdf.name.substring(0, 45)}${pdf.name.length > 45 ? '...' : ''}</div>
+                                <div class="meta">${pdf.size_mb} MB · ${pdf.source || 'redbooks'}</div>
                             </div>
-                        </div>
+                        </a>
                     `).join('')}
                 </div>
             `;
