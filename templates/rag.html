@@ -42,40 +42,7 @@
             <button class="btn success" onclick="initBuiltin()">Load Built-in Knowledge</button>
         </div>
         <div class="section-body">
-            <p style="color: var(--ibm-gray-50); margin-bottom: 1rem;">
-                Click "Load Built-in Knowledge" to add ABEND codes, JCL reference, and COBOL basics.
-                Then add your own PDFs below for more comprehensive coverage.
-            </p>
-            <div class="redbook-links">
-                <a href="https://www.redbooks.ibm.com/abstracts/sg247798.html" target="_blank" class="redbook-link">
-                    <span class="icon">📘</span>
-                    <div class="info">
-                        <h4>Mainframe Basics</h4>
-                        <p>Introduction to Mainframe concepts</p>
-                    </div>
-                </a>
-                <a href="https://www.redbooks.ibm.com/abstracts/sg246667.html" target="_blank" class="redbook-link">
-                    <span class="icon">📗</span>
-                    <div class="info">
-                        <h4>ABCs of Mainframe System Programming</h4>
-                        <p>System programming fundamentals</p>
-                    </div>
-                </a>
-                <a href="https://www.redbooks.ibm.com/abstracts/sg247858.html" target="_blank" class="redbook-link">
-                    <span class="icon">📙</span>
-                    <div class="info">
-                        <h4>JCL User's Guide</h4>
-                        <p>Comprehensive JCL reference</p>
-                    </div>
-                </a>
-                <a href="https://www.redbooks.ibm.com/abstracts/tips0869.html" target="_blank" class="redbook-link">
-                    <span class="icon">📕</span>
-                    <div class="info">
-                        <h4>COBOL Programming</h4>
-                        <p>Enterprise COBOL development</p>
-                    </div>
-                </a>
-            </div>
+            <p>Load built-in ABEND codes, JCL reference, and COBOL basics. Add your own PDFs below for more coverage.</p>
         </div>
     </div>
 
@@ -83,9 +50,9 @@
     <div class="section">
         <div class="section-header">
             <h2>IBM Redbooks Library</h2>
-            <div style="display: flex; gap: 0.5rem;">
+            <div class="btn-group">
                 <button class="btn secondary" onclick="loadRedbooks()">Refresh</button>
-                <button class="btn success" onclick="ingestRedbooks()">Ingest All to RAG</button>
+                <button class="btn success" onclick="ingestRedbooks()">Ingest All</button>
             </div>
         </div>
         <div class="section-body">
@@ -99,7 +66,7 @@
                     Loading Redbooks...
                 </div>
             </div>
-            <p style="color: var(--ibm-gray-50); margin-top: 1rem; font-size: 0.85rem;">
+            <p style="margin-top: 1rem;">
                 To download more Redbooks, run: <code>python tools/redbooks_rag.py download --limit 10</code>
             </p>
         </div>

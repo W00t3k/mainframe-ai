@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 from app.config import get_config
 from app.services.ollama import get_ollama_service
 from app.services.llm_provider import get_llm_service
-from app.constants.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_FAST
+from app.constants.prompts import SYSTEM_PROMPT, SYSTEM_PROMPT_FAST, SYSTEM_PROMPT_SIMPLE
 
 
 class ChatService:
@@ -33,10 +33,14 @@ class ChatService:
     def _load_optional_modules(self):
         """Load optional modules if available."""
         try:
-            from rag_engine import get_rag_engine
+            from tools.rag_engine import get_rag_engine
             self._rag_engine = get_rag_engine
         except ImportError:
-            pass
+            try:
+                from rag_engine import get_rag_engine
+                self._rag_engine = get_rag_engine
+            except ImportError:
+                pass
         
         try:
             from agent_tools import (
@@ -75,21 +79,31 @@ class ChatService:
         """Clear conversation history."""
         self.conversation_history = []
     
-    async def get_rag_context(self, query: str, n_results: int = 2) -> str:
+    async def get_rag_context(self, query: str, n_results: int = 5) -> str:
         """Query RAG for relevant context."""
         if self._rag_engine is None:
+            print("[RAG] Engine not loaded - skipping context")
             return ""
-        
+
         try:
             engine = self._rag_engine()
             results = await engine.query_simple(query, n_results=n_results)
             if results:
-                context = "\n\n[Relevant Knowledge Base Information]\n"
-                for r in results:
-                    context += f"---\n{r['content']}\n"
+                # Build clear, prominent context block
+                context = "\n\n" + "=" * 50 + "\n"
+                context += "REFERENCE INFORMATION (USE THIS TO ANSWER):\n"
+                context += "=" * 50 + "\n"
+                for i, r in enumerate(results, 1):
+                    doc_name = r.get('metadata', {}).get('doc_name', 'Reference')
+                    context += f"\n[Source {i}: {doc_name}]\n{r['content']}\n"
+                context += "=" * 50 + "\n"
+                context += "Answer the user's question using the reference information above.\n"
+                print(f"[RAG] Added {len(results)} chunks to context")
                 return context
+            else:
+                print("[RAG] No results found")
         except Exception as e:
-            print(f"RAG query error: {e}")
+            print(f"[RAG] Query error: {e}")
         
         return ""
     
@@ -237,9 +251,56 @@ ollama pull llama3.1:8b
         result["response"] = assistant_message
         return result
 
+    async def process_simple_message(self, user_message: str) -> Dict[str, Any]:
+        """Process a simple chat message - includes RAG but no mainframe screen context."""
+        result = {
+            "response": "",
+            "model": self.config.OLLAMA_MODEL
+        }
 
-# Singleton instance
+        # Check if any LLM provider is available
+        if not await self.llm.check_available():
+            result["response"] = """**No LLM provider available!**
+
+Start Ollama:
+```bash
+ollama serve
+ollama pull llama3.1:8b
+```
+"""
+            return result
+
+        # Get RAG context (same as main chat)
+        rag_context = await self.get_rag_context(user_message)
+        full_message = user_message + rag_context
+
+        self.conversation_history.append({
+            "role": "user",
+            "content": full_message
+        })
+
+        # Use fast system prompt which includes RAG instructions
+        assistant_message = await self.llm.chat_simple(
+            self.conversation_history,
+            SYSTEM_PROMPT_FAST
+        )
+
+        self.conversation_history.append({
+            "role": "assistant",
+            "content": assistant_message
+        })
+
+        # Cap history
+        if len(self.conversation_history) > self.max_history:
+            self.conversation_history = self.conversation_history[-self.max_history:]
+
+        result["response"] = assistant_message
+        return result
+
+
+# Singleton instances
 _chat_service: Optional[ChatService] = None
+_simple_chat_service: Optional[ChatService] = None
 
 
 def get_chat_service() -> ChatService:
@@ -248,3 +309,11 @@ def get_chat_service() -> ChatService:
     if _chat_service is None:
         _chat_service = ChatService()
     return _chat_service
+
+
+def get_simple_chat_service() -> ChatService:
+    """Get the singleton simple chat service instance (separate history)."""
+    global _simple_chat_service
+    if _simple_chat_service is None:
+        _simple_chat_service = ChatService()
+    return _simple_chat_service
