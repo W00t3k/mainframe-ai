@@ -35,12 +35,15 @@ class ChatService:
         try:
             from tools.rag_engine import get_rag_engine
             self._rag_engine = get_rag_engine
-        except ImportError:
+            print("[ChatService] RAG engine loaded successfully")
+        except ImportError as e:
+            print(f"[ChatService] RAG engine not available: {e}")
             try:
                 from rag_engine import get_rag_engine
                 self._rag_engine = get_rag_engine
+                print("[ChatService] RAG engine loaded (fallback)")
             except ImportError:
-                pass
+                print("[ChatService] RAG engine not found - RAG disabled")
         
         try:
             from agent_tools import (

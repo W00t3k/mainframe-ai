@@ -57,13 +57,26 @@ async def api_status():
     chat_service = get_chat_service()
     ollama_service = get_ollama_service()
     ollama_ok = await ollama_service.check_available()
-    
+
+    # Check RAG status
+    rag_loaded = chat_service._rag_engine is not None
+    rag_docs = 0
+    if rag_loaded:
+        try:
+            engine = chat_service._rag_engine()
+            docs = engine.get_documents()
+            rag_docs = len(docs) if docs else 0
+        except:
+            pass
+
     return JSONResponse({
         "connected": chat_service.is_connected,
         "host": chat_service.connection_host,
         "screen": chat_service.current_screen,
         "ollama_running": ollama_ok,
-        "model": chat_service.config.OLLAMA_MODEL
+        "model": chat_service.config.OLLAMA_MODEL,
+        "rag_loaded": rag_loaded,
+        "rag_documents": rag_docs
     })
 
 
