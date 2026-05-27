@@ -2,7 +2,14 @@
 RAKF API Routes
 
 Endpoints for RAKF (Resource Access Control Facility for MVS 3.8j) management.
-Fetches security tables via FTP and sends reload commands via Hercules console.
+
+IMPORTANT: TK5's FTP server cannot access PDS members (like SYS1.SECURE.CNTL(USERS)).
+The "Fetch from MVS" feature requires either:
+1. A different FTP server that supports PDS member access
+2. Using TN3270/ISPF to extract the data
+3. Or the page will show default RAKF configuration
+
+The reload commands work via Hercules console API.
 """
 
 import re
@@ -16,13 +23,7 @@ router = APIRouter(tags=["rakf"])
 # Hercules HTTP API
 HERC_HTTP = "http://localhost:8038"
 
-# FTP credentials for MVS
-FTP_HOST = "localhost"
-FTP_PORT = 2121
-FTP_USER = "HERC01"
-FTP_PASS = "CUL8TR"
-
-# RAKF table datasets
+# RAKF table datasets (PDS members - NOT accessible via TK5 FTP)
 USERS_DATASET = "SYS1.SECURE.CNTL(USERS)"
 PROFILES_DATASET = "SYS1.SECURE.CNTL(PROFILES)"
 
@@ -37,99 +38,23 @@ def herc_cmd(cmd: str) -> str:
         return f"ERROR: {e}"
 
 
-def ftp_get_dataset(dataset: str) -> str:
-    """Fetch a dataset from MVS via FTP."""
-    import ftplib
-    try:
-        ftp = ftplib.FTP()
-        ftp.connect(FTP_HOST, FTP_PORT, timeout=15)
-        ftp.login(FTP_USER, FTP_PASS)
-        ftp.voidcmd("SITE FILETYPE=SEQ")
-
-        lines = []
-        def callback(line):
-            lines.append(line)
-
-        # Quote the dataset name for MVS
-        ftp.retrlines(f"RETR '{dataset}'", callback)
-        ftp.quit()
-        return "\n".join(lines)
-    except ftplib.error_perm as e:
-        return f"FTP_ERROR: {e}"
-    except Exception as e:
-        return f"ERROR: {e}"
-
-
-def parse_users_table(raw: str) -> list:
-    """Parse RAKF users table into structured data."""
-    users = []
-    for line in raw.split("\n"):
-        line = line.rstrip()
-        if not line or line.startswith("*") or line.startswith("/"):
-            continue
-        # Format: USERNAME GROUP    *PASSWORD O
-        # Positions: 0-7 username, 9-16 group, 18-26 password (with * prefix if non-expiring), 28 ops flag
-        parts = line.split()
-        if len(parts) >= 3:
-            username = parts[0]
-            group = parts[1]
-            password_field = parts[2] if len(parts) > 2 else ""
-            ops = parts[3] if len(parts) > 3 else ""
-
-            non_expiring = password_field.startswith("*")
-            password = password_field[1:] if non_expiring else password_field
-
-            # Calculate risk
-            risk = "low"
-            if password.upper() == username.upper():
-                risk = "critical"
-            elif len(password) < 4:
-                risk = "high"
-            elif password.upper() in ["PASSWORD", "PASS", "SECRET", "ADMIN", "TEST"]:
-                risk = "high"
-            elif ops == "Y":
-                risk = "medium"
-
-            users.append({
-                "username": username,
-                "group": group,
-                "password": password,
-                "non_expiring": non_expiring,
-                "operations": ops == "Y",
-                "risk": risk
-            })
-    return users
-
-
 @router.get("/rakf/tables")
 async def api_rakf_tables():
-    """Fetch RAKF users and profiles tables from MVS via FTP."""
-    result = {
+    """Fetch RAKF users and profiles tables from MVS.
+
+    NOTE: TK5's FTP server cannot access PDS members like SYS1.SECURE.CNTL(USERS).
+    This endpoint returns an informative error - the UI falls back to default data.
+
+    To get live RAKF data, use ISPF 3.4 to browse SYS1.SECURE.CNTL members.
+    """
+    return JSONResponse({
         "users": [],
         "profiles_raw": "",
         "users_raw": "",
-        "error": None
-    }
-
-    # Fetch users table
-    users_raw = ftp_get_dataset(USERS_DATASET)
-    if users_raw.startswith("ERROR") or users_raw.startswith("FTP_ERROR"):
-        result["error"] = f"Could not fetch users table: {users_raw}"
-    else:
-        result["users_raw"] = users_raw
-        result["users"] = parse_users_table(users_raw)
-
-    # Fetch profiles table
-    profiles_raw = ftp_get_dataset(PROFILES_DATASET)
-    if profiles_raw.startswith("ERROR") or profiles_raw.startswith("FTP_ERROR"):
-        if result["error"]:
-            result["error"] += f"; Could not fetch profiles: {profiles_raw}"
-        else:
-            result["error"] = f"Could not fetch profiles table: {profiles_raw}"
-    else:
-        result["profiles_raw"] = profiles_raw
-
-    return JSONResponse(result)
+        "error": "TK5 FTP cannot access PDS members. Use ISPF (option 3.4) to browse "
+                 "SYS1.SECURE.CNTL(USERS) and SYS1.SECURE.CNTL(PROFILES). "
+                 "The page shows default TK5 RAKF configuration."
+    })
 
 
 @router.post("/rakf/reload")
