@@ -234,7 +234,11 @@ ollama pull llama3.1:8b
             result["screen"] = screen
             context = f"\n\n[Current 3270 Screen]\n```\n{screen}\n```"
 
-        full_message = user_message + rag_context + context
+        # Put RAG context BEFORE the question - helps smaller models focus
+        if rag_context:
+            full_message = rag_context + "\n\nUSER QUESTION: " + user_message + context
+        else:
+            full_message = user_message + context
 
         self.conversation_history.append({
             "role": "user",
@@ -281,7 +285,11 @@ ollama pull llama3.1:8b
         print(f"[CHAT-SIMPLE] About to call get_rag_context, _rag_engine={self._rag_engine}")
         rag_context = await self.get_rag_context(user_message)
         print(f"[CHAT-SIMPLE] RAG context length: {len(rag_context)}")
-        full_message = user_message + rag_context
+        # Put RAG context BEFORE the question - helps smaller models focus
+        if rag_context:
+            full_message = rag_context + "\n\nUSER QUESTION: " + user_message
+        else:
+            full_message = user_message
 
         self.conversation_history.append({
             "role": "user",
