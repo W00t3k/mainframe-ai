@@ -39,7 +39,7 @@ except ImportError:
 async def build_rag_context(query: str, n_results: int = 2) -> str:
     """Build RAG context for prompts."""
     try:
-        from rag_engine import get_rag_engine
+        from tools.rag_engine import get_rag_engine
         engine = get_rag_engine()
         results = await engine.query_simple(query, n_results=n_results)
         if results:

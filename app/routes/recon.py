@@ -88,12 +88,8 @@ async def build_rag_context(query: str, n_results: int = 2) -> str:
     Prefers unified adapter (production RAG), falls back to simple engine.
     """
     try:
-        # Prefer unified adapter
-        try:
-            from rag_adapter import get_rag_engine
-        except ImportError:
-            from rag_engine import get_rag_engine
-
+        # Use the main RAG engine
+        from tools.rag_engine import get_rag_engine
         engine = get_rag_engine()
         results = await engine.query_simple(query, n_results=n_results)
         if results:
