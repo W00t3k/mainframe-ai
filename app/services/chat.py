@@ -195,6 +195,7 @@ class ChatService:
     
     async def process_message(self, user_message: str) -> Dict[str, Any]:
         """Process a chat message."""
+        print(f"[CHAT] process_message called with: {user_message[:50]}...")
         result = {
             "response": "",
             "connected": self.is_connected,
@@ -202,14 +203,14 @@ class ChatService:
             "screen": self.current_screen,
             "model": self.config.OLLAMA_MODEL
         }
-        
+
         # Handle commands
         if user_message.startswith("/"):
             parts = user_message.split(maxsplit=1)
             cmd = parts[0].lower()
             args = parts[1] if len(parts) > 1 else ""
             return await self.process_command(cmd, args)
-        
+
         # Check if any LLM provider is available
         if not await self.llm.check_available():
             result["response"] = """⚠️ **No LLM provider available!**
@@ -224,7 +225,9 @@ ollama pull llama3.1:8b
 
         # Build context
         context = ""
+        print(f"[CHAT] About to call get_rag_context, _rag_engine={self._rag_engine}")
         rag_context = await self.get_rag_context(user_message)
+        print(f"[CHAT] RAG context length: {len(rag_context)}")
 
         if self.is_connected and self._read_screen:
             screen = self._read_screen()
@@ -256,6 +259,7 @@ ollama pull llama3.1:8b
 
     async def process_simple_message(self, user_message: str) -> Dict[str, Any]:
         """Process a simple chat message - includes RAG but no mainframe screen context."""
+        print(f"[CHAT-SIMPLE] process_simple_message called with: {user_message[:50]}...")
         result = {
             "response": "",
             "model": self.config.OLLAMA_MODEL
@@ -274,7 +278,9 @@ ollama pull llama3.1:8b
             return result
 
         # Get RAG context (same as main chat)
+        print(f"[CHAT-SIMPLE] About to call get_rag_context, _rag_engine={self._rag_engine}")
         rag_context = await self.get_rag_context(user_message)
+        print(f"[CHAT-SIMPLE] RAG context length: {len(rag_context)}")
         full_message = user_message + rag_context
 
         self.conversation_history.append({
