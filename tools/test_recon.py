@@ -7,8 +7,8 @@ sys.path.insert(0, '/Users/w00tock/MF-local/mainframe-ai')
 
 from agent_tools import connection, connect_mainframe, read_screen
 from recon_engine import (
-    _detect_state, _reset_terminal, _ensure_connection,
-    _go_to_vtam, _go_to_tso_logon, TSOEnumerator,
+    _detect_state, _reset_terminal,
+    _go_to_vtam, _go_to_tso_logon, _go_to_tso_ready, TSOEnumerator,
     STATE_VTAM_USS, STATE_TSO_LOGON
 )
 
@@ -33,10 +33,10 @@ def test():
     _reset_terminal()
     print(f"   Reset took {time.time()-start:.1f}s")
 
-    print("5. Ensuring connection...")
+    print("5. Going to TSO READY...")
     start = time.time()
-    ok = _ensure_connection()
-    print(f"   Connection ok: {ok}, took {time.time()-start:.1f}s")
+    ok = _go_to_tso_ready()
+    print(f"   At TSO READY: {ok}, took {time.time()-start:.1f}s")
 
     print("6. Going to VTAM...")
     start = time.time()
@@ -48,12 +48,13 @@ def test():
     ok = _go_to_tso_logon()
     print(f"   At TSO logon: {ok}, took {time.time()-start:.1f}s")
 
-    print("8. Running TSO enumeration with 1 user...")
+    print("8. Running TSO enumeration with 3 users...")
     start = time.time()
-    enum = TSOEnumerator(userids=["HERC01"])
+    enum = TSOEnumerator(userids=["HERC01", "IBMUSER", "INVALID99"])
     results = enum.enumerate()
     print(f"   Enumeration took {time.time()-start:.1f}s")
-    print(f"   Results: {results}")
+    for r in results:
+        print(f"   - {r['userid']}: {r['status']} ({r['message']})")
 
 if __name__ == "__main__":
     test()

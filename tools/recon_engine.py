@@ -19,16 +19,10 @@ import time
 from datetime import datetime
 from typing import Optional, List
 
-try:
-    from tools.agent_tools import (
-        connection, exec_emulator_command, read_screen,
-        normalize_screen_text
-    )
-except ImportError:
-    from agent_tools import (
-        connection, exec_emulator_command, read_screen,
-        normalize_screen_text
-    )
+from agent_tools import (
+    connection, exec_emulator_command, read_screen,
+    normalize_screen_text
+)
 
 
 # =============================================================================
@@ -41,17 +35,38 @@ except ImportError:
 import logging as _logging
 _log = _logging.getLogger("recon_engine")
 
+# Global stop flag - checked by navigation helpers to allow early exit
+_global_stop_flag = False
+
+def _set_global_stop(value: bool) -> None:
+    """Set the global stop flag. Used by enumerators to signal navigation helpers."""
+    global _global_stop_flag
+    _global_stop_flag = value
+
+def _should_stop() -> bool:
+    """Check if we should stop (global flag or connection lost)."""
+    if _global_stop_flag:
+        return True
+    if not connection.connected or not connection.emulator:
+        return True
+    return False
+
 # Terminal states
 STATE_VTAM_USS = "vtam_uss"          # VTAM logon screen  (Logon ==>)
 STATE_TSO_LOGON = "tso_logon"        # TSO userid prompt  (IKJ56700A)
 STATE_TSO_PASSWORD = "tso_password"  # TSO password prompt
 STATE_TSO_READY = "tso_ready"        # TSO READY prompt
 STATE_TSO_ISPF = "tso_ispf"          # Inside ISPF panels
+STATE_TSO_APPS_MENU = "tso_apps_menu"  # TSO Applications Menu (RFE, RPF, IMON)
+STATE_TSO_POST_LOGIN = "tso_post_login"  # Post-login screens (broadcast, fortune, reconnect)
 STATE_TSO_MORE = "tso_more"          # TSO output with *** (MORE) indicator
 STATE_TSO_REENTER = "tso_reenter"    # TSO asking to reenter (IKJ56703A)
 STATE_TSO_LOGON_LOGOFF = "tso_logon_logoff"  # IKJ56400A ENTER LOGON OR LOGOFF
 STATE_CICS = "cics"                  # Inside a CICS region
 STATE_UNKNOWN = "unknown"
+
+# Fallback userids when primary is IN USE
+_FALLBACK_USERS = {"HERC01": "HERC02", "HERC02": "HERC03", "HERC03": "HERC01"}
 
 
 def _clear_input_field() -> None:
@@ -95,6 +110,13 @@ def _detect_state() -> str:
     if "ISPF PRIMARY" in screen or "OPTION ===>" in screen or "ISPF/PDF" in screen:
         return STATE_TSO_ISPF
 
+    # TSO Applications Menu (TK5 lands here after login)
+    # Check before CICS since menu may show CICS as an option
+    if ("RFE" in screen and "RPF" in screen) or "TSOAPPLS" in screen:
+        return STATE_TSO_APPS_MENU
+    if "IMON" in screen and "QUEUE" in screen and "TSO" in screen:
+        return STATE_TSO_APPS_MENU
+
     # CICS/KICKS — full-screen check
     if "DFHCE" in screen or ("CICS" in screen and ("SIGN" in screen or "CESN" in screen)):
         return STATE_CICS
@@ -106,13 +128,23 @@ def _detect_state() -> str:
     bottom_lines = [l for l in lines if l.strip()]
     bottom = '\n'.join(bottom_lines[-6:]) if bottom_lines else ""
 
+    # Post-login screens (reconnect success, broadcast messages, fortune)
+    # Must press Enter to continue
+    if "IKT00300" in screen or "RECONNECT SUCCESSFUL" in screen:
+        return STATE_TSO_POST_LOGIN
+    if "SESSION ESTABLISHED" in screen:
+        return STATE_TSO_POST_LOGIN
+    if "IKJ56455" in screen:  # Broadcast messages
+        return STATE_TSO_POST_LOGIN
+    if "LOGON IN PROGRESS" in screen:
+        return STATE_TSO_POST_LOGIN
+
     # TSO READY prompt
     if "READY" in bottom:
         # Make sure it's the actual READY prompt, not just part of other text
         for bl in reversed(bottom_lines):
             if "READY" in bl:
                 return STATE_TSO_READY
-                break
 
     # Password failed (NOT AUTHORIZED) — bail out
     if "NOT AUTHORIZED" in bottom:
@@ -145,9 +177,136 @@ def _detect_state() -> str:
     return STATE_UNKNOWN
 
 
+def _is_logged_in(screen: str) -> bool:
+    """Check if we're at a logged-in screen (READY, ISPF/RFE, or TSO Apps Menu)."""
+    upper = screen.upper() if screen else ""
+    if "READY" in upper:
+        return True
+    if "ISPF" in upper and "OPTION" in upper:
+        return True
+    # TSO Applications Menu (TK5 shows this after login)
+    if "RFE" in upper and "RPF" in upper:
+        return True
+    if "TSOAPPLS" in upper:
+        return True
+    if "IMON" in upper and "QUEUE" in upper:
+        return True
+    return False
+
+
+def _is_post_login_screen(screen: str) -> bool:
+    """Check if we're at a post-login screen that needs Enter to advance."""
+    upper = screen.upper() if screen else ""
+    if "IKT00300" in upper or "SESSION ESTABLISHED" in upper:
+        return True
+    if "RECONNECT SUCCESSFUL" in upper:
+        return True
+    if "IKJ56455" in upper:  # Broadcast messages
+        return True
+    if "LOGON IN PROGRESS" in upper:
+        return True
+    return False
+
+
+def _press_through_screens(max_pages: int = 10) -> str:
+    """Press Enter through broadcast/fortune/info screens until we reach
+    a usable screen (READY, ISPF/RFE, TSO Apps Menu, or Logon)."""
+    for _ in range(max_pages):
+        if _should_stop():
+            return _read_screen_upper()
+        screen = _read_screen_upper()
+        if _is_logged_in(screen):
+            return screen
+        # VTAM/Logon screen means we're NOT logged in — stop pressing
+        if ("LOGON ==>" in screen or "LOGON ===>" in screen) and "IKT00300" not in screen:
+            return screen
+        if "IKJ56400" in screen and "IKT00300" not in screen:
+            return screen
+        # Error state — don't press Enter blindly
+        if "REENTER" in screen or "INVALID" in screen:
+            return screen
+        # Post-login screens (reconnect success, broadcast, fortune) — press Enter
+        if _is_post_login_screen(screen):
+            _fast_key("enter", wait=True)
+            time.sleep(3)
+            continue
+        # Mostly blank screen after reconnect — press Enter to advance
+        stripped = screen.strip()
+        if len(stripped) < 80:
+            _fast_key("enter", wait=True)
+            time.sleep(2)
+            continue
+        # Press Enter and check again
+        _fast_key("enter", wait=True)
+        time.sleep(2)
+    return _read_screen_upper()
+
+
+def _cancel_stuck_tso_session(userid: str = "HERC01") -> None:
+    """Reply CANCEL to all pending IEF238D operator messages that block TSO login.
+    Also attempts to cancel the zombie TSU session by jobname via Hercules console."""
+    import urllib.request
+    import urllib.parse
+    import os as _os
+
+    hardcopy = _os.path.join(
+        _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))),
+        "tk5", "mvs-tk5", "log", "hardcopy.log"
+    )
+    try:
+        if _os.path.exists(hardcopy):
+            with open(hardcopy, errors="replace") as f:
+                content = f.read()
+            import re as _re
+            nums = set(_re.findall(r'\*([0-9A-Fa-f]{2})\s+IEF238D', content))
+            for num in nums:
+                cmd = urllib.parse.quote(f"/R {num},CANCEL")
+                url = f"http://localhost:8038/cgi-bin/tasks/cmd?cmd={cmd}"
+                urllib.request.urlopen(url, timeout=5)
+                _log.info(f"Replied CANCEL to IEF238D *{num}")
+    except Exception as e:
+        _log.warning(f"IEF238D cancel error: {e}")
+    # Also try cancelling the stuck TSO job by userid
+    try:
+        cmd = urllib.parse.quote(f"/C {userid}")
+        url = f"http://localhost:8038/cgi-bin/tasks/cmd?cmd={cmd}"
+        urllib.request.urlopen(url, timeout=5)
+    except Exception:
+        pass
+    time.sleep(3)
+
+
+def _fresh_start() -> None:
+    """Clear ALL stuck TSO sessions for a fresh recon start.
+
+    This ensures each recon run starts clean without 'userid IN USE' issues.
+    Cancels HERC01/02/03/04 sessions via Hercules console.
+    """
+    import urllib.request
+    import urllib.parse
+
+    print("[FRESH START] Clearing stuck TSO sessions...", flush=True)
+
+    # Cancel all common HERC userids via Hercules console
+    for userid in ["HERC01", "HERC02", "HERC03", "HERC04"]:
+        try:
+            cmd = urllib.parse.quote(f"/C {userid}")
+            url = f"http://localhost:8038/cgi-bin/tasks/cmd?cmd={cmd}"
+            urllib.request.urlopen(url, timeout=3)
+        except Exception:
+            pass
+
+    # Give MVS time to process the cancels
+    time.sleep(2)
+
+    print("[FRESH START] Done", flush=True)
+
+
 def _clear_screen_state() -> None:
     """Dismiss any pending prompt: page through MORE, clear REENTER, etc."""
     for _ in range(8):
+        if _global_stop_flag:
+            return
         state = _detect_state()
         if state == STATE_TSO_MORE:
             _fast_key("enter", wait=True)
@@ -161,10 +320,40 @@ def _clear_screen_state() -> None:
             break
 
 
+def _reset_terminal() -> None:
+    """Reset the terminal to a clean state before running any assessment.
+
+    Sends Reset() to clear keyboard lock, then PA1 + Clear to dismiss
+    any pending prompts or error states. Finally presses Enter to
+    refresh the screen and avoid blank screen issues.
+    """
+    try:
+        exec_emulator_command(b'Reset()')
+    except Exception:
+        pass
+    time.sleep(0.3)
+
+    # Clear any pending state
+    _fast_key("pa", "1", wait=True)
+    time.sleep(0.3)
+    _fast_key("clear")
+    time.sleep(0.5)
+
+    # Press Enter to refresh the screen (avoids blank screen after clear)
+    _fast_key("enter", wait=True)
+    time.sleep(1.0)
+
+    # Clear screen state (MORE, REENTER, etc)
+    _clear_screen_state()
+
+
 def _go_to_vtam(max_attempts: int = 4) -> bool:
     """Navigate from any state back to the VTAM USS logon screen.
     Returns True if successful."""
     for attempt in range(max_attempts):
+        if _should_stop():
+            _log.info("_go_to_vtam: stop requested")
+            return False
         _clear_screen_state()
         state = _detect_state()
         _log.debug("_go_to_vtam attempt %d: state=%s", attempt, state)
@@ -182,13 +371,31 @@ def _go_to_vtam(max_attempts: int = 4) -> bool:
                     break
             # Now at TSO READY — fall through to logoff
 
-        if state in (STATE_TSO_READY, STATE_TSO_LOGON, STATE_TSO_PASSWORD,
-                     STATE_TSO_REENTER, STATE_TSO_MORE, STATE_TSO_ISPF,
-                     STATE_TSO_LOGON_LOGOFF):
+        if state == STATE_TSO_APPS_MENU:
+            # Exit TSO Apps Menu — PF3 to READY, then logoff
+            for _ in range(4):
+                _fast_key("pf", "3", wait=True)
+                time.sleep(0.5)
+                s = _detect_state()
+                if s == STATE_TSO_READY or s == STATE_VTAM_USS:
+                    break
+            # Fall through to logoff if now at READY
+
+        # Only send LOGOFF if we're actually logged in (READY, ISPF, Apps Menu)
+        if state in (STATE_TSO_READY, STATE_TSO_ISPF, STATE_TSO_APPS_MENU, STATE_TSO_MORE):
             _clear_input_field()
             _fast_key("string", "LOGOFF")
             _fast_key("enter", wait=True)
             time.sleep(4.0)
+            continue
+
+        # At TSO logon/password prompt - type TSO to get proper screen, or just clear
+        if state in (STATE_TSO_LOGON, STATE_TSO_PASSWORD, STATE_TSO_REENTER,
+                     STATE_TSO_LOGON_LOGOFF, STATE_TSO_POST_LOGIN):
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.3)
+            _fast_key("clear")
+            time.sleep(0.5)
             continue
 
         if state == STATE_CICS:
@@ -212,18 +419,37 @@ def _go_to_vtam(max_attempts: int = 4) -> bool:
 def _go_to_tso_logon() -> bool:
     """Navigate to the TSO logon userid prompt.
     Returns True if successful."""
-    state = _detect_state()
-    if state == STATE_TSO_LOGON:
-        return True
+    for attempt in range(3):
+        if _should_stop():
+            return False
 
-    if not _go_to_vtam():
-        return False
-    _clear_input_field()
-    _fast_key("string", "TSO")
-    _fast_key("enter", wait=True)
-    time.sleep(3.0)
-    state = _detect_state()
-    return state in (STATE_TSO_LOGON, STATE_TSO_PASSWORD)
+        state = _detect_state()
+        if state == STATE_TSO_LOGON:
+            return True
+
+        # If at password prompt, escape back
+        if state == STATE_TSO_PASSWORD:
+            _fast_key("pa", "1", wait=True)
+            time.sleep(0.5)
+            _fast_key("clear")
+            time.sleep(0.5)
+            continue
+
+        if not _go_to_vtam():
+            return False
+
+        # On TK5, typing "TSO" at Logon ==> goes to the TSO userid prompt
+        _clear_input_field()
+        _fast_key("string", "TSO")
+        _fast_key("enter", wait=True)
+        time.sleep(4.0)
+
+        state = _detect_state()
+        if state == STATE_TSO_LOGON:
+            return True
+
+    # Final check
+    return _detect_state() == STATE_TSO_LOGON
 
 
 def _send_password(password: str) -> None:
@@ -247,24 +473,31 @@ def _send_password(password: str) -> None:
 def _go_to_tso_ready(userid: str = "HERC01", password: str = "CUL8TR") -> bool:
     """Log into TSO and reach the READY prompt.
 
-    If the requested userid is in use, automatically falls back to HERC02.
+    If the requested userid is in use, automatically falls back to HERC02/HERC03.
     Handles every known intermediate state:
       - Already at READY → done
+      - TSO Apps Menu → exit to READY
       - ISPF → PF3 out to READY
       - VTAM USS → type TSO → userid → password → READY
-      - Userid in use → logoff, try HERC02
+      - Userid in use → auto-cancel stuck session, reconnect, or try fallback
       - Reconnect prompt → press Enter
+      - Post-login screens → press through
       - MORE / REENTER → dismiss
     Returns True if at READY when done.
     """
-    # Build fallback list: requested userid first, then HERC02 if not already
+    # Build fallback chain
     userids_to_try = [userid]
-    if userid.upper() == "HERC01":
-        userids_to_try.append("HERC02")
-    elif userid.upper() == "HERC02":
-        userids_to_try.append("HERC01")
+    fallback = _FALLBACK_USERS.get(userid.upper())
+    if fallback:
+        userids_to_try.append(fallback)
+        fallback2 = _FALLBACK_USERS.get(fallback)
+        if fallback2 and fallback2 != userid.upper():
+            userids_to_try.append(fallback2)
 
     for current_userid in userids_to_try:
+        if _should_stop():
+            _log.info("_go_to_tso_ready: stop requested")
+            return False
         _log.info("Trying TSO login as %s", current_userid)
         result = _try_tso_login(current_userid, password)
         if result:
@@ -275,7 +508,23 @@ def _go_to_tso_ready(userid: str = "HERC01", password: str = "CUL8TR") -> bool:
 
     final = _detect_state()
     _log.error("All TSO login attempts failed. Final state: %s", final)
-    return final == STATE_TSO_READY
+    return _is_logged_in(_read_screen_upper()) or final == STATE_TSO_READY
+
+
+def _navigate_apps_menu_to_ready() -> bool:
+    """From TSO Apps Menu, press PF3 repeatedly to get to TSO READY."""
+    for _ in range(4):
+        if _should_stop():
+            return False
+        _fast_key("pf", "3", wait=True)
+        time.sleep(1.0)
+        state = _detect_state()
+        if state == STATE_TSO_READY:
+            return True
+        screen = _read_screen_upper()
+        if "READY" in screen:
+            return True
+    return False
 
 
 def _try_tso_login(userid: str, password: str) -> bool:
@@ -285,10 +534,12 @@ def _try_tso_login(userid: str, password: str) -> bool:
     Returns False if userid is in use or login fails (caller should
     try a different userid).
     """
-    for step in range(20):
-        # Bail immediately if connection died
-        if not connection.connected or not connection.emulator:
-            print(f"[LOGIN] Connection lost at step {step}", flush=True)
+    in_use_count = 0
+
+    for step in range(25):
+        # Bail immediately if connection died or stop requested
+        if _should_stop():
+            print(f"[LOGIN] Stop requested at step {step}", flush=True)
             return False
 
         _clear_screen_state()
@@ -303,9 +554,42 @@ def _try_tso_login(userid: str, password: str) -> bool:
             print(f"[LOGIN] Screen says not connected", flush=True)
             return False
 
-        # === SUCCESS ===
+        # === SUCCESS: TSO READY ===
         if state == STATE_TSO_READY:
             return True
+
+        # === SUCCESS: TSO Apps Menu — navigate to READY ===
+        if state == STATE_TSO_APPS_MENU:
+            print(f"[LOGIN] At TSO Apps Menu — navigating to READY", flush=True)
+            if _navigate_apps_menu_to_ready():
+                return True
+            continue
+
+        # === SUCCESS: Logged in (check with helper) ===
+        if _is_logged_in(screen):
+            # Try to get to READY from wherever we are
+            if state == STATE_TSO_ISPF:
+                for _ in range(6):
+                    _fast_key("pf", "3", wait=True)
+                    time.sleep(0.5)
+                    if _detect_state() == STATE_TSO_READY:
+                        return True
+            return True
+
+        # === POST-LOGIN SCREENS — press through broadcasts/fortune ===
+        if state == STATE_TSO_POST_LOGIN or _is_post_login_screen(screen):
+            print(f"[LOGIN] Post-login screen — pressing through", flush=True)
+            result_screen = _press_through_screens()
+            if _is_logged_in(result_screen):
+                # Now navigate to READY
+                if "READY" in result_screen:
+                    return True
+                state = _detect_state()
+                if state == STATE_TSO_APPS_MENU:
+                    if _navigate_apps_menu_to_ready():
+                        return True
+                continue
+            continue
 
         # === PASSWORD FAILED — must be checked BEFORE password handler ===
         if "NOT AUTHORIZED" in screen or "INVALID PASSWORD" in screen:
@@ -314,19 +598,56 @@ def _try_tso_login(userid: str, password: str) -> bool:
             time.sleep(0.5)
             return False
 
-        # === USERID IN USE — reconnect (walkthrough.py pattern) ===
+        # === USERID IN USE — try auto-cancel, then reconnect ===
         if state == STATE_TSO_LOGON_LOGOFF or "IKJ56400A" in screen:
             reconnect = "IN USE" in screen or "LOGON REJECTED" in screen
+            if reconnect:
+                in_use_count += 1
+                if in_use_count == 1:
+                    print(f"[LOGIN] {userid} IN USE — auto-cancelling stuck session", flush=True)
+                    _cancel_stuck_tso_session(userid)
+                    continue
+                if in_use_count >= 3:
+                    print(f"[LOGIN] {userid} still IN USE after 3 attempts — giving up", flush=True)
+                    return False  # Let caller try fallback userid
             cmd = f"LOGON {userid} RECONNECT" if reconnect else f"LOGON {userid}"
-            print(f"[LOGIN] {userid} in use — sending {cmd}", flush=True)
+            print(f"[LOGIN] Sending {cmd}", flush=True)
             _clear_input_field()
             _fast_key("string", cmd)
             _fast_key("enter", wait=True)
             time.sleep(4.0)
-            continue  # next iteration handles password prompt
+            continue
 
         if "IKJ56425I" in screen or ("IN USE" in screen and "IKJ" in screen):
+            in_use_count += 1
+            if in_use_count == 1:
+                print(f"[LOGIN] {userid} IN USE (IKJ56425I) — auto-cancelling", flush=True)
+                _cancel_stuck_tso_session(userid)
+                continue
+            if in_use_count >= 3:
+                print(f"[LOGIN] {userid} still IN USE — giving up", flush=True)
+                return False
             print(f"[LOGIN] {userid} rejected (in use) — sending LOGON RECONNECT", flush=True)
+            _clear_input_field()
+            _fast_key("string", f"LOGON {userid} RECONNECT")
+            _fast_key("enter", wait=True)
+            time.sleep(4.0)
+            continue
+
+        # === "IN USE" without IKJ56400 prompt ===
+        if "IN USE" in screen or "LOGON REJECTED" in screen:
+            in_use_count += 1
+            if in_use_count == 1:
+                print(f"[LOGIN] {userid} IN USE (bare) — auto-cancelling", flush=True)
+                _cancel_stuck_tso_session(userid)
+                _fast_key("clear")
+                time.sleep(2)
+                continue
+            if in_use_count >= 3:
+                print(f"[LOGIN] {userid} still IN USE — giving up", flush=True)
+                return False
+            _fast_key("clear")
+            time.sleep(1)
             _clear_input_field()
             _fast_key("string", f"LOGON {userid} RECONNECT")
             _fast_key("enter", wait=True)
@@ -387,12 +708,25 @@ def _try_tso_login(userid: str, password: str) -> bool:
             time.sleep(1.0)
             continue
 
-        # === VTAM USS — type TSO at the Logon ==> field ===
+        # === VTAM USS — type userid at the Logon ==> field (TK5 style) ===
         if state == STATE_VTAM_USS:
+            print(f"[LOGIN] VTAM USS screen — typing {userid}", flush=True)
             _clear_input_field()
-            _fast_key("string", "TSO")
+            _fast_key("string", userid)
             _fast_key("enter", wait=True)
-            time.sleep(3.0)
+            time.sleep(4.0)
+            # Check for password prompt immediately after
+            screen = _read_screen_upper()
+            if "PASSWORD" in screen or "IKJ56476" in screen or "ENTER CURRENT" in screen:
+                print(f"[LOGIN] Password prompt — entering password", flush=True)
+                _send_password(password)
+                # Press through post-login screens
+                result_screen = _press_through_screens()
+                if _is_logged_in(result_screen):
+                    state = _detect_state()
+                    if state == STATE_TSO_APPS_MENU:
+                        _navigate_apps_menu_to_ready()
+                    return True
             continue
 
         # === CICS — logoff first ===
@@ -403,11 +737,27 @@ def _try_tso_login(userid: str, password: str) -> bool:
             time.sleep(3.0)
             continue
 
-        # === INPUT NOT RECOGNIZED — VTAM error, clear and retry ===
-        if "INPUT NOT RECOGNIZED" in screen:
-            print(f"[LOGIN] VTAM INPUT NOT RECOGNIZED — clearing", flush=True)
-            _fast_key("pa", "1", wait=True)
-            time.sleep(0.5)
+        # === INPUT NOT RECOGNIZED — keyboard locked, Reset+Clear ===
+        if "INPUT NOT RECOGNIZED" in screen or "NOT RECOGNIZED" in screen:
+            print(f"[LOGIN] INPUT NOT RECOGNIZED — Reset+Clear", flush=True)
+            try:
+                exec_emulator_command(b'Reset()')
+            except Exception:
+                pass
+            time.sleep(0.3)
+            _fast_key("clear")
+            time.sleep(2)
+            continue
+
+        # === Blank/frozen screen — try to wake it up ===
+        if not screen.strip():
+            print(f"[LOGIN] Blank screen — pressing Enter to wake up", flush=True)
+            _fast_key("enter", wait=True)
+            time.sleep(2.0)
+            screen = _read_screen_upper()
+            if not screen.strip():
+                # Still blank - wait a bit more
+                time.sleep(3.0)
             continue
 
         # === UNKNOWN — press Enter once ===
@@ -415,7 +765,9 @@ def _try_tso_login(userid: str, password: str) -> bool:
         _fast_key("enter", wait=True)
         time.sleep(1.0)
 
-    return _detect_state() == STATE_TSO_READY
+    # Final check
+    final_state = _detect_state()
+    return final_state == STATE_TSO_READY or _is_logged_in(_read_screen_upper())
 
 
 def _wait_output(timeout: float = 2.0) -> None:
@@ -646,6 +998,12 @@ class TSOEnumerator:
         if not self._check_connected():
             return [{"userid": "*", "status": "error", "message": "Not connected"}]
 
+        # Clear global stop flag at start
+        _set_global_stop(False)
+
+        # Fresh start - clear stuck sessions and reset terminal
+        _fresh_start()
+
         # Navigate to TSO logon prompt
         if not self._navigate_to_tso_logon():
             return [{"userid": "*", "status": "error",
@@ -690,14 +1048,12 @@ class TSOEnumerator:
             self._reset_to_tso_logon()
 
         self.running = False
-
-        # Return to TSO READY
-        _go_to_tso_ready()
-
+        _set_global_stop(False)
         return self.results
 
     def stop(self):
         self.running = False
+        _set_global_stop(True)
 
 
 # =============================================================================
@@ -774,22 +1130,27 @@ class CICSEnumerator:
             return False
 
         for applid in self.CICS_APPLIDS:
+            if _should_stop():
+                return False
             _fast_key("clear")
             time.sleep(0.3)
-            _fast_key("string", f"LOGON APPLID({applid})")
+            _clear_input_field()
+            # Type applid directly at "Logon ==>" prompt (TK5 style)
+            _fast_key("string", applid)
             _fast_key("enter", wait=True)
             time.sleep(2.0)
 
             screen = read_screen().upper()
             # Check if we got into CICS (no error patterns)
             if any(p in screen for p in ["DFHCE", "SIGN", "CICS", "CESN",
-                                          "TRANSACTION", "ENTER TRANS"]):
+                                          "TRANSACTION", "ENTER TRANS", "KICKS"]):
                 return True
             # Also check: if it's not an error, we might be in CICS
             if not any(p in screen for p in ["NOT ACTIVE", "UNABLE",
                                               "IST075I", "IST453I",
                                               "UNKNOWN", "NOT FOUND",
-                                              "INACTIVE", "LOGON ==>"]):
+                                              "INACTIVE", "LOGON ==>",
+                                              "IKJ56", "INVALID"]):
                 # Might be in the application
                 state = _detect_state()
                 if state == STATE_CICS:
@@ -816,6 +1177,12 @@ class CICSEnumerator:
         if not self._check_connected():
             return [{"transaction_id": "*", "status": "error",
                      "message": "Not connected"}]
+
+        # Clear global stop flag at start
+        _set_global_stop(False)
+
+        # Fresh start - clear stuck sessions and reset terminal
+        _fresh_start()
 
         # Try to navigate to CICS
         if not self._navigate_to_cics():
@@ -862,15 +1229,13 @@ class CICSEnumerator:
             time.sleep(0.2)
 
         self.running = False
-
-        # Return to TSO READY
-        _go_to_vtam()
-        _go_to_tso_ready()
+        _set_global_stop(False)
 
         return self.results
 
     def stop(self):
         self.running = False
+        _set_global_stop(True)
 
 
 # =============================================================================
@@ -878,16 +1243,17 @@ class CICSEnumerator:
 # =============================================================================
 
 class VTAMEnumerator:
-    """Enumerate valid VTAM application IDs by sending LOGON APPLID(...)
-    and classifying the response.
+    """Enumerate valid VTAM application IDs by typing them at the VTAM USS
+    'Logon ==>' prompt and classifying the response.
 
-    Reimplements vtam-enum.nse logic.
+    Reimplements vtam-enum.nse logic, adapted for TK5.
     """
 
     ERROR_PATTERNS = [
         "UNABLE TO ESTABLISH SESSION",
         "COMMAND UNRECOGNIZED",
         "INVALID COMMAND",
+        "INVALID KEYWORD",      # TK5: IKJ56712I
         "SESSION NOT BOUND",
         "UNKNOWN APPLID",
         "APPLID NOT FOUND",
@@ -895,16 +1261,25 @@ class VTAMEnumerator:
         "IST453I",          # LOGON failed
         "IST457I",          # Session setup failure
         "IST526I",          # Insufficient storage
+        "IKJ56712I",        # TK5: INVALID KEYWORD
+        "IKJ56703A",        # TK5: REENTER prompt
+        "IKJ56401I",        # TK5: INVALID COMMAND SYNTAX
         "NOT ACTIVE",
         "INACTIVE",
+        "REENTER",
+        "NOT DEFINED",
     ]
 
     VALID_PATTERNS = [
         "LOGON IN PROGRESS",
         "SESSION ESTABLISHED",
         "BOUND",
-        "USS",
-        "READY",
+        "ENTER USERID",     # Got to TSO logon
+        "IKJ56700A",        # TSO userid prompt
+        "PASSWORD",         # Password prompt means valid app
+        "ENTER CURRENT",    # Password prompt
+        "KICKS",            # CICS/KICKS region
+        "DFHCE",            # CICS message
     ]
 
     def __init__(self, applids: Optional[list[str]] = None):
@@ -951,10 +1326,22 @@ class VTAMEnumerator:
             return [{"applid": "*", "status": "error",
                      "message": "Not connected"}]
 
-        # Navigate to VTAM USS screen
-        if not _go_to_vtam():
-            return [{"applid": "*", "status": "error",
-                     "message": "Could not navigate to VTAM USS screen"}]
+        # Clear global stop flag at start
+        _set_global_stop(False)
+
+        # Fresh start - clear stuck sessions
+        _fresh_start()
+
+        # Navigate to VTAM USS screen - try direct clear first
+        _fast_key("clear")
+        time.sleep(1.0)
+        state = _detect_state()
+        print(f"[VTAM] Initial state after clear: {state}", flush=True)
+
+        if state != STATE_VTAM_USS:
+            if not _go_to_vtam():
+                # Last resort - just try to enumerate from current screen
+                print("[VTAM] Warning: Could not confirm VTAM USS, attempting anyway", flush=True)
 
         self.results = []
         self.running = True
@@ -976,12 +1363,14 @@ class VTAMEnumerator:
                 _fast_key("enter", wait=True)
                 time.sleep(1.5)
 
-            # Send LOGON APPLID command
+            # Send applid directly at "Logon ==>" prompt (TK5 style)
+            # Note: Some mainframes use "LOGON APPLID(xxx)" but TK5 uses direct entry
             _fast_key("clear")
             time.sleep(0.3)
-            _fast_key("string", f"LOGON APPLID({applid})")
+            _clear_input_field()
+            _fast_key("string", applid)
             _fast_key("enter", wait=True)
-            time.sleep(1.0)
+            time.sleep(1.5)
 
             screen_text = read_screen()
             status, message = self._classify_screen(screen_text)
@@ -1009,14 +1398,13 @@ class VTAMEnumerator:
                 time.sleep(0.3)
 
         self.running = False
-
-        # Return to TSO READY
-        _go_to_tso_ready()
+        _set_global_stop(False)
 
         return self.results
 
     def stop(self):
         self.running = False
+        _set_global_stop(True)
 
 
 # =============================================================================
@@ -1415,6 +1803,12 @@ class ApplicationMapper:
                      "children": [], "fields": [],
                      "depth": 0, "error": "Not connected"}]
 
+        # Clear global stop flag at start
+        _set_global_stop(False)
+
+        # Fresh start - clear stuck sessions and reset terminal
+        _fresh_start()
+
         self.visited = set()
         self.tree = []
         self.running = True
@@ -1430,7 +1824,7 @@ class ApplicationMapper:
 
     def _crawl(self, depth: int, callback=None) -> Optional[dict]:
         """Recursive crawl from current screen."""
-        if not self.running or depth > self.max_depth:
+        if not self.running or depth > self.max_depth or _should_stop():
             return None
 
         screen_text = read_screen()
@@ -1497,6 +1891,7 @@ class ApplicationMapper:
 
     def stop(self):
         self.running = False
+        _set_global_stop(True)
 
 
 # =============================================================================
@@ -2046,6 +2441,8 @@ class SystemEnumerator:
         # Page through MORE indicators — up to 20 pages for large outputs
         # (LISTDS MEMBERS, LISTCAT, etc. can produce many screens)
         for page in range(20):
+            if _should_stop():
+                break
             screen = read_screen()
             screen_upper = screen.upper()
 
@@ -2106,6 +2503,12 @@ class SystemEnumerator:
                      "output": "Not connected to mainframe. Use the Connect "
                                "button to connect first.",
                      "findings": [], "description": ""}]
+
+        # Clear global stop flag at start
+        _set_global_stop(False)
+
+        # Fresh start - clear stuck sessions and reset terminal
+        _fresh_start()
 
         # Initial login — navigate to TSO READY
         if not self._ensure_ready():
@@ -2181,7 +2584,9 @@ class SystemEnumerator:
                 callback(self.progress, self.total, result)
 
         self.running = False
+        _set_global_stop(False)
         return self.results
 
     def stop(self):
         self.running = False
+        _set_global_stop(True)

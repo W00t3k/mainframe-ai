@@ -30,7 +30,8 @@ async def landing_page(request: Request):
 async def chat_page(request: Request):
     """Chat interface page."""
     embed = request.query_params.get("embed") == "1"
-    return templates.TemplateResponse(request, "chat.html", {"embed": embed})
+    simple = request.query_params.get("simple") == "1"
+    return templates.TemplateResponse(request, "chat.html", {"embed": embed, "simple": simple})
 
 
 @router.get("/connect", response_class=HTMLResponse)

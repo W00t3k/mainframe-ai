@@ -5,20 +5,23 @@ Endpoints for mainframe reconnaissance and security assessment.
 """
 
 import asyncio
-import os
 import sys
+from pathlib import Path
 from fastapi import APIRouter, Request
 from fastapi.responses import JSONResponse
 
-from app.services.ollama import get_ollama_service
+from app.config import get_config
+from app.services.llm_provider import get_llm_service
 from app.constants.prompts import RECON_AI_PROMPT, EXPLAIN_SCREEN_PROMPT
-from app.services.rag_context import build_rag_context
 
 router = APIRouter(tags=["recon"])
+config = get_config()
 
-TOOLS_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "tools")
-if TOOLS_DIR not in sys.path:
-    sys.path.insert(0, TOOLS_DIR)
+PROJECT_ROOT = Path(__file__).resolve().parents[2]
+TOOLS_DIR = PROJECT_ROOT / "tools"
+
+if str(TOOLS_DIR) not in sys.path:
+    sys.path.insert(0, str(TOOLS_DIR))
 
 # Import recon engine
 try:
@@ -44,6 +47,64 @@ except ImportError:
 _active_enumerator = None
 _active_mapper = None
 
+# Progress tracking
+_progress = {
+    "running": False,
+    "module": "",
+    "progress": 0,
+    "total": 0,
+    "current_item": "",
+    "results": []
+}
+
+def _progress_callback(progress: int, total: int, result: dict):
+    """Callback to update progress during enumeration."""
+    _progress["progress"] = progress
+    _progress["total"] = total
+    _progress["current_item"] = result.get("userid") or result.get("transaction_id") or result.get("applid") or result.get("label", "")
+    _progress["results"].append(result)
+
+
+async def _ensure_mainframe_connection(target: str = "localhost:3270") -> tuple[bool, str | None]:
+    """Ensure recon actions have a live TN3270 session."""
+    if connection and connection.connected:
+        return True, None
+    if not connect_mainframe:
+        return False, "Mainframe connection tools not available"
+
+    try:
+        loop = asyncio.get_running_loop()
+        success, message = await loop.run_in_executor(None, connect_mainframe, target)
+        if success:
+            return True, None
+        return False, message or f"Could not connect to {target}"
+    except Exception as exc:
+        return False, str(exc)
+
+
+async def build_rag_context(query: str, n_results: int = 2) -> str:
+    """Build RAG context for prompts.
+
+    Prefers unified adapter (production RAG), falls back to simple engine.
+    """
+    try:
+        # Prefer unified adapter
+        try:
+            from rag_adapter import get_rag_engine
+        except ImportError:
+            from rag_engine import get_rag_engine
+
+        engine = get_rag_engine()
+        results = await engine.query_simple(query, n_results=n_results)
+        if results:
+            context = "\n\n[Relevant Knowledge Base Information]\n"
+            for r in results:
+                context += f"---\n{r['content']}\n"
+            return context
+    except Exception:
+        pass
+    return ""
+
 
 @router.post("/enumerate")
 async def api_recon_enumerate(request: Request):
@@ -52,8 +113,10 @@ async def api_recon_enumerate(request: Request):
 
     if not RECON_AVAILABLE:
         return JSONResponse({"error": "Recon engine not available"}, status_code=400)
-    if not connection or not connection.connected:
-        return JSONResponse({"error": "Not connected to a mainframe"}, status_code=400)
+
+    connected, error = await _ensure_mainframe_connection()
+    if not connected:
+        return JSONResponse({"error": f"Auto-connect failed: {error}"}, status_code=400)
 
     data = await request.json()
     module = data.get("module", "tso")
@@ -72,15 +135,48 @@ async def api_recon_enumerate(request: Request):
 
         _active_enumerator = enumerator
 
-        loop = asyncio.get_running_loop()
-        results = await loop.run_in_executor(None, enumerator.enumerate)
+        # Reset and start progress tracking
+        _progress["running"] = True
+        _progress["module"] = module
+        _progress["progress"] = 0
+        _progress["total"] = len(wordlist) if wordlist else enumerator.total
+        _progress["current_item"] = ""
+        _progress["results"] = []
 
+        loop = asyncio.get_running_loop()
+        results = await loop.run_in_executor(None, lambda: enumerator.enumerate(callback=_progress_callback))
+
+        _progress["running"] = False
         _active_enumerator = None
         return JSONResponse({"results": results})
 
     except Exception as e:
         _active_enumerator = None
         return JSONResponse({"error": str(e)}, status_code=500)
+
+
+@router.post("/enumerate/stop")
+async def api_recon_enumerate_stop():
+    """Stop a running enumeration."""
+    global _active_enumerator, _progress
+    if _active_enumerator:
+        _active_enumerator.stop()
+        _active_enumerator = None
+    _progress["running"] = False
+    return JSONResponse({"success": True})
+
+
+@router.get("/enumerate/progress")
+async def api_recon_enumerate_progress():
+    """Get current enumeration progress."""
+    return JSONResponse({
+        "running": _progress["running"],
+        "module": _progress["module"],
+        "progress": _progress["progress"],
+        "total": _progress["total"],
+        "current_item": _progress["current_item"],
+        "results_count": len(_progress["results"])
+    })
 
 
 @router.post("/enumerate/system")
@@ -91,29 +187,9 @@ async def api_recon_enumerate_system(request: Request):
     if not RECON_AVAILABLE:
         return JSONResponse({"error": "Recon engine not available"}, status_code=400)
 
-    # Auto-connect if not connected
-    if not connection or not connection.connected:
-        if connect_mainframe:
-            try:
-                loop = asyncio.get_running_loop()
-                success, msg = await loop.run_in_executor(
-                    None, connect_mainframe, "localhost:3270"
-                )
-                if not success:
-                    return JSONResponse(
-                        {"error": f"Auto-connect failed: {msg}"},
-                        status_code=400,
-                    )
-            except Exception as e:
-                return JSONResponse(
-                    {"error": f"Auto-connect failed: {e}"},
-                    status_code=400,
-                )
-        else:
-            return JSONResponse(
-                {"error": "Not connected to a mainframe"},
-                status_code=400,
-            )
+    connected, error = await _ensure_mainframe_connection()
+    if not connected:
+        return JSONResponse({"error": f"Auto-connect failed: {error}"}, status_code=400)
 
     try:
         data = await request.json()
@@ -127,9 +203,18 @@ async def api_recon_enumerate_system(request: Request):
         enumerator = SystemEnumerator(userid=userid, password=password, commands=commands)
         _active_enumerator = enumerator
 
-        loop = asyncio.get_running_loop()
-        results = await loop.run_in_executor(None, enumerator.enumerate)
+        # Reset and start progress tracking
+        _progress["running"] = True
+        _progress["module"] = "system"
+        _progress["progress"] = 0
+        _progress["total"] = len(enumerator.ENUM_COMMANDS) if not commands else len(commands)
+        _progress["current_item"] = ""
+        _progress["results"] = []
 
+        loop = asyncio.get_running_loop()
+        results = await loop.run_in_executor(None, lambda: enumerator.enumerate(callback=_progress_callback))
+
+        _progress["running"] = False
         _active_enumerator = None
         return JSONResponse({"results": results})
 
@@ -138,27 +223,19 @@ async def api_recon_enumerate_system(request: Request):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 
-@router.post("/enumerate/stop")
-async def api_recon_enumerate_stop():
-    """Stop a running enumeration."""
-    global _active_enumerator
-    if _active_enumerator:
-        _active_enumerator.stop()
-        _active_enumerator = None
-    return JSONResponse({"success": True})
-
-
 @router.post("/hidden-fields")
 async def api_recon_hidden_fields():
     """Detect hidden fields on current screen."""
     if not RECON_AVAILABLE:
         return JSONResponse({"error": "Recon engine not available"}, status_code=400)
-    if not connection or not connection.connected:
-        return JSONResponse({"error": "Not connected"}, status_code=400)
+
+    connected, error = await _ensure_mainframe_connection()
+    if not connected:
+        return JSONResponse({"error": f"Auto-connect failed: {error}"}, status_code=400)
 
     try:
         detector = HiddenFieldDetector()
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         fields = await loop.run_in_executor(None, detector.detect)
         return JSONResponse({"fields": fields})
     except Exception as e:
@@ -170,12 +247,14 @@ async def api_recon_analyze_screen():
     """Analyze current screen for security patterns."""
     if not RECON_AVAILABLE:
         return JSONResponse({"error": "Recon engine not available"}, status_code=400)
-    if not connection or not connection.connected:
-        return JSONResponse({"error": "Not connected"}, status_code=400)
+
+    connected, error = await _ensure_mainframe_connection()
+    if not connected:
+        return JSONResponse({"error": f"Auto-connect failed: {error}"}, status_code=400)
 
     try:
         analyzer = ScreenAnalyzer()
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         findings = await loop.run_in_executor(None, analyzer.analyze_current_screen)
         return JSONResponse({"findings": findings})
     except Exception as e:
@@ -189,8 +268,10 @@ async def api_recon_map(request: Request):
 
     if not RECON_AVAILABLE:
         return JSONResponse({"error": "Recon engine not available"}, status_code=400)
-    if not connection or not connection.connected:
-        return JSONResponse({"error": "Not connected"}, status_code=400)
+
+    connected, error = await _ensure_mainframe_connection()
+    if not connected:
+        return JSONResponse({"error": f"Auto-connect failed: {error}"}, status_code=400)
 
     data = await request.json()
     max_depth = min(int(data.get("max_depth", 3)), 5)
@@ -199,7 +280,7 @@ async def api_recon_map(request: Request):
         mapper = ApplicationMapper(max_depth=max_depth)
         _active_mapper = mapper
 
-        loop = asyncio.get_running_loop()
+        loop = asyncio.get_event_loop()
         tree = await loop.run_in_executor(None, mapper.map)
 
         stats = mapper.stats
@@ -284,8 +365,8 @@ async def api_recon_ai_analyze(request: Request):
     context = "\n".join(sections)
     prompt = RECON_AI_PROMPT + "\n\n---\n\n" + context
 
-    ollama = get_ollama_service()
-    ai_response = await ollama.generate(prompt, temperature=0.4, num_predict=2048)
+    llm = get_llm_service()
+    ai_response = await llm.generate(prompt, temperature=0.4, max_tokens=2048)
 
     return JSONResponse({"analysis": ai_response})
 
@@ -293,8 +374,9 @@ async def api_recon_ai_analyze(request: Request):
 @router.post("/explain-screen")
 async def api_recon_explain_screen(request: Request):
     """Explain the current screen through the methodology lens."""
-    if not connection or not connection.connected:
-        return JSONResponse({"error": "Not connected to a mainframe"}, status_code=400)
+    connected, error = await _ensure_mainframe_connection()
+    if not connected:
+        return JSONResponse({"error": f"Auto-connect failed: {error}"}, status_code=400)
 
     screen_text = read_screen()
     if not screen_text or screen_text == "[Not connected]":
@@ -313,7 +395,7 @@ async def api_recon_explain_screen(request: Request):
 
     prompt += f"\n\n---\n\nCurrent TN3270 Screen:\n```\n{screen_text}\n```"
 
-    ollama = get_ollama_service()
-    explanation = await ollama.generate(prompt, temperature=0.5, num_predict=1500)
+    llm = get_llm_service()
+    explanation = await llm.generate(prompt, temperature=0.5, max_tokens=1500)
 
     return JSONResponse({"explanation": explanation, "screen": screen_text})

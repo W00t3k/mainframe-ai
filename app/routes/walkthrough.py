@@ -102,7 +102,6 @@ class WalkthroughRunner:
         self.current_control_plane = ""
         self.walkthrough_name = ""
         self.log = []
-        self.expect_warnings = []
         self.display_seconds = speed
         self.lhost = lhost
         self.lport = lport
@@ -204,10 +203,6 @@ class WalkthroughRunner:
             except Exception:
                 screen_html = self.current_screen
         
-        expect_warnings = getattr(self, "expect_warnings", [])
-        # all_validated = True only if finished and no expect warnings
-        all_validated = self.finished and len(expect_warnings) == 0
-
         return {
             "running": self.running,
             "paused": self.paused,
@@ -220,10 +215,8 @@ class WalkthroughRunner:
             "control_plane": self.current_control_plane,
             "walkthrough_name": self.walkthrough_name,
             "finished": self.finished,
-            "all_validated": all_validated,
             "error": self.error,
             "log": list(self.log),
-            "expect_warnings": expect_warnings,
         }
 
     def _run(self, name: str, target: str):
@@ -329,31 +322,6 @@ class WalkthroughRunner:
                 self.current_screen = read_screen()
             except Exception:
                 self.current_screen = connection.current_screen if connection else ""
-
-            # Validate expect patterns if defined
-            expect_patterns = step.get("expect", [])
-            expect_matched = True
-            matched_pattern = None
-            if expect_patterns and self.running:
-                upper_screen = self.current_screen.upper()
-                for pattern in expect_patterns:
-                    if pattern.upper() in upper_screen:
-                        matched_pattern = pattern
-                        break
-                expect_matched = matched_pattern is not None
-                if not expect_matched:
-                    logger.warning(f"Step {idx+1} '{step['title']}': expected patterns {expect_patterns} not found on screen")
-                    self.expect_warnings.append({
-                        "step": idx + 1,
-                        "title": step["title"],
-                        "expected": expect_patterns,
-                        "screen_preview": self.current_screen[:500]
-                    })
-
-            # Update log entry with validation status
-            log_entry["expect_matched"] = expect_matched
-            log_entry["matched_pattern"] = matched_pattern
-            log_entry["expected_patterns"] = expect_patterns
 
             narration = step["narration"]
             narration = narration.replace("{{LHOST}}", self.lhost).replace("{{LPORT}}", self.lport)
@@ -770,7 +738,7 @@ class WalkthroughRunner:
     def _ask_llm_recovery_action(self, screen: str) -> str:
         """Ask the LLM to analyze the screen and return a single recovery action.
 
-        Uses unified provider logic: Ollama.
+        Uses unified provider logic: Groq (internet) first, Ollama (local) fallback.
         Returns one of: CLEAR, PF3, ENTER, LOGOFF, END, CANCEL
         Falls back to pattern matching if all LLMs unavailable."""
         config = get_config()
@@ -798,8 +766,9 @@ IMPORTANT: CLEAR is almost always the safest action for TSO error prompts. It cl
 What SINGLE action should we take RIGHT NOW?
 Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
 
-        # Use Ollama for recovery decision
         answer = None
+
+        # Try Ollama for recovery
         try:
             resp = httpx.post(
                 f"{config.OLLAMA_URL}/api/generate",
@@ -817,7 +786,7 @@ Reply with EXACTLY one word: CLEAR, PF3, ENTER, LOGOFF, END, or CANCEL"""
         except Exception as e:
             logger.warning(f"Ollama unavailable for recovery: {e}")
 
-        # Extract action from LLM response
+        # 3. Extract action from LLM response
         if answer:
             for cmd in ["LOGOFF", "CANCEL", "CLEAR", "ENTER", "END", "PF3"]:
                 if cmd in answer:

@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
 RAG Engine for Mainframe AI Assistant
-Simple file-based implementation using Ollama embeddings
+Enhanced file-based implementation with:
+- Hybrid search (BM25 + vector similarity)
+- Better PDF extraction via pymupdf
+- Technical document chunking (preserves JCL, COBOL blocks)
+- Page number metadata
 No external vector DB required!
 """
 
@@ -11,17 +15,31 @@ import json
 import hashlib
 import time
 import numpy as np
-from typing import List, Dict, Optional
-from dataclasses import dataclass, asdict
+from typing import List, Dict, Optional, Tuple
+from dataclasses import dataclass, asdict, field
 from datetime import datetime
 import httpx
 
-# Try to import PDF support
+# Try to import better PDF support (pymupdf/fitz)
+try:
+    import fitz  # pymupdf
+    PYMUPDF_SUPPORT = True
+except ImportError:
+    PYMUPDF_SUPPORT = False
+
+# Fallback to PyPDF2
 try:
     from PyPDF2 import PdfReader
     PDF_SUPPORT = True
 except ImportError:
     PDF_SUPPORT = False
+
+# BM25 for hybrid search
+try:
+    from rank_bm25 import BM25Okapi
+    BM25_SUPPORT = True
+except ImportError:
+    BM25_SUPPORT = False
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAG_DIR = os.path.join(BASE_DIR, "data", "rag_data")
@@ -47,6 +65,106 @@ class Document:
     doc_type: str
     chunks: int
     added: str
+    # New metadata fields
+    total_pages: int = 0
+    ibm_form_number: str = ""
+    title: str = ""
+
+
+class TechnicalChunker:
+    """
+    Technical document chunker that preserves:
+    - JCL blocks (lines starting with //)
+    - COBOL code sections
+    - Assembler code
+    - Tables and structured data
+    - Section headers
+    """
+
+    # Patterns for technical content
+    JCL_PATTERN = re.compile(r'^//[A-Z@#$]', re.MULTILINE)
+    COBOL_DIVISION = re.compile(r'^\s*(IDENTIFICATION|ENVIRONMENT|DATA|PROCEDURE)\s+DIVISION', re.MULTILINE | re.IGNORECASE)
+    SECTION_HEADER = re.compile(r'^(?:Chapter|Section|\d+\.)\s+.+$', re.MULTILINE | re.IGNORECASE)
+
+    def __init__(self, target_size: int = 500, max_size: int = 800):
+        self.target_size = target_size
+        self.max_size = max_size
+
+    def _is_jcl_block(self, text: str) -> bool:
+        """Check if text contains JCL"""
+        return bool(self.JCL_PATTERN.search(text))
+
+    def _is_cobol_block(self, text: str) -> bool:
+        """Check if text contains COBOL divisions"""
+        return bool(self.COBOL_DIVISION.search(text))
+
+    def _extract_code_blocks(self, text: str) -> List[Tuple[str, str]]:
+        """Extract code blocks and their types"""
+        blocks = []
+
+        # Find JCL blocks (consecutive lines starting with //)
+        jcl_blocks = re.findall(r'((?:^//.*\n?)+)', text, re.MULTILINE)
+        for block in jcl_blocks:
+            if len(block.strip()) > 20:
+                blocks.append(('jcl', block.strip()))
+
+        return blocks
+
+    def chunk(self, text: str, preserve_code: bool = True) -> List[Dict]:
+        """
+        Chunk text while preserving technical content.
+        Returns list of dicts with 'text' and 'type' keys.
+        """
+        chunks = []
+
+        # Split by double newlines (paragraphs)
+        paragraphs = re.split(r'\n\s*\n', text)
+
+        current_chunk = []
+        current_size = 0
+        current_type = 'prose'
+
+        for para in paragraphs:
+            para = para.strip()
+            if not para:
+                continue
+
+            para_words = len(para.split())
+
+            # Detect content type
+            if self._is_jcl_block(para):
+                para_type = 'jcl'
+            elif self._is_cobol_block(para):
+                para_type = 'cobol'
+            else:
+                para_type = 'prose'
+
+            # If type changes or chunk is full, save current and start new
+            if (current_type != para_type and current_chunk) or \
+               (current_size + para_words > self.max_size and current_chunk):
+                chunk_text = '\n\n'.join(current_chunk)
+                if len(chunk_text) > 50:
+                    chunks.append({
+                        'text': chunk_text,
+                        'type': current_type
+                    })
+                current_chunk = []
+                current_size = 0
+
+            current_chunk.append(para)
+            current_size += para_words
+            current_type = para_type
+
+        # Don't forget last chunk
+        if current_chunk:
+            chunk_text = '\n\n'.join(current_chunk)
+            if len(chunk_text) > 50:
+                chunks.append({
+                    'text': chunk_text,
+                    'type': current_type
+                })
+
+        return chunks
 
 
 class SentenceChunker:
@@ -183,15 +301,41 @@ def highlight_query_terms(content: str, query: str, tag: str = "mark") -> str:
 
 
 class RAGEngine:
-    """Simple RAG Engine using file-based storage and Ollama embeddings"""
+    """
+    Enhanced RAG Engine with:
+    - Hybrid search (BM25 + vector similarity)
+    - Better PDF extraction
+    - Technical document chunking
+    """
 
-    def __init__(self, chunking_strategy: str = "sentence"):
+    def __init__(self, chunking_strategy: str = "technical"):
         self.documents: Dict[str, Document] = {}
-        self.chunks: List[Dict] = []  # {id, doc_id, text, embedding}
+        self.chunks: List[Dict] = []  # {id, doc_id, text, embedding, page, type}
         self.query_cache = QueryCache(max_size=100, ttl_seconds=3600)
         self.chunking_strategy = chunking_strategy
         self.sentence_chunker = SentenceChunker(target_size=400, max_size=600, overlap_sentences=1)
+        self.technical_chunker = TechnicalChunker(target_size=500, max_size=800)
+        self.bm25_index = None  # Will be built on first query
+        self.bm25_corpus = []   # Tokenized corpus for BM25
         self._load_index()
+        self._build_bm25_index()
+
+    def _build_bm25_index(self):
+        """Build BM25 index from chunks"""
+        if not BM25_SUPPORT or not self.chunks:
+            return
+
+        # Tokenize all chunks
+        self.bm25_corpus = [self._tokenize(c.get('text', '')) for c in self.chunks]
+        if self.bm25_corpus:
+            self.bm25_index = BM25Okapi(self.bm25_corpus)
+
+    def _tokenize(self, text: str) -> List[str]:
+        """Simple tokenization for BM25"""
+        # Lowercase and split on non-alphanumeric
+        tokens = re.findall(r'\b[a-z0-9]+\b', text.lower())
+        # Remove very short tokens except common ones
+        return [t for t in tokens if len(t) > 2 or t in ('jcl', 'tso', 'db2', 'sna', 'ims')]
 
     def _load_index(self):
         """Load index from disk"""
@@ -279,18 +423,66 @@ class RAGEngine:
 
         return chunks
 
-    def extract_pdf_text(self, pdf_path: str) -> str:
-        """Extract text from PDF"""
-        if not PDF_SUPPORT:
-            raise ImportError("PyPDF2 not installed")
+    def extract_pdf_text(self, pdf_path: str) -> Tuple[str, Dict]:
+        """
+        Extract text from PDF with metadata.
+        Returns (text, metadata) where metadata includes page count, etc.
+        Uses pymupdf if available (better quality), falls back to PyPDF2.
+        """
+        metadata = {
+            'total_pages': 0,
+            'ibm_form_number': '',
+            'title': '',
+            'pages': []  # List of (page_num, text) tuples
+        }
 
+        if PYMUPDF_SUPPORT:
+            return self._extract_with_pymupdf(pdf_path, metadata)
+        elif PDF_SUPPORT:
+            return self._extract_with_pypdf2(pdf_path, metadata)
+        else:
+            raise ImportError("No PDF library installed. Run: pip install pymupdf")
+
+    def _extract_with_pymupdf(self, pdf_path: str, metadata: Dict) -> Tuple[str, Dict]:
+        """Extract text using pymupdf (better quality)"""
+        doc = fitz.open(pdf_path)
+        metadata['total_pages'] = len(doc)
+
+        # Try to get title from metadata
+        pdf_metadata = doc.metadata
+        if pdf_metadata:
+            metadata['title'] = pdf_metadata.get('title', '')
+
+        all_text = []
+        for page_num, page in enumerate(doc, 1):
+            page_text = page.get_text("text")
+            if page_text:
+                # Add page marker for citation
+                all_text.append(f"[Page {page_num}]\n{page_text}")
+                metadata['pages'].append((page_num, page_text))
+
+                # Try to extract IBM form number from first few pages
+                if page_num <= 3 and not metadata['ibm_form_number']:
+                    form_match = re.search(r'([A-Z]{2,3}[0-9]{2}-[0-9]{4}-[0-9]{2})', page_text)
+                    if form_match:
+                        metadata['ibm_form_number'] = form_match.group(1)
+
+        doc.close()
+        return '\n\n'.join(all_text), metadata
+
+    def _extract_with_pypdf2(self, pdf_path: str, metadata: Dict) -> Tuple[str, Dict]:
+        """Fallback extraction using PyPDF2"""
         reader = PdfReader(pdf_path)
-        text = ""
-        for page in reader.pages:
+        metadata['total_pages'] = len(reader.pages)
+
+        all_text = []
+        for page_num, page in enumerate(reader.pages, 1):
             page_text = page.extract_text()
             if page_text:
-                text += page_text + "\n"
-        return text
+                all_text.append(f"[Page {page_num}]\n{page_text}")
+                metadata['pages'].append((page_num, page_text))
+
+        return '\n\n'.join(all_text), metadata
 
     def cosine_similarity(self, a: List[float], b: List[float]) -> float:
         """Calculate cosine similarity between two vectors"""
@@ -301,8 +493,9 @@ class RAGEngine:
             return 0.0
         return float(np.dot(a, b) / denom)
 
-    async def add_document(self, name: str, content: str, source: str = "", doc_type: str = "txt") -> Dict:
-        """Add a document to the RAG system"""
+    async def add_document(self, name: str, content: str, source: str = "", doc_type: str = "txt",
+                          metadata: Dict = None) -> Dict:
+        """Add a document to the RAG system with enhanced chunking"""
         # Generate document ID
         doc_id = hashlib.md5(f"{name}{source}".encode()).hexdigest()[:12]
 
@@ -310,9 +503,15 @@ class RAGEngine:
         if doc_id in self.documents:
             return {"success": False, "error": "Document already exists", "id": doc_id}
 
-        # Chunk the content
-        normalized_content = self.normalize_text(content)
-        text_chunks = self.chunk_text(normalized_content)
+        # Use technical chunker for PDFs and technical docs, sentence for others
+        if self.chunking_strategy == "technical" or doc_type == "pdf":
+            chunk_results = self.technical_chunker.chunk(content)
+            text_chunks = [(c['text'], c.get('type', 'prose')) for c in chunk_results]
+        else:
+            normalized_content = self.normalize_text(content)
+            raw_chunks = self.chunk_text(normalized_content)
+            text_chunks = [(c, 'prose') for c in raw_chunks]
+
         if not text_chunks:
             return {"success": False, "error": "No content to index"}
 
@@ -322,20 +521,34 @@ class RAGEngine:
 
         added_chunks = 0
         existing_hashes = {c.get("hash") for c in self.chunks if c.get("hash")}
-        for i, chunk in enumerate(text_chunks):
-            chunk_hash = hashlib.md5(chunk.encode()).hexdigest()
+
+        for i, (chunk_text, chunk_type) in enumerate(text_chunks):
+            chunk_hash = hashlib.md5(chunk_text.encode()).hexdigest()
             if chunk_hash in existing_hashes:
                 continue
-            embedding = self.get_embedding_sync(chunk)
+
+            embedding = self.get_embedding_sync(chunk_text)
             if embedding:
-                self.chunks.append({
+                chunk_data = {
                     "id": f"{doc_id}_{i}",
                     "doc_id": doc_id,
                     "doc_name": name,
-                    "text": chunk,
+                    "text": chunk_text,
                     "embedding": embedding,
-                    "hash": chunk_hash
-                })
+                    "hash": chunk_hash,
+                    "type": chunk_type,  # 'prose', 'jcl', 'cobol', etc.
+                }
+
+                # Add page number if present in text
+                page_match = re.search(r'\[Page (\d+)\]', chunk_text)
+                if page_match:
+                    chunk_data['page'] = int(page_match.group(1))
+
+                # Add metadata if provided
+                if metadata:
+                    chunk_data['metadata'] = metadata
+
+                self.chunks.append(chunk_data)
                 added_chunks += 1
                 existing_hashes.add(chunk_hash)
 
@@ -346,6 +559,9 @@ class RAGEngine:
         if added_chunks == 0:
             return {"success": False, "error": "Failed to generate embeddings. Is Ollama running with nomic-embed-text?"}
 
+        # Extract metadata
+        meta = metadata or {}
+
         # Save document info
         doc = Document(
             id=doc_id,
@@ -353,7 +569,10 @@ class RAGEngine:
             source=source,
             doc_type=doc_type,
             chunks=added_chunks,
-            added=datetime.now().strftime("%Y-%m-%d %H:%M")
+            added=datetime.now().strftime("%Y-%m-%d %H:%M"),
+            total_pages=meta.get('total_pages', 0),
+            ibm_form_number=meta.get('ibm_form_number', ''),
+            title=meta.get('title', '')
         )
         self.documents[doc_id] = doc
 
@@ -361,23 +580,34 @@ class RAGEngine:
         self._save_index()
         self._save_embeddings()
 
+        # Rebuild BM25 index
+        self._build_bm25_index()
+
         return {"success": True, "id": doc_id, "chunks": added_chunks}
 
     async def add_pdf(self, pdf_path: str, name: str = "") -> Dict:
-        """Add a PDF document"""
-        if not PDF_SUPPORT:
-            return {"success": False, "error": "PyPDF2 not installed. Run: pip install PyPDF2"}
+        """Add a PDF document with enhanced extraction"""
+        if not PYMUPDF_SUPPORT and not PDF_SUPPORT:
+            return {"success": False, "error": "No PDF library installed. Run: pip install pymupdf"}
 
         if not name:
             name = os.path.basename(pdf_path)
 
         try:
-            print(f"Extracting text from PDF: {name}")
-            text = self.extract_pdf_text(pdf_path)
+            extractor = "pymupdf" if PYMUPDF_SUPPORT else "PyPDF2"
+            print(f"Extracting text from PDF using {extractor}: {name}")
+
+            text, metadata = self.extract_pdf_text(pdf_path)
             if not text.strip():
                 return {"success": False, "error": "No text could be extracted from PDF"}
-            print(f"Extracted {len(text)} characters, indexing...")
-            return await self.add_document(name, text, pdf_path, "pdf")
+
+            pages = metadata.get('total_pages', 0)
+            form_num = metadata.get('ibm_form_number', '')
+            print(f"Extracted {len(text)} chars from {pages} pages" +
+                  (f" (IBM Form: {form_num})" if form_num else "") +
+                  ", indexing...")
+
+            return await self.add_document(name, text, pdf_path, "pdf", metadata=metadata)
         except Exception as e:
             return {"success": False, "error": str(e)}
 
@@ -394,8 +624,18 @@ class RAGEngine:
         except Exception as e:
             return {"success": False, "error": str(e)}
 
-    async def query(self, question: str, n_results: int = 3, include_highlights: bool = True) -> Dict:
-        """Query the RAG system with enhanced results"""
+    async def query(self, question: str, n_results: int = 3, include_highlights: bool = True,
+                   use_hybrid: bool = True, bm25_weight: float = 0.3) -> Dict:
+        """
+        Query the RAG system with hybrid search (BM25 + vector similarity).
+
+        Args:
+            question: The query string
+            n_results: Number of results to return
+            include_highlights: Whether to highlight query terms
+            use_hybrid: Whether to use hybrid BM25+vector search
+            bm25_weight: Weight for BM25 scores (0.0-1.0), vector weight is 1-bm25_weight
+        """
         start_time = time.time()
 
         if not self.chunks:
@@ -403,7 +643,8 @@ class RAGEngine:
                 "results": [],
                 "query_time_ms": 0,
                 "total_chunks": 0,
-                "cache_hit": False
+                "cache_hit": False,
+                "search_mode": "none"
             }
 
         # Check cache first
@@ -426,28 +667,67 @@ class RAGEngine:
         else:
             cache_hit = True
 
-        # Calculate similarities
+        # Get BM25 scores if available and hybrid mode enabled
+        bm25_scores = {}
+        search_mode = "vector"
+
+        if use_hybrid and BM25_SUPPORT and self.bm25_index is not None:
+            query_tokens = self._tokenize(question)
+            if query_tokens:
+                raw_bm25 = self.bm25_index.get_scores(query_tokens)
+                # Normalize BM25 scores to 0-1
+                max_bm25 = max(raw_bm25) if max(raw_bm25) > 0 else 1
+                for i, score in enumerate(raw_bm25):
+                    if i < len(self.chunks):
+                        chunk_id = self.chunks[i].get("id", str(i))
+                        bm25_scores[chunk_id] = score / max_bm25
+                search_mode = "hybrid"
+
+        # Calculate combined scores
         results = []
-        for chunk in self.chunks:
-            if "embedding" in chunk and chunk["embedding"]:
-                similarity = self.cosine_similarity(query_embedding, chunk["embedding"])
-                score = round(similarity, 4)
+        for i, chunk in enumerate(self.chunks):
+            if "embedding" not in chunk or not chunk["embedding"]:
+                continue
 
-                result = {
-                    "content": chunk["text"],
-                    "score": score,
-                    "doc_id": chunk.get("doc_id", ""),
-                    "doc_name": chunk.get("doc_name", "Unknown"),
-                    "doc_type": self.documents.get(chunk.get("doc_id", ""), Document("", "", "", "unknown", 0, "")).doc_type
-                }
+            # Vector similarity score
+            vector_score = self.cosine_similarity(query_embedding, chunk["embedding"])
 
-                # Add highlighted content if requested
-                if include_highlights:
-                    result["highlighted_content"] = highlight_query_terms(chunk["text"], question)
+            # Get BM25 score
+            chunk_id = chunk.get("id", str(i))
+            bm25_score = bm25_scores.get(chunk_id, 0.0)
 
-                results.append(result)
+            # Combine scores (weighted average)
+            if search_mode == "hybrid":
+                combined_score = (1 - bm25_weight) * vector_score + bm25_weight * bm25_score
+            else:
+                combined_score = vector_score
 
-        # Sort by similarity (highest score first)
+            # Get document metadata
+            doc = self.documents.get(chunk.get("doc_id", ""))
+
+            result = {
+                "content": chunk["text"],
+                "score": round(combined_score, 4),
+                "vector_score": round(vector_score, 4),
+                "bm25_score": round(bm25_score, 4) if search_mode == "hybrid" else None,
+                "doc_id": chunk.get("doc_id", ""),
+                "doc_name": chunk.get("doc_name", "Unknown"),
+                "doc_type": doc.doc_type if doc else "unknown",
+                "page": chunk.get("page"),
+                "chunk_type": chunk.get("type", "prose"),
+            }
+
+            # Add IBM form number if available
+            if doc and doc.ibm_form_number:
+                result["ibm_form_number"] = doc.ibm_form_number
+
+            # Add highlighted content if requested
+            if include_highlights:
+                result["highlighted_content"] = highlight_query_terms(chunk["text"], question)
+
+            results.append(result)
+
+        # Sort by combined score (highest first)
         results.sort(key=lambda x: x["score"], reverse=True)
 
         query_time_ms = int((time.time() - start_time) * 1000)
@@ -456,7 +736,9 @@ class RAGEngine:
             "results": results[:n_results],
             "query_time_ms": query_time_ms,
             "total_chunks": len(self.chunks),
-            "cache_hit": cache_hit
+            "cache_hit": cache_hit,
+            "search_mode": search_mode,
+            "bm25_available": BM25_SUPPORT and self.bm25_index is not None
         }
 
     async def query_simple(self, question: str, n_results: int = 3) -> List[Dict]:
@@ -508,11 +790,24 @@ class RAGEngine:
 
     def get_stats(self) -> Dict:
         """Get RAG system statistics"""
+        # Count chunks by type
+        chunk_types = {}
+        for chunk in self.chunks:
+            ctype = chunk.get('type', 'unknown')
+            chunk_types[ctype] = chunk_types.get(ctype, 0) + 1
+
         return {
             "documents": len(self.documents),
             "chunks": len(self.chunks),
+            "chunk_types": chunk_types,
             "embedding_model": EMBEDDING_MODEL,
-            "pdf_support": PDF_SUPPORT,
+            "pdf_support": {
+                "pymupdf": PYMUPDF_SUPPORT,
+                "pypdf2": PDF_SUPPORT,
+                "active": "pymupdf" if PYMUPDF_SUPPORT else ("PyPDF2" if PDF_SUPPORT else "none")
+            },
+            "bm25_support": BM25_SUPPORT,
+            "bm25_indexed": self.bm25_index is not None,
             "chunking_strategy": self.chunking_strategy,
             "query_cache": self.query_cache.stats()
         }

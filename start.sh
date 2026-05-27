@@ -34,6 +34,7 @@ CYN='\033[0;36m'; BLD='\033[1m'; RST='\033[0m'
 ok()   { echo -e "  ${GRN}✓${RST} $1"; }
 fail() { echo -e "  ${RED}✗${RST} $1"; }
 info() { echo -e "  ${YEL}…${RST} $1"; }
+warn() { echo -e "  ${YEL}⚠${RST} $1"; }
 
 . "$DIR/scripts/dasd.sh"
 

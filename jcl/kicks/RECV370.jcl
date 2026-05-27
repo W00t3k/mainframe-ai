@@ -1,12 +1,11 @@
-//RECV370  JOB (1),'UNPACK XMIT',CLASS=A,MSGCLASS=X            
-//*------------------------------------------------------------
-//* UPLOAD KICKS XMIT FILE FROM CARD READER
-//* HERCULES CMD: devinit 01c /path/kicks-tso-v1r5m0.xmi ebcdic
-//*------------------------------------------------------------
-//RECV1   EXEC RECV370                                         
-//XMITIN   DD  UNIT=01C,DCB=BLKSIZE=80           
-//SYSUT2   DD  DSN=KICKS.V1R5M0.INSTALL,         
-//             VOL=SER=KICKS0,UNIT=3350,                       
-//             SPACE=(TRK,(600,,8),RLSE),                      
-//             DISP=(,CATLG)                                   
-//                                                              
+//RECV370  JOB (1),RECV370,CLASS=A,MSGCLASS=X,MSGLEVEL=(1,1)
+//JOBLIB   DD DISP=SHR,DSN=SYSC.LINKLIB
+//RECV1   EXEC PGM=RECV370
+//RECVLOG  DD SYSOUT=*
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD DUMMY
+//XMITIN   DD UNIT=01C,DCB=BLKSIZE=80
+//SYSUT1   DD UNIT=VIO,SPACE=(CYL,(5,5))
+//SYSUT2   DD DSN=KICKS.V1R5M0.INSTALL,
+//            UNIT=3350,VOL=SER=KICKS0,
+//            SPACE=(TRK,(600,,8),RLSE),DISP=(,CATLG)

@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}IBM Mainframe AI Assistant{% endblock %}
+{% block title %}{% if simple %}AI Chat{% else %}IBM Mainframe AI Assistant{% endif %}{% endblock %}
 
 {% block page_styles %}
 <link rel="stylesheet" href="/static/css/pages/chat.css?v=2">
 {% endblock %}
 
-{% block body_class %}{% if embed %}embed-mode{% endif %}{% endblock %}
+{% block body_class %}{% if embed %}embed-mode{% endif %}{% if simple %} simple-mode{% endif %}{% endblock %}
 
 {% block head_extra %}
 <script src="/static/js/vendor/marked.min.js"></script>
@@ -20,8 +20,9 @@
                 <a href="/" title="Home" style="display:flex;align-items:center;">
                     <img src="/static/img/ibm-logo-official.svg" alt="IBM" class="ibm-logo">
                 </a>
-                <h1><span>IBM</span> Mainframe AI Assistant</h1>
+                <h1>{% if simple %}AI Chat{% else %}<span>IBM</span> Mainframe AI Assistant{% endif %}</h1>
             </div>
+            {% if not simple %}
             <div class="header-tabs">
                 <button class="header-tab active" onclick="showPanel('chat')">
                     <span class="dot" id="chatDot"></span> Chat
@@ -36,6 +37,7 @@
                     <span class="dot" id="ragDot"></span> RAG
                 </button>
             </div>
+            {% endif %}
             <div style="display:flex; align-items:center; gap:10px; font-family: 'IBM Plex Mono', monospace; font-size: 0.7rem; color: var(--ibm-gray-50);">
                 <span>v2.0 | Local LLM</span>
                 <span id="headerGpu" style="display:none; align-items:center; gap:5px; padding:2px 8px; border:1px solid #333; border-radius:4px; background:rgba(0,255,0,0.05);">
@@ -52,7 +54,7 @@
         </header>
 
         <!-- Status Bar -->
-        <div class="status-bar">
+        <div class="status-bar"{% if simple %} style="display:none;"{% endif %}>
             <div class="status-item">
                 <span class="label">LLM:</span>
                 <span class="value" id="llmStatus">Checking...</span>
@@ -143,12 +145,16 @@
         <div class="main-content">
             <!-- CHAT PANEL -->
             <div class="panel active" id="chatPanel">
-                <div class="chat-panel">
-                    <div class="chat-main">
+                <div class="chat-panel"{% if simple %} style="display:block;"{% endif %}>
+                    <div class="chat-main"{% if simple %} style="flex:1; max-width:100%;"{% endif %}>
                         <div class="chat-messages" id="chatMessages">
                             <div class="message assistant">
                                 <div class="message-header">System</div>
                                 <div class="message-content">
+                                    {% if simple %}
+                                    <strong>AI Chat Ready</strong><br><br>
+                                    Ask me anything! I'm a general-purpose AI assistant.
+                                    {% else %}
                                     <strong>IBM Mainframe AI Assistant Ready</strong><br><br>
                                     I can help you with:<br>
                                     - ABEND codes and error analysis<br>
@@ -158,15 +164,17 @@
                                     - Live 3270 terminal control<br><br>
                                     <strong>Connected RAG Sources:</strong> Mainframe Documentation, ABEND Codes, JCL Templates<br><br>
                                     Type <code>/connect localhost:3270</code> to connect to MVS, or click the <strong>Terminal</strong> tab.
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
 
                         <div class="input-area">
                             <div class="input-wrapper">
-                                <textarea class="chat-input" id="chatInput" placeholder="Ask about mainframe, JCL, ABEND codes..." rows="1"></textarea>
+                                <textarea class="chat-input" id="chatInput" placeholder="{% if simple %}Ask me anything...{% else %}Ask about mainframe, JCL, ABEND codes...{% endif %}" rows="1"></textarea>
                                 <button class="send-btn" id="sendBtn" onclick="sendMessage()">SUBMIT</button>
                             </div>
+                            {% if not simple %}
                             <div class="quick-commands">
                                 <button class="quick-cmd" onclick="insertCmd('/connect localhost:3270')">/connect</button>
                                 <button class="quick-cmd" onclick="insertCmd('/screen')">/screen</button>
@@ -174,11 +182,12 @@
                                 <button class="quick-cmd" onclick="insertCmd('Generate JCL to copy a dataset')">JCL Copy</button>
                                 <button class="quick-cmd" onclick="insertCmd('/help')">/help</button>
                             </div>
+                            {% endif %}
                         </div>
                     </div>
 
                     <!-- Chat Sidebar -->
-                    <aside class="chat-sidebar">
+                    <aside class="chat-sidebar"{% if simple %} style="display:none;"{% endif %}>
                         <div class="sidebar-section">
                             <div class="sidebar-header">Connection Status</div>
                             <div class="sidebar-body">
@@ -416,6 +425,8 @@ or use /connect command.
         let terminalConnected = false;
         let ws = null;
         let activeAgent = 'general';
+        const simpleMode = {{ 'true' if simple else 'false' }};
+        const chatApiEndpoint = simpleMode ? '/api/chat/simple' : '/api/chat';
 
         // Panel switching
         function showPanel(name) {
@@ -478,8 +489,9 @@ or use /connect command.
         function addMessage(content, isUser = false) {
             const div = document.createElement('div');
             div.className = `message ${isUser ? 'user' : 'assistant'}`;
+            const assistantName = simpleMode ? 'AI Assistant' : 'Mainframe Assistant';
             div.innerHTML = `
-                <div class="message-header">${isUser ? 'You' : 'Mainframe Assistant'}</div>
+                <div class="message-header">${isUser ? 'You' : assistantName}</div>
                 <div class="message-content">${isUser ? content : marked.parse(content)}</div>
             `;
             chatMessages.appendChild(div);
@@ -490,8 +502,9 @@ or use /connect command.
             const div = document.createElement('div');
             div.className = 'message assistant';
             div.id = 'typingIndicator';
+            const assistantName = simpleMode ? 'AI Assistant' : 'Mainframe Assistant';
             div.innerHTML = `
-                <div class="message-header">Mainframe Assistant</div>
+                <div class="message-header">${assistantName}</div>
                 <div class="typing"><span></span><span></span><span></span></div>
             `;
             chatMessages.appendChild(div);
@@ -516,7 +529,7 @@ or use /connect command.
             showTyping();
 
             try {
-                const response = await fetch('/api/chat', {
+                const response = await fetch(chatApiEndpoint, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message, agent: activeAgent })

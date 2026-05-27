@@ -874,7 +874,7 @@
 // ==========================================================================
 // State
 // ==========================================================================
-let assessResults = { vtam: [], tso: [], cics: [], screen: { hidden: [], findings: [] }, map: [] };
+let assessResults = { vtam: [], tso: [], cics: [], screen: { hidden: [], findings: [] }, map: [], sysenum: [] };
 let enumRunning = false;
 let mapRunning = false;
 let lastReportContent = '';
@@ -963,6 +963,45 @@ async function toggleConnection() {
     await checkStatus();
 }
 
+async function ensureConnection(options = {}) {
+    if (isConnected) return true;
+
+    const target = (options.target || document.getElementById('connTarget').value.trim() || 'localhost:3270');
+    const button = options.buttonId ? document.getElementById(options.buttonId) : null;
+    const originalText = button ? button.textContent : '';
+
+    if (button) {
+        button.disabled = true;
+        button.textContent = 'Connecting...';
+    }
+
+    try {
+        const res = await fetch('/api/terminal/connect', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({target})
+        });
+        const data = await res.json();
+        await checkStatus();
+
+        if (data.success) {
+            showToast('Connected to ' + target, 'info');
+            return true;
+        }
+
+        showToast(data.message || data.error || 'Connection failed', 'error');
+        return false;
+    } catch (e) {
+        showToast('Connection failed: ' + e.message, 'error');
+        return false;
+    } finally {
+        if (button) {
+            button.disabled = false;
+            button.textContent = originalText;
+        }
+    }
+}
+
 // ==========================================================================
 // Methodology tab helpers
 // ==========================================================================
@@ -1005,8 +1044,7 @@ function showAssessStep(step) {
 }
 
 async function runAssessStep(module) {
-    if (!isConnected) {
-        showToast('Connect to a mainframe first', 'error');
+    if (!await ensureConnection({buttonId: module + 'Start'})) {
         return;
     }
 
@@ -1039,8 +1077,21 @@ async function runAssessStep(module) {
     if (emptyEl) emptyEl.style.display = 'none';
     if (progressBar) { progressBar.classList.add('active'); }
     if (progressFill) progressFill.style.width = '0%';
-    if (progressLabel) { progressLabel.classList.add('active'); progressLabel.textContent = 'Running enumeration...'; }
+    if (progressLabel) { progressLabel.classList.add('active'); progressLabel.textContent = 'Starting enumeration...'; }
     enumRunning = true;
+
+    // Start progress polling
+    const progressInterval = setInterval(async () => {
+        try {
+            const pres = await fetch('/api/recon/enumerate/progress');
+            const pdata = await pres.json();
+            if (pdata.running && pdata.total > 0) {
+                const pct = Math.round((pdata.progress / pdata.total) * 100);
+                if (progressFill) progressFill.style.width = pct + '%';
+                if (progressLabel) progressLabel.textContent = `${pdata.current_item || 'Processing'} (${pdata.progress}/${pdata.total})`;
+            }
+        } catch (e) {}
+    }, 1000);
 
     try {
         const body = { module };
@@ -1056,6 +1107,7 @@ async function runAssessStep(module) {
             signal: ctrl.signal
         });
         clearTimeout(timer);
+        clearInterval(progressInterval);
         const data = await res.json();
 
         if (data.results) {
@@ -1066,9 +1118,11 @@ async function runAssessStep(module) {
         }
         if (data.error) showToast(data.error, 'error');
     } catch (e) {
+        clearInterval(progressInterval);
         showToast('Enumeration failed: ' + e.message, 'error');
     }
 
+    clearInterval(progressInterval);
     enumRunning = false;
     if (startBtn) startBtn.style.display = 'inline-flex';
     if (stopBtn) stopBtn.style.display = 'none';
@@ -1094,8 +1148,7 @@ let sysEnumResults = [];
 assessResults.sysenum = [];
 
 async function runSystemEnum() {
-    if (!isConnected) {
-        showToast('Connect to a mainframe first', 'error');
+    if (!await ensureConnection({buttonId: 'sysEnumStart'})) {
         return;
     }
 
@@ -1115,8 +1168,21 @@ async function runSystemEnum() {
     if (emptyEl) emptyEl.style.display = 'none';
     if (progressBar) progressBar.classList.add('active');
     if (progressFill) progressFill.style.width = '5%';
-    if (progressLabel) { progressLabel.classList.add('active'); progressLabel.textContent = 'Logging into TSO and running enumeration (10 commands)...'; }
+    if (progressLabel) { progressLabel.classList.add('active'); progressLabel.textContent = 'Starting system enumeration...'; }
     enumRunning = true;
+
+    // Start progress polling
+    const progressInterval = setInterval(async () => {
+        try {
+            const pres = await fetch('/api/recon/enumerate/progress');
+            const pdata = await pres.json();
+            if (pdata.running && pdata.total > 0) {
+                const pct = Math.round((pdata.progress / pdata.total) * 100);
+                if (progressFill) progressFill.style.width = pct + '%';
+                if (progressLabel) progressLabel.textContent = `${pdata.current_item || 'Running command'} (${pdata.progress}/${pdata.total})`;
+            }
+        } catch (e) {}
+    }, 1000);
 
     try {
         const res = await fetch('/api/recon/enumerate/system', {
@@ -1125,9 +1191,11 @@ async function runSystemEnum() {
             body: JSON.stringify({ userid, password }),
             signal: AbortSignal.timeout(300000)
         });
+        clearInterval(progressInterval);
         const data = await res.json();
 
         if (data.results) {
+            await checkStatus();
             sysEnumResults = data.results;
             assessResults.sysenum = data.results;
             renderSysEnumResults(container, data.results);
@@ -1140,9 +1208,11 @@ async function runSystemEnum() {
         }
         if (data.error) showToast(data.error, 'error');
     } catch (e) {
+        clearInterval(progressInterval);
         showToast('System enumeration failed: ' + e.message, 'error');
     }
 
+    clearInterval(progressInterval);
     enumRunning = false;
     if (startBtn) startBtn.style.display = 'inline-flex';
     if (stopBtn) stopBtn.style.display = 'none';
@@ -1235,6 +1305,10 @@ let hiddenFields = [];
 let screenFindings = [];
 
 async function runHiddenFieldScan() {
+    if (!await ensureConnection({buttonId: 'hiddenScanBtn'})) {
+        return;
+    }
+
     const navTarget = document.getElementById('hiddenNavTarget').value;
     const statusEl = document.getElementById('hiddenScanStatus');
     const btn = document.getElementById('hiddenScanBtn');
@@ -1326,6 +1400,10 @@ async function runHiddenFieldScan() {
 }
 
 async function runScreenAnalysis() {
+    if (!await ensureConnection()) {
+        return;
+    }
+
     document.getElementById('screenEmpty').style.display = 'none';
 
     const [hiddenRes, analyzeRes] = await Promise.all([
@@ -1390,6 +1468,10 @@ async function runScreenAnalysis() {
 let mapTree = [];
 
 async function startMapping() {
+    if (!await ensureConnection({buttonId: 'mapStart'})) {
+        return;
+    }
+
     const maxDepth = parseInt(document.getElementById('mapDepth').value);
 
     document.getElementById('mapStart').style.display = 'none';

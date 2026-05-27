@@ -12,7 +12,7 @@ import threading
 import time as _time
 
 from app.models.schemas import ChatRequest
-from app.services.chat import get_chat_service
+from app.services.chat import get_chat_service, get_simple_chat_service
 from app.services.ollama import get_ollama_service
 from app.config import get_config, get_gpu_status
 
@@ -24,6 +24,14 @@ async def api_chat(request: ChatRequest):
     """Process a chat message."""
     chat_service = get_chat_service()
     result = await chat_service.process_message(request.message)
+    return JSONResponse(result)
+
+
+@router.post("/chat/simple")
+async def api_chat_simple(request: ChatRequest):
+    """Process a simple chat message - general AI, no mainframe context."""
+    chat_service = get_simple_chat_service()
+    result = await chat_service.process_simple_message(request.message)
     return JSONResponse(result)
 
 

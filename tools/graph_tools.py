@@ -47,6 +47,56 @@ ABEND_PATTERN = re.compile(r"\b[SU][0-9A-F]{3,4}\b")
 # Message IDs: IEFnnnI, DFHnnnnI, etc.
 MESSAGE_PATTERN = re.compile(r"\b[A-Z]{3}\d{3,5}[A-Z]?\b")
 
+# Known message ID prefixes (not datasets)
+MESSAGE_PREFIXES = frozenset([
+    "IEF", "IEC", "ICH", "IGD", "IKJ", "IGW", "IDC", "ARC", "ADR",
+    "DFH", "DSN", "CSV", "CEE", "EDC", "GIM", "HZS", "IEA", "IEB",
+    "IEW", "IGF", "IOS", "IRR", "IST", "IXC", "BPX", "ERB", "ISG"
+])
+
+
+def is_valid_dataset_name(name: str) -> bool:
+    """Check if a string is a valid dataset name (not a message ID or keyword).
+
+    Returns False for:
+    - Message IDs (IEF285I, DFH1234, etc.)
+    - Common keywords (DISP, CATLG, DELETE, etc.)
+    - Names without qualifiers that look like programs/message IDs
+    """
+    if not name or len(name) > 44:
+        return False
+
+    upper = name.upper()
+
+    # Check for message ID pattern (3 letters + 3-5 digits + optional letter)
+    if MESSAGE_PATTERN.fullmatch(upper):
+        return False
+
+    # Check for known message prefixes without dots
+    if "." not in upper:
+        prefix = upper[:3] if len(upper) >= 3 else upper
+        if prefix in MESSAGE_PREFIXES:
+            return False
+        # Single-qualifier names that are common keywords
+        keywords = {"DISP", "CATLG", "DELETE", "KEEP", "PASS", "NEW", "OLD",
+                    "SHR", "MOD", "UNIT", "VOL", "SPACE", "DCB", "RECFM",
+                    "LRECL", "BLKSIZE", "DSORG", "DUMMY", "NULLFILE", "SYSOUT"}
+        if upper in keywords:
+            return False
+
+    # Valid dataset: has at least one dot OR is a known system dataset pattern
+    if "." in upper:
+        return True
+
+    # Single qualifier datasets are rare; require them to look like HLQs
+    # Must start with letter, be 1-8 chars, alphanumeric + national chars
+    if re.fullmatch(r"[A-Z@#$][A-Z0-9@#$]{0,7}", upper):
+        # Could be a valid single-qualifier dataset, but likely a program name
+        # Be conservative: only allow if it looks like a user HLQ
+        return False
+
+    return False
+
 # PF key labels: PF1=HELP, F3=END
 PF_KEY_PATTERN = re.compile(r"(?:PF|F)(\d{1,2})=([A-Z]+)")
 
@@ -216,14 +266,11 @@ def extract_identifiers(screen_text: str) -> Dict:
         "pf_keys_shown": []
     }
 
-    # Datasets - look for dotted names
+    # Datasets - look for dotted names with validation
     ds_matches = DATASET_PATTERN.findall(screen_text.upper())
-    # Filter: must have at least one dot, exclude common false positives
-    false_positives = {"OPTION", "COMMAND", "ENTER", "SCROLL", "UTILITY"}
     for ds in ds_matches:
-        if "." in ds and ds.split(".")[0] not in false_positives:
-            if ds not in result["datasets"]:
-                result["datasets"].append(ds)
+        if is_valid_dataset_name(ds) and ds not in result["datasets"]:
+            result["datasets"].append(ds)
 
     # Job IDs
     result["jobids"] = list(set(JOBID_PATTERN.findall(screen_text.upper())))
@@ -573,23 +620,26 @@ def parse_sysout(sysout_text: str) -> Dict:
 
         # Dataset allocation (IEF285I)
         if "IEF285I" in upper:
-            ds_match = DATASET_PATTERN.search(upper)
-            if ds_match:
+            # Find all potential dataset matches and validate each
+            for ds_match in DATASET_PATTERN.finditer(upper):
                 ds = ds_match.group()
-                if ds not in result["datasets_allocated"]:
-                    result["datasets_allocated"].append(ds)
-                if current_step and ds not in current_step["datasets_allocated"]:
-                    current_step["datasets_allocated"].append(ds)
+                if is_valid_dataset_name(ds):
+                    if ds not in result["datasets_allocated"]:
+                        result["datasets_allocated"].append(ds)
+                    if current_step and ds not in current_step["datasets_allocated"]:
+                        current_step["datasets_allocated"].append(ds)
+                    break  # Take first valid dataset on the line
 
         # Dataset creation (look for CATLG in disposition)
         if "CATLG" in upper and "IEF285I" in upper:
-            ds_match = DATASET_PATTERN.search(upper)
-            if ds_match:
+            for ds_match in DATASET_PATTERN.finditer(upper):
                 ds = ds_match.group()
-                if ds not in result["datasets_created"]:
-                    result["datasets_created"].append(ds)
-                if current_step and ds not in current_step["datasets_created"]:
-                    current_step["datasets_created"].append(ds)
+                if is_valid_dataset_name(ds):
+                    if ds not in result["datasets_created"]:
+                        result["datasets_created"].append(ds)
+                    if current_step and ds not in current_step["datasets_created"]:
+                        current_step["datasets_created"].append(ds)
+                    break  # Take first valid dataset on the line
 
     return result
 
@@ -732,10 +782,11 @@ def update_graph_from_sysout(graph: TrustGraph, sysout_result: Dict,
         graph.add_edge("RETURNED", job_id, rc_id, evidence=evidence)
         stats["edges_added"] += 1
 
-    # Datasets from SYSOUT
+    # Datasets from SYSOUT (with validation)
     for ds in sysout_result.get("datasets_allocated", []):
-        ds_id = graph.add_node("Dataset", ds, evidence=evidence)
-        stats["nodes_added"] += 1
+        if is_valid_dataset_name(ds):
+            ds_id = graph.add_node("Dataset", ds, evidence=evidence)
+            stats["nodes_added"] += 1
 
     return stats
 

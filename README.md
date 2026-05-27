@@ -1,16 +1,34 @@
 # Mainframe AI Assistant
 
-## See It Running
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/W00t3k/mainframe-ai?style=social)](https://github.com/W00t3k/mainframe-ai)
+[![Local LLM](https://img.shields.io/badge/LLM-Ollama%20(Local)-green.svg)](https://ollama.com)
 
-**[▶ Live Demo & Project Page](https://w00t3k.github.io/mainframe-ai/)**
+<p align="center">
+  <img src="static/img/ibm-retro-desk.png" alt="Mainframe AI Terminal" width="700">
+</p>
 
-> Watch the tool connect to a live MVS 3.8j system, navigate control planes, 
-> and map trust relationships in real time. No setup required to explore.
+<p align="center">
+  <strong>Trust-boundary assessment for IBM mainframes — powered by local AI</strong>
+</p>
+
+<p align="center">
+  <a href="https://w00t3k.github.io/mainframe-ai/">▶️ Live Demo</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#walkthroughs">Walkthroughs</a> •
+  <a href="docs/">Documentation</a>
+</p>
+
+---
+
+> **Watch it in action:** Connect to a live MVS 3.8j system, navigate control planes, and map trust relationships in real time. No setup required to explore.
+
 **A reference implementation for trust-boundary assessment on mainframe systems.**
 
 This tool operationalizes a mental model I've been applying since 2018 — first to Active Directory and enterprise Windows environments, now to mainframe systems. The model isn't new. The tool is.
 
-## The Problem
+## ⚠️ The Problem
 
 Most offensive security methodologies import assumptions from Unix, Windows, and cloud environments. These assumptions fail on mainframe operating systems:
 
@@ -37,42 +55,37 @@ Mainframes expose this more clearly because security is explicitly federated acr
 
 If you bring the wrong mental model, you miss the real attack paths — just like people missed delegation abuse for years.
 
-## What This Tool Does
+## 🛠️ Features
 
-- **Retro IBM Home Screen** — A Lumon-style CRT terminal image with a live TN3270 overlay. Click any line on the terminal for instant AI analysis. Hover over any UI element for contextual descriptions. Invisible toolbar reveals on hover or scroll-up.
+| Feature | Description |
+|---------|-------------|
+| 🖥️ **Retro Terminal** | Lumon-style CRT with live TN3270 overlay. Click any line for AI analysis |
+| 🎬 **Walkthroughs** | 13 autonomous demos: VTAM, TSO, ISPF, JES, RACF navigation |
+| 🕸️ **Trust Graph** | BloodHound-style visualization of mainframe relationships |
+| 🎓 **Red Team Tutor** | AI-guided learning paths for mainframe security |
+| 📋 **Test & Report** | TSO/CICS/VTAM enumeration + pentest report generation |
+| 🧠 **Abstract Models** | 6 mental models for mainframe security thinking |
+| 🔬 **Security Labs** | Offline labs for VTAM → TSO → ISPF flows |
+| 📚 **RAG Knowledge** | Upload and query mainframe docs with AI |
+| 🔍 **Network Scanner** | Discover TN3270 services on target networks |
+| 💻 **COBOL Dev** | Compile-link-go walkthrough for batch development |
 
-- **Autonomous Walkthroughs** — Watch the tool connect, navigate, and narrate VTAM, TSO, ISPF, JES, and RACF. No keyboard needed. Educational narration explains what's happening at each control plane boundary.
+> **100% local. No API keys. No cloud dependencies.** Uses Ollama for local LLM inference.
 
-- **Trust Graph** — BloodHound-style visualization of mainframe trust relationships. Map identities, datasets, jobs, and their connections.
+## 🚀 Quick Start
 
-- **Red Team Tutor** — AI-guided learning paths for mainframe security assessment. Ask questions, get contextual help on the current screen.
+### Prerequisites
 
-- **Test & Report** — TSO/CICS/VTAM enumeration, hidden field detection, application mapping, and professional pentest report generation with findings-based methodology.
-
-- **Abstract Models** — Interactive mental model explorer. Click terminal lines to map them against six abstract security models (Session Stack, Control Planes, Artifacts & Evidence, Trust Boundaries, Batch vs Interactive, Graph Thinking).
-
-- **Security Labs** — Deterministic walkthroughs you can run offline. Replay VTAM → TSO → ISPF flows and batch execution patterns.
-
-- **RAG Knowledge Base** — Upload and query mainframe documentation with retrieval-augmented generation.
-
-- **Network Scanner** — Discover TN3270 services on target networks.
-
-- **COBOL Development** — Complete compile-link-go walkthrough demonstrating the batch-oriented development lifecycle.
-
-**100% local. No API keys. No cloud dependencies.** Uses Ollama for local LLM inference.
-
-## Quick Start
-
-### Requirements
-
-- Python 3.11+
-- [Ollama](https://ollama.com) for local LLM
-- s3270 (for web TN3270 terminal)
-- TK5 MVS 3.8j emulator (included)
+| Requirement | Version | Notes |
+|-------------|---------|-------|
+| Python | 3.11+ | Virtual environment recommended |
+| [Ollama](https://ollama.com) | Latest | Local LLM backend |
+| s3270/x3270 | Latest | TN3270 terminal client |
+| TK5 MVS | Included | Hercules-based MVS 3.8j emulator |
 
 ---
 
-### Platform Comparison
+### 💻 Platform Comparison
 
 | | **macOS** | **Linux** |
 |---|---|---|
@@ -255,7 +268,7 @@ Open in browser:
 | `http://localhost:8080/presentation` | Teaching presentation |
 | `http://localhost:8080/abstract` | Conference abstract |
 
-## Walkthroughs
+## 🎬 Walkthroughs
 
 Thirteen autonomous walkthroughs demonstrate mainframe control planes:
 
@@ -285,7 +298,7 @@ Each walkthrough maps to five core findings areas:
 
 The PR/SM walkthrough uses an **LLM-driven HMC simulator** — the AI emulates a production IBM z16 with 6 LPARs, letting you explore hardware partitioning interactively even though TK5 doesn't have real PR/SM.
 
-## The Mental Model
+## 🧠 The Mental Model
 
 This tool didn't invent the trust-boundary assessment model. It **operationalizes** it.
 
@@ -295,32 +308,37 @@ The same mental model that exposed ADCS abuse, Kerberos delegation attacks, and 
 
 The walkthroughs don't just show you how to navigate ISPF. They show you *where trust decisions happen* and *which assumptions break* at each boundary crossing.
 
-## Architecture
+## 🏗️ Architecture
 
-```
-┌──────────────────────────────────────────────────────────┐
-│                     Web Interface                         │
-│     FastAPI + Jinja2 + IBM Plex Mono + Retro IBM UI      │
-└─────────────────────────┬────────────────────────────────┘
-                          │
-┌─────────────────────────▼────────────────────────────────┐
-│                    app/ (modular)                         │
-│  routes/     - API endpoints (19 route modules)           │
-│  services/   - Business logic (chat, walkthrough, LLM)    │
-│  constants/  - Prompts, paths, walkthrough scripts        │
-│  models/     - Pydantic schemas                           │
-└──────────┬───────────────────────────┬───────────────────┘
-           │                           │
-┌──────────▼──────────┐  ┌────────────▼────────────────────┐
-│    Ollama (LLM)     │  │   TN3270 Layer (py3270)          │
-│  - Q&A              │  │   - Screen reading              │
-│  - Narration        │  │   - Command execution           │
-│  - Screen analysis  │  │   - Session management          │
-│  - Code analysis    │  │   - Click-to-analyze            │
-└─────────────────────┘  └─────────────────────────────────┘
+```mermaid
+graph TB
+    subgraph "Web Interface"
+        UI[FastAPI + Jinja2<br/>IBM Plex Mono + Retro UI]
+    end
+
+    subgraph "Application Layer"
+        Routes[routes/ - 19 API modules]
+        Services[services/ - Chat, LLM, Walkthrough]
+        Constants[constants/ - Prompts, Scripts]
+    end
+
+    subgraph "Backend Services"
+        Ollama[Ollama LLM<br/>Q&A, Narration, Analysis]
+        TN3270[py3270<br/>Screen, Commands, Sessions]
+    end
+
+    subgraph "Mainframe"
+        MVS[TK5 MVS 3.8j<br/>Hercules Emulator]
+    end
+
+    UI --> Routes
+    Routes --> Services
+    Services --> Ollama
+    Services --> TN3270
+    TN3270 --> MVS
 ```
 
-## Home Screen Features
+## 🖥️ Home Screen Features
 
 The home page features a retro IBM Lumon-style CRT terminal with:
 
@@ -332,7 +350,7 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 - **Collapsible sections** — Control Planes and More Tools expand on click
 - **Right panel menu** — hamburger button reveals full navigation
 
-## Configuration
+## ⚙️ Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
@@ -340,7 +358,7 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 | `OLLAMA_MODEL` | Auto-detected by RAM | `llama3.1:8b` (16GB+), `llama3.2:3b` (8-16GB), `tinyllama` (<8GB) |
 | `MAINFRAME_HOST` | `localhost:3270` | Default TN3270 target |
 
-## File Structure
+## 📁 File Structure
 
 ```
 mainframe-ai/
@@ -405,7 +423,7 @@ mainframe-ai/
 └── render.yaml             # Render.com deployment config
 ```
 
-## CICS AI Assistant
+## 🤖 CICS AI Assistant
 
 **"CICS as an interface to modern intelligence"** — not AI on the mainframe, but mainframe as control plane.
 
@@ -432,7 +450,7 @@ See `docs/` for full documentation.
 
 ---
 
-## KICKS (CICS) Installation
+## 📦 KICKS (CICS) Installation
 
 KICKS is a CICS-compatible transaction processing system for MVS 3.8j. This project includes complete automation for installing KICKS on TK5.
 
@@ -468,19 +486,19 @@ EXEC 'KICKS.KICKSSYS.V1R5M0.CLIST(KICKS)'
 
 See `docs/` for the complete step-by-step guide.
 
-## Related Work
+## 📚 Related Work
 
 - [py3270](https://pypi.org/project/py3270/) — Python TN3270 library
 - [Mainframed](https://github.com/mainframed) — Mainframe security tools by Soldier of FORTRAN
 - [TK5](https://www.prince-webdesign.nl/tk5) — MVS 3.8j Turnkey distribution
 - [KICKS](http://www.kicksfortso.com/) — CICS-compatible transaction processing for MVS 3.8j
 
-## Lineage
+## 📜 Lineage
 
 This work builds on trust-boundary and assessment models I've been writing about since 2018 in the context of Active Directory and enterprise systems. The mainframe environment makes those same failure modes explicit, and this tool serves as a reference implementation of that model.
 
 The insight is durable. I've been applying it across platforms for years. The tooling has simply caught up.
 
-## License
+## 📄 License
 
 MIT
