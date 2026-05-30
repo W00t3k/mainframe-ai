@@ -527,7 +527,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Connect & Login",
                 "control_plane": "tso",
-                "narration": "**Setup: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough explores the MVS 3.8j storage model — datasets, partitioned data sets (PDS), members, and the catalog structure.",
+                "narration": "**Step 1: Establishing Identity**\n\nWe connect and log in to TSO. This walkthrough explores the MVS 3.8j storage model — datasets, partitioned data sets (PDS), members, and the catalog structure.\n\nYour TSO userid becomes your high-level qualifier (HLQ) for datasets.",
                 "actions": [
                     {"type": "connect"},
                     {"type": "wait", "seconds": 2},
@@ -539,7 +539,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Enter RFE (ISPF)",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/RFE (Dataset Interface)**\n\nWe enter RFE. Unlike a Unix filesystem, the mainframe uses a flat catalog namespace. Datasets are named objects — not files in directories.\n\n**Broken Assumption:** *\"There is a filesystem hierarchy.\"* The mainframe has no `/home`, `/etc`, `/var`. Datasets are named with dot-separated qualifiers (e.g. `SYS1.PARMLIB`).",
+                "narration": "**Step 2: The Dataset Interface**\n\nWe enter RFE (ISPF). Unlike a Unix filesystem, the mainframe uses a flat catalog namespace. Datasets are named objects — not files in directories.\n\n**Broken Assumption:** *\"There is a filesystem hierarchy.\"* The mainframe has no `/home`, `/etc`, `/var`. Datasets are named with dot-separated qualifiers (e.g. `SYS1.PARMLIB`).",
                 "actions": [
                     {"type": "enter_rfe"},
                     {"type": "wait", "seconds": 2},
@@ -548,13 +548,22 @@ WALKTHROUGH_SCRIPTS = {
                 "display_seconds": 5,
             },
             {
-                "title": "Dataset List — User Datasets",
+                "title": "Navigate to Utilities",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (User Dataset Namespace)**\n\nWe navigate to RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) and list datasets under `HERC01`. The high-level qualifier (HLQ) is identity-driven.",
+                "narration": "**Step 3: Accessing Utilities**\n\nWe select option 3 to enter the Utilities menu. This provides access to dataset management tools including DSLIST (option 4) for browsing datasets by pattern.",
                 "actions": [
                     {"type": "string", "value": "3"},
                     {"type": "enter"},
                     {"type": "wait", "seconds": 3},
+                ],
+                "expect": ["UTILITY", "DSLIST", "LIBRARY", "MOVE", "COPY"],
+                "display_seconds": 4,
+            },
+            {
+                "title": "Dataset List — User Datasets",
+                "control_plane": "tso",
+                "narration": "**Step 4: Your Dataset Namespace**\n\nWe use DSLIST (option 4) and list datasets under `HERC01`. The high-level qualifier (HLQ) is identity-driven — your userid owns this namespace.\n\n**Key concept:** Unlike Unix home directories, your HLQ is a naming convention enforced by RACF.",
+                "actions": [
                     {"type": "string", "value": "4"},
                     {"type": "enter"},
                     {"type": "wait", "seconds": 3},
@@ -563,12 +572,12 @@ WALKTHROUGH_SCRIPTS = {
                     {"type": "wait", "seconds": 3},
                 ],
                 "expect": ["HERC01", "DSLIST", "DATA SET"],
-                "display_seconds": 6,
+                "display_seconds": 5,
             },
             {
                 "title": "System Dataset Namespace",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (System Namespace)**\n\nNow we list `SYS1` datasets — the system namespace. `SYS1.PARMLIB` (config), `SYS1.PROCLIB` (services), `SYS1.LINKLIB` (programs).\n\n**Key concept:** There is no `/etc/init.d` or `systemd`. System configuration lives in datasets.",
+                "narration": "**Step 5: System Datasets**\n\nNow we list `SYS1` datasets — the system namespace. Critical datasets include:\n- `SYS1.PARMLIB` — system configuration\n- `SYS1.PROCLIB` — started task procedures\n- `SYS1.LINKLIB` — system programs\n\n**Key concept:** There is no `/etc/init.d` or `systemd`. System configuration lives in datasets.",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
@@ -583,9 +592,9 @@ WALKTHROUGH_SCRIPTS = {
                 "display_seconds": 6,
             },
             {
-                "title": "Browse PDS Members — SYS1.PARMLIB",
+                "title": "Browse SYS1.PARMLIB",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (PDS Structure)**\n\nWe go back and use RFE option 1 (BROWSE) to open `SYS1.PARMLIB`. A Partitioned Data Set (PDS) is like a directory with members — each member is a named record.\n\n**Broken Assumption:** *\"Config files are in /etc.\"* On the mainframe, you must know which PDS contains the configuration and which member is active.",
+                "narration": "**Step 6: PDS Structure**\n\nWe use RFE option 1 (BROWSE) to open `SYS1.PARMLIB`. A Partitioned Data Set (PDS) is like a directory with members — each member is a named record.\n\n**Broken Assumption:** *\"Config files are in /etc.\"* On the mainframe, you must know which PDS contains the configuration and which member is active.\n\nKey members: IEASYS00 (IPL params), SMFPRM00 (SMF), IKJTSO00 (TSO config).",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
@@ -610,7 +619,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Catalog Structure — LISTCAT",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Catalog Discovery)**\n\nWe return to TSO and use `LISTCAT` to examine catalog entries. The catalog maps dataset names to physical DASD locations.\n\n**Key concept:** The catalog is the namespace. RACF profiles control who can access each cataloged dataset.",
+                "narration": "**Step 7: The Catalog Namespace**\n\nWe return to TSO and use `LISTCAT` to examine catalog entries. The catalog maps dataset names to physical DASD locations (volumes).\n\n**Key concept:** The catalog is the namespace. RACF profiles control who can access each cataloged dataset. LISTCAT shows you where datasets physically reside.",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
@@ -628,9 +637,9 @@ WALKTHROUGH_SCRIPTS = {
                 "display_seconds": 7,
             },
             {
-                "title": "Logoff",
+                "title": "Lab Complete",
                 "control_plane": "vtam",
-                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** The mainframe uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "narration": "**Step 8: Summary — Dataset Model**\n\n1. **No filesystem hierarchy:** The mainframe uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Trust-sensitive datasets:** Write access to PARMLIB, PROCLIB, or LINKLIB = system control.\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 8,

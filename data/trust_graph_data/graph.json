@@ -4,154 +4,358 @@
       "id": "a1b2c3d4e5f6",
       "node_type": "EntryPoint",
       "label": "TSO_LOGON",
-      "properties": {"applid": "TSO", "environment": "MVS"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "applid": "TSO",
+        "environment": "MVS"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260579"
     },
     {
       "id": "b2c3d4e5f6a1",
       "node_type": "EntryPoint",
       "label": "CICS_LOGON",
-      "properties": {"applid": "CICSPROD", "environment": "CICS"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "applid": "CICSPROD",
+        "environment": "CICS"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260587"
     },
     {
       "id": "86f4beee0f81",
       "node_type": "Panel",
       "label": "ISPF_PRIMARY",
-      "properties": {"panel_type": "ISPF_PRIMARY", "title": "ISPF Primary Option Menu", "environment": "TSO", "submits_jobs": true},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "panel_type": "ISPF_PRIMARY",
+        "title": "ISPF Primary Option Menu",
+        "environment": "TSO",
+        "submits_jobs": true
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260590"
     },
     {
       "id": "c3d4e5f6a1b2",
       "node_type": "Panel",
       "label": "ISPF_EDIT",
-      "properties": {"panel_type": "ISPF_EDIT", "title": "Edit Entry Panel"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "panel_type": "ISPF_EDIT",
+        "title": "Edit Entry Panel"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260592"
     },
     {
       "id": "d4e5f6a1b2c3",
       "node_type": "Panel",
       "label": "SDSF",
-      "properties": {"panel_type": "SDSF", "title": "SDSF Primary Option Menu"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "panel_type": "SDSF",
+        "title": "SDSF Primary Option Menu"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260593"
     },
     {
       "id": "857bcb560e1c",
       "node_type": "Job",
       "label": "DEMOJOB",
-      "properties": {"class": "A", "jobid": "JOB00012", "owner": "HERC01"},
-      "source_evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "class": "A",
+        "jobid": "JOB00012",
+        "owner": "HERC01"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942802"
     },
     {
       "id": "e5f6a1b2c3d4",
       "node_type": "Job",
       "label": "PAYROLL1",
-      "properties": {"class": "A", "owner": "PROD"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "class": "A",
+        "owner": "PROD"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260595"
     },
     {
       "id": "bbf07f4161e1",
       "node_type": "Program",
       "label": "IEBGENER",
-      "properties": {"type": "utility"},
-      "source_evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "type": "utility",
+        "step": "STEP1"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942299"
     },
     {
       "id": "f6a1b2c3d4e5",
       "node_type": "Program",
       "label": "PAYROLL",
-      "properties": {"type": "application"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "type": "application"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260597"
     },
     {
       "id": "2b592433223b",
       "node_type": "Dataset",
       "label": "PROD.DATA.FILE",
-      "properties": {"dsorg": "PS", "ddname": "SYSUT1"},
-      "source_evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "dsorg": "PS",
+        "ddname": "SYSUT1"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942332"
     },
     {
       "id": "d0ba88e606a9",
       "node_type": "Dataset",
       "label": "TEST.DATA.FILE",
-      "properties": {"dsorg": "PS", "ddname": "SYSUT2"},
-      "source_evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "dsorg": "PS",
+        "ddname": "SYSUT2"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942355"
     },
     {
       "id": "a1b2c3d4e5f7",
       "node_type": "Dataset",
       "label": "PAYROLL.MASTER",
-      "properties": {"dsorg": "VS"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "dsorg": "VS"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260600"
     },
     {
       "id": "g7h8i9j0k1l2",
       "node_type": "Loadlib",
       "label": "SYS1.LINKLIB",
       "properties": {},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260601"
     },
     {
       "id": "h8i9j0k1l2m3",
       "node_type": "CICSRegion",
       "label": "CICSPROD",
-      "properties": {"sysid": "PROD"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "sysid": "PROD"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260602"
     },
     {
       "id": "i9j0k1l2m3n4",
       "node_type": "Transaction",
       "label": "CEMT",
-      "properties": {"type": "admin"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "type": "admin"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260603"
     },
     {
       "id": "j0k1l2m3n4o5",
       "node_type": "Transaction",
       "label": "PAY1",
-      "properties": {"type": "application"},
-      "source_evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "type": "application"
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260604"
     },
     {
       "id": "9f79e5ea01ed",
       "node_type": "ReturnCode",
-      "label": "0000",
-      "properties": {"type": "RC"},
-      "source_evidence": [{"type": "assessment", "source": "sample_sysout"}],
+      "label": "RC=0000",
+      "properties": {
+        "type": "RC",
+        "success": true
+      },
+      "source_evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_sysout"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942819"
+    },
+    {
+      "id": "177ba49c5a4c",
+      "node_type": "Dataset",
+      "label": "SYS1.LINKLIB",
+      "properties": {},
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
+      "first_seen": "2026-05-28T11:31:39.942843",
+      "last_seen": "2026-05-28T11:31:39.942843"
+    },
+    {
+      "id": "55300b611b53",
+      "node_type": "Dataset",
+      "label": "SYS1.PROCLIB",
+      "properties": {},
+      "source_evidence": [
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
+      "first_seen": "2026-05-28T11:31:39.942854",
+      "last_seen": "2026-05-28T11:31:39.942854"
+    },
+    {
+      "id": "d37700625bbc",
+      "node_type": "Panel",
+      "label": "UNKNOWN",
+      "properties": {
+        "panel_type": "UNKNOWN",
+        "title": "",
+        "environment": "UNKNOWN",
+        "applid": null,
+        "submits_jobs": true
+      },
+      "source_evidence": [
+        {
+          "type": "screen",
+          "timestamp": "2026-05-28T11:31:39.943446",
+          "screen_hash": "19c4d877"
+        }
+      ],
+      "first_seen": "2026-05-28T11:31:39.943457",
+      "last_seen": "2026-05-28T11:31:39.943457"
     }
   ],
   "edges": [
@@ -160,176 +364,325 @@
       "edge_type": "TRANSITIONS_TO",
       "source_id": "a1b2c3d4e5f6",
       "target_id": "86f4beee0f81",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "TSO logon leads to ISPF"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260610"
     },
     {
       "id": "e002",
       "edge_type": "NAVIGATES_TO",
       "source_id": "86f4beee0f81",
       "target_id": "c3d4e5f6a1b2",
-      "properties": {"pf_key": "2"},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "pf_key": "2",
+        "description": "Option 2 from ISPF primary"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260612"
     },
     {
       "id": "e003",
       "edge_type": "NAVIGATES_TO",
       "source_id": "86f4beee0f81",
       "target_id": "d4e5f6a1b2c3",
-      "properties": {"command": "=S"},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "command": "=S",
+        "description": "SDSF from ISPF"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260614"
     },
     {
       "id": "e004",
       "edge_type": "SUBMITS_JOB",
       "source_id": "86f4beee0f81",
       "target_id": "857bcb560e1c",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "Job submitted from ISPF"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260615"
     },
     {
       "id": "c2cd36177576",
       "edge_type": "EXECUTES",
       "source_id": "857bcb560e1c",
       "target_id": "bbf07f4161e1",
-      "properties": {"step": "STEP1"},
-      "evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "step": "STEP1"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942317"
     },
     {
       "id": "6bbc12777dad",
       "edge_type": "READS",
       "source_id": "857bcb560e1c",
       "target_id": "2b592433223b",
-      "properties": {"ddname": "SYSUT1", "disp": "SHR"},
-      "evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "ddname": "SYSUT1",
+        "disp": "SHR"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942345"
     },
     {
       "id": "7a132c2fb629",
       "edge_type": "WRITES",
       "source_id": "857bcb560e1c",
       "target_id": "d0ba88e606a9",
-      "properties": {"ddname": "SYSUT2", "disp": "NEW,CATLG,DELETE"},
-      "evidence": [{"type": "assessment", "source": "sample_jcl"}],
+      "properties": {
+        "ddname": "SYSUT2",
+        "disp": "NEW,CATLG,DELETE"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_jcl"
+        },
+        {
+          "type": "demo",
+          "source": "sample_jcl"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942364"
     },
     {
       "id": "47dceb043679",
       "edge_type": "RETURNED",
       "source_id": "857bcb560e1c",
       "target_id": "9f79e5ea01ed",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "sample_sysout"}],
+      "properties": {
+        "description": "Job completed successfully"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "sample_sysout"
+        },
+        {
+          "type": "demo",
+          "source": "sample_sysout"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T11:31:39.942828"
     },
     {
       "id": "e005",
       "edge_type": "LOADS_FROM",
       "source_id": "bbf07f4161e1",
       "target_id": "g7h8i9j0k1l2",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "IEBGENER loads from system library"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260621"
     },
     {
       "id": "e006",
       "edge_type": "EXECUTES",
       "source_id": "e5f6a1b2c3d4",
       "target_id": "f6a1b2c3d4e5",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "PAYROLL1 job executes PAYROLL program"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260622"
     },
     {
       "id": "e007",
       "edge_type": "READS",
       "source_id": "e5f6a1b2c3d4",
       "target_id": "a1b2c3d4e5f7",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "PAYROLL1 reads master file"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260623"
     },
     {
       "id": "e008",
       "edge_type": "LOADS_FROM",
       "source_id": "f6a1b2c3d4e5",
       "target_id": "g7h8i9j0k1l2",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "PAYROLL program loads from LINKLIB"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260625"
     },
     {
       "id": "e009",
       "edge_type": "TRANSITIONS_TO",
       "source_id": "b2c3d4e5f6a1",
       "target_id": "h8i9j0k1l2m3",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "CICS logon enters CICSPROD region"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260626"
     },
     {
       "id": "e010",
       "edge_type": "RUNS_IN",
       "source_id": "i9j0k1l2m3n4",
       "target_id": "h8i9j0k1l2m3",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "CEMT runs in CICSPROD"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260627"
     },
     {
       "id": "e011",
       "edge_type": "RUNS_IN",
       "source_id": "j0k1l2m3n4o5",
       "target_id": "h8i9j0k1l2m3",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "PAY1 transaction runs in CICSPROD"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260628"
     },
     {
       "id": "e012",
       "edge_type": "INVOKES",
       "source_id": "j0k1l2m3n4o5",
       "target_id": "f6a1b2c3d4e5",
-      "properties": {},
-      "evidence": [{"type": "assessment", "source": "initial_scan"}],
+      "properties": {
+        "description": "PAY1 transaction invokes PAYROLL program"
+      },
+      "evidence": [
+        {
+          "type": "assessment",
+          "source": "initial_scan"
+        }
+      ],
       "confidence": 1.0,
       "first_seen": "2026-02-04T13:00:00.000000",
-      "last_seen": "2026-02-04T13:00:00.000000"
+      "last_seen": "2026-05-28T10:29:12.260629"
+    },
+    {
+      "id": "bb6985886129",
+      "edge_type": "NAVIGATES_TO",
+      "source_id": "demo:3270",
+      "target_id": "d37700625bbc",
+      "properties": {},
+      "evidence": [
+        {
+          "type": "screen",
+          "timestamp": "2026-05-28T11:31:39.943446",
+          "screen_hash": "19c4d877"
+        }
+      ],
+      "confidence": 1.0,
+      "first_seen": "2026-05-28T11:31:39.943478",
+      "last_seen": "2026-05-28T11:31:39.943478"
     }
   ]
 }

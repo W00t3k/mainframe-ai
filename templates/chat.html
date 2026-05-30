@@ -353,64 +353,14 @@ or use /connect command.
             <div class="panel" id="ragPanel">
                 <div class="rag-panel">
                     <div class="rag-header">
-                        <h2>RAG Knowledge Sources</h2>
-                        <p>Retrieval-Augmented Generation sources connected to the AI. These provide specialized knowledge for accurate responses.</p>
+                        <h2>RAG Knowledge Base</h2>
+                        <p>Documents indexed for Retrieval-Augmented Generation. The AI uses these to answer questions accurately.</p>
                     </div>
-                    <div class="rag-sources">
-                        <div class="rag-source connected">
-                            <div class="rag-icon">[DOC]</div>
-                            <div class="rag-info">
-                                <h3>Mainframe Documentation</h3>
-                                <p class="rag-desc">IBM mainframe documentation including MVS, JES2/JES3, DFSMS, and system programming guides.</p>
-                                <div class="rag-stats">15,432 documents | Last updated: 2024-01</div>
-                            </div>
-                            <button class="rag-toggle">Connected</button>
-                        </div>
-                        <div class="rag-source connected">
-                            <div class="rag-icon">[!]</div>
-                            <div class="rag-info">
-                                <h3>ABEND Code Database</h3>
-                                <p class="rag-desc">Complete database of system and user ABEND codes with explanations, causes, and resolutions.</p>
-                                <div class="rag-stats">2,847 codes | Includes S0Cx, Sxxx, Uxxxx</div>
-                            </div>
-                            <button class="rag-toggle">Connected</button>
-                        </div>
-                        <div class="rag-source connected">
-                            <div class="rag-icon">[JCL]</div>
-                            <div class="rag-info">
-                                <h3>JCL Templates</h3>
-                                <p class="rag-desc">Production-ready JCL templates for common tasks: IEBCOPY, IEBGENER, IDCAMS, SORT, and more.</p>
-                                <div class="rag-stats">847 templates | Commented & explained</div>
-                            </div>
-                            <button class="rag-toggle">Connected</button>
-                        </div>
-                        <div class="rag-source disconnected">
-                            <div class="rag-icon">[COB]</div>
-                            <div class="rag-info">
-                                <h3>COBOL Patterns</h3>
-                                <p class="rag-desc">Common COBOL programming patterns, CICS/DB2 integration, and debugging techniques.</p>
-                                <div class="rag-stats">1,234 patterns | Enterprise COBOL</div>
-                            </div>
-                            <button class="rag-toggle">Connect</button>
-                        </div>
-                        <div class="rag-source disconnected">
-                            <div class="rag-icon">[SEC]</div>
-                            <div class="rag-info">
-                                <h3>RACF Commands</h3>
-                                <p class="rag-desc">RACF security commands, profiles, and best practices for mainframe security administration.</p>
-                                <div class="rag-stats">523 commands | Security policies</div>
-                            </div>
-                            <button class="rag-toggle">Connect</button>
-                        </div>
-                        <div class="rag-source disconnected">
-                            <div class="rag-icon">[KB]</div>
-                            <div class="rag-info">
-                                <h3>Custom Knowledge Base</h3>
-                                <p class="rag-desc">Upload your own documentation, runbooks, and internal procedures.</p>
-                                <div class="rag-stats">0 documents | Click to configure</div>
-                            </div>
-                            <button class="rag-toggle">Configure</button>
-                        </div>
+                    <div class="rag-status" id="ragPanelContent">
+                        <div class="rag-loading">Loading RAG status...</div>
+                    </div>
+                    <div style="margin-top: 1rem; text-align: center;">
+                        <a href="/rag" class="rag-manage-btn">Manage Knowledge Base</a>
                     </div>
                 </div>
             </div>
@@ -1530,5 +1480,93 @@ or use /connect command.
         // Initial check, then poll every 3 seconds
         pollGpuLive();
         setInterval(pollGpuLive, 3000);
+
+        // ── RAG Panel Status ──
+        async function loadRagPanelStatus() {
+            const panel = document.getElementById('ragPanelContent');
+            if (!panel) return;
+
+            try {
+                const [statsRes, docsRes] = await Promise.all([
+                    fetch('/api/rag/stats'),
+                    fetch('/api/rag/documents')
+                ]);
+
+                const stats = await statsRes.json();
+                const docs = await docsRes.json();
+
+                // Update status bar too
+                const statusEl = document.getElementById('ragStatus');
+                if (statusEl) {
+                    const docCount = stats.documents || 0;
+                    statusEl.textContent = docCount > 0 ? `${docCount} docs` : 'empty';
+                    statusEl.className = docCount > 0 ? 'value ok' : 'value';
+                }
+
+                // Build panel content
+                let html = `
+                    <div style="display:flex; gap:20px; flex-wrap:wrap; margin-bottom:1rem;">
+                        <div style="background:rgba(0,255,136,0.1); border:1px solid #333; border-radius:6px; padding:12px 20px; flex:1; min-width:120px;">
+                            <div style="font-size:2rem; color:#0f8; font-weight:bold;">${stats.documents || 0}</div>
+                            <div style="font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Documents</div>
+                        </div>
+                        <div style="background:rgba(0,255,255,0.1); border:1px solid #333; border-radius:6px; padding:12px 20px; flex:1; min-width:120px;">
+                            <div style="font-size:2rem; color:#0ff; font-weight:bold;">${stats.chunks || 0}</div>
+                            <div style="font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Chunks</div>
+                        </div>
+                        <div style="background:rgba(255,136,0,0.1); border:1px solid #333; border-radius:6px; padding:12px 20px; flex:1; min-width:120px;">
+                            <div style="font-size:2rem; color:#f80; font-weight:bold;">${stats.embedding_dim || '-'}</div>
+                            <div style="font-size:0.75rem; color:#888; text-transform:uppercase; letter-spacing:1px;">Dimensions</div>
+                        </div>
+                    </div>
+                `;
+
+                if (docs.documents && docs.documents.length > 0) {
+                    html += `<div style="font-size:0.8rem; color:#888; margin-bottom:0.5rem; text-transform:uppercase; letter-spacing:1px;">Indexed Documents</div>`;
+                    html += `<div style="max-height:200px; overflow-y:auto; border:1px solid #222; border-radius:4px;">`;
+                    docs.documents.forEach(doc => {
+                        const chunkInfo = doc.chunks ? ` (${doc.chunks} chunks)` : '';
+                        html += `
+                            <div style="padding:8px 12px; border-bottom:1px solid #222; display:flex; justify-content:space-between; align-items:center; font-family:'IBM Plex Mono',monospace; font-size:0.75rem;">
+                                <span style="color:#ccc;">${doc.name || doc.id}</span>
+                                <span style="color:#666;">${chunkInfo}</span>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                } else {
+                    html += `
+                        <div style="text-align:center; padding:20px; color:#666;">
+                            <div style="font-size:0.9rem;">No documents indexed yet.</div>
+                            <div style="font-size:0.75rem; margin-top:0.5rem;">Click "Manage Knowledge Base" to add documents.</div>
+                        </div>
+                    `;
+                }
+
+                panel.innerHTML = html;
+
+            } catch (e) {
+                panel.innerHTML = `
+                    <div style="text-align:center; padding:20px; color:#f55;">
+                        <div style="font-size:0.9rem;">Error loading RAG status</div>
+                        <div style="font-size:0.75rem; margin-top:0.5rem;">${e.message}</div>
+                    </div>
+                `;
+            }
+        }
+
+        // Load RAG status on page load and when switching to RAG panel
+        if (!simpleMode) {
+            loadRagPanelStatus();
+        }
+
+        // Refresh when showing RAG panel
+        const origShowPanel = showPanel;
+        showPanel = function(name) {
+            origShowPanel(name);
+            if (name === 'rag') {
+                loadRagPanelStatus();
+            }
+        };
     </script>
 {% endblock %}

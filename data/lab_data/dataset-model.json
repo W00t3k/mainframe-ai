@@ -6,46 +6,52 @@
   "difficulty": "beginner",
   "steps": [
     {
-      "title": "Enter ISPF Option 3 (Utilities)",
-      "screen": "ISPF Primary Option Menu\nOption ===> 3\n\n3  Utilities\n\nF1=Help  F3=Exit",
-      "expected": "Navigate to ISPF Utilities.",
-      "hint": "Type 3 at the ISPF Primary Menu and press Enter."
+      "title": "Connect & Login",
+      "screen": "TSO/E LOGON\n\nUserid ===> HERC01\nPassword ===> ********\n\nEnter LOGON parameters below:\n\nProcedure ===> IKJACCNT\nAcct Nmbr  ===> ACCT#\nSize       ===> 4096\n\nEnter an 'S' before each option desired below:\n  -Nomail   -Nonotice   -Reconnect   -OIDcard",
+      "expected": "Log in to TSO to establish identity.",
+      "hint": "Enter your TSO userid and password. The userid becomes your high-level qualifier (HLQ)."
     },
     {
-      "title": "Dataset List (Option 4)",
-      "screen": "ISPF Utility Menu\nOption ===> 4\n\n1  Library\n2  Dataset\n3  Move/Copy\n4  DSLIST\n5  Reset\n6  Hardcopy\n\nF1=Help  F3=Exit",
-      "expected": "Access the dataset list utility.",
-      "hint": "Type 4 to list datasets by pattern."
+      "title": "Enter RFE (ISPF)",
+      "screen": "READY\n\nrfe\n\n RFE - MVS 3.8j Turnkey System\n\nOption ===>_\n\n0  Settings     1  Browse      2  Edit\n3  Utilities    4  Foreground  5  Batch\n6  Command      7  Dialog      8  LM\n9  IBM          10 SCLM        11 Workplace\n\nF1=Help  F3=Exit",
+      "expected": "Enter RFE/ISPF — the dataset interface.",
+      "hint": "Type RFE at the READY prompt. Unlike Unix, the mainframe has no filesystem hierarchy — datasets use dot-separated qualifiers."
     },
     {
-      "title": "List SYS1 Datasets",
-      "screen": "DSLIST - Data Sets Matching SYS1.*\n\nDataset Name          Org  Recfm Lrecl Blksz\nSYS1.BRODCAST         DA   FB    129   6450\nSYS1.LINKLIB          PO   U     0     32760\nSYS1.LPALIB           PO   U     0     32760\nSYS1.NUCLEUS          PO   U     0     32760\nSYS1.PARMLIB          PO   FB    80    3120\nSYS1.PROCLIB          PO   FB    80    3120\n\nCommand ===>",
+      "title": "Navigate to Utilities",
+      "screen": "RFE - MVS 3.8j Turnkey System\n\nOption ===> 3\n\n0  Settings     1  Browse      2  Edit\n3  Utilities    4  Foreground  5  Batch\n6  Command      7  Dialog      8  LM\n\nF1=Help  F3=Exit",
+      "expected": "Navigate to the Utilities menu.",
+      "hint": "Type 3 to access dataset utilities including DSLIST."
+    },
+    {
+      "title": "Dataset List — User Datasets",
+      "screen": "DSLIST - Data Sets Matching HERC01.*\n\nCommand - Enter \"/\" to select action\n----------------------------------------------------\n         HERC01.CNTL\n         HERC01.JCL\n         HERC01.LOAD\n         HERC01.SOURCE\n\nCommand ===>",
+      "expected": "List datasets under your HLQ (high-level qualifier).",
+      "hint": "Type 4 for DSLIST, then enter HERC01 as the pattern. Your HLQ is tied to your identity."
+    },
+    {
+      "title": "System Dataset Namespace",
+      "screen": "DSLIST - Data Sets Matching SYS1.*\n\nCommand - Enter \"/\" to select action\n----------------------------------------------------\n         SYS1.BRODCAST\n         SYS1.LINKLIB          PO   U     0     32760\n         SYS1.LPALIB           PO   U     0     32760\n         SYS1.NUCLEUS          PO   U     0     32760\n         SYS1.PARMLIB          PO   FB    80    3120\n         SYS1.PROCLIB          PO   FB    80    3120\n\nCommand ===>",
       "expected": "Identify critical system datasets: PARMLIB, PROCLIB, LINKLIB.",
-      "hint": "Enter SYS1.* as the dataset pattern to list system datasets."
+      "hint": "Change the pattern to SYS1 to list system datasets. There is no /etc — system config lives in datasets."
     },
     {
       "title": "Browse SYS1.PARMLIB",
-      "screen": "BROWSE  SYS1.PARMLIB\n\nName     Prompt   Size  Created\nIEASYS00          15   1999/01/01\nIEASYM00          8    1999/01/01\nSMFPRM00          22   1999/01/01\nIKJTSO00          31   1999/01/01\n\nCommand ===>",
+      "screen": "BROWSE  SYS1.PARMLIB  Row 00001 of 00025\n\nName     VV.MM  Created    Changed     Size  Init   Mod   ID\nIEASYS00  01.00 1999/01/01 1999/01/01    15    15     0 HERC01\nIEASYM00  01.00 1999/01/01 1999/01/01     8     8     0 HERC01\nSMFPRM00  01.00 1999/01/01 1999/01/01    22    22     0 HERC01\nIKJTSO00  01.00 1999/01/01 1999/01/01    31    31     0 HERC01\n***************************** Bottom of data *****\nCommand ===>",
       "expected": "SYS1.PARMLIB is a PDS containing system configuration members.",
-      "hint": "PARMLIB controls IPL parameters, SMF settings, and TSO configuration."
+      "hint": "A PDS (Partitioned Data Set) is like a directory — each member is a named record. PARMLIB holds IPL and system config."
     },
     {
-      "title": "View IEASYS00",
-      "screen": "BROWSE  SYS1.PARMLIB(IEASYS00)\n\nNUCLST=00,\nPAGE=(SYS1.PAGEDUMP),\nSMF=00,\nSYS=00,\nCONSOLE=00,\nCOMMND=00\n\n*** Bottom of Data ***",
-      "expected": "IEASYS00 defines the IPL system parameters.",
-      "hint": "This member is read at IPL time — modifying it changes system behavior."
-    },
-    {
-      "title": "Catalog Structure",
-      "screen": "ISMF - Interactive Storage Management Facility\n\nMaster Catalog: SYS1.MASTER.ICFCAT\nUser Catalogs:\n  UCAT.HERC01\n  UCAT.WORK\n\nAll datasets are cataloged here for name resolution.",
-      "expected": "Understand the ICF catalog hierarchy.",
-      "hint": "The master catalog is the root of all dataset name resolution on z/OS."
+      "title": "Catalog Structure — LISTCAT",
+      "screen": "READY\n\nLISTCAT ENT('SYS1.LINKLIB')\n\nNONVSAM ------- SYS1.LINKLIB\n     IN-CAT --- CATALOG.SYS1.MASTER\n     HISTORY\n       DATASET-OWNER-----(NULL)\n       CREATION--------1999.001\n       RELEASE----------------2\n     VOLUMES\n       VOLSER------------MVSRES\n       DEVTYPE------X'3050200F'\n\nREADY",
+      "expected": "Understand how the catalog maps dataset names to physical volumes.",
+      "hint": "The catalog is the namespace. RACF profiles control who can access each cataloged dataset. LISTCAT shows where datasets physically reside."
     },
     {
       "title": "Lab Complete",
-      "screen": "Dataset Model Lab Complete\n\nKey concepts:\n- PDS = Partitioned Dataset (library with members)\n- PDSE = Extended PDS\n- SYS1.PARMLIB controls system config\n- ICF Catalog resolves all dataset names\n- Trust-sensitive: PARMLIB, PROCLIB, LINKLIB",
+      "screen": "Dataset Model Lab Complete\n\nKey concepts:\n- PDS = Partitioned Dataset (library with members)\n- HLQ = High-Level Qualifier (tied to identity)\n- SYS1.PARMLIB controls system config\n- Catalog maps names to physical DASD volumes\n- Trust-sensitive: PARMLIB, PROCLIB, LINKLIB\n\nWarning: Write access to PARMLIB or PROCLIB = system control.",
       "expected": "Map the storage namespace and identify trust-sensitive datasets.",
-      "hint": "An attacker with write access to PARMLIB or PROCLIB owns the system."
+      "hint": "Always logoff cleanly — disconnecting locks your userid. Use /C U=userid at the Hercules console to recover."
     }
   ]
 }

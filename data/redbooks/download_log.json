@@ -1,0 +1,130 @@
+{
+  "downloaded": {
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp4641.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Security_in_Development_The_IBM_Secure_.pdf",
+      "title": "Security in Development: The IBM Secure Engineering Framework",
+      "downloaded_at": "2026-05-23T06:53:53.723193"
+    },
+    "https://www.redbooks.ibm.com/courses/CRSE0303/CRSE0303.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Introduction_to_CICS.pdf",
+      "title": "Introduction to CICS",
+      "downloaded_at": "2026-05-23T06:53:54.983977"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5661.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Optimized_Inferencing_and_Integration_wi.pdf",
+      "title": "Optimized Inferencing and Integration with AI on IBM zSystems: Introduction, Methodology, and Use Cases",
+      "downloaded_at": "2026-05-23T06:53:56.545539"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248410.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Getting_Started_with_zOS_Data_Set_Encry.pdf",
+      "title": "Getting Started with z/OS Data Set Encryption",
+      "downloaded_at": "2026-05-23T06:53:58.097900"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp4799.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_DB2_for_zOS_Configuring_TLSSSL_fo.pdf",
+      "title": "IBM DB2 for z/OS: Configuring TLS/SSL for Secure Client/Server Communications",
+      "downloaded_at": "2026-05-23T06:53:59.614031"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248532.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Mainframe_Application_Modernization_Patt.pdf",
+      "title": "Mainframe Application Modernization Patterns for Hybrid Cloud",
+      "downloaded_at": "2026-05-23T07:02:37.425763"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248552.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Turning_Data_into_Insight_with_Machine_L.pdf",
+      "title": "Turning Data into Insight with Machine Learning for IBM z/OS",
+      "downloaded_at": "2026-05-23T07:02:39.077505"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5761.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_Z_AIOps_Simplifying_Mainframe_Opera.pdf",
+      "title": "IBM Z AIOps: Simplifying Mainframe Operations",
+      "downloaded_at": "2026-05-23T07:02:40.681600"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248568.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_Power_Security_Catalog.pdf",
+      "title": "IBM Power Security Catalog",
+      "downloaded_at": "2026-05-23T07:02:42.328032"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248579.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_z17_(9175)_Technical_Guide.pdf",
+      "title": "IBM z17 (9175) Technical Guide",
+      "downloaded_at": "2026-05-23T07:02:44.679186"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248951.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_z16_(3931)_Technical_Guide.pdf",
+      "title": "IBM z16 (3931) Technical Guide",
+      "downloaded_at": "2026-05-23T07:02:46.740468"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5560.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Securing_Data_on_Threat_Detection_by_Usi.pdf",
+      "title": "Securing Data on Threat Detection by Using IBM Spectrum Scale and IBM QRadar: An Enhanced Cyber Resiliency Solution",
+      "downloaded_at": "2026-05-23T07:02:48.388282"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248555.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/Applying_IBM_Hyper_Protect_Platform_Applying_Dat.pdf",
+      "title": "IBM Hyper Protect Platform: Applying Data Protection and Confidentiality in a Hybrid Cloud Environment",
+      "downloaded_at": "2026-05-23T07:02:49.865274"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5758.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_AI_on_IBM_Z_Applications_and_Examples.pdf",
+      "title": "AI on IBM Z : Applications and Examples",
+      "downloaded_at": "2026-05-23T07:02:51.702658"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248511.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Getting_Started_with_IBM_Z_Cyber_Vault.pdf",
+      "title": "Getting Started with IBM Z Cyber Vault",
+      "downloaded_at": "2026-05-23T07:02:53.244927"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248581.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_z17_Configuration_Setup.pdf",
+      "title": "IBM z17 Configuration Setup",
+      "downloaded_at": "2026-05-23T07:02:55.778600"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5680.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Become_Data_Driven_with_IBM_Z_Infused_Da.pdf",
+      "title": "Become Data Driven with IBM Z Infused Data Fabric",
+      "downloaded_at": "2026-05-23T07:02:57.511425"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248205.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_ISV_IBM_zPDT_Guide_and_Reference.pdf",
+      "title": "ISV IBM zPDT Guide and Reference",
+      "downloaded_at": "2026-05-23T07:02:59.025101"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248518.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Leveraging_LinuxONE_to_Maximize_Your_Dat.pdf",
+      "title": "Leveraging LinuxONE to Maximize Your Data Serving Capabilities",
+      "downloaded_at": "2026-05-23T07:03:00.862944"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248578.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_RACF_Security_Impact_Forecasting_by_.pdf",
+      "title": "IBM RACF Security Impact Forecasting by using IBM zSecure",
+      "downloaded_at": "2026-05-23T07:03:02.514928"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5492.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/Starter_Developing_a_Blockchain_Business_Network.pdf",
+      "title": "Developing a Blockchain Business Network with Hyperledger Composer using the IBM Blockchain Platform Starter Plan",
+      "downloaded_at": "2026-05-23T07:03:03.930972"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5615.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Enabling_IBM_Cloud_Pak_for_Multicloud_Ma.pdf",
+      "title": "Enabling IBM Cloud Pak for Multicloud Management to Connect Kubernetes Clusters Using IBM Secure Gateway",
+      "downloaded_at": "2026-05-23T07:03:05.294588"
+    },
+    "https://www.redbooks.ibm.com/redpapers/pdfs/redp5659.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_Power_Systems_Cloud_Security_Guide_.pdf",
+      "title": "IBM Power Systems Cloud Security Guide: Protect IT Infrastructure In All Layers",
+      "downloaded_at": "2026-05-23T07:03:06.950451"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg248336.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_Managing_Digital_Certificates_across_the.pdf",
+      "title": "Managing Digital Certificates across the Enterprise",
+      "downloaded_at": "2026-05-23T07:03:08.343727"
+    },
+    "https://www.redbooks.ibm.com/redbooks/pdfs/sg245444.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/pdfs/ation_IBM_Z_Connectivity_Handbook.pdf",
+      "title": "IBM Z Connectivity Handbook",
+      "downloaded_at": "2026-05-23T07:03:10.010646"
+    }
+  },
+  "failed": {}
+}
