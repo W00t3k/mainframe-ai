@@ -254,3 +254,80 @@ def test_get_edges_filtered_by_type():
     assert discovered[0].target_id == "b"
 
     graph.close()
+
+
+def test_to_dict_export():
+    from bigiron.core.graph import ProvenanceGraph
+    from bigiron.core.schema import Node, NodeType, Edge, EdgeType
+
+    graph = ProvenanceGraph(":memory:")
+
+    n1 = Node(id="n1", node_type=NodeType.HOST, label="Host1")
+    n2 = Node(id="n2", node_type=NodeType.USER, label="User1")
+    graph.add_node(n1)
+    graph.add_node(n2)
+    graph.add_edge(Edge(source_id="n1", target_id="n2", edge_type=EdgeType.DISCOVERED))
+
+    data = graph.to_dict()
+
+    assert "nodes" in data
+    assert "edges" in data
+    assert len(data["nodes"]) == 2
+    assert len(data["edges"]) == 1
+
+    graph.close()
+
+
+def test_stats():
+    from bigiron.core.graph import ProvenanceGraph
+    from bigiron.core.schema import Node, NodeType
+
+    graph = ProvenanceGraph(":memory:")
+
+    graph.add_node(Node(node_type=NodeType.HOST, label="H1"))
+    graph.add_node(Node(node_type=NodeType.HOST, label="H2"))
+    graph.add_node(Node(node_type=NodeType.USER, label="U1"))
+
+    stats = graph.stats()
+
+    assert stats["total_nodes"] == 3
+    assert stats["total_edges"] == 0
+    assert stats["nodes_by_type"]["host"] == 2
+    assert stats["nodes_by_type"]["user"] == 1
+
+    graph.close()
+
+
+def test_search_nodes_by_label():
+    from bigiron.core.graph import ProvenanceGraph
+    from bigiron.core.schema import Node, NodeType
+
+    graph = ProvenanceGraph(":memory:")
+
+    graph.add_node(Node(node_type=NodeType.USER, label="HERC01"))
+    graph.add_node(Node(node_type=NodeType.USER, label="HERC02"))
+    graph.add_node(Node(node_type=NodeType.USER, label="IBMUSER"))
+
+    results = list(graph.search_nodes("HERC"))
+
+    assert len(results) == 2
+    labels = {n.label for n in results}
+    assert labels == {"HERC01", "HERC02"}
+
+    graph.close()
+
+
+def test_search_nodes_case_insensitive():
+    from bigiron.core.graph import ProvenanceGraph
+    from bigiron.core.schema import Node, NodeType
+
+    graph = ProvenanceGraph(":memory:")
+
+    graph.add_node(Node(node_type=NodeType.DATASET, label="SYS1.PARMLIB"))
+
+    results = list(graph.search_nodes("parmlib"))
+
+    assert len(results) == 1
+    assert results[0].label == "SYS1.PARMLIB"
+
+    graph.close()

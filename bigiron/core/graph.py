@@ -257,3 +257,79 @@ class ProvenanceGraph:
                     yield new_path
                 else:
                     queue.append(new_path)
+
+    def to_dict(self) -> dict:
+        """Export the entire graph as a dictionary."""
+        nodes = []
+        for row in self.db.execute("SELECT * FROM nodes").fetchall():
+            nodes.append({
+                "id": row["id"],
+                "node_type": row["node_type"],
+                "label": row["label"],
+                "properties": json.loads(row["properties"]),
+                "provenance": json.loads(row["provenance"]),
+                "created_at": row["created_at"],
+                "updated_at": row["updated_at"]
+            })
+
+        edges = []
+        for row in self.db.execute("SELECT * FROM edges").fetchall():
+            edges.append({
+                "id": row["id"],
+                "source_id": row["source_id"],
+                "target_id": row["target_id"],
+                "edge_type": row["edge_type"],
+                "properties": json.loads(row["properties"]),
+                "provenance": json.loads(row["provenance"]),
+                "created_at": row["created_at"]
+            })
+
+        return {"nodes": nodes, "edges": edges}
+
+    def stats(self) -> dict:
+        """Get graph statistics."""
+        total_nodes = self.db.execute("SELECT COUNT(*) FROM nodes").fetchone()[0]
+        total_edges = self.db.execute("SELECT COUNT(*) FROM edges").fetchone()[0]
+
+        nodes_by_type = {}
+        for row in self.db.execute(
+            "SELECT node_type, COUNT(*) as count FROM nodes GROUP BY node_type"
+        ).fetchall():
+            nodes_by_type[row["node_type"]] = row["count"]
+
+        edges_by_type = {}
+        for row in self.db.execute(
+            "SELECT edge_type, COUNT(*) as count FROM edges GROUP BY edge_type"
+        ).fetchall():
+            edges_by_type[row["edge_type"]] = row["count"]
+
+        return {
+            "total_nodes": total_nodes,
+            "total_edges": total_edges,
+            "nodes_by_type": nodes_by_type,
+            "edges_by_type": edges_by_type
+        }
+
+    def search_nodes(self, query: str, node_type: NodeType | None = None) -> Iterator[Node]:
+        """Search nodes by label (case-insensitive substring match)."""
+        if node_type:
+            rows = self.db.execute(
+                "SELECT * FROM nodes WHERE label LIKE ? AND node_type = ?",
+                (f"%{query}%", node_type.value)
+            ).fetchall()
+        else:
+            rows = self.db.execute(
+                "SELECT * FROM nodes WHERE label LIKE ?",
+                (f"%{query}%",)
+            ).fetchall()
+
+        for row in rows:
+            yield Node(
+                id=row["id"],
+                node_type=NodeType(row["node_type"]),
+                label=row["label"],
+                properties=json.loads(row["properties"]),
+                provenance=Provenance.model_validate_json(row["provenance"]),
+                created_at=row["created_at"],
+                updated_at=row["updated_at"]
+            )
