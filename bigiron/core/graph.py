@@ -1,8 +1,9 @@
 """Provenance graph - the single source of truth."""
 import json
 from pathlib import Path
-from typing import Iterator
+from typing import Iterator, Literal
 from datetime import datetime, timezone
+from collections import deque
 
 from .db import Database
 from .schema import Node, Edge, NodeType, EdgeType, Provenance
@@ -182,3 +183,77 @@ class ProvenanceGraph:
                 provenance=Provenance.model_validate_json(row["provenance"]),
                 created_at=row["created_at"]
             )
+
+    def get_nodes_by_type(self, node_type: NodeType) -> Iterator[Node]:
+        """Get all nodes of a specific type."""
+        rows = self.db.execute(
+            "SELECT * FROM nodes WHERE node_type = ?", (node_type.value,)
+        ).fetchall()
+
+        for row in rows:
+            yield Node(
+                id=row["id"],
+                node_type=NodeType(row["node_type"]),
+                label=row["label"],
+                properties=json.loads(row["properties"]),
+                provenance=Provenance.model_validate_json(row["provenance"]),
+                created_at=row["created_at"],
+                updated_at=row["updated_at"]
+            )
+
+    def get_neighbors(
+        self,
+        node_id: str,
+        direction: Literal["outgoing", "incoming", "both"] = "outgoing",
+        edge_type: EdgeType | None = None
+    ) -> Iterator[Node]:
+        """Get neighboring nodes."""
+        neighbor_ids = set()
+
+        if direction in ("outgoing", "both"):
+            for edge in self.get_edges_from(node_id, edge_type):
+                neighbor_ids.add(edge.target_id)
+
+        if direction in ("incoming", "both"):
+            for edge in self.get_edges_to(node_id, edge_type):
+                neighbor_ids.add(edge.source_id)
+
+        for nid in neighbor_ids:
+            node = self.get_node(nid)
+            if node:
+                yield node
+
+    def find_paths(
+        self,
+        source_id: str,
+        target_id: str,
+        max_depth: int = 10
+    ) -> Iterator[list[str]]:
+        """Find all paths between two nodes using BFS."""
+        if source_id == target_id:
+            yield [source_id]
+            return
+
+        # BFS with path tracking
+        queue: deque[list[str]] = deque([[source_id]])
+
+        while queue:
+            path = queue.popleft()
+
+            if len(path) > max_depth:
+                continue
+
+            current = path[-1]
+
+            for edge in self.get_edges_from(current):
+                next_id = edge.target_id
+
+                if next_id in path:  # Avoid cycles
+                    continue
+
+                new_path = path + [next_id]
+
+                if next_id == target_id:
+                    yield new_path
+                else:
+                    queue.append(new_path)
