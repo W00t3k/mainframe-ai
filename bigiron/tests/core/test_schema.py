@@ -47,3 +47,101 @@ def test_edge_type_has_relationship_edges():
     assert EdgeType.ATTACK_PATH.value == "attack_path"
     assert EdgeType.MAPS_TO.value == "maps_to"
     assert EdgeType.PART_OF.value == "part_of"
+
+
+def test_provenance_model_creation():
+    from datetime import datetime, timezone
+    from bigiron.core.schema import Provenance
+
+    prov = Provenance(
+        timestamp=datetime(2026, 6, 5, 14, 23, 1, tzinfo=timezone.utc),
+        authorization_ref="ENG-2026-0042",
+        agent_turn=7,
+        raw_output="[+] Job submitted",
+        simulated=False
+    )
+
+    assert prov.authorization_ref == "ENG-2026-0042"
+    assert prov.agent_turn == 7
+    assert prov.simulated is False
+
+
+def test_provenance_defaults():
+    from bigiron.core.schema import Provenance
+
+    prov = Provenance()
+
+    assert prov.timestamp is not None
+    assert prov.authorization_ref is None
+    assert prov.agent_turn is None
+    assert prov.raw_output is None
+    assert prov.simulated is False
+    assert prov.recording_id is None
+
+
+def test_node_model_creation():
+    from bigiron.core.schema import Node, NodeType
+
+    node = Node(
+        id="host-192.168.1.100",
+        node_type=NodeType.HOST,
+        label="192.168.1.100",
+        properties={"ip": "192.168.1.100", "port": 23}
+    )
+
+    assert node.id == "host-192.168.1.100"
+    assert node.node_type == NodeType.HOST
+    assert node.label == "192.168.1.100"
+    assert node.properties["port"] == 23
+
+
+def test_node_auto_generates_id():
+    from bigiron.core.schema import Node, NodeType
+
+    node = Node(
+        node_type=NodeType.USER,
+        label="HERC01"
+    )
+
+    assert node.id is not None
+    assert len(node.id) > 0
+
+
+def test_node_has_provenance():
+    from bigiron.core.schema import Node, NodeType, Provenance
+
+    node = Node(
+        node_type=NodeType.JOB,
+        label="JOB12345",
+        provenance=Provenance(authorization_ref="ENG-001")
+    )
+
+    assert node.provenance.authorization_ref == "ENG-001"
+
+
+def test_edge_model_creation():
+    from bigiron.core.schema import Edge, EdgeType
+
+    edge = Edge(
+        source_id="run-001",
+        target_id="user-HERC01",
+        edge_type=EdgeType.DISCOVERED,
+        properties={"parser": "TSOEnumParser"}
+    )
+
+    assert edge.source_id == "run-001"
+    assert edge.target_id == "user-HERC01"
+    assert edge.edge_type == EdgeType.DISCOVERED
+
+
+def test_edge_has_provenance():
+    from bigiron.core.schema import Edge, EdgeType, Provenance
+
+    edge = Edge(
+        source_id="a",
+        target_id="b",
+        edge_type=EdgeType.ATTACK_PATH,
+        provenance=Provenance(agent_turn=3)
+    )
+
+    assert edge.provenance.agent_turn == 3

@@ -1,8 +1,9 @@
 """Pydantic models for the provenance graph schema."""
 from enum import Enum
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Any
 from pydantic import BaseModel, Field
+import uuid
 
 
 class NodeType(str, Enum):
@@ -65,3 +66,36 @@ class EdgeType(str, Enum):
     INVOKES = "invokes"
     RUNS_IN = "runs_in"
     BOUNDARY_CROSS = "boundary_cross"
+
+
+class Provenance(BaseModel):
+    """Provenance metadata attached to nodes and edges."""
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    authorization_ref: str | None = None
+    agent_turn: int | None = None
+    raw_output: str | None = None
+    parsed_entities: list[str] = Field(default_factory=list)
+    simulated: bool = False
+    recording_id: str | None = None
+
+
+class Node(BaseModel):
+    """A node in the provenance graph."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    node_type: NodeType
+    label: str
+    properties: dict[str, Any] = Field(default_factory=dict)
+    provenance: Provenance = Field(default_factory=Provenance)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+class Edge(BaseModel):
+    """An edge in the provenance graph."""
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    source_id: str
+    target_id: str
+    edge_type: EdgeType
+    properties: dict[str, Any] = Field(default_factory=dict)
+    provenance: Provenance = Field(default_factory=Provenance)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
