@@ -1,3 +1,4 @@
+"""Tests for authorization model and gate."""
 import pytest
 from datetime import datetime, timezone, timedelta
 
