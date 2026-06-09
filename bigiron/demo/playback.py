@@ -6,7 +6,7 @@ from typing import Any, Callable
 from pydantic import BaseModel, Field
 
 from ..core.graph import ProvenanceGraph
-from ..core.schema import Node, NodeType, Provenance
+from ..core.schema import Edge, EdgeType, Node, NodeType, Provenance
 from .recorder import Recording, RecordingIndex
 
 
@@ -125,7 +125,11 @@ class RecordedExecutor:
                 provenance=Provenance(simulated=True)
             )
             self.graph.add_node(entity_node)
-            self.graph.add_edge(node.id, entity_node.id, "DISCOVERED")
+            self.graph.add_edge(Edge(
+                source_id=node.id,
+                target_id=entity_node.id,
+                edge_type=EdgeType.DISCOVERED
+            ))
 
         return result
 
