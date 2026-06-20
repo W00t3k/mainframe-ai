@@ -1,0 +1,7 @@
+# configs/fetch_sources.yaml
+sources: []
+# Example entries (commented out until user configures):
+# - url: "https://www.ibm.com/docs/en/zos-basic-skills"
+#   mode: scheduled
+#   schedule: "weekly"
+#   review: true

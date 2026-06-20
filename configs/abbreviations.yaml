@@ -1,0 +1,21 @@
+# configs/abbreviations.yaml
+abbreviations:
+  mf: mainframe
+  jcl: job control language
+  tso: time sharing option
+  ispf: interactive system productivity facility
+  racf: resource access control facility
+  cics: customer information control system
+  vsam: virtual storage access method
+  sdsf: system display and search facility
+  jes: job entry subsystem
+  smf: system management facilities
+  apf: authorized program facility
+  vtam: virtual telecommunications access method
+  rexx: restructured extended executor
+  cobol: common business oriented language
+  ipl: initial program load
+  lpar: logical partition
+  saf: system authorization facility
+  ims: information management system
+  hlq: high level qualifier

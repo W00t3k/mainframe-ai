@@ -1,0 +1,20 @@
+# configs/seed_config.yaml
+fuzzy:
+  typo_distance: 2
+  phonetic_enabled: true
+  abbreviations_file: "configs/abbreviations.yaml"
+
+feedback:
+  auto_approve_threshold: 3
+
+ingest:
+  watch_dir: "data/rag_ingest"
+  supported_formats: [".md", ".txt", ".json"]
+
+eval:
+  baseline_file: "data/evals/baseline.json"
+  regression_threshold_pct: 20
+
+backlog:
+  high_priority_min: 10
+  medium_priority_min: 5
