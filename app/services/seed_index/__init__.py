@@ -7,6 +7,10 @@ from app.services.seed_index.fuzzy import (
     generate_abbreviations,
     generate_all_variants,
 )
+from app.services.seed_index.builder import (
+    build_fuzzy_index,
+    write_fuzzy_index,
+)
 
 __all__ = [
     "normalize",
@@ -14,4 +18,6 @@ __all__ = [
     "generate_phonetic",
     "generate_abbreviations",
     "generate_all_variants",
+    "build_fuzzy_index",
+    "write_fuzzy_index",
 ]
