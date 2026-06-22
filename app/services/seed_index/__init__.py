@@ -11,6 +11,10 @@ from app.services.seed_index.builder import (
     build_fuzzy_index,
     write_fuzzy_index,
 )
+from app.services.seed_index.lookup import (
+    SeedIndexLookup,
+    LookupResult,
+)
 
 __all__ = [
     "normalize",
@@ -20,4 +24,6 @@ __all__ = [
     "generate_all_variants",
     "build_fuzzy_index",
     "write_fuzzy_index",
+    "SeedIndexLookup",
+    "LookupResult",
 ]
