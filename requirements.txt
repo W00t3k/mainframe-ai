@@ -18,6 +18,10 @@ numpy>=1.24.0
 PyPDF2>=3.0.0  # Optional: for PDF support
 httpx>=0.24.0  # HTTP client for Ollama API
 
+# Fuzzy matching and configuration
+pyyaml>=6.0
+jellyfish>=1.0.0  # Phonetic/fuzzy string matching (Soundex, Metaphone)
+
 # Web interface
 fastapi>=0.100.0
 uvicorn>=0.20.0
