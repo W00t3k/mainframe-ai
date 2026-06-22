@@ -15,6 +15,9 @@ from app.services.seed_index.lookup import (
     SeedIndexLookup,
     LookupResult,
 )
+from app.services.seed_index.tracker import (
+    QueryMissTracker,
+)
 
 __all__ = [
     "normalize",
@@ -26,4 +29,5 @@ __all__ = [
     "write_fuzzy_index",
     "SeedIndexLookup",
     "LookupResult",
+    "QueryMissTracker",
 ]
