@@ -207,6 +207,22 @@ class ChatService:
             return False
         if re.search(r"[?!,;:]", message):
             return False
+
+        # Check if it's a sentence (has multiple words beyond just a concept)
+        words = message.lower().split()
+        if len(words) > 4:
+            # Too many words to be a bare concept - likely a question
+            return False
+
+        # Not a bare concept if it starts with question/conversation words
+        question_starts = (
+            "can", "does", "do", "how", "why", "is", "are", "will",
+            "would", "should", "could", "when", "where", "who", "what",
+            "tell", "show", "give", "list", "describe", "compare",
+        )
+        if words and words[0] in question_starts:
+            return False
+
         return bool(find_seed_definition_entries(message, limit=1) or find_mainframe_memory_entries(message, limit=1))
 
     def _extract_definition_target(self, user_message: str) -> Optional[str]:
