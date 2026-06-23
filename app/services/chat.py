@@ -123,16 +123,26 @@ class ChatService:
         context, _ = await self.get_rag_context_with_meta(query, n_results)
         return context
 
-    async def get_rag_context_with_meta(self, query: str, n_results: int = 2) -> tuple[str, int]:
-        """Query RAG and return formatted context plus result count."""
+    async def get_rag_context_with_meta(
+        self, query: str, n_results: int = 2, distance_threshold: float = 0.5
+    ) -> tuple[str, int]:
+        """Query RAG and return formatted context plus result count.
+
+        Only includes results with distance < threshold (lower = more relevant).
+        """
         results = await self.get_rag_results(query, n_results)
         if not results:
             return "", 0
 
+        # Filter by relevance threshold
+        relevant = [r for r in results if r.get("distance", 1.0) < distance_threshold]
+        if not relevant:
+            return "", 0
+
         context = "\n\n[Relevant Knowledge Base Information]\n"
-        for r in results:
+        for r in relevant:
             context += f"---\n{r['content']}\n"
-        return context, len(results)
+        return context, len(relevant)
 
     async def get_rag_results(self, query: str, n_results: int = 2) -> list[dict[str, Any]]:
         """Query RAG and return raw result dictionaries."""
@@ -199,6 +209,28 @@ class ChatService:
             "what does", "tell me about",
         )
         return message.startswith(definition_starts)
+
+    def _check_unclear_question(self, user_message: str) -> Optional[str]:
+        """Return a clarification request if the question is too vague."""
+        message = user_message.strip().lower()
+        words = message.split()
+
+        # Very short messages with pronouns but no mainframe terms
+        if len(words) <= 6:
+            has_pronoun = any(w in message for w in ["they", "it", "this", "that", "them", "these", "those"])
+            mainframe_terms = (
+                "mainframe", "jcl", "jes", "racf", "tso", "ispf", "cics", "vtam",
+                "cobol", "dataset", "abend", "spool", "mvs", "z/os", "zos", "apf",
+            )
+            has_mainframe_term = any(term in message for term in mainframe_terms)
+
+            if has_pronoun and not has_mainframe_term and not self.conversation_history:
+                return (
+                    "I'm not sure what you're referring to. Could you clarify your question? "
+                    "For example, are you asking about mainframes, z/OS, JCL, RACF, or something else?"
+                )
+
+        return None
 
     def _is_bare_concept_query(self, user_message: str) -> bool:
         """Return true for short queries that are just a known concept name."""
@@ -600,10 +632,13 @@ class ChatService:
                 suggestions = [s["title"] for s in fuzzy_result["suggestions"]]
             self._miss_tracker.log_miss(user_message, "rag_llm", suggestions)
 
+        # Filter RAG results by relevance threshold (distance < 0.5 = relevant)
+        relevant_rag = [r for r in rag_results if r.get("distance", 1.0) < 0.5]
+
         rag_context = ""
-        if rag_results:
+        if relevant_rag:
             rag_context = "\n\n[Relevant Knowledge Base Information]\n"
-            for r in rag_results:
+            for r in relevant_rag:
                 rag_context += f"---\n{r['content']}\n"
             reference_context = f"\n\nRAG context from local knowledge base:{rag_context}"
             context_source = "rag"
@@ -612,12 +647,28 @@ class ChatService:
             reference_context = f"\n\nFallback reference memory:\n{memory_context}" if memory_context else ""
             context_source = "fallback_memory" if memory_context else "none"
 
+        # Include recent conversation context for pronouns like "they", "it", "this"
+        conversation_context = ""
+        if self.conversation_history and re.search(r"\b(they|it|this|that|these|those|them)\b", user_message.lower()):
+            recent = self.conversation_history[-4:]  # Last 2 exchanges
+            if recent:
+                conversation_context = "\n\nRecent conversation:\n"
+                for msg in recent:
+                    role = "User" if msg["role"] == "user" else "Assistant"
+                    # Truncate long messages
+                    content = msg["content"][:200] + "..." if len(msg["content"]) > 200 else msg["content"]
+                    conversation_context += f"{role}: {content}\n"
+
         prompt = (
             "Answer this mainframe question concisely in BigIron.ai style. "
             "Use mainframe-native terms. Do not generate JCL or code unless explicitly asked. "
             "For ABEND codes, include meaning, likely cause, and one evidence item to check. "
             "Use at most 4 short bullets or 80 words. Stop after the direct answer.\n\n"
+            "IMPORTANT: If the question is unclear, ambiguous, or you don't have enough context "
+            "(e.g., pronouns like 'they' or 'it' without clear reference), ask for clarification "
+            "instead of guessing. Say 'Could you clarify what you mean by X?' or 'I'm not sure what you're referring to.'\n\n"
             f"Question: {user_message}"
+            f"{conversation_context}"
             f"{reference_context}"
         )
         response = await self.llm.chat_compact(
@@ -730,6 +781,13 @@ class ChatService:
             cmd = parts[0].lower()
             args = parts[1] if len(parts) > 1 else ""
             return await self.process_command(cmd, args)
+
+        # Check for unclear/ambiguous questions that need clarification
+        unclear_response = self._check_unclear_question(user_message)
+        if unclear_response:
+            result["response"] = unclear_response
+            result["answer_mode"] = "clarification"
+            return result
 
         if self._is_fast_mainframe_qa(user_message):
             response, rag_used, context_source, rag_chunks = await self._answer_fast_mainframe_qa(user_message)
