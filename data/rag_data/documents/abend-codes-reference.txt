@@ -1,0 +1,427 @@
+# IBM z/OS and MVS ABEND Codes Complete Reference
+
+## System ABEND Codes (Sxxx)
+
+### S001 - I/O Error
+Cause: Unrecoverable I/O error on a dataset
+Common causes:
+- Hardware malfunction on DASD or tape
+- Dataset corruption
+- Invalid DCB parameters
+- Record length mismatch
+Fix: Check SYSOUT for IEC messages, verify DCB matches actual dataset, check hardware status
+
+### S002 - Invalid I/O Record
+Cause: Invalid record encountered during I/O operation
+- Record length exceeds buffer
+- Truncated record on tape
+Fix: Verify DCB parameters match dataset, check for tape errors
+
+### S013 - Dataset Open Error
+Cause: Error opening a dataset
+Reason codes:
+- 14: Member not found in PDS
+- 18: PDS directory I/O error
+- 1C: Invalid BSAM/QSAM request
+- 20: Block size not specified
+- 34: Block size too small
+- 60: VSAM open error
+Fix: Check DD statement, verify dataset exists, check DCB parameters
+
+### S0C1 - Operation Exception
+Cause: Attempted to execute an invalid instruction
+Common causes:
+- Branch to invalid address or uninitialized storage
+- Corrupted program code
+- Missing module or CSECT
+- Invalid entry point address
+- Execute instruction with invalid target
+- Program overlay by data
+Fix: Check program logic, verify module linkage, check for storage overlays, examine PSW address in dump
+
+### S0C2 - Privileged Operation Exception
+Cause: Program attempted to execute a privileged instruction in problem state
+Common causes:
+- Branched into supervisor code
+- Storage overlay corrupted instructions
+Fix: Check for storage corruption, verify program logic
+
+### S0C3 - Execute Exception
+Cause: Target of EXECUTE instruction is another EXECUTE
+Fix: Check EX instruction target address
+
+### S0C4 - Protection Exception
+Cause: Attempted to access protected or unallocated storage
+Common causes:
+- Invalid pointer or address
+- Array subscript out of bounds (COBOL)
+- Working storage corruption
+- Accessing storage key 0 without authorization
+- Using freed GETMAIN storage
+- NULL pointer dereference
+- CICS HANDLE ABEND issues
+Fix: Check array bounds, verify pointer initialization, review COBOL subscripts, check GETMAIN/FREEMAIN pairs
+
+### S0C5 - Addressing Exception
+Cause: Address outside addressable storage range
+Common causes:
+- Invalid base register
+- Uninitialized pointer
+- Bad parameter list address
+Fix: Check register contents at time of ABEND, verify parameter addresses
+
+### S0C6 - Specification Exception
+Cause: Invalid instruction operand specification
+Common causes:
+- Odd address for halfword/fullword operation
+- Invalid register specification
+- Boundary alignment error
+Fix: Ensure proper alignment of data fields
+
+### S0C7 - Data Exception
+Cause: Invalid packed decimal data in arithmetic operation
+Common causes:
+- Uninitialized packed decimal field
+- Non-numeric data in numeric field
+- COBOL MOVE to wrong field type
+- File record layout mismatch
+- Missing INITIALIZE verb
+- REDEFINES overlay problem
+- Invalid sign nibble in packed field
+Fix: Initialize all numeric fields, check MOVE statements, use INITIALIZE verb, verify file layouts, check copybooks
+
+### S0C8 - Fixed-Point Overflow
+Cause: Result of fixed-point arithmetic exceeds register capacity
+Fix: Check for large number calculations, use larger fields
+
+### S0C9 - Fixed-Point Divide Exception
+Cause: Fixed-point division by zero or quotient overflow
+Fix: Add zero check before division
+
+### S0CA - Decimal Overflow
+Cause: Packed decimal result exceeds field size
+Fix: Increase receiving field size, check calculation logic
+
+### S0CB - Decimal Divide Exception
+Cause: Packed decimal division by zero
+Fix: Add zero check before DIVIDE operation
+
+### S0CC - Exponent Overflow
+Cause: Floating-point exponent too large
+Fix: Check floating-point calculations
+
+### S0CD - Exponent Underflow
+Cause: Floating-point exponent too small
+Fix: Check floating-point calculations
+
+### S0CE - Significance Exception
+Cause: Floating-point result is zero with non-zero fraction
+Fix: Check floating-point logic
+
+### S0CF - Floating-Point Divide
+Cause: Floating-point division by zero
+Fix: Add zero check before division
+
+### S106 - Invalid Module Format
+Cause: LOAD/LINK/XCTL found module with invalid format
+- Module corrupted
+- Not a valid load module
+- Incompatible module format
+Fix: Relink the module, check library concatenation
+
+### S122 - Job Cancelled by Operator with Dump
+Cause: CANCEL command with DUMP option issued
+Fix: Check console log for reason
+
+### S137 - End of Volume on Tape
+Cause: Tape dataset spans volumes but continuation not available
+Fix: Mount continuation tape, check tape retention
+
+### S213 - Dataset Open Error (Specific)
+Cause: Unable to open dataset
+- Member not found in PDS (RC=04)
+- I/O error on PDS directory (RC=08)
+- Dataset not found (RC=0C)
+- Invalid BPAM request (RC=10)
+Fix: Verify dataset/member exists, check JCL DD statement
+
+### S222 - Job Cancelled by Operator
+Cause: Job cancelled via CANCEL command (no dump)
+- Operator cancelled job
+- Automated cancellation
+- Session timeout
+Fix: Check console log, verify job was supposed to run
+
+### S237 - End of Volume on DASD
+Cause: DASD dataset cannot extend
+Fix: Increase SPACE allocation, use secondary extents
+
+### S30A - Missing DD Statement
+Cause: Program opened a file but DD statement missing
+Fix: Add required DD statement to JCL
+
+### S313 - OPEN Error on Tape
+Cause: Error opening tape dataset
+- Tape not mounted
+- Wrong volume serial
+- Tape hardware error
+Fix: Check tape mount, verify VOLSER
+
+### S322 - CPU Time Exceeded
+Cause: Job exceeded TIME parameter limit
+Common causes:
+- Infinite loop in program
+- TIME parameter too small
+- Unexpected data volume
+Fix: Increase TIME parameter, check for loops, optimize program
+
+### S337 - End of Volume on Output Dataset
+Cause: Output dataset full, no more extents available
+Fix: Increase SPACE, allow more extents
+
+### S413 - Tape Volume Wrong
+Cause: Mounted tape has wrong volume serial
+Fix: Mount correct tape
+
+### S422 - Job Wait Time Exceeded
+Cause: Job waited too long for resources
+Fix: Check for resource contention, increase wait time
+
+### S522 - Job Wait Time Exceeded (TSO)
+Cause: TSO session timeout
+- User inactive too long
+- LOGON wait time exceeded
+Fix: Logon again, adjust timeout parameters
+
+### S613 - OPEN Error - DD Card Missing
+Cause: OPEN issued for dataset without DD statement
+Fix: Add DD statement to JCL
+
+### S637 - End of Volume - No More Space
+Cause: Unable to allocate space for dataset extension
+Fix: Increase SPACE, use different volume
+
+### S706 - Module Not Executable
+Cause: Attempted to execute non-executable module
+Fix: Check module attributes, relink as executable
+
+### S713 - OPEN Failure for Tape
+Cause: Tape dataset open failed
+Fix: Check tape status, verify JCL
+
+### S722 - Lines or Cards Exceeded
+Cause: SYSOUT output exceeded limit
+- Too many print lines
+- Output limit reached
+Fix: Increase OUTLIM, reduce output, check for loop
+
+### S804 - GETMAIN Failure
+Cause: Insufficient virtual storage for GETMAIN request
+Common causes:
+- REGION parameter too small
+- Memory leak in program
+- Excessive storage requests
+Fix: Increase REGION, check for memory leaks, optimize storage usage
+
+### S806 - Module Not Found
+Cause: LOAD, LINK, XCTL, or ATTACH failed - module not found
+Common causes:
+- Module not in STEPLIB/JOBLIB
+- Misspelled module name
+- Module not linkedited
+- Library concatenation wrong
+Fix: Check STEPLIB/JOBLIB DD statements, verify module exists, check library names
+
+### S80A - Not Enough Storage
+Cause: Insufficient storage for load module
+Fix: Increase REGION, check module size
+
+### S813 - OPEN Error - Member Not Found
+Cause: Specified PDS member does not exist
+Fix: Verify member name, check PDS directory
+
+### S837 - End of Volume - Tape
+Cause: Tape end of volume, continuation not found
+Fix: Mount continuation volume
+
+### S878 - GETMAIN Failure (31-bit)
+Cause: Unable to obtain 31-bit addressable storage
+Fix: Increase REGION, check storage usage
+
+### S90A - Insufficient Storage
+Cause: Not enough storage for request
+Fix: Increase REGION parameter
+
+### S913 - RACF Authorization Failure
+Cause: User not authorized to access resource
+Reason codes indicate specific failure:
+- RC=00: Access denied to dataset
+- RC=04: Access denied, no RACF profile
+- RC=08: Access denied to resource
+Fix: Request RACF access from security administrator
+
+### S937 - Tape End of Volume
+Cause: Tape EOV processing error
+Fix: Check tape, remount
+
+### SA13 - OPEN Failed - VSAM
+Cause: VSAM dataset open error
+Check VSAM return codes for specific reason
+Fix: Check VSAM catalog, verify cluster exists
+
+### SB14 - CLOSE Error
+Cause: Error closing dataset
+Fix: Check for I/O errors, verify dataset status
+
+### SB37 - Dataset Out of Space
+Cause: Output dataset full, no space for extension
+- Primary allocation exhausted
+- No secondary space available
+- Volume full
+Fix: Increase SPACE parameter, allow more extents, use multi-volume
+
+### SC03 - System Timeout
+Cause: System or resource timeout
+Fix: Check for contention, increase timeout
+
+### SD37 - No Space on Volume
+Cause: Requested volume has no space available
+Fix: Use different volume, specify VOLUME count, clean up space
+
+### SE37 - Space Allocation Exceeded
+Cause: Dataset exceeded maximum extents (usually 16)
+Fix: Increase primary allocation, consolidate dataset, use larger block size
+
+### SF37 - Space Allocation Failed
+Cause: Unable to allocate space for dataset
+Fix: Check volume availability, specify alternate volumes
+
+## User ABEND Codes (Uxxxx)
+
+### U0001 - U0999
+Application-defined ABENDs
+Meaning depends on application documentation
+
+### U0016
+Common COBOL abend for invalid SORT input
+
+### U1001-U1999
+Often used by system utilities
+
+### U4000
+Often indicates parameter error
+
+### U4038
+IDCAMS error
+
+### U4039
+IDCAMS error
+
+### U4091
+IDCAMS open error
+
+### U4093
+IDCAMS close error
+
+## CICS ABEND Codes
+
+### AEIA - Invalid Receive Request
+Cause: RECEIVE issued when no data available
+Fix: Check RECEIVE logic
+
+### AEIO - Invalid I/O Request
+Cause: Invalid file I/O request
+Fix: Check file control commands
+
+### AEIN - Invalid SEND Request
+Cause: SEND issued incorrectly
+Fix: Check terminal I/O logic
+
+### AEIS - Invalid Storage Request
+Cause: GETMAIN/FREEMAIN error
+Fix: Check storage management
+
+### AEIV - Invalid Parameter
+Cause: Invalid parameter in CICS command
+Fix: Check command parameters
+
+### AEY7 - Resource Not Available
+Cause: Requested resource unavailable
+Fix: Check resource definitions
+
+### AEY9 - Program Not Found
+Cause: LINK/XCTL program not found
+Fix: Verify program definition in CSD
+
+### AKCP - Program Check in CICS
+Cause: Program exception (like S0C7) in CICS
+Fix: Debug program logic
+
+### ASRA - Program Check in CICS
+Cause: CICS equivalent of system ABEND
+- Subtranslated code indicates actual error
+- Most common: data exception (S0C7 equivalent)
+Fix: Check CICS dump for original ABEND code
+
+### ASRB - Operating System ABEND
+Cause: MVS ABEND occurred in CICS transaction
+Fix: Check for system-level errors
+
+### ATNI - Terminal Error
+Cause: Terminal I/O error
+Fix: Check terminal status
+
+## IMS ABEND Codes
+
+### U0778
+IMS application program scheduling error
+
+### U0456
+IMS segment not found
+
+### U3303
+IMS lock timeout
+
+## DB2 SQLCODEs (Not ABENDs but Often Confused)
+
+### SQLCODE -803
+Duplicate key on insert
+
+### SQLCODE -805
+Package/plan not found
+
+### SQLCODE -811
+Multiple rows returned for single SELECT
+
+### SQLCODE -904
+Resource unavailable
+
+### SQLCODE -911
+Timeout or deadlock
+
+### SQLCODE -913
+Deadlock detected
+
+## Debugging ABEND Codes
+
+### Reading the PSW
+- Instruction address shows where ABEND occurred
+- Condition code indicates program state
+
+### COBOL Compile Options for Debugging
+- SSRANGE: Check subscript ranges
+- TEST: Enable debugging
+- LIST: Generate assembly listing
+- MAP: Generate data map
+
+### Using SNAP Dumps
+Add SNAP DD statement for diagnostic dumps:
+//SNAP DD SYSOUT=*
+
+### Reading Dump Output
+1. Find ABEND code and reason code
+2. Locate PSW (Program Status Word)
+3. Find failing instruction address
+4. Match to compiler listing or assembly
+5. Check register contents
+6. Review working storage values

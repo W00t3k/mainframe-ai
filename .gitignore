@@ -33,8 +33,12 @@ Thumbs.db
 # Cached downloads
 .cache/
 
-# RAG data (user-specific)
-rag_data/
+# RAG embeddings (too large, regenerate locally)
+data/rag_data/embeddings.json
+
+# Local feedback and generated training exports
+data/feedback/*.jsonl
+data/training/generated/*.jsonl
 
 # Screencaps (user-specific)
 screencaps/

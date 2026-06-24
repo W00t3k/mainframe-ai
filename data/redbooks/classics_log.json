@@ -1,0 +1,125 @@
+{
+  "downloaded": {
+    "https://bitsavers.org/pdf/ibm/370/MVS/G320-0053-0_Beretvas_-_Technical_Report_Page_Swap_Configurations_198211.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_G320-0053-0_Beretvas_-_Technical_Report_Page_Swap_Configurations_198211.pdf",
+      "title": "G320-0053-0 Beretvas - Technical Report Page Swap Configurations 198211",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:44.376162"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GA22-7072-0_IBM_System_370_Extended_Facility_Jan78.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GA22-7072-0_IBM_System_370_Extended_Facility_Jan78.pdf",
+      "title": "GA22-7072-0 IBM System 370 Extended Facility Jan78",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:45.744477"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GA22-7079-1_IBM_System_370_Assists_for_MVS_2nd_ed_198110.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GA22-7079-1_IBM_System_370_Assists_for_MVS_2nd_ed_198110.pdf",
+      "title": "GA22-7079-1 IBM System 370 Assists for MVS 2nd ed 198110",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:47.109405"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GA22-7079-1_IBM_System_370_Assists_for_MVS_Oct81.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GA22-7079-1_IBM_System_370_Assists_for_MVS_Oct81.pdf",
+      "title": "GA22-7079-1 IBM System 370 Assists for MVS Oct81",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:48.487120"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GA28-1310-2_TSO_Terminal_Messages_Jan86.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GA28-1310-2_TSO_Terminal_Messages_Jan86.pdf",
+      "title": "GA28-1310-2 TSO Terminal Messages Jan86",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:50.245397"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC23-0044-1_JES3_Messages_Dec81.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC23-0044-1_JES3_Messages_Dec81.pdf",
+      "title": "GC23-0044-1 JES3 Messages Dec81",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:52.102619"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC23-0351-3_MVS_Software_Manufacturing_Offerings_General_Information_199001.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC23-0351-3_MVS_Software_Manufacturing_Offerings_General_Information_199001.pdf",
+      "title": "GC23-0351-3 MVS Software Manufacturing Offerings General Information 199001",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:53.611535"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC23-0351-5_MVS_Software_Manufacturing_Offerings_General_Information_Release_6_199106.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC23-0351-5_MVS_Software_Manufacturing_Offerings_General_Information_Release_6_199106.pdf",
+      "title": "GC23-0351-5 MVS Software Manufacturing Offerings General Information Release 6 199106",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:55.061781"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC26-4056-1_MVS_370_System_Programming_Library_Data_Management_Oct83.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC26-4056-1_MVS_370_System_Programming_Library_Data_Management_Oct83.pdf",
+      "title": "GC26-4056-1 MVS 370 System Programming Library Data Management Oct83",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:56.880849"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC26-4061-0_MVS-370_Linkage_Editor_and_Loader_1st_ed_198304.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC26-4061-0_MVS-370_Linkage_Editor_and_Loader_1st_ed_198304.pdf",
+      "title": "GC26-4061-0 MVS-370 Linkage Editor and Loader 1st ed 198304",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:26:58.447932"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC26-4061-1_MVS_370_Linkage_Editor_Users_Guide_Dec85.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC26-4061-1_MVS_370_Linkage_Editor_Users_Guide_Dec85.pdf",
+      "title": "GC26-4061-1 MVS 370 Linkage Editor Users Guide Dec85",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:00.148713"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC26-4067-0_MVS-370_Linkage_Editor_and_Loader_Messages_1st_ed_198304.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC26-4067-0_MVS-370_Linkage_Editor_and_Loader_Messages_1st_ed_198304.pdf",
+      "title": "GC26-4067-0 MVS-370 Linkage Editor and Loader Messages 1st ed 198304",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:01.552599"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC26-4074-2_MVS370_VSAM_Administration_-_Macro_Instruction_Reference_-_Release_1.2_199005.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC26-4074-2_MVS370_VSAM_Administration_-_Macro_Instruction_Reference_-_Release_1.2_199005.pdf",
+      "title": "GC26-4074-2 MVS370 VSAM Administration - Macro Instruction Reference - Release 1.2 199005",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:08.050929"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-0607-2_Introduction_to_JES3_Rel_3_Sep78.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-0607-2_Introduction_to_JES3_Rel_3_Sep78.pdf",
+      "title": "GC28-0607-2 Introduction to JES3 Rel 3 Sep78",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:09.562499"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-0674-4_OSVS2_MVS_SPL_Service_Aids_198507.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-0674-4_OSVS2_MVS_SPL_Service_Aids_198507.pdf",
+      "title": "GC28-0674-4 OSVS2 MVS SPL Service Aids 198507",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:11.181227"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-0736-0_OS_VS2_MVS_Resource_Measurement_Facility_General_Information_May76.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-0736-0_OS_VS2_MVS_Resource_Measurement_Facility_General_Information_May76.pdf",
+      "title": "GC28-0736-0 OS VS2 MVS Resource Measurement Facility General Information May76",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:12.587437"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-1025-12_MVS_System_Product_Version_1_General_Information_Manual_Mar85.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-1025-12_MVS_System_Product_Version_1_General_Information_Manual_Mar85.pdf",
+      "title": "GC28-1025-12 MVS System Product Version 1 General Information Manual Mar85",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:14.129261"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-1027-7_Input_Output_Configuration_Users_Guide_Sep89.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-1027-7_Input_Output_Configuration_Users_Guide_Sep89.pdf",
+      "title": "GC28-1027-7 Input Output Configuration Users Guide Sep89",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:15.872841"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-1300-2_MVS_JCL_Dec84.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-1300-2_MVS_JCL_Dec84.pdf",
+      "title": "GC28-1300-2 MVS JCL Dec84",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:18.190167"
+    },
+    "https://bitsavers.org/pdf/ibm/370/MVS/GC28-1310-4_TSO_Messages_Sep1987.pdf": {
+      "path": "/Users/w00tock/MF-local/mainframe-ai/data/redbooks/classics/classic_MVS_GC28-1310-4_TSO_Messages_Sep1987.pdf",
+      "title": "GC28-1310-4 TSO Messages Sep1987",
+      "category": "MVS",
+      "downloaded_at": "2026-05-23T07:27:20.612595"
+    }
+  },
+  "failed": {}
+}
