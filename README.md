@@ -61,6 +61,104 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 
 **100% local. No API keys. No cloud dependencies.** Uses Ollama for local LLM inference.
 
+---
+
+## Apple Silicon Branch: Local AI + Fine-Tuning
+
+This branch (`feature/apple-silicon-bigiron`) adds **local-first AI** optimized for Apple Silicon Macs with unified memory. No cloud APIs, no external dependencies.
+
+### What's Different
+
+| Feature | Main Branch | Apple Silicon Branch |
+|---------|------------|----------------------|
+| LLM Backend | Ollama (generic) | **BigIron** (mainframe-tuned Mistral) |
+| Knowledge Source | Generic LLM knowledge | **213 IBM Redbooks** (~4.8M words) |
+| Response Speed | LLM for everything | **<50ms** for known terms (RAG + fuzzy lookup) |
+| Fine-tuning | None | **MLX LoRA** on Apple Silicon GPU |
+| Embeddings | External API | **Local** (nomic-embed-text) |
+
+### RAG Knowledge Base
+
+The app includes a **Retrieval-Augmented Generation** system with:
+
+```
+213 IBM Redbooks indexed
+16,137 text chunks
+~4.8 million words
+~12,000 pages of mainframe documentation
+159 MB embeddings (local, no API)
+```
+
+**How it works:**
+1. Your question is embedded locally (nomic-embed-text)
+2. Similar chunks are retrieved from the Redbooks index
+3. Context is passed to the LLM for an informed answer
+4. Fast fuzzy lookup catches typos ("mainfraem" → "mainframe")
+
+**Topics covered:** RACF, JCL, ABEND codes, CICS, COBOL, DB2, VSAM, JES2/JES3, TSO/ISPF, z/OS security, Cyber Vault, data encryption, and more.
+
+### BigIron Fine-Tuned Model
+
+The **bigiron-finetuned** model is Mistral 7B with:
+- Mainframe-specific system prompt
+- 10+ embedded Q&A examples from Redbooks
+- Terminology guardrails (APF, RACF, ISPF, JES)
+- Concise, practitioner-style responses
+
+```bash
+# The model is auto-created on startup
+./start.sh
+
+# Or create manually
+ollama create bigiron-finetuned -f configs/ollama/Modelfile.bigiron-finetuned
+```
+
+### MLX Fine-Tuning Pipeline
+
+For deeper customization, fine-tune on your own data using Apple's MLX framework:
+
+```bash
+# 1. Generate Q&A from indexed Redbooks
+python scripts/training/generate_qa_from_rag.py --limit 2000
+
+# 2. Convert to MLX format and train (~1-2 hours on M1/M2/M3)
+python scripts/training/mlx_finetune.py --iters 1000
+
+# 3. Fuse adapter into model
+python scripts/training/mlx_finetune.py --fuse
+```
+
+**Why MLX?**
+- Uses Metal GPU (unified memory on Apple Silicon)
+- 64GB RAM = can fine-tune 7B models locally
+- LoRA = small adapter (~100MB), not full model retraining
+- Result: A Mistral that *deeply understands* mainframes
+
+### Response Modes
+
+The chat system uses a tiered approach for speed + accuracy:
+
+| Mode | Speed | When Used |
+|------|-------|-----------|
+| **Seed Lookup** | <1ms | Exact term match ("JCL", "RACF") |
+| **Fuzzy Match** | <10ms | Typos, abbreviations ("mainfraem", "mf") |
+| **RAG** | <100ms | Questions with Redbook context |
+| **LLM** | 1-5s | Complex questions, no RAG match |
+
+### Feedback Loop
+
+Rate responses with RIGHT/WRONG buttons to:
+1. Build evaluation datasets (`data/evals/`)
+2. Generate corrections for fine-tuning (`data/feedback/`)
+3. Track response quality over time
+
+```bash
+# Export feedback to training format
+python scripts/training/export_feedback_jsonl.py
+```
+
+---
+
 ## Quick Start
 
 ### Requirements
@@ -69,6 +167,14 @@ If you bring the wrong mental model, you miss the real attack paths — just lik
 - [Ollama](https://ollama.com) for local LLM
 - s3270 (for web TN3270 terminal)
 - TK5 MVS 3.8j emulator (included)
+
+### Apple Silicon Branch Docs
+
+For the Apple Silicon fork-style workflow, start here:
+
+- [Apple Silicon local setup](docs/APPLE_SILICON.md)
+- [Memory architecture](docs/MEMORY_ARCHITECTURE.md)
+- [Mistral training and inference notes](docs/TRAINING_MISTRAL.md)
 
 ---
 
@@ -121,7 +227,8 @@ The install script installs:
 # Install Ollama
 brew install ollama
 ollama serve &
-ollama pull llama3.1:8b
+ollama pull mistral
+export OLLAMA_MODEL=mistral
 
 # Install TN3270 client
 brew install x3270
@@ -346,7 +453,7 @@ The home page features a retro IBM Lumon-style CRT terminal with:
 mainframe-ai/
 ├── app/                    # FastAPI application
 │   ├── routes/             # API endpoints (19 modules)
-│   ├── services/           # Business logic (ollama, grok, chat, ftp, kicks, bof_lab, rag)
+│   ├── services/           # Business logic (ollama, chat, ftp, kicks, bof_lab, rag)
 │   ├── constants/          # LLM prompts, walkthrough scripts, learning paths
 │   ├── models/             # Pydantic request/response schemas
 │   └── websocket/          # Real-time terminal and trust graph updates
@@ -369,10 +476,17 @@ mainframe-ai/
 │   └── kicks_install/      # KICKS XMIT distribution files
 ├── data/                   # Runtime data (gitignored where appropriate)
 │   ├── lab_data/           # Lab exercise definitions (JSON)
-│   ├── rag_data/           # RAG document index and embeddings
+│   ├── rag_data/           # RAG document index and embeddings (213 Redbooks)
+│   ├── rag_seed/           # Seed definitions (mainframe terms, timeline)
+│   ├── training/           # Fine-tuning data (MLX format)
+│   │   └── generated/      # Synthetic Q&A from Redbooks
+│   ├── feedback/           # User feedback for training
+│   ├── evals/              # Evaluation datasets
 │   ├── screencaps/         # Saved terminal screenshots
 │   ├── trust_graph_data/   # Graph persistence (JSON)
 │   └── discovery.db        # TN3270 scanner results (SQLite)
+├── configs/                # Configuration files
+│   └── ollama/             # Ollama Modelfiles (bigiron-finetuned, etc.)
 ├── jcl/                    # JCL source files
 │   ├── kicks/              # KICKS CICS installation JCL
 │   ├── ftpd.jcl            # MVS FTP server startup
@@ -383,7 +497,11 @@ mainframe-ai/
 │   ├── mvs.sh              # TK5 management (start/stop/restart/status)
 │   ├── start_mvs.sh        # TK5 foreground/interactive mode
 │   ├── start_gpu.sh        # GPU-enabled launcher
-│   └── diagnose.sh         # Diagnostic info collector
+│   ├── diagnose.sh         # Diagnostic info collector
+│   └── training/           # Fine-tuning scripts
+│       ├── generate_qa_from_rag.py   # Generate Q&A from Redbooks
+│       ├── mlx_finetune.py           # MLX LoRA fine-tuning
+│       └── export_feedback_jsonl.py  # Export feedback for training
 ├── docs/                   # Documentation
 │   ├── CONTRIBUTING.md     # Contribution guidelines
 │   ├── MODULES.md          # Module reference
