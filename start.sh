@@ -55,6 +55,23 @@ detect_model() {
   GPU_DETECTED=false
   GPU_VRAM_GB=0
 
+  if [ -n "${OLLAMA_MODEL:-}" ]; then
+    MODEL="$OLLAMA_MODEL"
+    TOTAL_RAM_MB=$(free -m 2>/dev/null | awk '/^Mem:/{print $2}')
+    [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
+    [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=0
+    info "Using OLLAMA_MODEL override: $MODEL"
+    return
+  fi
+
+  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
+    [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=16000
+    MODEL="bigiron-finetuned"
+    info "Apple Silicon detected — local Ollama mode with $MODEL"
+    return
+  fi
+
   # Check for NVIDIA GPU first
   if command -v nvidia-smi &>/dev/null; then
     GPU_VRAM_MB=$(nvidia-smi --query-gpu=memory.total --format=csv,noheader,nounits 2>/dev/null | head -1)
@@ -320,8 +337,13 @@ wait_for() {
 start_ollama_svc() {
   echo -e "\n${BLD}[1/3] Ollama AI Backend${RST}"
 
-  export OLLAMA_KEEP_ALIVE="5m"
-  export OLLAMA_MAX_LOADED_MODELS=1
+  if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
+    export OLLAMA_KEEP_ALIVE="30m"
+    export OLLAMA_MAX_LOADED_MODELS=2
+  else
+    export OLLAMA_KEEP_ALIVE="5m"
+    export OLLAMA_MAX_LOADED_MODELS=1
+  fi
   export OLLAMA_NUM_PARALLEL=1
 
   if check_ollama; then
@@ -343,20 +365,69 @@ start_ollama_svc() {
   info "RAM: ${TOTAL_RAM_MB}MB → target model: ${BLD}$MODEL${RST}"
   OLLAMA_OK=1
 
+  if [ "$MODEL" = "bigiron-finetuned" ]; then
+    ensure_bigiron_model
+    return 0
+  fi
+
   # Check if target model is already pulled
   if timeout 5 ollama list 2>/dev/null | grep -q "$MODEL"; then
     ok "Model $MODEL ready"
   else
+    TARGET_MODEL="$MODEL"
     # Use first available model as fallback while target pulls
     FALLBACK=$(timeout 5 ollama list 2>/dev/null | tail -n +2 | head -1 | awk '{print $1}')
     if [ -n "$FALLBACK" ]; then
-      info "Using $FALLBACK while pulling $MODEL in background..."
+      info "Using $FALLBACK while pulling $TARGET_MODEL in background..."
       MODEL="$FALLBACK"
     else
-      info "No models installed — pulling $MODEL (this may take a while)..."
+      info "No models available yet — pulling $TARGET_MODEL (this may take a while)..."
     fi
     # Pull target model in background
-    ( ollama pull "$MODEL" ) >> "$LOGDIR/ollama.log" 2>&1 &
+    ( ollama pull "$TARGET_MODEL" ) >> "$LOGDIR/ollama.log" 2>&1 &
+  fi
+}
+
+ollama_has_model() {
+  local model="$1"
+  timeout 10 ollama list 2>/dev/null \
+    | awk 'NR > 1 {print $1}' \
+    | sed 's/:latest$//' \
+    | grep -qx "$model"
+}
+
+ensure_bigiron_model() {
+  local modelfile="$DIR/configs/ollama/Modelfile.bigiron-finetuned"
+
+  if ollama_has_model "bigiron-finetuned"; then
+    ok "Model bigiron-finetuned ready"
+    return 0
+  fi
+
+  if [ ! -f "$modelfile" ]; then
+    fail "Missing $modelfile"
+    info "Falling back to mistral"
+    MODEL="mistral"
+    return 0
+  fi
+
+  if ! ollama_has_model "mistral"; then
+    info "Pulling mistral base model for bigiron-finetuned..."
+    if ollama pull mistral >> "$LOGDIR/ollama.log" 2>&1; then
+      ok "Model mistral ready"
+    else
+      fail "Could not pull mistral — continuing with app startup"
+      return 1
+    fi
+  fi
+
+  info "Creating bigiron-finetuned from $modelfile..."
+  if ollama create bigiron-finetuned -f "$modelfile" >> "$LOGDIR/ollama.log" 2>&1; then
+    ok "Model bigiron-finetuned ready"
+  else
+    fail "Could not create bigiron-finetuned"
+    info "Falling back to mistral"
+    MODEL="mistral"
   fi
 }
 
