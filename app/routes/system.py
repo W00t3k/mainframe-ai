@@ -186,6 +186,37 @@ async def mainframe_status():
     }
 
 
+@router.get("/rag/stats")
+async def rag_stats():
+    """Get RAG knowledge base statistics for the v2 banner."""
+    try:
+        from tools.rag_engine import get_rag_engine
+        engine = get_rag_engine()
+
+        docs = list(engine.documents.values())
+        pdf_count = sum(1 for d in docs if d.doc_type == "pdf")
+        total_chunks = len(engine.chunks)
+        est_words = total_chunks * 300
+
+        # Format word count
+        if est_words >= 1_000_000:
+            word_str = f"{est_words / 1_000_000:.1f}M"
+        else:
+            word_str = f"{est_words / 1_000:.0f}K"
+
+        return {
+            "documents": len(docs),
+            "pdf_count": pdf_count,
+            "chunks": total_chunks,
+            "est_words": est_words,
+            "word_str": word_str,
+            "model": "bigiron-finetuned",
+            "version": "v2"
+        }
+    except Exception as e:
+        return {"error": str(e), "documents": 0, "word_str": "0"}
+
+
 @router.post("/mainframe/start")
 async def start_mainframe(background_tasks: BackgroundTasks):
     """Start the TK5 mainframe."""
