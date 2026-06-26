@@ -270,7 +270,55 @@ class ChatService:
         target = re.sub(r"\s+", " ", match.group(1).strip(" .?"))
         if not target or len(target) > 80:
             return None
+
+        # Clean up malformed queries like "mainframe do" → "mainframe"
+        # Remove trailing filler words that don't add meaning
+        target = re.sub(r"\s+(?:do|does|mean|work|for|used|about)$", "", target, flags=re.IGNORECASE)
+
+        # Apply fuzzy correction to find the closest known term
+        target = self._fuzzy_correct_term(target)
+
         return target
+
+    def _fuzzy_correct_term(self, term: str) -> str:
+        """Apply fuzzy correction to fix typos in a term."""
+        from app.services.seed_index.fuzzy import normalize
+
+        # Try direct lookup first
+        result = find_seed_definition_entries(term, limit=1)
+        if result:
+            return term  # Already matches
+
+        # Common typo corrections for mainframe terms
+        normalized = normalize(term)
+        typo_corrections = {
+            # mainframe variants
+            "mainfram": "mainframe", "mainfrme": "mainframe", "mainfraem": "mainframe",
+            "mainfarme": "mainframe", "manframe": "mainframe", "mainframe": "mainframe",
+            "mf": "mainframe",
+            # racf variants
+            "racf": "racf", "rcaf": "racf", "rafC": "racf",
+            # jcl variants
+            "jcl": "jcl", "jlc": "jcl",
+            # other common terms
+            "cics": "cics", "cisc": "cics",
+            "cobol": "cobol", "coblo": "cobol",
+            "vsam": "vsam", "vasm": "vsam",
+            "ispf": "ispf", "isfp": "ispf",
+            "tso": "tso", "tos": "tso",
+            "jes": "jes", "jes2": "jes2", "jes3": "jes3",
+            "vtam": "vtam", "vtam": "vtam",
+            "apf": "apf",
+            "smf": "smf",
+            "db2": "db2",
+            "zos": "z/os", "z os": "z/os",
+            "abend": "abend", "abned": "abend",
+        }
+
+        if normalized in typo_corrections:
+            return typo_corrections[normalized]
+
+        return term
 
     def _answer_history_direct(self, user_message: str) -> Optional[str]:
         """Answer common mainframe release-date questions from RAG seed data."""

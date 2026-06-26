@@ -84,14 +84,13 @@ def run_mlx_finetune(
     output_dir.mkdir(parents=True, exist_ok=True)
 
     cmd = [
-        sys.executable, "-m", "mlx_lm.lora",
+        sys.executable, "-m", "mlx_lm", "lora",
         "--model", model,
         "--train",
         "--data", str(data_dir),
         "--adapter-path", str(output_dir),
         "--iters", str(num_iters),
         "--batch-size", str(batch_size),
-        "--lora-rank", str(lora_rank),
         "--learning-rate", str(learning_rate),
     ]
 
