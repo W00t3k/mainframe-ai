@@ -40,6 +40,12 @@ data/rag_data/embeddings.json
 data/feedback/*.jsonl
 data/training/generated/*.jsonl
 
+# Large model files (regenerate locally with scripts/training/mlx_finetune.py)
+*.gguf
+data/training/mlx_adapters*/
+data/training/bigiron-*-fused/
+data/training/bigiron-mlx-fused/
+
 # Screencaps (user-specific)
 screencaps/
 
