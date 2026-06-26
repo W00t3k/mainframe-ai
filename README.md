@@ -97,42 +97,56 @@ The app includes a **Retrieval-Augmented Generation** system with:
 
 **Topics covered:** RACF, JCL, ABEND codes, CICS, COBOL, DB2, VSAM, JES2/JES3, TSO/ISPF, z/OS security, Cyber Vault, data encryption, and more.
 
-### BigIron Fine-Tuned Model
+### BigIron-5k: Fine-Tuned Mainframe Model
 
-The **bigiron-finetuned** model is Mistral 7B with:
-- Mainframe-specific system prompt
-- 10+ embedded Q&A examples from Redbooks
-- Terminology guardrails (APF, RACF, ISPF, JES)
-- Concise, practitioner-style responses
+The **bigiron-5k** model is Mistral-7B fine-tuned on **8,175 Q&A pairs** from IBM Redbooks:
+
+| Training Metric | Value |
+|-----------------|-------|
+| Iterations | 5,000 |
+| Training samples | 8,175 |
+| Initial loss | 4.59 |
+| Final loss | 1.29 (72% improvement) |
+| Model size | 7.7 GB (q8_0) |
+| Peak memory | 16 GB |
 
 ```bash
-# The model is auto-created on startup
+# Auto-created on startup (Apple Silicon)
 ./start.sh
 
-# Or create manually
-ollama create bigiron-finetuned -f configs/ollama/Modelfile.bigiron-finetuned
+# Or test directly
+ollama run bigiron-5k "What is RACF?"
 ```
+
+**Expertise:** z/OS, RACF, JCL, CICS, COBOL, VSAM, JES, mainframe security, Cyber Vault, data encryption.
 
 ### MLX Fine-Tuning Pipeline
 
-For deeper customization, fine-tune on your own data using Apple's MLX framework:
+Train your own model using Apple's MLX framework on Apple Silicon:
 
 ```bash
 # 1. Generate Q&A from indexed Redbooks
-python scripts/training/generate_qa_from_rag.py --limit 2000
+python scripts/training/generate_qa_from_rag.py
 
-# 2. Convert to MLX format and train (~1-2 hours on M1/M2/M3)
-python scripts/training/mlx_finetune.py --iters 1000
+# 2. Run MLX LoRA fine-tuning (5000 iterations recommended)
+python scripts/training/mlx_finetune.py --iters 5000
 
-# 3. Fuse adapter into model
+# 3. Fuse adapter into base model
 python scripts/training/mlx_finetune.py --fuse
+
+# 4. Convert to GGUF for Ollama
+python /tmp/llama.cpp/convert_hf_to_gguf.py data/training/bigiron-5k-fused \
+  --outfile data/training/bigiron-5k.gguf --outtype q8_0
+
+# 5. Create Ollama model
+ollama create bigiron-5k -f configs/ollama/Modelfile.bigiron-5k
 ```
 
-**Why MLX?**
-- Uses Metal GPU (unified memory on Apple Silicon)
-- 64GB RAM = can fine-tune 7B models locally
-- LoRA = small adapter (~100MB), not full model retraining
-- Result: A Mistral that *deeply understands* mainframes
+**Why MLX on Apple Silicon?**
+- Metal GPU acceleration with unified memory
+- 16-64GB RAM = fine-tune 7B models locally
+- LoRA adapters = small (~100MB), fast training
+- No CUDA/Linux required
 
 ### Response Modes
 
