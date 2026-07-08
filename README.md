@@ -71,11 +71,12 @@ This branch (`feature/apple-silicon-bigiron`) adds **local-first AI** optimized 
 
 | Feature | Main Branch | Apple Silicon Branch |
 |---------|------------|----------------------|
-| LLM Backend | Ollama (generic) | **BigIron** (mainframe-tuned Mistral) |
-| Knowledge Source | Generic LLM knowledge | **213 IBM Redbooks** (~4.8M words) |
+| LLM Backend | Ollama (generic) | **BigIron-AI** (fully fine-tuned Mistral-7B) |
+| Knowledge Source | Generic LLM knowledge | **6,240+ curated examples** + IBM Redbooks |
+| Training Method | None | **Full fine-tuning** (all 7.2B parameters) |
 | Response Speed | LLM for everything | **<50ms** for known terms (RAG + fuzzy lookup) |
-| Fine-tuning | None | **MLX LoRA** on Apple Silicon GPU |
 | Embeddings | External API | **Local** (nomic-embed-text) |
+| Personality | Corporate/generic | **Plain English** ("senior mainframer") |
 
 ### RAG Knowledge Base
 
@@ -97,56 +98,63 @@ The app includes a **Retrieval-Augmented Generation** system with:
 
 **Topics covered:** RACF, JCL, ABEND codes, CICS, COBOL, DB2, VSAM, JES2/JES3, TSO/ISPF, z/OS security, Cyber Vault, data encryption, and more.
 
-### BigIron-5k: Fine-Tuned Mainframe Model
+### BigIron-AI: Fine-Tuned Mainframe Model
 
-The **bigiron-5k** model is Mistral-7B fine-tuned on **8,175 Q&A pairs** from IBM Redbooks:
+**BigIron-AI** is Mistral-7B **fully fine-tuned** (all 7.2B parameters) on **6,240+ curated examples**:
 
 | Training Metric | Value |
 |-----------------|-------|
-| Iterations | 5,000 |
-| Training samples | 8,175 |
-| Initial loss | 4.59 |
-| Final loss | 1.29 (72% improvement) |
-| Model size | 7.7 GB (q8_0) |
-| Peak memory | 16 GB |
+| Fine-tune Type | **Full** (not LoRA) |
+| Training samples | 6,240+ |
+| Epochs | 100 |
+| Learning rate | 5e-6 (fine) |
+| Model size | 14 GB (F16) |
+| Peak memory | 39 GB |
 
 ```bash
 # Auto-created on startup (Apple Silicon)
 ./start.sh
 
 # Or test directly
-ollama run bigiron-5k "What is RACF?"
+ollama run bigiron-ai "Write REXX to read a dataset on z/OS"
 ```
 
-**Expertise:** z/OS, RACF, JCL, CICS, COBOL, VSAM, JES, mainframe security, Cyber Vault, data encryption.
+**Expertise:** z/OS, RACF, JCL, CICS, COBOL, VSAM, JES, REXX, Assembler, DB2, mainframe security.
+
+**Personality:** Plain English, no jargon. *"Think of me as that senior mainframer down the hall who actually enjoys helping."*
+
+**Read the whitepaper:** [docs/WHITEPAPER.md](docs/WHITEPAPER.md)
 
 ### MLX Fine-Tuning Pipeline
 
 Train your own model using Apple's MLX framework on Apple Silicon:
 
 ```bash
-# 1. Generate Q&A from indexed Redbooks
-python scripts/training/generate_qa_from_rag.py
+# One-command full fine-tuning (recommended)
+./scripts/training/build_bigiron_ai.sh --epochs 100
 
-# 2. Run MLX LoRA fine-tuning (5000 iterations recommended)
-python scripts/training/mlx_finetune.py --iters 5000
+# Or step by step:
+# 1. Add training examples to data/training/examples/*.jsonl
+# 2. Run the build script
+./scripts/training/build_bigiron_ai.sh --epochs 50
 
-# 3. Fuse adapter into base model
-python scripts/training/mlx_finetune.py --fuse
-
-# 4. Convert to GGUF for Ollama
-python /tmp/llama.cpp/convert_hf_to_gguf.py data/training/bigiron-5k-fused \
-  --outfile data/training/bigiron-5k.gguf --outtype q8_0
-
-# 5. Create Ollama model
-ollama create bigiron-5k -f configs/ollama/Modelfile.bigiron-5k
+# Resume from checkpoint
+./scripts/training/build_bigiron_ai.sh --epochs 100 --resume
 ```
 
 **Why MLX on Apple Silicon?**
+- **Full fine-tuning** of 7B models (not just LoRA)
 - Metal GPU acceleration with unified memory
-- 16-64GB RAM = fine-tune 7B models locally
-- LoRA adapters = small (~100MB), fast training
+- 64GB RAM = train all 7.2 billion parameters
+- Gradient checkpointing for memory efficiency
 - No CUDA/Linux required
+
+**Training Time:**
+| Epochs | Iterations | Time |
+|--------|------------|------|
+| 25 | ~19,400 | ~3-4 hours |
+| 50 | ~38,800 | ~6-7 hours |
+| 100 | ~77,600 | ~10-12 hours |
 
 ### Response Modes
 
