@@ -83,7 +83,8 @@ class Config:
             logger.warning(f"GPU detection failed, falling back to CPU: {e}")
             self.GPU_ENABLED = False
             self.GPU_TIER = "cpu"
-            self.GPU_OLLAMA_OPTIONS = {"num_gpu": 0, "num_thread": 8, "num_ctx": 4096}
+            # Don't set num_gpu=0 - let Ollama auto-detect Metal on Apple Silicon
+            self.GPU_OLLAMA_OPTIONS = {"num_ctx": 4096}
 
 
 # Global configuration instance

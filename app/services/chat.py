@@ -251,6 +251,10 @@ class ChatService:
             "can", "does", "do", "how", "why", "is", "are", "will",
             "would", "should", "could", "when", "where", "who", "what",
             "tell", "show", "give", "list", "describe", "compare",
+            # Contractions
+            "isn't", "isnt", "aren't", "arent", "doesn't", "doesnt",
+            "don't", "dont", "won't", "wont", "can't", "cant",
+            "couldn't", "couldnt", "wouldn't", "wouldnt", "shouldn't", "shouldnt",
         )
         if words and words[0] in question_starts:
             return False
@@ -462,11 +466,22 @@ class ChatService:
         if not self._is_definition_question(user_message) and not self._is_bare_concept_query(user_message):
             return None, "none"
 
+        # Extract the specific concept being asked about
+        target = self._extract_definition_target(user_message)
+        if not target:
+            # For bare concept queries, use the full message
+            target = user_message.strip()
+
+        # Only match if target is a direct concept, not "X on Y" or "X in Y"
+        if re.search(r'\b(on|in|for|with|about|from)\s+\w+', target, re.IGNORECASE):
+            # This is a contextual question like "shit on z/os" - let LLM handle it
+            return None, "none"
+
         answers = []
         seen_titles: set[str] = set()
         used_seed = False
 
-        for seed_entry in find_seed_definition_entries(user_message, limit=6):
+        for seed_entry in find_seed_definition_entries(target, limit=6):
             title = seed_entry.get("title", "")
             title_key = title.lower()
             if title_key in seen_titles:
@@ -475,7 +490,7 @@ class ChatService:
             seen_titles.add(title_key)
             used_seed = True
 
-        entries = find_mainframe_memory_entries(user_message, limit=6)
+        entries = find_mainframe_memory_entries(target, limit=6)
 
         for entry in entries:
             title = entry.get("title", "Mainframe concept")
@@ -652,9 +667,10 @@ class ChatService:
             used_chunks = 1 if concept_source == "rag_seed_direct" else 0
             return concept_direct_answer, concept_source == "rag_seed_direct", concept_source, used_chunks
 
-        unknown_answer = self._unknown_short_concept_answer(user_message)
-        if unknown_answer:
-            return unknown_answer, False, "unknown_guard", 0
+        # Let unknown terms fall through to LLM instead of blocking
+        # unknown_answer = self._unknown_short_concept_answer(user_message)
+        # if unknown_answer:
+        #     return unknown_answer, False, "unknown_guard", 0
 
         rag_results = await self.get_rag_results(user_message, n_results=3)
         rag_chunks = len(rag_results)
@@ -668,10 +684,11 @@ class ChatService:
         if rag_definition_answer:
             return rag_definition_answer, True, "rag_direct", rag_chunks
 
-        if self._is_definition_question(user_message):
-            unknown_definition_answer = self._unknown_definition_help_answer(user_message, rag_results)
-            if unknown_definition_answer:
-                return unknown_definition_answer, bool(rag_results), "unknown_guard", rag_chunks if rag_results else 0
+        # Let unknown definitions fall through to LLM
+        # if self._is_definition_question(user_message):
+        #     unknown_definition_answer = self._unknown_definition_help_answer(user_message, rag_results)
+        #     if unknown_definition_answer:
+        #         return unknown_definition_answer, bool(rag_results), "unknown_guard", rag_chunks if rag_results else 0
 
         # Log query miss for backlog before falling back to LLM
         if self._miss_tracker:
@@ -708,22 +725,23 @@ class ChatService:
                     conversation_context += f"{role}: {content}\n"
 
         prompt = (
-            "Answer this mainframe question concisely in BigIron.ai style. "
-            "Use mainframe-native terms. Do not generate JCL or code unless explicitly asked. "
-            "For ABEND codes, include meaning, likely cause, and one evidence item to check. "
-            "Use at most 4 short bullets or 80 words. Stop after the direct answer.\n\n"
-            "IMPORTANT: If the question is unclear, ambiguous, or you don't have enough context "
-            "(e.g., pronouns like 'they' or 'it' without clear reference), ask for clarification "
-            "instead of guessing. Say 'Could you clarify what you mean by X?' or 'I'm not sure what you're referring to.'\n\n"
-            f"Question: {user_message}"
-            f"{conversation_context}"
-            f"{reference_context}"
+            "You are BigIron, a mainframe expert. Answer the user's question directly.\n\n"
+            f"{reference_context}\n\n"
+            f"{conversation_context}\n\n"
+            "INSTRUCTIONS:\n"
+            "- Answer the USER'S QUESTION below, not the reference context above\n"
+            "- If the question is unclear or off-topic, ask for clarification\n"
+            "- Use mainframe-native terms when relevant\n"
+            "- Be concise: max 4 bullets or 80 words\n"
+            "- Only use reference context if it's actually relevant to the question\n\n"
+            f"USER'S QUESTION: {user_message}\n\n"
+            "YOUR ANSWER:"
         )
         response = await self.llm.chat_compact(
             [{"role": "user", "content": prompt}],
             system_prompt="You are BigIron.ai. Answer directly using mainframe-native terms.",
             temperature=0.2,
-            max_tokens=140,
+            max_tokens=512,
             timeout=45.0,
         )
         return response, bool(rag_context), context_source, rag_chunks

@@ -210,7 +210,7 @@ info "Training for $ITERS iterations ($EPOCHS epochs)"
     --iters "$ITERS" \
     --learning-rate "$LEARNING_RATE" \
     --adapter-path "$FULL_MODEL_DIR/weights" \
-    --save-every 500 \
+    --save-every 5000 \
     --grad-checkpoint \
     --max-seq-length "$MAX_SEQ_LEN" \
     --test

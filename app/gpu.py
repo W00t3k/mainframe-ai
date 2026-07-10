@@ -437,8 +437,7 @@ GPU_MODEL_TIERS = {
         ],
         "default": "llama3.1:8b",
         "ollama_options": {
-            "num_gpu": 0,
-            "num_thread": 8,
+            # Don't set num_gpu - let Ollama auto-detect Metal on Apple Silicon
             "num_ctx": 4096,
             "num_batch": 256,
         },

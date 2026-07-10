@@ -102,7 +102,12 @@ class UnifiedLLMService:
             ollama = get_ollama_service()
             return await ollama.generate(prompt, temperature=temperature, num_predict=max_tokens, timeout=timeout)
 
-    async def chat_simple(self, messages: List[Dict[str, str]], system_prompt: str = "") -> str:
+    async def chat_simple(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: str = "",
+        max_tokens: int = 2048,
+    ) -> str:
         """Simple chat returning just text."""
         provider = await self.get_active_provider()
         self._last_provider_used = provider
@@ -115,6 +120,37 @@ class UnifiedLLMService:
             from app.services.ollama import get_ollama_service
             ollama = get_ollama_service()
             return await ollama.chat_simple(messages)
+
+    async def chat_compact(
+        self,
+        messages: List[Dict[str, str]],
+        system_prompt: str = "",
+        temperature: float = 0.7,
+        max_tokens: int = 150,
+        timeout: float = 30.0,
+    ) -> str:
+        """Compact chat for quick Q&A - lower token limit, faster timeout."""
+        provider = await self.get_active_provider()
+        self._last_provider_used = provider
+
+        if provider == "grok":
+            from app.services.grok import get_grok_service
+            grok = get_grok_service()
+            return await grok.chat_simple(messages, system_prompt)
+        else:
+            from app.services.ollama import get_ollama_service
+            ollama = get_ollama_service()
+            # Build prompt with system context
+            prompt = system_prompt + "\n\n" if system_prompt else ""
+            for msg in messages:
+                role = msg["role"]
+                content = msg["content"]
+                if role == "user":
+                    prompt += f"User: {content}\n\n"
+                else:
+                    prompt += f"Assistant: {content}\n\n"
+            prompt += "Assistant: "
+            return await ollama.generate(prompt, temperature=temperature, num_predict=max_tokens, timeout=timeout)
 
     async def quick_explain(self, screen_text: str, context: str = "") -> str:
         """Fast screen explanation."""

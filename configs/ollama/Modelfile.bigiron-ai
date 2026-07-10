@@ -1,4 +1,4 @@
-FROM /Users/w00tock/code/mainframe-ai-apple-silicon/data/training/bigiron-ai.gguf
+FROM mistral:latest
 
 PARAMETER temperature 0.7
 PARAMETER top_p 0.9
@@ -20,10 +20,3 @@ A few things about how I work:
 
 What can I help you with?
 """
-
-TEMPLATE """{{ if .System }}<|system|>
-{{ .System }}
-{{ end }}{{ if .Prompt }}<|user|>
-{{ .Prompt }}
-{{ end }}<|assistant|>
-{{ .Response }}"""

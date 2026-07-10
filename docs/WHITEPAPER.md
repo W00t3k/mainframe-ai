@@ -7,7 +7,7 @@
 <p align="center">
   <a href="#contributions">Contributions</a> •
   <a href="#13-open-mainframe-ai-training-dataset">Dataset</a> •
-  <a href="https://github.com/YOUR_REPO/bigiron-ai">GitHub</a> •
+  <a href="https://github.com/W00t3k/mainframe-ai">GitHub</a> •
   <a href="#citation">Cite</a>
 </p>
 
@@ -21,7 +21,7 @@
 
 ## Abstract
 
-This paper documents the development of BigIron-AI, a domain-specialized large language model fully fine-tuned for IBM mainframe expertise. Using Apple Silicon's Metal GPU acceleration and the MLX framework, we performed full parameter fine-tuning on Mistral-7B-Instruct-v0.3 with 6,220+ curated training examples covering z/OS, RACF, JCL, COBOL, CICS, VSAM, REXX, and related mainframe technologies. Unlike traditional LoRA approaches that modify only adapter weights, our full fine-tuning trains all 7.2 billion parameters, achieving deeper domain specialization. The resulting model speaks plain English while maintaining technical accuracy, designed to be "the senior mainframer down the hall who actually enjoys helping." This work demonstrates that production-quality domain specialization is achievable on consumer Apple Silicon hardware.
+This paper documents the development of BigIron-AI, a domain-specialized large language model fully fine-tuned for IBM mainframe expertise. Using Apple Silicon's Metal GPU acceleration and the MLX framework, we performed full parameter fine-tuning on Mistral-7B-Instruct-v0.3 with 9,042 curated training examples covering z/OS, RACF, JCL, COBOL, CICS, VSAM, REXX, and related mainframe technologies. Unlike traditional LoRA approaches that modify only adapter weights, our full fine-tuning trains all 7.2 billion parameters, achieving deeper domain specialization. The resulting model speaks plain English while maintaining technical accuracy, designed to be "the senior mainframer down the hall who actually enjoys helping." This work demonstrates that production-quality domain specialization is achievable on consumer Apple Silicon hardware.
 
 **Keywords:** Large Language Models, Full Fine-tuning, Mainframe Computing, Apple Silicon, MLX, Domain Adaptation, COBOL, z/OS
 
@@ -35,7 +35,7 @@ This work makes the following novel contributions to the field:
 
 2. **Zero-cost domain specialization pipeline** - A complete, reproducible workflow for creating production-quality domain-specific models without cloud compute costs.
 
-3. **Open mainframe training corpus** - 6,220+ curated examples covering COBOL, JCL, REXX, RACF, CICS, VSAM, DB2, and z/OS system programming, available for community use and extension.
+3. **Open mainframe training corpus** - 9,042 curated examples covering COBOL, JCL, REXX, RACF, CICS, VSAM, DB2, and z/OS system programming, available for community use and extension.
 
 4. **Comprehensive evaluation of public mainframe datasets** - Documentation of what's actually available (MainframeBench), what's not useful (IBM CodeNet has no COBOL), and what's private (XMainframe training data).
 
@@ -60,6 +60,7 @@ This work makes the following novel contributions to the field:
 11. [Conclusion](#11-conclusion)
 12. [Appendix: Technical Specifications](#12-appendix-technical-specifications)
 13. [Open Mainframe AI Training Dataset](#13-open-mainframe-ai-training-dataset)
+14. [Appendix: HuggingFace Submission Guide](#14-appendix-huggingface-submission-guide)
 
 ---
 
@@ -261,7 +262,7 @@ mlx_lm.lora(
 
 ### Data Sources
 
-Our training corpus combines multiple sources totaling 6,220+ examples:
+Our training corpus combines multiple sources totaling 9,042 examples:
 
 #### 1. Hand-Crafted Code Examples (50+ files, ~3,600 examples)
 
@@ -338,7 +339,7 @@ All training data uses the chat/instruction format:
 |--------|----------|
 | Hand-crafted code examples | ~3,600 |
 | MainframeBench Q&A | 2,598 |
-| **Total** | **~6,220** |
+| **Total** | **~9,042** |
 
 ---
 
@@ -476,7 +477,7 @@ Hardware: Apple Silicon M-series, 64GB unified memory
 | bigiron-v2 | LoRA | 2000 | +code examples | 7.2 GB (Q4) | Added code training |
 | bigiron-v3 | High-rank LoRA | 2000 | +terminology | 14 GB (F16) | Improved prompts |
 | bigiron-v4 | High-rank LoRA | 2000 | +246 code examples | 14 GB (F16) | Pre-production |
-| **bigiron-ai** | **Full fine-tune** | **11,643** | **6,220 examples** | **14 GB (F16)** | **Production** |
+| **bigiron-ai** | **Full fine-tune** | **11,643** | **9,042 examples** | **14 GB (F16)** | **Production** |
 
 ---
 
@@ -768,7 +769,7 @@ to find your COBOL statement.
 
 | Aspect | Status |
 |--------|--------|
-| Training Data | 6,220+ examples |
+| Training Data | 9,042 examples |
 | Model Version | **bigiron-ai** (production) |
 | Fine-tuning Type | Full (all 7.2B parameters) |
 | Training | 15-25 epochs |
@@ -817,11 +818,11 @@ helping people learn.
     └── Enhanced REXX/z/OS examples
     └── Comprehensive evaluation
 
-[ ] Phase 5: Distribution
-    └── Model weights on HuggingFace
-    └── Ollama library submission
-    └── Community feedback
-    └── Documentation complete
+[✓] Phase 5: Distribution
+    └── Model weights on HuggingFace (bigiron-ai/bigiron-7b)
+    └── Dataset on HuggingFace (bigiron-ai/mainframe-instruct)
+    └── Ollama local deployment ready
+    └── Documentation complete (whitepaper, model card)
 ```
 
 ### Recent Improvements
@@ -1051,7 +1052,7 @@ Beyond the trained model, this project produces a **curated mainframe training d
 | Utilities | 4 | ~300 | DFSORT, IDCAMS, IEBCOPY, ADRDSSU |
 | Other | 6 | ~400 | JES2, GDG, PDS/PDSE, SMF, APF, PL/I |
 | **External** | - | **2,598** | MainframeBench Q&A |
-| **Total** | **50+** | **~6,220** | |
+| **Total** | **50+** | **~9,042** | |
 
 ### Dataset Format
 
@@ -1104,18 +1105,241 @@ The training dataset is released under Apache 2.0, allowing:
 
 We encourage the mainframe community to contribute additional examples, corrections, and improvements.
 
-### Future: HuggingFace Release
+### HuggingFace Release
 
-We plan to release both the model and dataset on HuggingFace:
+The model and dataset are available on HuggingFace:
 
-- **Model**: `bigiron-ai/bigiron-7b` - Fine-tuned Mistral-7B
-- **Dataset**: `bigiron-ai/mainframe-instruct` - 6,220+ training examples
+- **Model**: [`bigiron-ai/bigiron-7b`](https://huggingface.co/bigiron-ai/bigiron-7b) - Fine-tuned Mistral-7B (14GB safetensors)
+- **Dataset**: [`bigiron-ai/mainframe-instruct`](https://huggingface.co/datasets/bigiron-ai/mainframe-instruct) - 9,042 training examples
 
-This will enable researchers and practitioners to:
+#### Using the Model from HuggingFace
+
+```python
+from transformers import AutoModelForCausalLM, AutoTokenizer
+import torch
+
+# Load model and tokenizer
+model_id = "bigiron-ai/bigiron-7b"
+tokenizer = AutoTokenizer.from_pretrained(model_id)
+model = AutoModelForCausalLM.from_pretrained(
+    model_id,
+    torch_dtype=torch.float16,
+    device_map="auto"
+)
+
+# Generate response
+prompt = "What causes an S0C7 abend in COBOL?"
+inputs = tokenizer(prompt, return_tensors="pt").to(model.device)
+outputs = model.generate(**inputs, max_new_tokens=256, temperature=0.7)
+print(tokenizer.decode(outputs[0], skip_special_tokens=True))
+```
+
+#### Using the Dataset
+
+```python
+from datasets import load_dataset
+
+# Load the full dataset
+dataset = load_dataset("bigiron-ai/mainframe-instruct")
+
+# Access splits
+train = dataset["train"]      # 7,686 examples
+valid = dataset["validation"] # 904 examples
+test = dataset["test"]        # 452 examples
+
+# Example format
+print(train[0])
+# {"messages": [{"role": "user", "content": "..."}, {"role": "assistant", "content": "..."}]}
+```
+
+#### Publishing Your Own Version
+
+To upload a modified version to HuggingFace:
+
+```bash
+# 1. Install HuggingFace CLI
+pip install huggingface_hub
+
+# 2. Login to HuggingFace
+huggingface-cli login
+
+# 3. Use the provided upload script
+./scripts/upload_to_huggingface.sh --both
+
+# Or upload separately:
+./scripts/upload_to_huggingface.sh --model    # Upload model (~14GB)
+./scripts/upload_to_huggingface.sh --dataset  # Upload dataset (~50MB)
+```
+
+This enables researchers and practitioners to:
 - Fine-tune their own mainframe models
 - Extend our training corpus
 - Benchmark against our results
 - Build specialized mainframe AI tools
+
+---
+
+## 14. Appendix: HuggingFace Submission Guide
+
+This section provides detailed instructions for submitting BigIron-AI to HuggingFace.
+
+### Prerequisites
+
+1. **HuggingFace Account**: Create at https://huggingface.co/join
+2. **Access Token**: Generate at https://huggingface.co/settings/tokens (with write access)
+3. **Git LFS**: Required for large model files
+
+```bash
+# Install Git LFS (macOS)
+brew install git-lfs
+git lfs install
+
+# Install HuggingFace Hub
+pip install huggingface_hub
+```
+
+### Step 1: Login to HuggingFace
+
+```bash
+huggingface-cli login
+# Paste your access token when prompted
+```
+
+### Step 2: Create Repositories
+
+```bash
+# Create model repository
+huggingface-cli repo create bigiron-7b --type model
+
+# Create dataset repository
+huggingface-cli repo create mainframe-instruct --type dataset
+```
+
+### Step 3: Prepare Model Files
+
+The model files are located at `data/training/bigiron_full/fused/`:
+
+```
+fused/
+├── config.json                    # Model configuration
+├── generation_config.json         # Generation settings
+├── model-00001-of-00003.safetensors  # Model weights (5.3GB)
+├── model-00002-of-00003.safetensors  # Model weights (5.4GB)
+├── model-00003-of-00003.safetensors  # Model weights (3.9GB)
+├── model.safetensors.index.json   # Weight index
+├── README.md                      # Model card
+├── special_tokens_map.json        # Special tokens
+├── tokenizer.json                 # Tokenizer
+├── tokenizer.model                # Tokenizer model
+└── tokenizer_config.json          # Tokenizer config
+```
+
+### Step 4: Upload Model
+
+```bash
+# Using the provided script (recommended)
+./scripts/upload_to_huggingface.sh --model
+
+# Or manually
+cd data/training/bigiron_full/fused
+git clone https://huggingface.co/YOUR_USERNAME/bigiron-7b
+cp -r * bigiron-7b/
+cd bigiron-7b
+git add .
+git commit -m "Upload BigIron-AI v1.0"
+git push
+```
+
+### Step 5: Prepare Dataset
+
+The dataset is in JSONL format:
+
+```
+data/training/mlx_data/
+├── train.jsonl   # 7,686 examples
+├── valid.jsonl   #   904 examples
+└── test.jsonl    #   452 examples
+```
+
+### Step 6: Upload Dataset
+
+```bash
+# Using the provided script (recommended)
+./scripts/upload_to_huggingface.sh --dataset
+
+# Or manually
+huggingface-cli upload YOUR_USERNAME/mainframe-instruct \
+    data/training/mlx_data/ . \
+    --repo-type dataset
+```
+
+### Step 7: Verify Uploads
+
+1. Visit `https://huggingface.co/YOUR_USERNAME/bigiron-7b`
+2. Visit `https://huggingface.co/datasets/YOUR_USERNAME/mainframe-instruct`
+3. Test loading:
+
+```python
+# Test model
+from transformers import AutoModelForCausalLM
+model = AutoModelForCausalLM.from_pretrained("YOUR_USERNAME/bigiron-7b")
+
+# Test dataset
+from datasets import load_dataset
+ds = load_dataset("YOUR_USERNAME/mainframe-instruct")
+```
+
+### Model Card Requirements
+
+A good HuggingFace model card (README.md) should include:
+
+| Section | Description |
+|---------|-------------|
+| YAML Front Matter | License, tags, base model, pipeline |
+| Model Description | What the model does, key features |
+| Intended Uses | Target use cases |
+| Training Details | Base model, method, data, hardware |
+| Usage Examples | Code snippets for inference |
+| Limitations | Known issues, out-of-scope uses |
+| Citation | BibTeX for academic use |
+
+### Dataset Card Requirements
+
+| Section | Description |
+|---------|-------------|
+| YAML Front Matter | License, language, tags, size |
+| Dataset Description | What's in the dataset |
+| Dataset Structure | Splits, format, fields |
+| Usage Examples | How to load and use |
+| Sources | Where data came from |
+
+### Ollama Library Submission
+
+To also submit to the Ollama library:
+
+1. Fork `https://github.com/ollama/ollama`
+2. Add model manifest in `models/`
+3. Submit pull request with model details
+
+```yaml
+# Example manifest
+name: bigiron-ai
+description: Mainframe expert LLM
+parameters:
+  temperature: 0.7
+  context_length: 4096
+license: Apache 2.0
+repository: https://huggingface.co/bigiron-ai/bigiron-7b
+```
+
+### Troubleshooting
+
+| Issue | Solution |
+|-------|----------|
+| Upload timeout | Use `--chunk-size` flag for large files |
+| Git LFS errors | Run `git lfs install` first |
+| Auth errors | Regenerate token with write permissions |
+| Quota exceeded | Request increased storage at HF |
 
 ---
 
@@ -1153,8 +1377,8 @@ If you use BigIron-AI or the mainframe training dataset in your research, please
   title={BigIron-AI: Fine-Tuning Large Language Models for Mainframe Domain Expertise on Apple Silicon},
   author={BigIron-AI Project Contributors},
   year={2026},
-  howpublished={\url{https://github.com/YOUR_REPO/bigiron-ai}},
-  note={Version 2.0}
+  howpublished={\url{https://github.com/W00t3k/mainframe-ai}},
+  note={Version 2.0, HuggingFace: bigiron-ai/bigiron-7b}
 }
 ```
 
