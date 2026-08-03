@@ -67,7 +67,7 @@ detect_model() {
   if [ "$(uname -s)" = "Darwin" ] && [ "$(uname -m)" = "arm64" ]; then
     TOTAL_RAM_MB=$(sysctl -n hw.memsize 2>/dev/null | awk '{printf "%d", $1/1048576}')
     [ -z "$TOTAL_RAM_MB" ] && TOTAL_RAM_MB=16000
-    MODEL="bigiron-5k"
+    MODEL="bigironv2"
     info "Apple Silicon detected — local Ollama mode with $MODEL"
     return
   fi
@@ -365,8 +365,9 @@ start_ollama_svc() {
   info "RAM: ${TOTAL_RAM_MB}MB → target model: ${BLD}$MODEL${RST}"
   OLLAMA_OK=1
 
-  if [ "$MODEL" = "bigiron-5k" ]; then
-    ensure_bigiron_5k_model
+  # Check if target model is available (handles both standard and custom models)
+  if [ "$MODEL" = "bigironv2" ]; then
+    ensure_bigiron_model
     return 0
   fi
 
@@ -396,36 +397,37 @@ ollama_has_model() {
     | grep -qx "$model"
 }
 
-ensure_bigiron_5k_model() {
-  local modelfile="$DIR/configs/ollama/Modelfile.bigiron-5k"
+ensure_bigiron_model() {
+  local modelfile="$DIR/configs/ollama/Modelfile.bigironv2"
 
-  if ollama_has_model "bigiron-5k"; then
-    ok "Model bigiron-5k ready (5000-iter fine-tuned)"
+  if ollama_has_model "bigironv2"; then
+    ok "Model bigironv2 ready (fine-tuned)"
     return 0
   fi
 
   if [ ! -f "$modelfile" ]; then
     fail "Missing $modelfile"
+    info "Run: ./scripts/training/bigiron_autopilot.sh"
     info "Falling back to mistral"
     MODEL="mistral"
     return 0
   fi
 
   # Check if GGUF exists
-  local gguf_path="$DIR/data/training/bigiron-5k.gguf"
+  local gguf_path="$DIR/data/training/bigiron-v2.gguf"
   if [ ! -f "$gguf_path" ]; then
     fail "Missing $gguf_path"
-    info "Run scripts/training/mlx_finetune.py to create the fine-tuned model"
+    info "Run: ./scripts/training/bigiron_autopilot.sh"
     info "Falling back to mistral"
     MODEL="mistral"
     return 0
   fi
 
-  info "Creating bigiron-5k from $modelfile..."
-  if ollama create bigiron-5k -f "$modelfile" >> "$LOGDIR/ollama.log" 2>&1; then
-    ok "Model bigiron-5k ready (5000-iter fine-tuned)"
+  info "Creating bigironv2 from $modelfile..."
+  if ollama create bigironv2 -f "$modelfile" >> "$LOGDIR/ollama.log" 2>&1; then
+    ok "Model bigironv2 ready (fine-tuned)"
   else
-    fail "Could not create bigiron-5k"
+    fail "Could not create bigironv2"
     info "Falling back to mistral"
     MODEL="mistral"
   fi

@@ -1,6 +1,6 @@
 # BigIron-AI Project
 
-Mainframe AI assistant built on Apple Silicon. Fine-tuned 7B model specialized in z/OS, COBOL, JCL, CICS, RACF, DB2, and VSAM.
+Mainframe AI assistant built on Apple Silicon. Fine-tuned 7B model specialized in z/OS, COBOL, JCL, CICS, RACF, DB2, VSAM, and REXX.
 
 ## Quick Start
 
@@ -13,29 +13,29 @@ Mainframe AI assistant built on Apple Silicon. Fine-tuned 7B model specialized i
 | Directory | Purpose |
 |-----------|---------|
 | `app/` | FastAPI web interface |
-| `configs/ollama/` | Ollama Modelfiles |
-| `data/training/` | Training data and model outputs |
-| `data/training/examples/` | JSONL training examples |
+| `configs/ollama/` | Ollama Modelfile (bigironv2) |
+| `data/training/examples/` | Curated JSONL training examples (86 total) |
+| `data/training/mlx_data/` | Processed train/valid splits |
 | `scripts/training/` | Build and training scripts |
-| `tk5/` | TK5 MVS 3.8j emulator |
+| `tk5/` | TK5 MVS 3.8j emulator for RLVR |
 
-## Models
+## Current Model
 
-**Active:** `bigiron-ai` - Full fine-tuned Mistral-7B (15 epochs, 6,210 samples)
+**Active:** `bigironv2` - LoRA fine-tuned Mistral-7B (86 curated examples, Q8 quantization)
 
 ```bash
 # Register with Ollama
-ollama create bigiron-ai -f configs/ollama/Modelfile.bigiron-ai
+ollama create bigironv2 -f configs/ollama/Modelfile.bigironv2
 
 # Test
-ollama run bigiron-ai "What is RACF?"
+ollama run bigironv2 "What is RACF?"
 ```
 
 ## Training
 
 ```bash
-# Retrain with more epochs
-./scripts/training/build_bigiron_ai.sh --epochs 20
+# Full retrain
+./scripts/training/build_bigiron_ai.sh --epochs 5
 
 # Resume from checkpoint
 ./scripts/training/build_bigiron_ai.sh --resume
@@ -51,12 +51,24 @@ Uses Python 3.12 environment (`.venv-train/`) for MLX compatibility.
 
 ## Key Files
 
-- `data/training/bigiron-ai.gguf` - The model (14GB)
-- `configs/ollama/Modelfile.bigiron-ai` - Ollama config
+- `data/training/bigiron-v2.gguf` - The model (7.2GB)
+- `configs/ollama/Modelfile.bigironv2` - Ollama config
 - `scripts/training/build_bigiron_ai.sh` - Training pipeline
+
+## Training Data
+
+| Category | File | Examples |
+|----------|------|----------|
+| JCL | `jcl_curated.jsonl` | 20 |
+| COBOL | `cobol_curated.jsonl` | 15 |
+| CICS | `cics_curated.jsonl` | 10 |
+| REXX | `rexx_curated.jsonl` | 10 |
+| RACF | `racf_curated.jsonl` | 12 |
+| DB2 | `db2_curated.jsonl` | 9 |
+| z/OS | `zos_knowledge.jsonl` | 10 |
 
 ## Docs
 
-- `docs/BIGIRON_AI.md` - Model architecture and capabilities
+- `docs/WHITEPAPER.md` - Full technical whitepaper
+- `docs/BIGIRON_AI.md` - Model architecture
 - `docs/TRAINING.md` - Training guide
-- `docs/EXTERNAL_DATASETS.md` - Available datasets

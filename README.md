@@ -72,7 +72,7 @@ This branch (`feature/apple-silicon-bigiron`) adds **local-first AI** optimized 
 | Feature | Main Branch | Apple Silicon Branch |
 |---------|------------|----------------------|
 | LLM Backend | Ollama (generic) | **BigIron-AI** (fully fine-tuned Mistral-7B) |
-| Knowledge Source | Generic LLM knowledge | **6,240+ curated examples** + IBM Redbooks |
+| Knowledge Source | Generic LLM knowledge | **120,000+ examples** (33,733 source + Redbooks) |
 | Training Method | None | **Full fine-tuning** (all 7.2B parameters) |
 | Response Speed | LLM for everything | **<50ms** for known terms (RAG + fuzzy lookup) |
 | Embeddings | External API | **Local** (nomic-embed-text) |
@@ -98,30 +98,29 @@ The app includes a **Retrieval-Augmented Generation** system with:
 
 **Topics covered:** RACF, JCL, ABEND codes, CICS, COBOL, DB2, VSAM, JES2/JES3, TSO/ISPF, z/OS security, Cyber Vault, data encryption, and more.
 
-### BigIron-AI: Fine-Tuned Mainframe Model
+### BigironV2: Clean Fine-Tuned Mainframe Model
 
-**BigIron-AI** is Mistral-7B **fully fine-tuned** (all 7.2B parameters) on **6,240+ curated examples**:
+**BigironV2** is Mistral-7B fine-tuned on **86 hand-curated, high-quality examples** — quality over quantity:
 
 | Training Metric | Value |
 |-----------------|-------|
-| Fine-tune Type | **Full** (not LoRA) |
-| Training samples | 6,240+ |
-| Epochs | 100 |
-| Learning rate | 5e-6 (fine) |
-| Model size | 14 GB (F16) |
-| Peak memory | 39 GB |
+| Fine-tune Type | LoRA |
+| Training examples | 86 curated |
+| Val loss | 2.077 → 1.090 |
+| Model size | 7.2 GB (Q8) |
+| RLVR Score | 10 consecutive 5s in 39 iterations |
 
 ```bash
-# Auto-created on startup (Apple Silicon)
+# Quick start
 ./start.sh
 
 # Or test directly
-ollama run bigiron-ai "Write REXX to read a dataset on z/OS"
+ollama run bigironv2 "Write JCL to copy a PDS using IEBCOPY"
 ```
 
-**Expertise:** z/OS, RACF, JCL, CICS, COBOL, VSAM, JES, REXX, Assembler, DB2, mainframe security.
+**Expertise:** z/OS, RACF, JCL, CICS, COBOL, VSAM, JES, REXX, DB2.
 
-**Personality:** Plain English, no jargon. *"Think of me as that senior mainframer down the hall who actually enjoys helping."*
+**Clean output:** No bracket tags, no OS/400 confusion, no artifacts.
 
 **Read the whitepaper:** [docs/WHITEPAPER.md](docs/WHITEPAPER.md)
 
@@ -131,15 +130,15 @@ Train your own model using Apple's MLX framework on Apple Silicon:
 
 ```bash
 # One-command full fine-tuning (recommended)
-./scripts/training/build_bigiron_ai.sh --epochs 100
+./scripts/training/build_bigiron_ai.sh --epochs 5
 
 # Or step by step:
 # 1. Add training examples to data/training/examples/*.jsonl
 # 2. Run the build script
-./scripts/training/build_bigiron_ai.sh --epochs 50
+./scripts/training/build_bigiron_ai.sh --epochs 3
 
-# Resume from checkpoint
-./scripts/training/build_bigiron_ai.sh --epochs 100 --resume
+# Resume from checkpoint (incremental training)
+./scripts/training/build_bigiron_ai.sh --epochs 5 --resume
 ```
 
 **Why MLX on Apple Silicon?**
@@ -149,12 +148,12 @@ Train your own model using Apple's MLX framework on Apple Silicon:
 - Gradient checkpointing for memory efficiency
 - No CUDA/Linux required
 
-**Training Time:**
+**Training Time (120k samples):**
 | Epochs | Iterations | Time |
 |--------|------------|------|
-| 25 | ~19,400 | ~3-4 hours |
-| 50 | ~38,800 | ~6-7 hours |
-| 100 | ~77,600 | ~10-12 hours |
+| 3 | ~45,000 | ~8-10 hours |
+| 5 | ~75,000 | ~12-15 hours |
+| 10 | ~150,000 | ~24-30 hours |
 
 ### Response Modes
 

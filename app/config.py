@@ -21,7 +21,7 @@ class Config:
     
     # Ollama settings
     OLLAMA_URL: str = field(default_factory=lambda: os.getenv("OLLAMA_URL", "http://localhost:11434"))
-    OLLAMA_MODEL: str = field(default_factory=lambda: os.getenv("OLLAMA_MODEL", "llama3.1:8b"))
+    OLLAMA_MODEL: str = field(default_factory=lambda: os.getenv("OLLAMA_MODEL", "bigironv2"))
     
     # Server settings
     HOST: str = "127.0.0.1"

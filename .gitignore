@@ -40,11 +40,27 @@ data/rag_data/embeddings.json
 data/feedback/*.jsonl
 data/training/generated/*.jsonl
 
-# Large model files (regenerate locally with scripts/training/mlx_finetune.py)
+# Large model files (regenerate locally)
 *.gguf
 data/training/mlx_adapters*/
 data/training/bigiron-*-fused/
 data/training/bigiron-mlx-fused/
+data/training/bigiron_full/
+data/training/bigiron_final/
+data/training/bigiron_clean_lora/
+data/training/adapters_clean/
+data/training/clean_jcl_data/
+
+# Training environments
+.venv-train/
+
+# Redbooks PDFs (too large)
+data/redbooks/*.pdf
+data/redbooks/archive_pdfs/
+data/redbooks/security/
+
+# External data (download separately)
+data/external/
 
 # Screencaps (user-specific)
 screencaps/

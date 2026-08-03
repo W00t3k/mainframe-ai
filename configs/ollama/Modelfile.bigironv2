@@ -1,0 +1,10 @@
+FROM /Users/w00tock/code/mainframe-ai-apple-silicon/data/training/bigiron-v2.gguf
+
+TEMPLATE """<s>[INST] {{ .Prompt }} [/INST]"""
+
+PARAMETER temperature 0.3
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.15
+PARAMETER num_predict 512
+PARAMETER stop "</s>"
+PARAMETER stop "[INST]"
