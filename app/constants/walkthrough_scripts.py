@@ -20,7 +20,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Authenticate",
                 "control_plane": "tso",
-                "narration": "**Logging in as HERC01**\n\nEntering userid and password. RACF verifies credentials.",
+                "narration": "**Logging in as HERC01**\n\nEntering userid and password. RAKF verifies credentials.",
                 "actions": [{"type": "tso_login"}],
                 "expect": ["READY", "ISPF", "RFE", "TSOAPPLS"],
                 "display_seconds": 4,
@@ -84,7 +84,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "TSO Logon — Identity Binding",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO / RACF (Identity Binding & Authentication)**\n\nWe log in as HERC01. The login sequence traverses several screens:\n\n1. **Userid** — entered at the `Logon ===>` prompt, routes our VTAM session to TSO\n2. **Password** — verified by RACF (not TSO)\n3. **Broadcast messages** — system announcements, press Enter\n4. **Fortune screen** — press Enter to continue\n5. **TSO Applications Menu** — identity is now bound\n\n**Key concept:** VTAM acts as a session router. The transition from VTAM to TSO is a control-plane boundary crossing.\n\n**Broken Assumption:** *\"There is a root user.\"* There is no root. RACF distributes authority across profiles. The userid `HERC01` determines which profile set applies.\n\nAuthentication proves identity, but authentication is not authorization.",
+                "narration": "**Control Plane: TSO / RAKF (Identity Binding & Authentication)**\n\nWe log in as HERC01. The login sequence traverses several screens:\n\n1. **Userid** — entered at the `Logon ===>` prompt, routes our VTAM session to TSO\n2. **Password** — verified by RAKF (not TSO)\n3. **Broadcast messages** — system announcements, press Enter\n4. **Fortune screen** — press Enter to continue\n5. **TSO Applications Menu** — identity is now bound\n\n**Key concept:** VTAM acts as a session router. The transition from VTAM to TSO is a control-plane boundary crossing.\n\n**Broken Assumption:** *\"There is a root user.\"* There is no root. RAKF distributes authority across profiles. The userid `HERC01` determines which profile set applies.\n\nAuthentication proves identity, but authentication is not authorization.",
                 "actions": [{"type": "tso_login"}],
                 "expect": ["READY", "ISPF", "IKJ56455I", "RFE", "TSOAPPLS"],
                 "display_seconds": 6,
@@ -102,7 +102,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "ISPF Utilities — Dataset List (3.4)",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (Dataset Navigation)**\n\nWe use RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) to list datasets. Datasets are the mainframe storage model — not a filesystem.\n\n**Key concept:** The mainframe does not have `/etc`, `/var`, or config files in the Unix sense. Everything is stored in datasets: cataloged, named objects with structure (PDS, sequential, VSAM). Access is controlled by RACF profiles, not filesystem permissions.\n\n**Findings Area F5 — Imported Assumptions:** The mainframe uses a flat catalog namespace with profile-based protection — not a filesystem hierarchy.",
+                "narration": "**Control Plane: TSO/ISPF (Dataset Navigation)**\n\nWe use RFE option 3 (UTILITIES), then sub-option 4 (DSLIST) to list datasets. Datasets are the mainframe storage model — not a filesystem.\n\n**Key concept:** The mainframe does not have `/etc`, `/var`, or config files in the Unix sense. Everything is stored in datasets: cataloged, named objects with structure (PDS, sequential, VSAM). Access is controlled by RAKF profiles, not filesystem permissions.\n\n**Findings Area F5 — Imported Assumptions:** The mainframe uses a flat catalog namespace with profile-based protection — not a filesystem hierarchy.",
                 "actions": [
                     {"type": "home"}, {"type": "eraseeof"},
                     {"type": "string", "value": "3"},
@@ -119,7 +119,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Browse System Datasets",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe enter `SYS1` as the dataset name level to browse system datasets. `SYS1.PARMLIB`, `SYS1.PROCLIB`, and `SYS1.LINKLIB` are critical system datasets.\n\n**Key concept:** System configuration lives in datasets like `SYS1.PARMLIB` — not in `/etc`. These datasets define system behavior: started tasks, security policy, IPL parameters. Access to them is controlled by RACF dataset profiles.\n\n**F4 — Policy Enforcement:** RACF enforces access to system datasets. Anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior.",
+                "narration": "**Control Plane: TSO/ISPF (System Configuration)**\n\nWe enter `SYS1` as the dataset name level to browse system datasets. `SYS1.PARMLIB`, `SYS1.PROCLIB`, and `SYS1.LINKLIB` are critical system datasets.\n\n**Key concept:** System configuration lives in datasets like `SYS1.PARMLIB` — not in `/etc`. These datasets define system behavior: started tasks, security policy, IPL parameters. Access to them is controlled by RAKF dataset profiles.\n\n**F4 — Policy Enforcement:** RAKF enforces access to system datasets. Anyone who can UPDATE `SYS1.PARMLIB` can alter system behavior.",
                 "actions": [{"type": "string", "value": "SYS1"}, {"type": "enter"}, {"type": "wait", "seconds": 3}],
                 "expect": ["SYS1", "PARMLIB", "PROCLIB", "LINKLIB"],
                 "display_seconds": 5,
@@ -127,7 +127,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Exit ISPF → TSO Command Line",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Command Execution)**\n\nPF3 navigates back through the RFE panel stack: dataset list → Utilities → RFE Primary Menu. Then we type `X` at the RFE Primary Menu to exit and reach the TSO READY prompt.\n\n**Key concept:** Every command at TSO READY runs under the authority of HERC01. There is no `sudo` — your authority is determined by your RACF profile, not by how you invoke a command.\n\n**Note:** `X` is an RFE/ISPF command — it only works from the Primary Option Menu. At TSO READY, you use TSO commands like LOGOFF, STATUS, LISTALC.",
+                "narration": "**Control Plane: TSO (Command Execution)**\n\nPF3 navigates back through the RFE panel stack: dataset list → Utilities → RFE Primary Menu. Then we type `X` at the RFE Primary Menu to exit and reach the TSO READY prompt.\n\n**Key concept:** Every command at TSO READY runs under the authority of HERC01. There is no `sudo` — your authority is determined by your RAKF profile, not by how you invoke a command.\n\n**Note:** `X` is an RFE/ISPF command — it only works from the Primary Option Menu. At TSO READY, you use TSO commands like LOGOFF, STATUS, LISTALC.",
                 "actions": [
                     {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
@@ -148,7 +148,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff — Return to VTAM",
                 "control_plane": "vtam",
-                "narration": "**Control Plane: VTAM (Session Unbinding)**\n\nTo logoff: PF3 back through panels to the RFE main menu, then `X` or PF3 to exit to the TSO READY prompt, then type `LOGOFF`. The identity is unbound and we return to the anonymous VTAM session fabric.\n\n**Session lifecycle summary:**\n1. **VTAM** — anonymous session established\n2. **TSO** — identity bound via logon (HERC01)\n3. **ISPF** — interactive desktop, dataset navigation\n4. **RACF** — continuous authority enforcement\n5. **VTAM** — identity unbound, back to anonymous\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.\n\n**Key takeaway:** Three control planes were traversed. Identity was bound at TSO, enforced by RACF, and the session fabric (VTAM) existed before and after authentication.",
+                "narration": "**Control Plane: VTAM (Session Unbinding)**\n\nTo logoff: PF3 back through panels to the RFE main menu, then `X` or PF3 to exit to the TSO READY prompt, then type `LOGOFF`. The identity is unbound and we return to the anonymous VTAM session fabric.\n\n**Session lifecycle summary:**\n1. **VTAM** — anonymous session established\n2. **TSO** — identity bound via logon (HERC01)\n3. **ISPF** — interactive desktop, dataset navigation\n4. **RAKF** — continuous authority enforcement\n5. **VTAM** — identity unbound, back to anonymous\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.\n\n**Key takeaway:** Three control planes were traversed. Identity was bound at TSO, enforced by RAKF, and the session fabric (VTAM) existed before and after authentication.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM", "LOGON"],
                 "display_seconds": 8,
@@ -208,7 +208,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "View a JCL Job",
                 "control_plane": "jes",
-                "narration": "**Control Plane: JES (Job Structure)**\n\nEach member in `SYS2.JCLLIB` is a complete JCL job. A job has:\n- **JOB card** — identity, class, priority\n- **EXEC statements** — programs to run\n- **DD statements** — dataset allocations\n\n**Key concept:** The JOB card carries the submitter's identity. When JES executes this job, RACF evaluates every resource access against that identity — even if the submitter has logged off.\n\n**F3 — Deferred Execution:** The identity bound at submission time governs execution.",
+                "narration": "**Control Plane: JES (Job Structure)**\n\nEach member in `SYS2.JCLLIB` is a complete JCL job. A job has:\n- **JOB card** — identity, class, priority\n- **EXEC statements** — programs to run\n- **DD statements** — dataset allocations\n\n**Key concept:** The JOB card carries the submitter's identity. When JES executes this job, RAKF evaluates every resource access against that identity — even if the submitter has logged off.\n\n**F3 — Deferred Execution:** The identity bound at submission time governs execution.",
                 "actions": [
                     {"type": "wait", "seconds": 4},
                 ],
@@ -238,7 +238,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff",
                 "control_plane": "vtam",
-                "narration": "**Summary: Deferred Execution**\n\nJES demonstrates that the mainframe separates work *declaration* from work *execution*:\n\n1. **Identity persists:** The submitter's identity governs execution\n2. **Authority is evaluated at submission:** RACF checks happen when the job is submitted\n3. **Audit trail exists:** Every job's identity, input, and output are preserved in JES\n\nOn the mainframe, you must ask: \"What work was declared but hasn't run yet? Under whose authority will it run?\"\n\n**Warning:** Never disconnect the terminal while logged in \u2014 it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "narration": "**Summary: Deferred Execution**\n\nJES demonstrates that the mainframe separates work *declaration* from work *execution*:\n\n1. **Identity persists:** The submitter's identity governs execution\n2. **Authority is evaluated at submission:** RAKF checks happen when the job is submitted\n3. **Audit trail exists:** Every job's identity, input, and output are preserved in JES\n\nOn the mainframe, you must ask: \"What work was declared but hasn't run yet? Under whose authority will it run?\"\n\n**Warning:** Never disconnect the terminal while logged in \u2014 it locks the userid. Recover with `/C U=userid` at the Hercules console.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 6,
@@ -277,7 +277,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "TSO TIME — System Clock",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO (System Context)**\n\nThe `TIME` command shows the system clock. Every command you execute runs under your bound identity.\n\n**Key concept:** There is no `sudo`. When HERC01 types any command, RACF evaluates authority. Authority is continuous, not one-time.",
+                "narration": "**Control Plane: TSO (System Context)**\n\nThe `TIME` command shows the system clock. Every command you execute runs under your bound identity.\n\n**Key concept:** There is no `sudo`. When HERC01 types any command, RAKF evaluates authority. Authority is continuous, not one-time.",
                 "actions": [
                     {"type": "string", "value": "TIME"},
                     {"type": "enter"},
@@ -336,7 +336,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff",
                 "control_plane": "vtam",
-                "narration": "**Summary: System Inspection**\n\n1. **TSO STATUS** revealed active sessions — each with a bound identity\n2. **Every command** executes under your identity — no sudo, no elevation\n3. **SYS1.PROCLIB** defines the system's services — access = control\n4. **RACF enforces** who can read, update, or alter system configuration\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "narration": "**Summary: System Inspection**\n\n1. **TSO STATUS** revealed active sessions — each with a bound identity\n2. **Every command** executes under your identity — no sudo, no elevation\n3. **SYS1.PROCLIB** defines the system's services — access = control\n4. **RAKF enforces** who can read, update, or alter system configuration\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 7,
@@ -610,7 +610,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Catalog Structure — LISTCAT",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO (Catalog Discovery)**\n\nWe return to TSO and use `LISTCAT` to examine catalog entries. The catalog maps dataset names to physical DASD locations.\n\n**Key concept:** The catalog is the namespace. RACF profiles control who can access each cataloged dataset.",
+                "narration": "**Control Plane: TSO (Catalog Discovery)**\n\nWe return to TSO and use `LISTCAT` to examine catalog entries. The catalog maps dataset names to physical DASD locations.\n\n**Key concept:** The catalog is the namespace. RAKF profiles control who can access each cataloged dataset.",
                 "actions": [
                     {"type": "pf", "value": "3"},
                     {"type": "wait", "seconds": 2},
@@ -630,7 +630,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff",
                 "control_plane": "vtam",
-                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** The mainframe uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RACF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
+                "narration": "**Summary: Dataset Model**\n\n1. **No filesystem hierarchy:** The mainframe uses a flat catalog namespace with dot-separated qualifiers\n2. **PDS = directory:** Partitioned Data Sets contain named members\n3. **HLQ = identity:** Your high-level qualifier ties datasets to your identity\n4. **Catalogs = namespace:** The catalog maps names to physical volumes\n5. **RAKF = access control:** Dataset profiles determine who can read, write, or alter\n\n**Warning:** Never disconnect the terminal while logged in — it locks the userid. Recover with `/C U=userid` at the Hercules console.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 8,
@@ -688,7 +688,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Submit Compile-Link-Go Job",
                 "control_plane": "jes",
-                "narration": "**Submitting to JES — Deferred Execution**\n\nThe `SUBMIT` command on the RFE command line sends this JCL to JES2.\n\n**What happens next:**\n1. JES reads the JCL and allocates resources\n2. **COB step** — COBOL compiler reads instream source, produces object deck\n3. **LKED step** — Linkage editor binds object with `SYS1.COBLIB` runtime\n4. **GO step** — Executes the linked program\n5. All output captured to spool\n\n**Identity binding:** The job runs under HERC01's identity. RACF checks at every stage: can HERC01 execute the compiler? Access `SYS1.COBLIB`? Write to spool?\n\n**This is deferred execution.** The job may run seconds or hours after submission.",
+                "narration": "**Submitting to JES — Deferred Execution**\n\nThe `SUBMIT` command on the RFE command line sends this JCL to JES2.\n\n**What happens next:**\n1. JES reads the JCL and allocates resources\n2. **COB step** — COBOL compiler reads instream source, produces object deck\n3. **LKED step** — Linkage editor binds object with `SYS1.COBLIB` runtime\n4. **GO step** — Executes the linked program\n5. All output captured to spool\n\n**Identity binding:** The job runs under HERC01's identity. RAKF checks at every stage: can HERC01 execute the compiler? Access `SYS1.COBLIB`? Write to spool?\n\n**This is deferred execution.** The job may run seconds or hours after submission.",
                 "actions": [
                     {"type": "home"}, {"type": "eraseeof"},
                     {"type": "string", "value": "SUBMIT"}, {"type": "enter"},
@@ -717,7 +717,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "Logoff — Clean Exit",
                 "control_plane": "vtam",
-                "narration": "**Summary: COBOL on MVS**\n\n**What we demonstrated:**\n1. Opened a PDS member containing JCL + instream COBOL source\n2. Examined the compile-link-go workflow declared in JCL\n3. Submitted to JES — deferred execution under our identity\n4. Verified output in the spool\n\n**The execution trust chain:**\nHERC01 → SUBMIT → JES queue → COB compiler → LKED linker → GO execution → spool\n\nEvery step ran under HERC01's authority. RACF governed access at each boundary.\n\n**Key insight:** Whoever can EDIT `SYS2.JCLLIB(TESTCOB)` controls what code compiles and executes. On MVS, write access to a job library is a privilege path.\n\n**Mental model shift:**\nUnix: `gcc hello.c && ./a.out` — immediate, ephemeral.\nMVS: Declare → Queue → Schedule → Execute → Preserve.",
+                "narration": "**Summary: COBOL on MVS**\n\n**What we demonstrated:**\n1. Opened a PDS member containing JCL + instream COBOL source\n2. Examined the compile-link-go workflow declared in JCL\n3. Submitted to JES — deferred execution under our identity\n4. Verified output in the spool\n\n**The execution trust chain:**\nHERC01 → SUBMIT → JES queue → COB compiler → LKED linker → GO execution → spool\n\nEvery step ran under HERC01's authority. RAKF governed access at each boundary.\n\n**Key insight:** Whoever can EDIT `SYS2.JCLLIB(TESTCOB)` controls what code compiles and executes. On MVS, write access to a job library is a privilege path.\n\n**Mental model shift:**\nUnix: `gcc hello.c && ./a.out` — immediate, ephemeral.\nMVS: Declare → Queue → Schedule → Execute → Preserve.",
                 "actions": [{"type": "tso_logoff"}],
                 "expect": ["LOGOFF", "VTAM"],
                 "display_seconds": 10,
@@ -780,7 +780,7 @@ WALKTHROUGH_SCRIPTS = {
             {
                 "title": "LISTCAT — System Catalog",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO (System Discovery)**\n\n`LISTCAT` shows catalog entries — the namespace of all datasets on the system. The catalog maps names to physical DASD volumes.\n\n**Key concept:** Look for system datasets (SYS1.*), user datasets (HERC01.*), and product datasets (SYS2.*). Each has RACF profiles controlling access. ICH messages in the system log record every authorization decision.",
+                "narration": "**Control Plane: TSO (System Discovery)**\n\n`LISTCAT` shows catalog entries — the namespace of all datasets on the system. The catalog maps names to physical DASD volumes.\n\n**Key concept:** Look for system datasets (SYS1.*), user datasets (HERC01.*), and product datasets (SYS2.*). Each has RAKF profiles controlling access. ICH messages in the system log record every authorization decision.",
                 "actions": [
                     {"type": "string", "value": "LISTCAT ENT('SYS1.PARMLIB')"},
                     {"type": "enter"},
@@ -939,7 +939,7 @@ WALKTHROUGH_SCRIPTS["cics-kicks"] = {
             {
                 "title": "TSO Login",
                 "control_plane": "tso",
-                "narration": "**Control Plane: TSO / RACF**\n\nLogging in as HERC01. KICKS runs as a TSO application, unlike IBM CICS which runs as a started task.",
+                "narration": "**Control Plane: TSO / RAKF**\n\nLogging in as HERC01. KICKS runs as a TSO application, unlike IBM CICS which runs as a started task.",
                 "actions": [{"type": "tso_login"}],
                 "expect": ["READY", "ISPF", "RFE", "TSOAPPLS"],
                 "display_seconds": 4,
@@ -1026,7 +1026,7 @@ WALKTHROUGH_SCRIPTS["jcl-injection"] = {
             {
                 "title": "Reach TSO READY",
                 "control_plane": "tso",
-                "narration": "**Reaching TSO READY prompt**\n\nWe need the raw TSO command line — not ISPF. If we're in ISPF or the TSO Applications Menu, PF3 exits back.\n\nAt TSO READY, every command we type executes under HERC01's identity. There is no `sudo`. Authority comes from RACF profiles bound to our userid.",
+                "narration": "**Reaching TSO READY prompt**\n\nWe need the raw TSO command line — not ISPF. If we're in ISPF or the TSO Applications Menu, PF3 exits back.\n\nAt TSO READY, every command we type executes under HERC01's identity. There is no `sudo`. Authority comes from RAKF profiles bound to our userid.",
                 "actions": [
                     {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
                     {"type": "pf", "value": "3"}, {"type": "wait", "seconds": 2},
@@ -1180,7 +1180,7 @@ WALKTHROUGH_SCRIPTS["jcl-injection"] = {
             {
                 "title": "Cleanup & Findings Summary",
                 "control_plane": "tso",
-                "narration": "**Cleanup and Findings**\n\nDeleting the proof dataset and test library.\n\n## Findings Summary\n\n**F1 — Identity Binding:** HERC01's identity was bound at JCL submission and inherited through deferred execution.\n\n**F3 — Deferred Execution:** The job ran after submission — the submitter controls what runs, JES controls when.\n\n**F4 — Policy Enforcement:** RACF controls WHO can access datasets, but NOT the library search ORDER. STEPLIB is JCL-controlled.\n\n**F5 — Imported Assumption:** \"Program libraries are read-only system resources.\" Wrong. Any user can create a library and use STEPLIB to override the search path.\n\n## Remediation\n1. Restrict UPDATE to production STEPLIBs\n2. Use RACF PROGRAM control for sensitive programs\n3. Monitor SMF 30 for unusual STEPLIB references\n4. Audit who can UPDATE libraries referenced in production JCL\n5. Separate dev and prod library namespaces",
+                "narration": "**Cleanup and Findings**\n\nDeleting the proof dataset and test library.\n\n## Findings Summary\n\n**F1 — Identity Binding:** HERC01's identity was bound at JCL submission and inherited through deferred execution.\n\n**F3 — Deferred Execution:** The job ran after submission — the submitter controls what runs, JES controls when.\n\n**F4 — Policy Enforcement:** RAKF controls WHO can access datasets, but NOT the library search ORDER. STEPLIB is JCL-controlled.\n\n**F5 — Imported Assumption:** \"Program libraries are read-only system resources.\" Wrong. Any user can create a library and use STEPLIB to override the search path.\n\n## Remediation\n1. Restrict UPDATE to production STEPLIBs\n2. Use RACF PROGRAM control for sensitive programs\n3. Monitor SMF 30 for unusual STEPLIB references\n4. Audit who can UPDATE libraries referenced in production JCL\n5. Separate dev and prod library namespaces",
                 "actions": [
                     {"type": "string", "value": "DELETE 'HERC01.INJECTION.PROOF'"},
                     {"type": "enter"},
@@ -1205,7 +1205,7 @@ WALKTHROUGH_SCRIPTS["jcl-injection"] = {
 
 # System Enumeration walkthrough definition (live on TK5)
 WALKTHROUGH_SCRIPTS["system-enum"] = {
-    "title": "System Enumeration: z/OS Pentest Recon",
+    "title": "System Enumeration: MVS 3.8j Pentest Recon",
     "steps": [
             {
                 "title": "Connect & Login",
