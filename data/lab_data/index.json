@@ -6,6 +6,7 @@
       "description": "30-second automated walkthrough. Connect, authenticate, reach ISPF.",
       "category": "fundamentals",
       "difficulty": "beginner",
+      "status": "working",
       "walkthrough": true,
       "steps": 6
     },
@@ -15,6 +16,8 @@
       "description": "Map the VTAM → TSO → ISPF session layers. Identify where identity is bound and trust shifts.",
       "category": "fundamentals",
       "difficulty": "beginner",
+      "status": "disabled",
+      "status_reason": "Uses SDSF - not available on TK5",
       "walkthrough": true,
       "steps": 9
     },
@@ -24,6 +27,7 @@
       "description": "Enumerate catalog entries and dataset attributes. Map the storage namespace and trust-sensitive datasets.",
       "category": "fundamentals",
       "difficulty": "beginner",
+      "status": "working",
       "walkthrough": true,
       "steps": 8
     },
@@ -33,6 +37,8 @@
       "description": "Submit a job and trace the execution chain. Identity binding, JES scheduling, deferred trust.",
       "category": "fundamentals",
       "difficulty": "beginner",
+      "status": "disabled",
+      "status_reason": "Uses SDSF - not available on TK5",
       "walkthrough": true,
       "steps": 6
     },
@@ -42,6 +48,8 @@
       "description": "Examine how RACF evaluates access. Resource profiles, identity footprint, policy enforcement gaps.",
       "category": "security",
       "difficulty": "intermediate",
+      "status": "disabled",
+      "status_reason": "Uses RACF - TK5 uses RAKF",
       "walkthrough": true,
       "steps": 5
     },
@@ -51,6 +59,7 @@
       "description": "Explore the RAKF security system on TK5. View users and profiles tables, understand access control, identify misconfigurations, and trace authorization decisions.",
       "category": "security",
       "difficulty": "intermediate",
+      "status": "working",
       "walkthrough": true,
       "steps": 8
     },
@@ -60,6 +69,7 @@
       "description": "Inspect system datasets, PROCLIB, and configuration. Map what a normal user can see.",
       "category": "recon",
       "difficulty": "intermediate",
+      "status": "wip",
       "walkthrough": true,
       "steps": 7
     },
@@ -69,6 +79,8 @@
       "description": "Inspect address spaces, allocations, and job output. Destroy the process-centric mental model.",
       "category": "fundamentals",
       "difficulty": "intermediate",
+      "status": "disabled",
+      "status_reason": "Uses SDSF - not available on TK5",
       "walkthrough": true,
       "steps": 6
     },
@@ -78,6 +90,8 @@
       "description": "Create a COBOL program, write JCL, submit the compile-link-go job. Trace the deferred execution model.",
       "category": "fundamentals",
       "difficulty": "intermediate",
+      "status": "disabled",
+      "status_reason": "Uses IGYWCL - TK5 uses IKFCBL00",
       "walkthrough": true,
       "steps": 7
     },
@@ -87,6 +101,7 @@
       "description": "Map the transaction execution plane. Install and run CICS transactions on the TK5 lab.",
       "category": "security",
       "difficulty": "advanced",
+      "status": "wip",
       "walkthrough": true,
       "steps": 8
     },
@@ -96,6 +111,7 @@
       "description": "Demonstrate how a low-privileged user influences batch execution by controlling a program library. No exploits — just normal MVS behavior.",
       "category": "security",
       "difficulty": "advanced",
+      "status": "working",
       "walkthrough": true,
       "steps": 11
     },
@@ -105,6 +121,7 @@
       "description": "The classic mainframe privesc. Find writable APF library, assemble MODESET program, escalate to SPECIAL+OPERATIONS. Based on mainframed/APFPRIV.jcl.",
       "category": "security",
       "difficulty": "advanced",
+      "status": "wip",
       "walkthrough": true,
       "steps": 10
     },
@@ -114,6 +131,7 @@
       "description": "Enumerate APF libraries, RACF settings, SVC table, TSO auth tables, logged-on users. Based on mainframed/ENUM_REFACTORED.",
       "category": "recon",
       "difficulty": "advanced",
+      "status": "working",
       "walkthrough": true,
       "steps": 10
     },
@@ -123,6 +141,8 @@
       "description": "Understand how RACF password hashing works — DES encryption with ASCII-to-EBCDIC conversion. Learn why the algorithm is weak and how to crack hashes.",
       "category": "security",
       "difficulty": "advanced",
+      "status": "disabled",
+      "status_reason": "RAKF uses cleartext, not DES hashes",
       "walkthrough": true,
       "steps": 8
     },
@@ -132,6 +152,8 @@
       "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
       "category": "security",
       "difficulty": "advanced",
+      "status": "disabled",
+      "status_reason": "Requires USS - not on MVS 3.8j",
       "walkthrough": true,
       "steps": 10
     },
@@ -142,6 +164,7 @@
       "category": "fundamentals",
       "difficulty": "beginner",
       "source": "DC30_Workshop / DEFCON 30",
+      "status": "wip",
       "walkthrough": true,
       "steps": 6
     },
@@ -152,6 +175,7 @@
       "category": "security",
       "difficulty": "intermediate",
       "source": "DC30_Workshop / DEFCON 30",
+      "status": "wip",
       "walkthrough": true,
       "steps": 6
     },
@@ -162,6 +186,7 @@
       "category": "security",
       "difficulty": "advanced",
       "source": "DC30_Workshop / DEFCON 30",
+      "status": "wip",
       "walkthrough": true,
       "steps": 6
     },
@@ -172,8 +197,152 @@
       "category": "security",
       "difficulty": "advanced",
       "source": "DC30_Workshop / DEFCON 30",
+      "status": "wip",
       "walkthrough": true,
       "steps": 5
+    },
+    {
+      "id": "tso-enumeration",
+      "title": "TSO Enumeration",
+      "description": "Enumerate TSO users, datasets, and system information using native TSO commands.",
+      "category": "recon",
+      "difficulty": "beginner",
+      "status": "working",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "dataset-enumeration",
+      "title": "Dataset Enumeration",
+      "description": "Enumerate datasets, catalogs, and storage using LISTCAT and LISTDS commands.",
+      "category": "recon",
+      "difficulty": "beginner",
+      "status": "wip",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "hidden-fields",
+      "title": "Hidden Fields: 3270 Protocol Analysis",
+      "description": "Analyze 3270 data streams for hidden fields and protected data.",
+      "category": "security",
+      "difficulty": "intermediate",
+      "status": "wip",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "cics-enumeration",
+      "title": "CICS Enumeration",
+      "description": "Enumerate CICS regions, transactions, and programs.",
+      "category": "recon",
+      "difficulty": "intermediate",
+      "status": "disabled",
+      "status_reason": "TK5 has KICKS, not CICS",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "sdsf-inspection",
+      "title": "SDSF Inspection",
+      "description": "Use SDSF to inspect jobs, output, and system status.",
+      "category": "recon",
+      "difficulty": "beginner",
+      "status": "disabled",
+      "status_reason": "Uses SDSF - not available on TK5",
+      "walkthrough": true,
+      "steps": 5
+    },
+    {
+      "id": "jcl-analysis",
+      "title": "JCL Analysis",
+      "description": "Analyze JCL for security implications, library references, and execution patterns.",
+      "category": "recon",
+      "difficulty": "intermediate",
+      "status": "working",
+      "walkthrough": true,
+      "steps": 6
+    },
+    {
+      "id": "bof_demo",
+      "title": "Buffer Overflow Demo",
+      "description": "Demonstrate buffer overflow exploitation on MVS with provided JCL.",
+      "category": "security",
+      "difficulty": "advanced",
+      "status": "working",
+      "walkthrough": true,
+      "steps": 8
+    },
+    {
+      "id": "zos-reverse-shell",
+      "title": "z/OS Reverse Shell",
+      "description": "Analyze reverse shell techniques on z/OS using USS and JCL.",
+      "category": "security",
+      "difficulty": "advanced",
+      "status": "wip",
+      "walkthrough": true,
+      "steps": 8
+    },
+    {
+      "id": "batch-basics",
+      "title": "Batch Basics",
+      "description": "Introduction to batch processing on MVS.",
+      "category": "fundamentals",
+      "difficulty": "beginner",
+      "status": "disabled",
+      "status_reason": "Redundant with deferred-exec",
+      "walkthrough": true,
+      "steps": 4
+    },
+    {
+      "id": "cobol-compile-run",
+      "title": "COBOL Compile and Run",
+      "description": "Complete COBOL compile-link-go workflow using TK5 procedures.",
+      "category": "fundamentals",
+      "difficulty": "intermediate",
+      "status": "working",
+      "walkthrough": true,
+      "steps": 10
+    },
+    {
+      "id": "featherriver-mvs-guide",
+      "title": "Featherriver MVS Guide",
+      "description": "Reference guide for MVS operations based on Featherriver documentation.",
+      "category": "reference",
+      "difficulty": "beginner",
+      "status": "working",
+      "walkthrough": false,
+      "steps": 15
+    },
+    {
+      "id": "jaymoseley-mvs-guide",
+      "title": "Jay Moseley MVS Guide",
+      "description": "Comprehensive MVS setup and operations guide by Jay Moseley.",
+      "category": "reference",
+      "difficulty": "intermediate",
+      "status": "working",
+      "walkthrough": false,
+      "steps": 20
+    },
+    {
+      "id": "mvs-command-reference",
+      "title": "MVS Command Reference",
+      "description": "Quick reference for common MVS and TSO commands.",
+      "category": "reference",
+      "difficulty": "beginner",
+      "status": "working",
+      "walkthrough": false,
+      "steps": 25
+    },
+    {
+      "id": "mvs-ipl-operations",
+      "title": "MVS IPL Operations",
+      "description": "Guide to IPL (Initial Program Load) and system startup procedures.",
+      "category": "reference",
+      "difficulty": "advanced",
+      "status": "working",
+      "walkthrough": false,
+      "steps": 12
     }
   ]
 }

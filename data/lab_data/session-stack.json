@@ -1,63 +1,83 @@
 {
   "id": "session-stack",
   "title": "Session Stack: Trust Boundary Mapping",
-  "description": "Map the VTAM → TSO → ISPF session layers. Identify where identity is bound and trust shifts.",
+  "description": "Map the VTAM → TSO → RFE session layers. Identify where identity is bound and trust shifts.",
   "category": "fundamentals",
   "difficulty": "beginner",
+  "status": "working",
+  "agentic": true,
   "steps": [
     {
       "title": "Connect to Mainframe",
+      "description": "Establish a TN3270 connection to the mainframe.",
+      "command": null,
       "screen": "Connecting to mainframe via TN3270...\n\nEstablishing LU session with VTAM.\nThe session fabric exists independently of TCP/IP.",
-      "expected": "Establish a TN3270 connection to the mainframe.",
+      "expected": "TN3270 session established with VTAM.",
       "hint": "The session is managed by VTAM, not the network stack. Your LU session can outlive the TCP connection."
     },
     {
       "title": "VTAM Entry Screen",
-      "screen": "z/OS V2R5   IP: 10.1.1.2\n\n   ZZZZZZZ  /  OOOOO   SSSSS\n      Z    /  O   O  S\n     Z    /  O   O   SSS\n    Z    /  O   O      S\n   ZZZZZ /   OOOOO  SSSSS\n\n\n ===> _\n\nF1=Help  Enter=Continue",
-      "expected": "Identify the VTAM session fabric — you are anonymous with no identity bound.",
-      "hint": "On the first connection, the Logon prompt may be missing. Press Enter and it will appear. This is the session manager itself, not a 'service on a port'."
+      "description": "You are at the VTAM session manager - anonymous, no identity bound yet.",
+      "command": "ENTER",
+      "screen": "MVS 3.8j TK5   IP: localhost:3270\n\n   M   M  V   V  SSSSS\n   MM MM  V   V  S\n   M M M  V   V  SSSSS\n   M   M   V V       S\n   M   M    V   SSSSS\n\n ===> _\n\nEnter TSO to logon",
+      "expected": "Identify the VTAM session fabric - you are anonymous with no identity bound.",
+      "hint": "Press Enter to see the logon prompt. This is the session manager itself, not a service on a port."
     },
     {
-      "title": "TSO Logon — Identity Binding",
-      "screen": "TSO/E LOGON\n\nUserid ===> HERC01\nPassword ===> ********\n\nProcedure ===> IKJACCNT\n\nEnter an 'S' before each option:\n  -Nomail  -Nonotice  -Reconnect",
-      "expected": "Log in to TSO to bind identity. VTAM routes the session to TSO, RACF verifies the password.",
-      "hint": "VTAM acts as a session router. The transition from VTAM to TSO is a control-plane boundary crossing. There is no root user — RACF distributes authority across profiles."
+      "title": "TSO Logon - Identity Binding",
+      "description": "Log in to TSO to bind your identity. RAKF verifies the password.",
+      "command": "TSO",
+      "screen": "TSO/E LOGON\n\nUserid ===> HERC01\nPassword ===> ********\n\nProcedure ===> IKJACCNT",
+      "expected": "VTAM routes session to TSO. Enter userid and password.",
+      "hint": "VTAM acts as a session router. The transition from VTAM to TSO is a control-plane boundary crossing. TK5 uses RAKF for security, not RACF."
     },
     {
-      "title": "Enter RFE (ISPF)",
-      "screen": "READY\n\nrfe\n\n RFE - MVS 3.8j Turnkey System\n\nOption ===>_\n\n0  Settings     1  Browse      2  Edit\n3  Utilities    4  Foreground  5  Batch\n6  Command      7  Dialog      8  LM\n\nF1=Help  F3=Exit",
-      "expected": "Enter RFE (ISPF-like interface). Your TSO address space persists — identity context survives across panels.",
-      "hint": "Type RFE at the READY prompt. TK5 uses RFE, not modern ISPF. There is no SDSF panel — job output is viewed via TSO commands."
-    },
-    {
-      "title": "ISPF Utilities — Dataset List (3.4)",
-      "screen": "RFE Utility Selection Menu\n\nOption ===> 4\n\n1  Library      - Allocate/browse PDS\n2  Dataset      - Dataset utilities\n3  Move/Copy    - Move or copy datasets\n4  DSLIST       - List datasets by pattern\n5  Reset Stats  - Reset statistics\n6  Hardcopy     - Print dataset\n\nF1=Help  F3=Exit",
-      "expected": "Navigate to DSLIST utility (option 3, then 4).",
-      "hint": "The mainframe does not have /etc or /var. Everything is stored in datasets — cataloged, named objects with RACF profile protection."
-    },
-    {
-      "title": "Browse System Datasets",
-      "screen": "DSLIST - Data Sets Matching SYS1.*\n\nCommand - Enter \"/\" to select action\n----------------------------------------------------\n         SYS1.BRODCAST\n         SYS1.LINKLIB          PO   U     0     32760\n         SYS1.LPALIB           PO   U     0     32760\n         SYS1.NUCLEUS          PO   U     0     32760\n         SYS1.PARMLIB          PO   FB    80    3120\n         SYS1.PROCLIB          PO   FB    80    3120\n\nCommand ===>",
-      "expected": "Browse SYS1 system datasets — PARMLIB, PROCLIB, LINKLIB are critical.",
-      "hint": "System configuration lives in datasets like SYS1.PARMLIB — not in /etc. Anyone who can UPDATE SYS1.PARMLIB can alter system behavior."
-    },
-    {
-      "title": "Exit ISPF → TSO Command Line",
+      "title": "TSO READY Prompt",
+      "description": "You are now at the TSO command line with identity bound.",
+      "command": null,
       "screen": "READY\n\n_",
-      "expected": "Exit RFE and return to TSO READY prompt.",
-      "hint": "PF3 navigates back through panels. At the RFE Primary Menu, type X to exit to TSO READY. Every command at TSO READY runs under HERC01's authority — there is no sudo."
+      "expected": "Reach TSO READY prompt. Your identity (HERC01) is now bound to this address space.",
+      "hint": "Every command at TSO READY runs under HERC01's authority. There is no sudo - your authority is determined by RAKF profiles."
     },
     {
-      "title": "LISTALC — Identity Context",
-      "screen": "READY\n\nLISTALC STATUS\n\n--DDNAME   DISP\n  STEPLIB\n           KEEP   SYS1.CMDLIB\n  SYSPROC\n           KEEP   SYSC.CMDPROC\n  SYSEXEC\n           KEEP   SYSC.EXEC\n  ISPLLIB\n           KEEP   ISP.V2R2M0.ISPLOAD\n\nREADY",
-      "expected": "View dataset allocations — the resource context of your identity.",
-      "hint": "LISTALC STATUS shows every dataset allocated to this TSO session. STEPLIB, ISPTLIB control which programs and panels are available. These allocations were established at logon."
+      "title": "Enter RFE (ISPF-like)",
+      "description": "Enter RFE, the RPF Full-screen Editor - TK5's ISPF equivalent.",
+      "command": "RFE",
+      "screen": "RFE - MVS 3.8j Turnkey System\n\nOption ===>_\n\n0  Settings     1  Browse      2  Edit\n3  Utilities    4  Foreground  5  Batch\n6  Command      7  Dialog      8  LM\n\nF1=Help  F3=Exit",
+      "expected": "Enter RFE panel interface. Your TSO address space persists - identity context survives across panels.",
+      "hint": "TK5 uses RFE, not modern ISPF. Job output is viewed via TSO OUTPUT command, not SDSF."
     },
     {
-      "title": "Logoff — Return to VTAM",
-      "screen": "READY\n\nLOGOFF\n\nIKJ56470I HERC01 LOGGED OFF TSO AT 14:32:00 ON MAY 28, 2026\n\n\nz/OS V2R5   IP: 10.1.1.2\n\n ===> _",
-      "expected": "Logoff from TSO — identity is unbound, returning to anonymous VTAM session.",
-      "hint": "Never disconnect the terminal while logged in — it locks the userid. Recover with /C U=userid at the Hercules console. Three control planes were traversed: VTAM → TSO → ISPF."
+      "title": "LISTALC - View Allocated Datasets",
+      "description": "See what datasets are allocated to your session.",
+      "command": "TSO LISTALC STATUS",
+      "screen": "READY\n\nLISTALC STATUS\n\n--DDNAME   DISP\n  STEPLIB\n           KEEP   SYS1.CMDLIB\n  SYSPROC\n           KEEP   SYSC.CMDPROC\n\nREADY",
+      "expected": "View dataset allocations - the resource context of your identity.",
+      "hint": "LISTALC STATUS shows every dataset allocated to this TSO session. STEPLIB controls which programs are available."
+    },
+    {
+      "title": "STATUS - View Your Jobs",
+      "description": "Check status of jobs you have submitted.",
+      "command": "STATUS",
+      "screen": "READY\n\nSTATUS\n\nIKJ56192I NO JOB STATUS AVAILABLE FOR HERC01\n\nREADY",
+      "expected": "View job status. No jobs running means no batch work in the JES queue.",
+      "hint": "STATUS shows jobs in the JES2 queue. Use OUTPUT to view completed job output."
+    },
+    {
+      "title": "Exit RFE to TSO",
+      "description": "Exit RFE and return to TSO READY prompt.",
+      "command": "X",
+      "screen": "READY\n\n_",
+      "expected": "Return to TSO READY prompt.",
+      "hint": "PF3 or X exits panels. At the RFE Primary Menu, X returns to TSO READY."
+    },
+    {
+      "title": "LOGOFF - Return to VTAM",
+      "description": "Log off TSO to unbind identity and return to VTAM.",
+      "command": "LOGOFF",
+      "screen": "READY\n\nLOGOFF\n\nIKJ56470I HERC01 LOGGED OFF TSO AT 14:32:00 ON MAY 28, 2026\n\nMVS 3.8j TK5\n\n ===> _",
+      "expected": "Logoff from TSO - identity is unbound, returning to anonymous VTAM session.",
+      "hint": "Never disconnect while logged in - it locks the userid. Recover with /C U=userid at Hercules console. Three control planes traversed: VTAM → TSO → RFE."
     }
   ]
 }
