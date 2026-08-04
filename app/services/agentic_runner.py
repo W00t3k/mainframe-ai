@@ -241,12 +241,14 @@ VALID ACTIONS:
 RULES:
 1. Look at the screen carefully. What does it show?
 2. Decide ONE action that moves toward the goal.
-3. If you see "Logon ===>" type the userid.
-4. If you see "Password ===>" type the password.
-5. If you see "READY" you're at TSO prompt.
-6. To browse a file: RFE option 1, then enter dataset name.
-7. PF3 goes back/exits panels.
-8. LOGOFF only when the goal is to logoff.
+3. If you see "Logon ===>" type the userid: TYPE HERC01
+4. If you see "Password" prompt or "ENTER CURRENT PASSWORD", type: TYPE CUL8TR
+5. If you see "REENTER" or "PASSWORD NOT AUTHORIZED", send: CLEAR
+6. If you see "READY" you're at TSO prompt.
+7. To browse a file: RFE option 1, then enter dataset name.
+8. PF3 goes back/exits panels.
+9. LOGOFF only when the goal is to logoff.
+10. The password for HERC01 is CUL8TR - always use this.
 
 Respond with EXACTLY ONE action. Examples:
 TYPE HERC01
@@ -318,12 +320,20 @@ YOUR ACTION:"""
         if "[NOT CONNECTED]" in upper or "[EMPTY" in upper:
             return "CONNECT"
 
+        # Password error - need to clear and retry
+        if "PASSWORD NOT AUTHORIZED" in upper or "REENTER" in upper:
+            return "CLEAR"
+
         # VTAM logon screen
         if "LOGON ===>" in upper or "LOGON==>" in upper:
             return "TYPE HERC01"
 
-        # Password prompt
-        if "PASSWORD" in upper and "===>" in upper:
+        # Password prompt - look for various patterns
+        if "ENTER CURRENT PASSWORD" in upper or "PASSWORD ===>" in upper or ("PASSWORD" in upper and "===>" in upper):
+            return "TYPE CUL8TR"
+
+        # Password field without explicit prompt (TSO login)
+        if "PASSWORD ==>" in upper or "PASSWORD==" in upper:
             return "TYPE CUL8TR"
 
         # TSO messages - press enter
@@ -393,8 +403,9 @@ YOUR ACTION:"""
             elif action.startswith("TYPE "):
                 text = action[5:]
                 send_terminal_key("string", text)
-                time.sleep(0.3)
+                time.sleep(0.5)
                 send_terminal_key("enter")
+                time.sleep(1)  # Wait for response
 
         except Exception as e:
             logger.error(f"Action execution error: {e}")
