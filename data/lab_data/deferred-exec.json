@@ -4,42 +4,55 @@
   "description": "Submit a job and trace the execution chain. Identity binding, JES scheduling, deferred trust.",
   "category": "fundamentals",
   "difficulty": "beginner",
+  "status": "working",
+  "agentic": true,
   "steps": [
     {
       "title": "What is JCL?",
-      "screen": "Job Control Language (JCL)\n\n//MYJOB   JOB (ACCT),'MY JOB',CLASS=A,MSGCLASS=X\n//STEP1   EXEC PGM=IEFBR14\n//SYSPRINT DD  SYSOUT=*\n\nJCL defines: who runs it, what program, what data.",
+      "type": "explanation",
+      "screen": "Job Control Language (JCL)\n\n//MYJOB   JOB (ACCT),'MY JOB',CLASS=A,MSGCLASS=X\n//STEP1   EXEC PGM=IEFBR14\n//SYSPRINT DD  SYSOUT=*\n\nJCL defines: who runs it, what program, what data.\n\nIEFBR14 is the 'do-nothing' program - it just sets RC=0.\nPerfect for testing JCL syntax and job submission.",
       "expected": "Understand the three parts of a JCL job: JOB, EXEC, DD.",
       "hint": "JOB card = identity + accounting. EXEC = program to run. DD = data definition."
     },
     {
-      "title": "Submit a Job via ISPF",
-      "screen": "ISPF Edit - HERC01.JCL(TESTJOB)\n\n//TESTJOB JOB (ACCT),'TEST',CLASS=A,MSGCLASS=X\n//STEP1   EXEC PGM=IEFBR14\n//SYSPRINT DD  SYSOUT=*\n\nEnter SUB on command line to submit.",
-      "expected": "Job submitted to JES input queue.",
-      "hint": "Type SUB on the command line and press Enter. Note the job number returned."
+      "title": "Create a Test Job",
+      "type": "command",
+      "command": "EDIT 'HERC01.JCL(TESTJOB)' NEW",
+      "input": "//TESTJOB JOB (ACCT),'TEST',CLASS=A,MSGCLASS=X\n//STEP1   EXEC PGM=IEFBR14",
+      "screen": "EDIT - HERC01.JCL(TESTJOB)\nCommand ===> \n****** ********************************* Top of Data *\n000001 //TESTJOB JOB (ACCT),'TEST',CLASS=A,MSGCLASS=X\n000002 //STEP1   EXEC PGM=IEFBR14\n****** ******************************** Bottom of Data",
+      "expected": "Create a simple JCL member with IEFBR14.",
+      "hint": "Use RFE option 2 (Edit) or the EDIT command. Type SUB to submit."
     },
     {
-      "title": "JES Input Queue",
-      "screen": "SDSF INPUT QUEUE\n\nNJobname  JobID    Owner  Prty Queue  C Pos\n-TESTJOB  JOB00123 HERC01 1    INPUT  A   1\n\nJob is waiting for JES to schedule it.",
-      "expected": "Job appears in JES input queue with assigned job ID.",
-      "hint": "JES assigns a unique job ID. The job waits here until a class initiator picks it up."
+      "title": "Submit the Job",
+      "type": "command",
+      "command": "SUB 'HERC01.JCL(TESTJOB)'",
+      "screen": "READY\nSUB 'HERC01.JCL(TESTJOB)'\nIKJ56250I JOB TESTJOB(JOB00123) SUBMITTED\nREADY",
+      "expected": "Job submitted to JES input queue with assigned job ID.",
+      "hint": "Note the job number (JOB00123). JES assigns a unique ID to every submitted job."
     },
     {
-      "title": "Job Execution",
-      "screen": "SDSF STATUS DISPLAY\n\nNJobname  JobID    Owner  Prty Status  C\n-TESTJOB  JOB00123 HERC01 1    ACTIVE  A\n\nJob is executing on an initiator.",
-      "expected": "Job moves from INPUT to ACTIVE status.",
-      "hint": "An initiator (address space) picks up the job and executes each step sequentially."
+      "title": "Check Job Status",
+      "type": "command",
+      "command": "STATUS TESTJOB",
+      "screen": "READY\nSTATUS TESTJOB\nIKJ56192I JOB TESTJOB(JOB00123) ON OUTPUT QUEUE\nREADY",
+      "expected": "Job appears in output queue after execution.",
+      "hint": "STATUS shows: ON INPUT QUEUE (waiting), EXECUTING, ON OUTPUT QUEUE (done), or NOT FOUND."
     },
     {
-      "title": "Job Output (SYSOUT)",
-      "screen": "SDSF OUTPUT QUEUE\n\nNJobname  JobID    Owner  Prty  Queue Dest\n-TESTJOB  JOB00123 HERC01 5     PRINT LOCAL\n\nIEF142I TESTJOB STEP1 - STEP WAS EXECUTED - COND CODE 0000",
+      "title": "View Job Output",
+      "type": "command",
+      "command": "OUTPUT TESTJOB PRINT(*)",
+      "screen": "READY\nOUTPUT TESTJOB PRINT(*)\n1                       J E S 2  J O B  L O G\n0 21.15.32 JOB00123 $HASP373 TESTJOB  STARTED\n  21.15.32 JOB00123 IEF403I TESTJOB - STARTED\n  21.15.32 JOB00123 IEF404I TESTJOB - ENDED\n0 21.15.32 JOB00123 $HASP395 TESTJOB  ENDED\n------ JES2 JOB STATISTICS ------\n  0 CARDS READ\n  24 SYSOUT PRINT RECORDS\nIEF142I TESTJOB STEP1 - STEP WAS EXECUTED - COND CODE 0000\nREADY",
       "expected": "Job completes with condition code 0000 (success).",
-      "hint": "Condition code 0000 = success. Non-zero codes indicate warnings or errors."
+      "hint": "COND CODE 0000 = success. The OUTPUT command displays and deletes job output."
     },
     {
       "title": "Deferred Trust Implications",
-      "screen": "Security Analysis: Deferred Execution\n\nKey insight: JCL runs LATER under the submitter's identity.\n\nAttack vector:\n- Inject JCL into a trusted user's input queue\n- Job runs with THEIR RACF identity\n- Deferred = harder to detect in real-time\n\nThis is the mainframe equivalent of a cron job injection.",
+      "type": "explanation",
+      "screen": "Security Analysis: Deferred Execution\n\nKey insight: JCL runs LATER under the submitter's identity.\n\nTimeline:\n  1. You submit JCL at 09:00\n  2. JES queues it (identity: HERC01)\n  3. Job executes at 09:05 (still identity: HERC01)\n  4. Output waits for you (owned by: HERC01)\n\nAttack vector:\n- Inject JCL into a trusted user's input stream\n- Job runs with THEIR identity, not yours\n- Deferred = harder to detect in real-time\n\nThis is the mainframe equivalent of a cron job injection.\nRACF/RAKF logs capture submission time, not execution time.",
       "expected": "Understand why deferred execution creates unique security risks.",
-      "hint": "Unlike interactive commands, batch jobs run asynchronously — detection and attribution are harder."
+      "hint": "Unlike interactive commands, batch jobs run asynchronously - detection and attribution are harder."
     }
   ]
 }
