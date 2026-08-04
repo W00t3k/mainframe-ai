@@ -245,14 +245,22 @@ async function loadLabs() {
     }
 }
 
+// Labs that have actual walkthrough scripts defined
+const WORKING_WALKTHROUGHS = new Set([
+    'quick-demo', 'session-stack', 'deferred-exec', 'dataset-model',
+    'address-spaces', 'cobol-basics', 'system-inspection', 'auth-model',
+    'rakf-security', 'apf-privesc', 'reverse-shell',
+    'dc30-hello-world', 'dc30-buffer-overflow', 'dc30-arbauth-privesc', 'dc30-ftp-overflow'
+]);
+
 function renderLabsList() {
     const listEl = $('#moduleList');
     if (!labsIndex.length) {
         listEl.innerHTML = '<div class="module-loading">No labs available.</div>';
         return;
     }
-    // Filter out reference docs, keep only executable labs
-    const execLabs = labsIndex.filter(l => l.category !== 'reference');
+    // Filter to only labs with walkthrough scripts defined
+    const execLabs = labsIndex.filter(l => WORKING_WALKTHROUGHS.has(l.id));
     listEl.innerHTML = execLabs.map(lab => {
         const cat = catMeta[lab.category] || catMeta.fundamentals;
         const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
