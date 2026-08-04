@@ -211,7 +211,8 @@ const state = {
     messages: [],
     isLoading: false,
     walkthroughActive: false,
-    walkthroughPollId: null
+    walkthroughPollId: null,
+    isAgentic: false
 };
 
 let labsIndex = [];
@@ -251,6 +252,11 @@ const WORKING_WALKTHROUGHS = new Set([
     'address-spaces', 'cobol-basics', 'system-inspection', 'auth-model',
     'rakf-security', 'apf-privesc', 'reverse-shell',
     'dc30-hello-world', 'dc30-buffer-overflow', 'dc30-arbauth-privesc', 'dc30-ftp-overflow'
+]);
+
+// Labs that use the new agentic runner (LLM decides actions)
+const AGENTIC_LABS = new Set([
+    'rakf-security', 'session-stack', 'deferred-exec'
 ]);
 
 function renderLabsList() {
@@ -463,22 +469,29 @@ async function selectLab(labId) {
 
 async function startWalkthrough(name) {
     const target = $('#hostInput').value.trim() || 'localhost:3270';
+
+    // Try agentic runner first, fall back to scripted
+    const isAgentic = AGENTIC_LABS.has(name);
+    const endpoint = isAgentic ? '/api/agentic/start' : '/api/walkthrough/start';
+
     try {
-        const res = await fetch('/api/walkthrough/start', {
+        const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ name, target, speed: 4.0 })
         });
         const data = await res.json();
         if (!data.success) {
-            addMessage('error', 'Walkthrough Error', data.error || 'Failed to start');
+            addMessage('error', 'Lab Error', data.error || 'Failed to start');
             return;
         }
         state.walkthroughActive = true;
+        state.isAgentic = isAgentic;
         state.connected = true;
         state.host = target;
         render();
-        // Delay first poll so walkthrough thread can initialize
+        addMessage('info', isAgentic ? 'Agentic Lab' : 'Scripted Lab',
+            isAgentic ? 'Agent is observing screen and deciding actions...' : 'Running scripted walkthrough...');
         setTimeout(() => startWalkthroughPoll(), 1500);
     } catch (e) {
         addMessage('error', 'Error', e.message);
@@ -488,9 +501,10 @@ async function startWalkthrough(name) {
 function startWalkthroughPoll() {
     if (state.walkthroughPollId) clearInterval(state.walkthroughPollId);
     let lastStep = -1;
+    const statusEndpoint = state.isAgentic ? '/api/agentic/status' : '/api/walkthrough/status';
     state.walkthroughPollId = setInterval(async () => {
         try {
-            const res = await fetch('/api/walkthrough/status');
+            const res = await fetch(statusEndpoint);
             const s = await res.json();
 
             // Update terminal
@@ -505,8 +519,15 @@ function startWalkthroughPoll() {
                 const stepNum = (s.step || 0) + 1;
                 const total = s.total || '?';
                 $('#stepNumber').textContent = `Step ${stepNum} of ${total}`;
-                $('#stepTitle').textContent = s.title || 'Running...';
+                // Agentic uses 'goal', scripted uses 'title'
+                const stepTitle = s.goal || s.title || 'Running...';
+                $('#stepTitle').textContent = stepTitle;
                 $('#stepIndicator').textContent = `${stepNum}/${total}`;
+
+                // Show action count for agentic labs
+                if (state.isAgentic && s.action_count !== undefined) {
+                    $('#stepIndicator').textContent = `${stepNum}/${total} (${s.action_count} actions)`;
+                }
 
                 // Control plane
                 if (s.control_plane) {
@@ -570,15 +591,18 @@ async function stopWalkthrough() {
         state.walkthroughPollId = null;
     }
     state.walkthroughActive = false;
+    const stopEndpoint = state.isAgentic ? '/api/agentic/stop' : '/api/walkthrough/stop';
     try {
-        await fetch('/api/walkthrough/stop', { method: 'POST' });
+        await fetch(stopEndpoint, { method: 'POST' });
     } catch (e) {}
+    state.isAgentic = false;
     render();
 }
 
 async function pauseWalkthrough() {
+    const pauseEndpoint = state.isAgentic ? '/api/agentic/pause' : '/api/walkthrough/pause';
     try {
-        const res = await fetch('/api/walkthrough/pause', { method: 'POST' });
+        const res = await fetch(pauseEndpoint, { method: 'POST' });
         const data = await res.json();
         const btn = $('#wtPauseBtn');
         btn.textContent = data.paused ? 'Resume' : 'Pause';
