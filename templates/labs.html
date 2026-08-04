@@ -68,11 +68,16 @@ function renderGrid() {
     gridEl.innerHTML = labsIndex.map(lab => {
         const cat  = catMeta[lab.category]  || catMeta.fundamentals;
         const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
+        const isDisabled = lab.status === 'disabled' || lab.status === 'wip';
+        const statusTag = lab.status === 'disabled' ? '<span class="lab-status-tag disabled">[NOT ON TK5]</span>' :
+                          lab.status === 'wip' ? '<span class="lab-status-tag wip">[WIP]</span>' : '';
+        const reason = lab.status_reason ? `title="${lab.status_reason}"` : '';
         return `
-        <button class="lab-card" data-id="${lab.id}" style="--accent:${cat.color}">
+        <button class="lab-card ${isDisabled ? 'lab-disabled' : ''}" data-id="${lab.id}" ${isDisabled ? 'disabled' : ''} style="--accent:${cat.color}" ${reason}>
             <div class="lab-card-top">
                 <span class="lab-card-icon">${cat.icon}</span>
                 <span class="lab-card-cat" style="color:${cat.color}">${cat.label}</span>
+                ${statusTag}
             </div>
             <h3 class="lab-card-title">${lab.title}</h3>
             <p class="lab-card-desc">${lab.description}</p>
@@ -83,7 +88,7 @@ function renderGrid() {
         </button>`;
     }).join('');
 
-    gridEl.querySelectorAll('.lab-card').forEach(card => {
+    gridEl.querySelectorAll('.lab-card:not([disabled])').forEach(card => {
         card.addEventListener('click', () => loadLab(card.dataset.id));
     });
 }

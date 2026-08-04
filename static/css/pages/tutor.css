@@ -1042,3 +1042,25 @@ body {
         grid-template-columns: 1fr;
     }
 }
+
+/* ============================================================
+   DISABLED MODULE ITEMS
+   ============================================================ */
+.module-item.module-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+    pointer-events: none;
+}
+.module-item.module-disabled:hover {
+    background: inherit;
+    border-color: inherit;
+}
+.module-status.status-disabled {
+    color: #ff6666;
+    font-weight: bold;
+}
+.module-status.status-wip {
+    color: #ffaa44;
+    font-weight: bold;
+}

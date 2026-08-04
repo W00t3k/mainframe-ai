@@ -251,11 +251,19 @@ function renderLabsList() {
         listEl.innerHTML = '<div class="module-loading">No labs available.</div>';
         return;
     }
-    listEl.innerHTML = labsIndex.map(lab => {
+    // Filter out reference docs, keep only executable labs
+    const execLabs = labsIndex.filter(l => l.category !== 'reference');
+    listEl.innerHTML = execLabs.map(lab => {
         const cat = catMeta[lab.category] || catMeta.fundamentals;
         const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
+        const isDisabled = lab.status === 'disabled' || lab.status === 'wip';
+        const statusText = lab.status === 'disabled' ? '[NOT ON TK5]' :
+                          lab.status === 'wip' ? '[WIP]' : 'Not started';
+        const statusClass = lab.status === 'disabled' ? 'status-disabled' :
+                           lab.status === 'wip' ? 'status-wip' : '';
+        const reason = lab.status_reason || '';
         return `
-        <div class="module-item" data-lab="${lab.id}">
+        <div class="module-item ${isDisabled ? 'module-disabled' : ''}" data-lab="${lab.id}" ${isDisabled ? '' : ''} title="${reason}">
             <div class="module-header">
                 <span class="module-name">${lab.title}</span>
                 <span class="module-time">${lab.steps || '?'} steps</span>
@@ -263,13 +271,13 @@ function renderLabsList() {
             <div class="module-desc">${lab.description}</div>
             <div class="module-meta">
                 <span class="module-level" style="background:${diff.color}">${diff.label}</span>
-                <span class="module-status">Not started</span>
+                <span class="module-status ${statusClass}">${statusText}</span>
             </div>
         </div>`;
     }).join('');
 
-    // Bind click handlers
-    $$('.module-item').forEach(el => {
+    // Bind click handlers only on enabled labs
+    $$('.module-item:not(.module-disabled)').forEach(el => {
         el.addEventListener('click', () => selectLab(el.dataset.lab));
     });
 }

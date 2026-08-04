@@ -658,3 +658,20 @@ body {
         border-bottom: 1px solid var(--os2-border);
     }
 }
+
+/* ============================================================
+   DISABLED WALKTHROUGH OPTIONS
+   ============================================================ */
+#walkthroughSelect option:disabled {
+    color: #666;
+    background: #1a1a2e;
+    font-style: italic;
+}
+#walkthroughSelect option:disabled::after {
+    content: ' (not available on TK5)';
+}
+#walkthroughSelect optgroup {
+    color: var(--ibm-cyan);
+    font-weight: bold;
+    background: #0f1d35;
+}

@@ -375,3 +375,32 @@
     .labs-detail { padding: 1rem; }
     .labs-header-actions { width: 100%; }
 }
+
+/* ============================================================
+   DISABLED LAB CARDS
+   ============================================================ */
+.lab-card.lab-disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    filter: grayscale(0.7);
+    pointer-events: none;
+}
+.lab-card.lab-disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+.lab-status-tag {
+    font-size: 0.65rem;
+    padding: 2px 6px;
+    border-radius: 3px;
+    margin-left: auto;
+    font-weight: bold;
+}
+.lab-status-tag.disabled {
+    background: #3a2020;
+    color: #ff6666;
+}
+.lab-status-tag.wip {
+    background: #3a3020;
+    color: #ffaa44;
+}
