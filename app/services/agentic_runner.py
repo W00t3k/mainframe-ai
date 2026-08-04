@@ -38,6 +38,10 @@ except ImportError as e:
 class AgenticLabRunner:
     """Goal-based lab runner using LLM to decide actions."""
 
+    # Default credentials
+    USERID = "HERC01"
+    PASSWORD = "CUL8TR"
+
     # Valid actions the agent can take
     VALID_ACTIONS = [
         "ENTER", "CLEAR", "PF1", "PF2", "PF3", "PF4", "PF5", "PF6",
@@ -60,6 +64,132 @@ class AgenticLabRunner:
         self.error: Optional[str] = None
         self.action_count = 0
         self._thread: Optional[threading.Thread] = None
+        self._logged_in = False
+
+    def _robust_login(self, target: str, max_retries: int = 3) -> bool:
+        """Robust login with retry logic - handles all edge cases."""
+        if not AGENT_TOOLS_AVAILABLE:
+            self._add_log("Agent tools not available", "error")
+            return False
+
+        for attempt in range(max_retries):
+            self._add_log(f"Login attempt {attempt + 1}/{max_retries}", "info")
+
+            # Connect
+            try:
+                connect_mainframe(target)
+                time.sleep(3)
+            except Exception as e:
+                self._add_log(f"Connection failed: {e}", "error")
+                time.sleep(5)
+                continue
+
+            screen = self._read_screen()
+            self.current_screen = screen
+            upper = screen.upper() if screen else ""
+
+            # Clear any previous state
+            send_terminal_key("clear")
+            time.sleep(1)
+            screen = self._read_screen()
+            upper = screen.upper() if screen else ""
+
+            # Type logon command
+            if "LOGON ===>" in upper or "LOGON==>" in upper:
+                self._add_log(f"At logon prompt, typing {self.USERID}", "action")
+                send_terminal_key("string", self.USERID)
+                time.sleep(0.5)
+                send_terminal_key("enter")
+                time.sleep(2)
+                screen = self._read_screen()
+                upper = screen.upper() if screen else ""
+            elif "ENTER LOGON OR LOGOFF" in upper or "IKJ56400A" in upper:
+                self._add_log(f"At VTAM prompt, typing LOGON {self.USERID}", "action")
+                send_terminal_key("string", f"LOGON {self.USERID}")
+                time.sleep(0.5)
+                send_terminal_key("enter")
+                time.sleep(2)
+                screen = self._read_screen()
+                upper = screen.upper() if screen else ""
+
+            # Check for IN USE
+            if "IN USE" in upper:
+                self._add_log(f"Userid {self.USERID} in use, waiting 15 seconds...", "warning")
+                send_terminal_key("clear")
+                time.sleep(15)
+                continue
+
+            # Type password
+            if "PASSWORD" in upper:
+                self._add_log("Typing password", "action")
+                send_terminal_key("string", self.PASSWORD)
+                time.sleep(0.5)
+                send_terminal_key("enter")
+                time.sleep(3)
+                screen = self._read_screen()
+                upper = screen.upper() if screen else ""
+
+            # Check for password error
+            if "PASSWORD NOT AUTHORIZED" in upper or "REENTER" in upper:
+                self._add_log("Password rejected, clearing and retrying", "warning")
+                send_terminal_key("clear")
+                time.sleep(2)
+                continue
+
+            # Skip broadcast messages
+            for _ in range(5):
+                screen = self._read_screen()
+                if "***" in (screen or ""):
+                    send_terminal_key("enter")
+                    time.sleep(1)
+                else:
+                    break
+
+            # Check if we're at ISPF/TSO menu
+            screen = self._read_screen()
+            upper = (screen or "").upper()
+            if "TSOAPPLS" in upper or "OPTION ===>" in upper or ("BROWSE" in upper and "EDIT" in upper):
+                self._add_log("Login successful!", "success")
+                self._logged_in = True
+                # Exit to TSO READY for better control
+                self._add_log("Exiting to TSO READY prompt", "action")
+                for _ in range(3):
+                    send_terminal_key("pf", "3")
+                    time.sleep(0.5)
+                    screen = self._read_screen()
+                    if "READY" in (screen or "").upper():
+                        break
+                return True
+
+            self._add_log(f"Login attempt {attempt + 1} failed", "warning")
+
+        self._add_log("Login failed after all retries", "error")
+        return False
+
+    def _robust_logoff(self) -> bool:
+        """Robust logoff - exits all menus and logs off cleanly."""
+        if not AGENT_TOOLS_AVAILABLE or not self._logged_in:
+            return True
+
+        self._add_log("Logging off...", "info")
+
+        # Exit any nested menus
+        for _ in range(5):
+            send_terminal_key("pf", "3")
+            time.sleep(0.5)
+            screen = self._read_screen()
+            if "READY" in (screen or "").upper():
+                break
+
+        # Type LOGOFF
+        send_terminal_key("string", "LOGOFF")
+        time.sleep(0.5)
+        send_terminal_key("enter")
+        time.sleep(2)
+
+        self._logged_in = False
+        self._add_log("Logged off", "success")
+        return True
 
     def start(self, lab_name: str, target: str = "localhost:3270"):
         """Start an agentic lab."""
@@ -117,38 +247,58 @@ class AgenticLabRunner:
         """Main execution loop."""
         lab = AGENTIC_LABS[lab_name]
 
-        for i, step in enumerate(lab["steps"]):
-            if not self.running:
-                break
+        try:
+            for i, step in enumerate(lab["steps"]):
+                if not self.running:
+                    break
 
-            self.current_step = i
-            self.current_goal = step["goal"]
-            self.current_narration = step.get("narration", "")
-            self.current_control_plane = step.get("control_plane", "")
-            max_actions = step.get("max_actions", 20)
+                self.current_step = i
+                self.current_goal = step["goal"]
+                self.current_narration = step.get("narration", "")
+                self.current_control_plane = step.get("control_plane", "")
+                max_actions = step.get("max_actions", 20)
 
-            self._add_log(f"Step {i+1}: {step['goal']}", "goal")
+                self._add_log(f"Step {i+1}: {step['goal']}", "goal")
 
-            # Execute step using agent
-            success = self._execute_goal(
-                goal=step["goal"],
-                context=step.get("context", ""),
-                success_criteria=step.get("success_criteria", []),
-                max_actions=max_actions,
-                target=target,
-            )
+                # Check if this is a login step - use robust login
+                goal_upper = step["goal"].upper()
+                if "LOGIN" in goal_upper or "CONNECT" in goal_upper and "TSO" in goal_upper:
+                    if not self._logged_in:
+                        if not self._robust_login(target):
+                            self.error = "Failed to login to mainframe"
+                            self._add_log("Login failed", "error")
+                            break
+                        # Login succeeded - mark step complete
+                        self._add_log(f"Completed: {step['goal']}", "success")
+                        if step.get("narration"):
+                            self._add_log(step["narration"], "narration")
+                            time.sleep(3)
+                        continue  # Skip to next step
 
-            if not success:
-                self.error = f"Failed to achieve goal: {step['goal']}"
-                self._add_log(f"FAILED: {step['goal']}", "error")
-                break
+                # Execute step using agent
+                success = self._execute_goal(
+                    goal=step["goal"],
+                    context=step.get("context", ""),
+                    success_criteria=step.get("success_criteria", []),
+                    max_actions=max_actions,
+                    target=target,
+                )
 
-            self._add_log(f"Completed: {step['goal']}", "success")
+                if not success:
+                    self.error = f"Failed to achieve goal: {step['goal']}"
+                    self._add_log(f"FAILED: {step['goal']}", "error")
+                    break
 
-            # Show narration
-            if step.get("narration"):
-                self._add_log(step["narration"], "narration")
-                time.sleep(3)  # Let user read
+                self._add_log(f"Completed: {step['goal']}", "success")
+
+                # Show narration
+                if step.get("narration"):
+                    self._add_log(step["narration"], "narration")
+                    time.sleep(3)  # Let user read
+
+        finally:
+            # Always logoff cleanly
+            self._robust_logoff()
 
         self.finished = True
         self.running = False
@@ -206,62 +356,57 @@ class AgenticLabRunner:
         if not criteria:
             return True
         upper_screen = screen.upper()
-        matches = sum(1 for c in criteria if c.upper() in upper_screen)
-        # Require at least half the criteria to match
-        return matches >= len(criteria) / 2
+        # Require ALL criteria to match
+        for c in criteria:
+            if c.upper() not in upper_screen:
+                return False
+        return True
 
     def _decide_action(self, screen: str, goal: str, context: str, actions_taken: int) -> Optional[str]:
-        """Use LLM to decide what action to take."""
-        config = get_config()
+        """Decide what action to take - pattern matching first, then LLM."""
+        # Try pattern matching FIRST - more reliable than LLM
+        pattern_action = self._pattern_decide(screen, goal)
+        if pattern_action == "DONE":
+            # Pattern indicates we've achieved the goal - return None to trigger success check
+            logger.info("Pattern indicates goal achieved")
+            return None
+        if pattern_action:
+            logger.info(f"Pattern decided: {pattern_action}")
+            return pattern_action
 
-        # Truncate screen to first 24 lines (typical 3270 screen)
+        # No pattern match - ask LLM
+        config = get_config()
         screen_lines = screen.split("\n")[:24]
         screen_truncated = "\n".join(screen_lines)
 
-        prompt = f"""You are an MVS 3.8j mainframe terminal agent. You observe the screen and decide ONE action to take.
+        prompt = f"""You are an MVS 3.8j mainframe terminal agent. Observe the screen and decide ONE action.
 
-CURRENT SCREEN:
+SCREEN:
 {screen_truncated}
 
 GOAL: {goal}
 
 CONTEXT: {context}
 
-ACTIONS TAKEN SO FAR: {actions_taken}
-
-VALID ACTIONS:
-- TYPE <text> - Type text (e.g., TYPE HERC01, TYPE 1, TYPE SYS1.SECURE.CNTL)
-- ENTER - Press Enter key
-- CLEAR - Clear screen
-- PF3 - Go back / Exit
-- PF7 - Scroll up
-- PF8 - Scroll down
-- TAB - Move to next field
-- HOME - Move to home position
-- CONNECT - Connect to mainframe (if not connected)
-- LOGOFF - Type LOGOFF and press Enter
-- WAIT - Wait for screen to update
+ACTIONS SO FAR: {actions_taken}
 
 RULES:
-1. Look at the screen carefully. What does it show?
-2. Decide ONE action that moves toward the goal.
-3. If you see "Logon ===>" type the userid: TYPE HERC01
-4. If you see "Password" prompt or "ENTER CURRENT PASSWORD", type: TYPE CUL8TR
-5. If you see "REENTER" or "PASSWORD NOT AUTHORIZED", send: CLEAR
-6. If you see "READY" you're at TSO prompt.
-7. To browse a file: RFE option 1, then enter dataset name.
-8. PF3 goes back/exits panels.
-9. LOGOFF only when the goal is to logoff.
-10. The password for HERC01 is CUL8TR - always use this.
+- "ENTER LOGON OR LOGOFF" = VTAM prompt. Type: TYPE LOGON HERC01
+- "Logon ===>" = TSO panel. Type: TYPE HERC01
+- "USERID IN USE" = Clear and wait
+- "ENTER CURRENT PASSWORD" = Type: TYPE CUL8TR
+- "OPTION ===>" with "BROWSE/EDIT" = ISPF menu. Type 1 for Browse.
+- "DATA SET NAME" = enter dataset path
+- "TSOAPPLS" = TSO menu. Type 1 for RFE.
+- "READY" = TSO command prompt.
+- PF3 goes back/exits
 
-Respond with EXACTLY ONE action. Examples:
-TYPE HERC01
-ENTER
-PF3
-TYPE 1
-CONNECT
+DO NOT type HERC01 if at ISPF!
+If screen shows BROWSE, EDIT, UTILITIES - you ARE logged in.
 
-YOUR ACTION:"""
+VALID: TYPE <text>, ENTER, CLEAR, PF3, PF7, PF8, TAB, CONNECT, LOGOFF, WAIT
+
+Reply with EXACTLY ONE action:"""
 
         try:
             resp = httpx.post(
@@ -270,21 +415,19 @@ YOUR ACTION:"""
                     "model": config.OLLAMA_MODEL,
                     "prompt": prompt,
                     "stream": False,
-                    "options": {"temperature": 0.3, "num_predict": 50},
+                    "options": {"temperature": 0.1, "num_predict": 30},
                 },
                 timeout=30.0,
             )
             if resp.status_code == 200:
                 response = resp.json().get("response", "").strip()
-                # Extract action from response
                 action = self._parse_action(response)
                 logger.info(f"LLM decided: {action} (raw: {response[:100]})")
                 return action
         except Exception as e:
             logger.error(f"LLM error: {e}")
 
-        # Fallback: try pattern-based decision
-        return self._pattern_decide(screen, goal)
+        return None
 
     def _parse_action(self, response: str) -> Optional[str]:
         """Parse LLM response into a valid action."""
@@ -324,59 +467,114 @@ YOUR ACTION:"""
         if "[NOT CONNECTED]" in upper or "[EMPTY" in upper:
             return "CONNECT"
 
+        # Userid locked - need to wait for session to time out
+        if "USERID" in upper and "IN USE" in upper:
+            logger.warning("Userid in use - waiting 10 seconds before retry")
+            time.sleep(10)
+            return "CLEAR"
+
         # Password error - need to clear and retry
         if "PASSWORD NOT AUTHORIZED" in upper or "REENTER" in upper:
             return "CLEAR"
 
-        # VTAM logon screen
+        # VTAM command prompt (IKJ56400A) - need full LOGON command
+        if "ENTER LOGON OR LOGOFF" in upper or "IKJ56400A" in upper:
+            return "TYPE LOGON HERC01"
+
+        # VTAM logon panel with "Logon ===>" - but only if goal is to login
         if "LOGON ===>" in upper or "LOGON==>" in upper:
-            return "TYPE HERC01"
+            if "LOGIN" in goal_upper or "CONNECT" in goal_upper:
+                return "TYPE HERC01"
+            # If goal is to logoff and we're at logon screen, we're done!
+            if "LOGOFF" in goal_upper or "EXIT" in goal_upper:
+                return "DONE"  # Success - we logged off
+
+        # Invalid command syntax - clear and start fresh
+        if "INVALID COMMAND SYNTAX" in upper or "IKJ56401I" in upper:
+            return "CLEAR"
 
         # Password prompt - look for various patterns
-        if "ENTER CURRENT PASSWORD" in upper or "PASSWORD ===>" in upper or ("PASSWORD" in upper and "===>" in upper):
+        # But NOT if we're at the Browse entry panel (has "DATA SET PASSWORD")
+        if "ENTER CURRENT PASSWORD" in upper:
+            return "TYPE CUL8TR"
+        if "PASSWORD ===>" in upper and "DATA SET PASSWORD" not in upper and "ENTRY PANEL" not in upper:
             return "TYPE CUL8TR"
 
-        # Password field without explicit prompt (TSO login)
-        if "PASSWORD ==>" in upper or "PASSWORD==" in upper:
-            return "TYPE CUL8TR"
-
-        # TSO messages - press enter
-        if "IKJ5" in upper or "BROADCAST" in upper:
+        # TSO messages with *** - press enter to continue
+        if "IKJ5" in upper and "***" in upper:
             return "ENTER"
 
-        # TSOAPPLS menu - select RFE
+        # TSOAPPLS menu - exit to TSO READY for direct commands
         if "TSOAPPLS" in upper or "TSO APPLICATIONS" in upper:
-            return "TYPE 1"
+            if "BROWSE" in goal_upper or "VIEW" in goal_upper or "STATUS" in goal_upper:
+                return "PF3"  # Exit to TSO READY
+            return "TYPE 1"  # Enter RFE for other tasks
 
-        # At READY and goal mentions browse/view
+        # At READY prompt and need to do something
         if "READY" in upper:
+            # Enter RFE if goal mentions it
+            if "RFE" in goal_upper or "ISPF" in goal_upper:
+                return "TYPE RFE"
+            # For browsing files, use REVIEW command directly
             if "BROWSE" in goal_upper or "VIEW" in goal_upper:
+                if "SYS1.SECURE.CNTL(USERS)" in goal_upper:
+                    return "TYPE REVIEW 'SYS1.SECURE.CNTL(USERS)'"
+                if "SYS1.SECURE.CNTL(PROFILES)" in goal_upper:
+                    return "TYPE REVIEW 'SYS1.SECURE.CNTL(PROFILES)'"
+                ds_match = re.search(r"([A-Z0-9.]+\([A-Z0-9]+\))", goal_upper)
+                if ds_match:
+                    return f"TYPE REVIEW '{ds_match.group(1)}'"
                 return "TYPE RFE"
             if "STATUS" in goal_upper:
                 return "TYPE STATUS"
             if "OUTPUT" in goal_upper:
                 return "TYPE OUTPUT *"
-            if "LOGOFF" in goal_upper:
+            if "LOGOFF" in goal_upper or "EXIT" in goal_upper:
                 return "LOGOFF"
 
-        # Already at ISPF/RFE - don't type random stuff
-        if "ISPF" in upper and "OPTION" in upper and "BROWSE" in upper:
+        # At RFE/ISPF primary menu - exit to TSO READY for better control
+        if "OPTION ===>" in upper and ("BROWSE" in upper or "EDIT" in upper):
             if "BROWSE" in goal_upper or "VIEW" in goal_upper:
-                return "TYPE 1"
-            # Default: we're logged in, goal might be complete
-            return None
+                # Exit to TSO READY and use REVIEW command directly
+                return "PF3"
+            if "LOGIN" in goal_upper:
+                return None  # Already logged in!
+            return "PF3"  # Exit to TSO for most goals
 
-        # RFE primary menu
-        if "RFE" in upper and "BROWSE" in upper and "EDIT" in upper:
-            if "BROWSE" in goal_upper:
-                return "TYPE 1"
-            return None
+        # RFE Browse/Review entry panel - always exit with PF3
+        # Whether navigating, exiting, or logging off, PF3 is the right choice
+        if ("REVIEW" in upper and "ENTRY PANEL" in upper) or \
+           ("BROWSE" in upper and "ENTRY PANEL" in upper) or \
+           ("DATA SET NAME" in upper and "OTHER PARTITIONED" in upper):
+            return "PF3"
 
-        # Generic: try PF3 to go back
+        # Dataset not found error - need to correct path or exit
+        if "NOT IN CATALOG" in upper or "NOT FOUND" in upper:
+            return "PF3"  # Go back and try again
+
+        # Viewing a file in REVIEW - check if we're done and need to exit
+        if ("LINE" in upper and "COL" in upper) or ("COMMAND ===>" in upper and "SCROLL" in upper):
+            if "EXIT" in goal_upper or "GO BACK" in goal_upper:
+                return "PF3"
+            # If viewing a different file than what goal asks for, exit
+            if "SYS1.SECURE.CNTL(PROFILES)" in goal_upper and "USERS" in upper:
+                return "PF3"
+            if "SYS1.SECURE.CNTL(USERS)" in goal_upper and "PROFILES" in upper:
+                return "PF3"
+            return None  # Stay and view - check success criteria
+
+        # Viewing a file - check if we need to exit
+        if "BROWSE" in upper and ("LINE" in upper or "COL" in upper):
+            if "GO BACK" in goal_upper or "EXIT" in goal_upper:
+                return "PF3"
+            return None  # Viewing file, might be success
+
+        # Generic error recovery
         if "ERROR" in upper or "INVALID" in upper:
             return "CLEAR"
 
-        return "ENTER"
+        # Don't blindly press Enter - might cause issues
+        return None
 
     def _execute_action(self, action: str, target: str):
         """Execute a single action."""
@@ -401,9 +599,15 @@ YOUR ACTION:"""
                 send_terminal_key("home")
 
             elif action == "LOGOFF":
+                # Exit any nested panels first
+                for _ in range(5):
+                    send_terminal_key("pf", "3")
+                    time.sleep(0.5)
+                # Type LOGOFF command
                 send_terminal_key("string", "LOGOFF")
                 time.sleep(0.5)
                 send_terminal_key("enter")
+                time.sleep(3)
 
             elif action == "WAIT":
                 time.sleep(2)

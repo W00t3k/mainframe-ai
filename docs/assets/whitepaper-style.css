@@ -1,0 +1,378 @@
+/* BigIron-AI Whitepaper Stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --primary: #1a365d;
+  --secondary: #2c5282;
+  --accent: #ed8936;
+  --bg-light: #f7fafc;
+  --text: #2d3748;
+  --text-muted: #718096;
+  --border: #e2e8f0;
+  --code-bg: #1a202c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.7;
+  color: var(--text);
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.75in;
+  background: white;
+}
+
+/* Cover Page */
+.cover-page {
+  text-align: center;
+  padding-top: 1.5in;
+  min-height: 9in;
+}
+
+.cover-page h1 {
+  font-size: 32pt;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5em;
+  letter-spacing: -0.02em;
+}
+
+.cover-page .subtitle {
+  font-size: 14pt;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-bottom: 2em;
+}
+
+.cover-page .logo {
+  font-size: 72pt;
+  margin-bottom: 1em;
+}
+
+.cover-page .version {
+  font-size: 12pt;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 3em;
+}
+
+.cover-page .authors {
+  font-size: 11pt;
+  color: var(--text-muted);
+  margin-top: 1em;
+}
+
+/* Headers */
+h1 {
+  font-size: 20pt;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  padding-bottom: 0.2em;
+  border-bottom: 2px solid var(--accent);
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+h2 {
+  font-size: 16pt;
+  font-weight: 600;
+  color: var(--secondary);
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+h3 {
+  font-size: 13pt;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 0.8em;
+  margin-bottom: 0.2em;
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: 1em;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Links */
+a {
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Lists */
+ul, ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+li {
+  margin-bottom: 0.3em;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+thead {
+  background: var(--primary);
+  color: white;
+}
+
+th {
+  padding: 0.75em 1em;
+  text-align: left;
+  font-weight: 600;
+}
+
+td {
+  padding: 0.6em 1em;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:nth-child(even) {
+  background: var(--bg-light);
+}
+
+/* Code blocks */
+pre {
+  background: var(--code-bg);
+  color: #e2e8f0;
+  padding: 1em 1.25em;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 9pt;
+  line-height: 1.5;
+  margin: 1em 0;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 9pt;
+  background: var(--bg-light);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--accent);
+  margin: 1.5em 0;
+  padding: 0.5em 1.5em;
+  background: var(--bg-light);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+blockquote p {
+  margin: 0;
+}
+
+/* Horizontal rules */
+hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 2em 0;
+}
+
+/* Figures and diagrams */
+.diagram {
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5em;
+  margin: 1.5em 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9pt;
+  line-height: 1.3;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+
+/* Info boxes */
+.info-box {
+  background: #ebf8ff;
+  border-left: 4px solid #3182ce;
+  padding: 1em 1.5em;
+  margin: 1.5em 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.warning-box {
+  background: #fffaf0;
+  border-left: 4px solid var(--accent);
+  padding: 1em 1.5em;
+  margin: 1.5em 0;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Table of Contents */
+.toc {
+  background: var(--bg-light);
+  padding: 1em 1.5em;
+  border-radius: 8px;
+  margin: 1.5em 0;
+}
+
+.toc h2 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.toc li {
+  margin-bottom: 0.5em;
+}
+
+.toc a {
+  color: var(--text);
+}
+
+/* Page breaks */
+.page-break {
+  page-break-after: always;
+}
+
+/* Print styles */
+@media print {
+  body {
+    font-size: 10pt;
+    padding: 0;
+  }
+
+  pre {
+    font-size: 8pt;
+  }
+
+  .cover-page {
+    padding-top: 2in;
+  }
+}
+
+/* Abstract box */
+.abstract {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: 2em;
+  border-radius: 12px;
+  margin: 2em 0;
+}
+
+.abstract h2 {
+  color: white;
+  margin-top: 0;
+}
+
+.abstract p {
+  text-align: left;
+}
+
+/* Metrics section */
+.metrics-section {
+  page-break-before: always;
+  padding-top: 1in;
+}
+
+/* Metrics box */
+.metrics {
+  display: flex;
+  justify-content: space-around;
+  gap: 0.5em;
+  margin: 1em 0;
+}
+
+.metric {
+  background: var(--bg-light);
+  padding: 1em;
+  border-radius: 8px;
+  text-align: center;
+  flex: 1;
+  max-width: 2in;
+}
+
+.metric-value {
+  font-size: 22pt;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.metric-label {
+  font-size: 9pt;
+  color: var(--text-muted);
+  margin-top: 0.3em;
+}
+
+/* Footer - inline at end of document */
+.footer {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 9pt;
+  color: var(--text-muted);
+}
+
+/* Page rules for PDF */
+@page {
+  size: letter;
+  margin: 0.75in 0.75in 1in 0.75in;
+
+  @bottom-center {
+    content: "BigIron-AI Technical White Paper";
+    font-size: 8pt;
+    color: #718096;
+  }
+
+  @bottom-right {
+    content: counter(page);
+    font-size: 8pt;
+    color: #718096;
+  }
+}
+
+@page :first {
+  @bottom-center { content: none; }
+  @bottom-right { content: none; }
+}

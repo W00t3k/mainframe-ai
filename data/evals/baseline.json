@@ -1,0 +1,497 @@
+{
+  "run_id": "2026-06-22-113704",
+  "summary": {
+    "total": 34,
+    "passed": 13,
+    "failed": 21,
+    "avg_ms": 6.9,
+    "p95_ms": 12.4
+  },
+  "regressions": [],
+  "results": [
+    {
+      "id": "eval_001",
+      "passed": false,
+      "reason": "missing keywords: ['RACF', 'profiles', 'distributed authority', 'not root']",
+      "ms": 22.3,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "RACF",
+        "profiles",
+        "distributed authority",
+        "not root"
+      ]
+    },
+    {
+      "id": "eval_002",
+      "passed": false,
+      "reason": "missing keywords: ['authorized library', 'trusted code']",
+      "ms": 4.5,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "APF",
+        "not sudo"
+      ],
+      "keywords_missing": [
+        "authorized library",
+        "trusted code"
+      ]
+    },
+    {
+      "id": "eval_003",
+      "passed": false,
+      "reason": "missing keywords: ['PROCLIB', 'started task', 'JCL', 'deferred execution']",
+      "ms": 11.8,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "PROCLIB",
+        "started task",
+        "JCL",
+        "deferred execution"
+      ]
+    },
+    {
+      "id": "eval_004",
+      "passed": false,
+      "reason": "missing keywords: ['RACF', 'dataset profiles', 'not Unix', 'resource classes']",
+      "ms": 11.8,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "RACF",
+        "dataset profiles",
+        "not Unix",
+        "resource classes"
+      ]
+    },
+    {
+      "id": "eval_005",
+      "passed": false,
+      "reason": "missing keywords: ['VTAM', 'TN3270', 'CICS', 'logical sessions']",
+      "ms": 10.7,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "VTAM",
+        "TN3270",
+        "CICS",
+        "logical sessions"
+      ]
+    },
+    {
+      "id": "eval_006",
+      "passed": false,
+      "reason": "missing keywords: ['JES', 'spool', 'SYSOUT', 'SMF']",
+      "ms": 11.6,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "JES",
+        "spool",
+        "SYSOUT",
+        "SMF"
+      ]
+    },
+    {
+      "id": "eval_007",
+      "passed": false,
+      "reason": "missing keywords: ['datasets', 'catalog', 'PDS', 'RACF dataset profile']",
+      "ms": 11.7,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "datasets",
+        "catalog",
+        "PDS",
+        "RACF dataset profile"
+      ]
+    },
+    {
+      "id": "eval_008",
+      "passed": false,
+      "reason": "missing keywords: ['started task', 'identity', 'RACF', 'permissions']",
+      "ms": 10.8,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "started task",
+        "identity",
+        "RACF",
+        "permissions"
+      ]
+    },
+    {
+      "id": "eval_009",
+      "passed": false,
+      "reason": "missing keywords: ['JCL', 'execution', 'datasets', 'JES']",
+      "ms": 10.6,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "JCL",
+        "execution",
+        "datasets",
+        "JES"
+      ]
+    },
+    {
+      "id": "eval_010",
+      "passed": false,
+      "reason": "missing keywords: ['root', 'sudo', '/etc/passwd', 'mainframe-native']",
+      "ms": 11.7,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "root",
+        "sudo",
+        "/etc/passwd",
+        "mainframe-native"
+      ]
+    },
+    {
+      "id": "eval_011",
+      "passed": false,
+      "reason": "missing keywords: ['user session']",
+      "ms": 3.2,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "TSO",
+        "interactive",
+        "logon"
+      ],
+      "keywords_missing": [
+        "user session"
+      ]
+    },
+    {
+      "id": "eval_012",
+      "passed": true,
+      "reason": null,
+      "ms": 3.6,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "ISPF",
+        "panels",
+        "datasets",
+        "interactive"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_013",
+      "passed": false,
+      "reason": "missing keywords: ['APF libraries', 'write access', 'authorized code', 'trust boundary']",
+      "ms": 11.0,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "APF libraries",
+        "write access",
+        "authorized code",
+        "trust boundary"
+      ]
+    },
+    {
+      "id": "eval_014",
+      "passed": false,
+      "reason": "missing keywords: ['spool', 'SYSOUT', 'JES', 'evidence']",
+      "ms": 10.8,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "spool",
+        "SYSOUT",
+        "JES",
+        "evidence"
+      ]
+    },
+    {
+      "id": "eval_015",
+      "passed": false,
+      "reason": "missing keywords: ['session fabric']",
+      "ms": 3.2,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "VTAM",
+        "applid",
+        "TN3270"
+      ],
+      "keywords_missing": [
+        "session fabric"
+      ]
+    },
+    {
+      "id": "eval_016",
+      "passed": false,
+      "reason": "missing keywords: ['CICS', 'transactions', 'region identity', 'authorization']",
+      "ms": 11.0,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "CICS",
+        "transactions",
+        "region identity",
+        "authorization"
+      ]
+    },
+    {
+      "id": "eval_017",
+      "passed": false,
+      "reason": "missing keywords: ['system datasets', 'UPDATE', 'ALTER', 'control plane']",
+      "ms": 11.2,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "system datasets",
+        "UPDATE",
+        "ALTER",
+        "control plane"
+      ]
+    },
+    {
+      "id": "eval_018",
+      "passed": true,
+      "reason": null,
+      "ms": 3.1,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "RACF",
+        "JES",
+        "VTAM",
+        "trust boundaries"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_019",
+      "passed": false,
+      "reason": "missing keywords: ['concept', 'security impact', 'assessment angle', 'lab-safe example']",
+      "ms": 5.4,
+      "mode": "none",
+      "keywords_found": [],
+      "keywords_missing": [
+        "concept",
+        "security impact",
+        "assessment angle",
+        "lab-safe example"
+      ]
+    },
+    {
+      "id": "eval_020",
+      "passed": false,
+      "reason": "missing keywords: ['private corpus', 'copyright', 'RAG', 'not committed']",
+      "ms": 11.6,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "private corpus",
+        "copyright",
+        "RAG",
+        "not committed"
+      ]
+    },
+    {
+      "id": "eval_021",
+      "passed": false,
+      "reason": "missing keywords: ['do not invent', 'unknown', 'did you mean TSO', 'RAG']",
+      "ms": 12.4,
+      "mode": "rag_llm",
+      "keywords_found": [],
+      "keywords_missing": [
+        "do not invent",
+        "unknown",
+        "did you mean TSO",
+        "RAG"
+      ]
+    },
+    {
+      "id": "eval_022",
+      "passed": true,
+      "reason": null,
+      "ms": 2.4,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "TSO",
+        "Time Sharing Option",
+        "RACF",
+        "Resource Access Control Facility"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_023",
+      "passed": false,
+      "reason": "missing keywords: ['temporary dataset']",
+      "ms": 3.0,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "context-dependent",
+        "SYSUT",
+        "SORTWK",
+        "WORK01"
+      ],
+      "keywords_missing": [
+        "temporary dataset"
+      ]
+    },
+    {
+      "id": "eval_024",
+      "passed": true,
+      "reason": null,
+      "ms": 2.6,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "System/370",
+        "June 30, 1970",
+        "successor",
+        "System/360"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_025",
+      "passed": false,
+      "reason": "missing keywords: ['date', 'not generic overview']",
+      "ms": 2.8,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "System/370",
+        "June 30, 1970"
+      ],
+      "keywords_missing": [
+        "date",
+        "not generic overview"
+      ]
+    },
+    {
+      "id": "eval_026",
+      "passed": true,
+      "reason": null,
+      "ms": 2.2,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "System/390",
+        "September 5, 1990",
+        "ESA/390"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_027",
+      "passed": true,
+      "reason": null,
+      "ms": 2.0,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "Job Entry Subsystem",
+        "deferred execution",
+        "spool",
+        "SYSOUT",
+        "assessment angle"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_028",
+      "passed": true,
+      "reason": null,
+      "ms": 2.3,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "JES-controlled",
+        "batch jobs",
+        "job class",
+        "spool evidence"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_029",
+      "passed": true,
+      "reason": null,
+      "ms": 2.1,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "Virtual Storage Access Method",
+        "cluster",
+        "RACF dataset access",
+        "CICS"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_030",
+      "passed": true,
+      "reason": null,
+      "ms": 2.1,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "System Display and Search Facility",
+        "jobs",
+        "spool output",
+        "SYSOUT"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_031",
+      "passed": true,
+      "reason": null,
+      "ms": 2.1,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "Restructured Extended Executor",
+        "scripting language",
+        "TSO",
+        "datasets"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_032",
+      "passed": true,
+      "reason": null,
+      "ms": 2.3,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "System/360",
+        "architecture",
+        "1964",
+        "System/370"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_033",
+      "passed": true,
+      "reason": null,
+      "ms": 2.2,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "System/390",
+        "1990",
+        "MVS/ESA",
+        "OS/390"
+      ],
+      "keywords_missing": []
+    },
+    {
+      "id": "eval_034",
+      "passed": true,
+      "reason": null,
+      "ms": 2.4,
+      "mode": "rag_seed_direct",
+      "keywords_found": [
+        "enterprise computing",
+        "transaction processing",
+        "RACF",
+        "JES",
+        "datasets",
+        "not root"
+      ],
+      "keywords_missing": []
+    }
+  ]
+}

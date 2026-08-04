@@ -1,0 +1,478 @@
+/* Interactive z/OS Book - Styles */
+
+:root {
+    --bg-dark: #1a1a2e;
+    --bg-darker: #16213e;
+    --bg-card: #0f3460;
+    --text-primary: #eaeaea;
+    --text-secondary: #a0a0a0;
+    --accent: #e94560;
+    --accent-dim: #c73e54;
+    --green: #4ecca3;
+    --terminal-bg: #0a0a0a;
+    --terminal-text: #33ff33;
+    --border: #2a2a4a;
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg-dark);
+    color: var(--text-primary);
+    line-height: 1.6;
+}
+
+/* Index Page */
+.book-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 4rem 2rem;
+}
+
+.book-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.book-header h1 {
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    background: linear-gradient(135deg, var(--accent), var(--green));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+    color: var(--text-secondary);
+    font-size: 1.1rem;
+}
+
+.toc h2 {
+    font-size: 1.2rem;
+    color: var(--text-secondary);
+    margin-bottom: 1.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+}
+
+.chapter-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.chapter-link {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 1.5rem;
+    background: var(--bg-card);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--text-primary);
+    transition: all 0.2s;
+}
+
+.chapter-link:hover {
+    background: var(--accent);
+    transform: translateX(5px);
+}
+
+.chapter-num {
+    font-family: monospace;
+    color: var(--accent);
+    font-weight: bold;
+}
+
+.chapter-link:hover .chapter-num {
+    color: white;
+}
+
+.book-footer {
+    margin-top: 4rem;
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+}
+
+/* Reader Page */
+.reader-container {
+    display: grid;
+    grid-template-columns: 220px 1fr 400px;
+    min-height: 100vh;
+}
+
+/* Sidebar */
+.sidebar {
+    background: var(--bg-darker);
+    border-right: 1px solid var(--border);
+    padding: 1.5rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+}
+
+.logo {
+    display: block;
+    font-weight: bold;
+    font-size: 1.2rem;
+    color: var(--accent);
+    text-decoration: none;
+    margin-bottom: 2rem;
+}
+
+.chapter-nav {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.chapter-nav a {
+    padding: 0.5rem 0.75rem;
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 0.9rem;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.chapter-nav a:hover {
+    background: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.chapter-nav a.active {
+    background: var(--accent);
+    color: white;
+}
+
+/* Main Content */
+.content {
+    padding: 3rem;
+    max-width: 800px;
+    overflow-y: auto;
+}
+
+.chapter-content h1 {
+    font-size: 2rem;
+    margin-bottom: 1.5rem;
+    color: var(--accent);
+}
+
+.chapter-content h2 {
+    font-size: 1.5rem;
+    margin: 2rem 0 1rem;
+    color: var(--green);
+}
+
+.chapter-content h3 {
+    font-size: 1.2rem;
+    margin: 1.5rem 0 0.75rem;
+}
+
+.chapter-content p {
+    margin-bottom: 1rem;
+}
+
+.chapter-content code {
+    background: var(--bg-darker);
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.9em;
+}
+
+.chapter-content pre {
+    background: var(--terminal-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem;
+    overflow-x: auto;
+    margin: 1.5rem 0;
+}
+
+.chapter-content pre code {
+    background: none;
+    padding: 0;
+    color: var(--terminal-text);
+}
+
+.chapter-content blockquote {
+    border-left: 4px solid var(--accent);
+    padding-left: 1rem;
+    margin: 1.5rem 0;
+    color: var(--text-secondary);
+    font-style: italic;
+}
+
+.chapter-content ul, .chapter-content ol {
+    margin: 1rem 0 1rem 2rem;
+}
+
+.chapter-content li {
+    margin-bottom: 0.5rem;
+}
+
+/* Try It button styling */
+.chapter-content .try-it {
+    display: inline-block;
+    background: var(--green);
+    color: var(--bg-dark);
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-weight: bold;
+    cursor: pointer;
+    margin: 0.5rem 0;
+}
+
+.chapter-content .try-it:hover {
+    opacity: 0.9;
+}
+
+/* Pagination */
+.chapter-pagination {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border);
+}
+
+.prev-link, .next-link {
+    color: var(--accent);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.prev-link:hover, .next-link:hover {
+    text-decoration: underline;
+}
+
+/* Practice Panel */
+.practice-panel {
+    background: var(--bg-darker);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.panel-tabs {
+    display: flex;
+    border-bottom: 1px solid var(--border);
+}
+
+.tab {
+    flex: 1;
+    padding: 1rem;
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    background: var(--bg-card);
+}
+
+.tab.active {
+    color: var(--text-primary);
+    background: var(--bg-card);
+    border-bottom: 2px solid var(--accent);
+}
+
+.panel-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.panel {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+}
+
+.panel.active {
+    display: flex;
+}
+
+/* Terminal Panel */
+.terminal-panel {
+    padding: 1rem;
+}
+
+.terminal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.status {
+    font-size: 0.8rem;
+    color: var(--accent);
+}
+
+.status.connected {
+    color: var(--green);
+}
+
+#connect-btn {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+
+#connect-btn:hover {
+    background: var(--accent-dim);
+}
+
+.terminal {
+    flex: 1;
+    background: var(--terminal-bg);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+#terminal-output {
+    height: 400px;
+    padding: 1rem;
+    overflow-y: auto;
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.85rem;
+    color: var(--terminal-text);
+    white-space: pre-wrap;
+    margin: 0;
+}
+
+#terminal-input {
+    width: 100%;
+    padding: 0.75rem;
+    background: var(--terminal-bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--terminal-text);
+    font-family: 'SF Mono', Monaco, monospace;
+    font-size: 0.9rem;
+    margin-top: 0.5rem;
+}
+
+#terminal-input:focus {
+    outline: none;
+    border-color: var(--green);
+}
+
+#terminal-input:disabled {
+    opacity: 0.5;
+}
+
+/* AI Chat Panel */
+.ai-panel {
+    display: flex;
+    flex-direction: column;
+}
+
+.chat-messages {
+    flex: 1;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.message {
+    padding: 0.75rem 1rem;
+    border-radius: 8px;
+    max-width: 90%;
+}
+
+.message.user {
+    background: var(--accent);
+    align-self: flex-end;
+}
+
+.message.assistant {
+    background: var(--bg-card);
+    align-self: flex-start;
+}
+
+.message.error {
+    background: #5a1a1a;
+    align-self: flex-start;
+}
+
+.message p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.chat-input {
+    display: flex;
+    gap: 0.5rem;
+    padding: 1rem;
+    border-top: 1px solid var(--border);
+}
+
+#ai-input {
+    flex: 1;
+    padding: 0.75rem;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+#ai-input:focus {
+    outline: none;
+    border-color: var(--accent);
+}
+
+#ai-send {
+    background: var(--accent);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+#ai-send:hover {
+    background: var(--accent-dim);
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+    .reader-container {
+        grid-template-columns: 1fr;
+    }
+
+    .sidebar {
+        display: none;
+    }
+
+    .practice-panel {
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 50vh;
+        border-left: none;
+        border-top: 1px solid var(--border);
+    }
+}

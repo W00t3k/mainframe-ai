@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive z/OS Book</title>
+    <link rel="stylesheet" href="/static/css/book.css">
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+</head>
+<body>
+    <div class="reader-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <a href="/" class="logo">z/OS Book</a>
+            <nav class="chapter-nav" id="chapter-nav"></nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="content">
+            <article class="chapter-content" id="chapter-content"></article>
+
+            <nav class="chapter-pagination">
+                <a href="{{prev.path}}" class="prev-link" id="prev-link">← Previous</a>
+                <a href="{{next.path}}" class="next-link" id="next-link">Next →</a>
+            </nav>
+        </main>
+
+        <!-- Right Panel: Terminal + AI -->
+        <aside class="practice-panel">
+            <div class="panel-tabs">
+                <button class="tab active" data-panel="terminal">Terminal</button>
+                <button class="tab" data-panel="ai">Ask BigIron</button>
+            </div>
+
+            <div class="panel-content">
+                <!-- Terminal -->
+                <div class="panel terminal-panel active" id="terminal-panel">
+                    <div class="terminal-header">
+                        <span class="status" id="terminal-status">Disconnected</span>
+                        <button id="connect-btn">Connect to TK5</button>
+                    </div>
+                    <div class="terminal" id="terminal">
+                        <pre id="terminal-output">Click "Connect to TK5" to start a mainframe session.</pre>
+                    </div>
+                    <input type="text" id="terminal-input" placeholder="Enter command..." disabled>
+                </div>
+
+                <!-- AI Chat -->
+                <div class="panel ai-panel" id="ai-panel">
+                    <div class="chat-messages" id="chat-messages">
+                        <div class="message assistant">
+                            <p>Hi! I'm BigIron. Ask me anything about what you're reading.</p>
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <input type="text" id="ai-input" placeholder="Ask a question...">
+                        <button id="ai-send">Send</button>
+                    </div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <script>
+        // Chapter data
+        const chapters = {{chapters}};
+        const currentSlug = "{{current}}";
+        const chapterContent = `{{content}}`;
+        const prevChapter = {{prev}};
+        const nextChapter = {{next}};
+        const tk5Ws = "{{tk5_ws}}";
+
+        // Render chapter navigation
+        const nav = document.getElementById('chapter-nav');
+        chapters.forEach(ch => {
+            const a = document.createElement('a');
+            a.href = ch.path;
+            a.textContent = ch.title;
+            if (ch.slug === currentSlug) a.classList.add('active');
+            nav.appendChild(a);
+        });
+
+        // Render chapter content (markdown)
+        document.getElementById('chapter-content').innerHTML = marked.parse(chapterContent);
+
+        // Handle pagination
+        if (!prevChapter) document.getElementById('prev-link').style.display = 'none';
+        if (!nextChapter) document.getElementById('next-link').style.display = 'none';
+
+        // Panel tabs
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.panel + '-panel').classList.add('active');
+            });
+        });
+
+        // Terminal connection (WebSocket to main app)
+        let ws = null;
+        const termOutput = document.getElementById('terminal-output');
+        const termInput = document.getElementById('terminal-input');
+        const termStatus = document.getElementById('terminal-status');
+        const connectBtn = document.getElementById('connect-btn');
+
+        connectBtn.addEventListener('click', () => {
+            if (ws && ws.readyState === WebSocket.OPEN) {
+                ws.close();
+                return;
+            }
+            termOutput.textContent = 'Connecting to TK5...\n';
+            ws = new WebSocket(tk5Ws);
+
+            ws.onopen = () => {
+                termStatus.textContent = 'Connected';
+                termStatus.classList.add('connected');
+                connectBtn.textContent = 'Disconnect';
+                termInput.disabled = false;
+                termInput.focus();
+            };
+
+            ws.onmessage = (e) => {
+                termOutput.textContent += e.data;
+                termOutput.scrollTop = termOutput.scrollHeight;
+            };
+
+            ws.onclose = () => {
+                termStatus.textContent = 'Disconnected';
+                termStatus.classList.remove('connected');
+                connectBtn.textContent = 'Connect to TK5';
+                termInput.disabled = true;
+            };
+
+            ws.onerror = () => {
+                termOutput.textContent += '\nConnection error. Is the main app running?\n';
+            };
+        });
+
+        termInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && ws && ws.readyState === WebSocket.OPEN) {
+                ws.send(termInput.value + '\n');
+                termInput.value = '';
+            }
+        });
+
+        // AI Chat
+        const chatMessages = document.getElementById('chat-messages');
+        const aiInput = document.getElementById('ai-input');
+        const aiSend = document.getElementById('ai-send');
+
+        async function askBigIron(question) {
+            // Add user message
+            const userMsg = document.createElement('div');
+            userMsg.className = 'message user';
+            userMsg.innerHTML = `<p>${question}</p>`;
+            chatMessages.appendChild(userMsg);
+
+            // Get context from current chapter
+            const context = `The user is reading about: ${document.querySelector('h1')?.textContent || 'z/OS'}`;
+
+            try {
+                const resp = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        message: question,
+                        context: context
+                    })
+                });
+                const data = await resp.json();
+
+                const aiMsg = document.createElement('div');
+                aiMsg.className = 'message assistant';
+                aiMsg.innerHTML = `<p>${data.response || data.error || 'No response'}</p>`;
+                chatMessages.appendChild(aiMsg);
+            } catch (err) {
+                const errMsg = document.createElement('div');
+                errMsg.className = 'message error';
+                errMsg.innerHTML = `<p>Error: ${err.message}. Is BigIron running?</p>`;
+                chatMessages.appendChild(errMsg);
+            }
+
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        aiSend.addEventListener('click', () => {
+            if (aiInput.value.trim()) {
+                askBigIron(aiInput.value.trim());
+                aiInput.value = '';
+            }
+        });
+
+        aiInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') aiSend.click();
+        });
+
+        // Make code blocks clickable to send to terminal
+        document.querySelectorAll('pre code').forEach(block => {
+            block.style.cursor = 'pointer';
+            block.title = 'Click to send to terminal';
+            block.addEventListener('click', () => {
+                if (ws && ws.readyState === WebSocket.OPEN) {
+                    ws.send(block.textContent.trim() + '\n');
+                    document.querySelector('[data-panel="terminal"]').click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

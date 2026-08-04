@@ -356,7 +356,7 @@ GPU_MODEL_TIERS = {
                 "use_case": "code",
             },
         ],
-        "default": "llama3.1:8b",
+        "default": "bigironv2",
         "ollama_options": {
             "num_gpu": 99,
             "num_thread": 8,
@@ -435,7 +435,7 @@ GPU_MODEL_TIERS = {
                 "use_case": "minimal",
             },
         ],
-        "default": "llama3.1:8b",
+        "default": "bigironv2",
         "ollama_options": {
             # Don't set num_gpu - let Ollama auto-detect Metal on Apple Silicon
             "num_ctx": 4096,

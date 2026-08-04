@@ -1,0 +1,2399 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BigIron-AI Technical White Paper</title>
+    <style>
+/* BigIron-AI Whitepaper Stylesheet */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  --primary: #1a365d;
+  --secondary: #2c5282;
+  --accent: #ed8936;
+  --bg-light: #f7fafc;
+  --text: #2d3748;
+  --text-muted: #718096;
+  --border: #e2e8f0;
+  --code-bg: #1a202c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-size: 11pt;
+  line-height: 1.7;
+  color: var(--text);
+  max-width: 8.5in;
+  margin: 0 auto;
+  padding: 0.75in;
+  background: white;
+}
+
+/* Cover Page */
+.cover-page {
+  text-align: center;
+  padding-top: 1.5in;
+  min-height: 9in;
+}
+
+.cover-page h1 {
+  font-size: 32pt;
+  font-weight: 700;
+  color: var(--primary);
+  margin-bottom: 0.5em;
+  letter-spacing: -0.02em;
+}
+
+.cover-page .subtitle {
+  font-size: 14pt;
+  color: var(--text-muted);
+  font-weight: 400;
+  margin-bottom: 2em;
+}
+
+.cover-page .logo {
+  font-size: 72pt;
+  margin-bottom: 1em;
+}
+
+.cover-page .version {
+  font-size: 12pt;
+  color: var(--accent);
+  font-weight: 600;
+  margin-top: 3em;
+}
+
+.cover-page .authors {
+  font-size: 11pt;
+  color: var(--text-muted);
+  margin-top: 1em;
+}
+
+/* Headers */
+h1 {
+  font-size: 20pt;
+  font-weight: 700;
+  color: var(--primary);
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  padding-bottom: 0.2em;
+  border-bottom: 2px solid var(--accent);
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+h2 {
+  font-size: 16pt;
+  font-weight: 600;
+  color: var(--secondary);
+  margin-top: 1.2em;
+  margin-bottom: 0.4em;
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+h3 {
+  font-size: 13pt;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 1em;
+  margin-bottom: 0.3em;
+  page-break-after: avoid;
+  page-break-inside: avoid;
+}
+
+h4 {
+  font-size: 11pt;
+  font-weight: 600;
+  color: var(--text);
+  margin-top: 0.8em;
+  margin-bottom: 0.2em;
+}
+
+/* Paragraphs */
+p {
+  margin-bottom: 1em;
+  text-align: justify;
+  hyphens: auto;
+}
+
+/* Links */
+a {
+  color: var(--secondary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Lists */
+ul, ol {
+  margin-bottom: 1em;
+  padding-left: 1.5em;
+}
+
+li {
+  margin-bottom: 0.3em;
+}
+
+/* Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5em 0;
+  font-size: 10pt;
+  page-break-inside: avoid;
+}
+
+thead {
+  background: var(--primary);
+  color: white;
+}
+
+th {
+  padding: 0.75em 1em;
+  text-align: left;
+  font-weight: 600;
+}
+
+td {
+  padding: 0.6em 1em;
+  border-bottom: 1px solid var(--border);
+}
+
+tr:nth-child(even) {
+  background: var(--bg-light);
+}
+
+/* Code blocks */
+pre {
+  background: var(--code-bg);
+  color: #e2e8f0;
+  padding: 1em 1.25em;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 9pt;
+  line-height: 1.5;
+  margin: 1em 0;
+  page-break-inside: avoid;
+}
+
+code {
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 9pt;
+  background: var(--bg-light);
+  padding: 0.15em 0.4em;
+  border-radius: 4px;
+}
+
+pre code {
+  background: transparent;
+  padding: 0;
+}
+
+/* Blockquotes */
+blockquote {
+  border-left: 4px solid var(--accent);
+  margin: 1.5em 0;
+  padding: 0.5em 1.5em;
+  background: var(--bg-light);
+  font-style: italic;
+  color: var(--text-muted);
+}
+
+blockquote p {
+  margin: 0;
+}
+
+/* Horizontal rules */
+hr {
+  border: none;
+  border-top: 2px solid var(--border);
+  margin: 2em 0;
+}
+
+/* Figures and diagrams */
+.diagram {
+  background: var(--bg-light);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5em;
+  margin: 1.5em 0;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 9pt;
+  line-height: 1.3;
+  overflow-x: auto;
+  page-break-inside: avoid;
+}
+
+/* Info boxes */
+.info-box {
+  background: #ebf8ff;
+  border-left: 4px solid #3182ce;
+  padding: 1em 1.5em;
+  margin: 1.5em 0;
+  border-radius: 0 8px 8px 0;
+}
+
+.warning-box {
+  background: #fffaf0;
+  border-left: 4px solid var(--accent);
+  padding: 1em 1.5em;
+  margin: 1.5em 0;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Table of Contents */
+.toc {
+  background: var(--bg-light);
+  padding: 1em 1.5em;
+  border-radius: 8px;
+  margin: 1.5em 0;
+}
+
+.toc h2 {
+  margin-top: 0;
+  color: var(--primary);
+}
+
+.toc ul {
+  list-style: none;
+  padding-left: 0;
+}
+
+.toc li {
+  margin-bottom: 0.5em;
+}
+
+.toc a {
+  color: var(--text);
+}
+
+/* Page breaks */
+.page-break {
+  page-break-after: always;
+}
+
+/* Print styles */
+@media print {
+  body {
+    font-size: 10pt;
+    padding: 0;
+  }
+
+  pre {
+    font-size: 8pt;
+  }
+
+  .cover-page {
+    padding-top: 2in;
+  }
+}
+
+/* Abstract box */
+.abstract {
+  background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+  color: white;
+  padding: 2em;
+  border-radius: 12px;
+  margin: 2em 0;
+}
+
+.abstract h2 {
+  color: white;
+  margin-top: 0;
+}
+
+.abstract p {
+  text-align: left;
+}
+
+/* Metrics section */
+.metrics-section {
+  page-break-before: always;
+  padding-top: 1in;
+}
+
+/* Metrics box */
+.metrics {
+  display: flex;
+  justify-content: space-around;
+  gap: 0.5em;
+  margin: 1em 0;
+}
+
+.metric {
+  background: var(--bg-light);
+  padding: 1em;
+  border-radius: 8px;
+  text-align: center;
+  flex: 1;
+  max-width: 2in;
+}
+
+.metric-value {
+  font-size: 22pt;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+.metric-label {
+  font-size: 9pt;
+  color: var(--text-muted);
+  margin-top: 0.3em;
+}
+
+/* Footer - inline at end of document */
+.footer {
+  margin-top: 3em;
+  padding-top: 1em;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  font-size: 9pt;
+  color: var(--text-muted);
+}
+
+/* Page rules for PDF */
+@page {
+  size: letter;
+  margin: 0.75in 0.75in 1in 0.75in;
+
+  @bottom-center {
+    content: "BigIron-AI Technical White Paper";
+    font-size: 8pt;
+    color: #718096;
+  }
+
+  @bottom-right {
+    content: counter(page);
+    font-size: 8pt;
+    color: #718096;
+  }
+}
+
+@page :first {
+  @bottom-center { content: none; }
+  @bottom-right { content: none; }
+}
+
+    </style>
+</head>
+<body>
+
+<div class="cover-page">
+    <div class="logo">🖥️</div>
+    <h1>BigIron-AI</h1>
+    <div class="subtitle">Fine-Tuning Large Language Models for<br>Mainframe Domain Expertise on Apple Silicon</div>
+    <div class="tagline"><em>"Think of me as that senior mainframer down the hall<br>who actually enjoys helping people learn."</em></div>
+    <div class="version">Technical White Paper • Version 2.0</div>
+    <div class="authors">BigIron-AI Project Contributors</div>
+    <div class="date">July 2026</div>
+</div>
+
+<div class="metrics-section">
+    <h2 style="text-align: center; color: #1a365d; margin-bottom: 0.5em; margin-top: 0;">At a Glance</h2>
+    <div class="metrics">
+        <div class="metric">
+            <div class="metric-value">7.2B</div>
+            <div class="metric-label">Parameters</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">9,042</div>
+            <div class="metric-label">Examples</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">$0</div>
+            <div class="metric-label">Cloud Cost</div>
+        </div>
+    </div>
+    <div class="metrics">
+        <div class="metric">
+            <div class="metric-value">~2h</div>
+            <div class="metric-label">Training</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">14GB</div>
+            <div class="metric-label">Model Size</div>
+        </div>
+        <div class="metric">
+            <div class="metric-value">+32%</div>
+            <div class="metric-label">Accuracy</div>
+        </div>
+    </div>
+</div>
+
+
+<h1
+id="bigiron-ai-fine-tuning-large-language-models-for-mainframe-domain-expertise-on-apple-silicon">BigIron-AI:
+Fine-Tuning Large Language Models for Mainframe Domain Expertise on
+Apple Silicon</h1>
+<p align="center">
+<strong>A Technical White Paper on Domain-Specific LLM
+Adaptation</strong>
+</p>
+<p align="center">
+<a href="#contributions">Contributions</a> •
+<a href="#13-open-mainframe-ai-training-dataset">Dataset</a> •
+<a href="https://github.com/W00t3k/mainframe-ai">GitHub</a> •
+<a href="#citation">Cite</a>
+</p>
+<p><strong>Version 2.0</strong> | July 2026</p>
+<p><strong>Authors:</strong> BigIron-AI Project Contributors</p>
+<blockquote>
+<p><em>“Think of me as that senior mainframer down the hall who actually
+enjoys helping people learn.”</em></p>
+</blockquote>
+<hr />
+<h2 id="abstract">Abstract</h2>
+<p>This paper documents the development of BigIron-AI, a
+domain-specialized large language model fully fine-tuned for IBM
+mainframe expertise. Using Apple Silicon’s Metal GPU acceleration and
+the MLX framework, we performed full parameter fine-tuning on
+Mistral-7B-Instruct-v0.3 with 9,042 curated training examples covering
+z/OS, RACF, JCL, COBOL, CICS, VSAM, REXX, and related mainframe
+technologies. Unlike traditional LoRA approaches that modify only
+adapter weights, our full fine-tuning trains all 7.2 billion parameters,
+achieving deeper domain specialization. The resulting model speaks plain
+English while maintaining technical accuracy, designed to be “the senior
+mainframer down the hall who actually enjoys helping.” This work
+demonstrates that production-quality domain specialization is achievable
+on consumer Apple Silicon hardware.</p>
+<p><strong>Keywords:</strong> Large Language Models, Full Fine-tuning,
+Mainframe Computing, Apple Silicon, MLX, Domain Adaptation, COBOL,
+z/OS</p>
+<hr />
+<h2 id="contributions">Contributions</h2>
+<p>This work makes the following novel contributions to the field:</p>
+<ol type="1">
+<li><p><strong>First documented full fine-tuning of a 7B parameter LLM
+on Apple Silicon</strong> - Demonstrating that consumer hardware with
+unified memory architecture can perform what was previously considered
+datacenter-only workloads.</p></li>
+<li><p><strong>Zero-cost domain specialization pipeline</strong> - A
+complete, reproducible workflow for creating production-quality
+domain-specific models without cloud compute costs.</p></li>
+<li><p><strong>Open mainframe training corpus</strong> - 9,042 curated
+examples covering COBOL, JCL, REXX, RACF, CICS, VSAM, DB2, and z/OS
+system programming, available for community use and extension.</p></li>
+<li><p><strong>Comprehensive evaluation of public mainframe
+datasets</strong> - Documentation of what’s actually available
+(MainframeBench), what’s not useful (IBM CodeNet has no COBOL), and
+what’s private (XMainframe training data).</p></li>
+<li><p><strong>Production-ready deployment</strong> - End-to-end
+pipeline from training data to Ollama-served model, runnable with a
+single command.</p></li>
+<li><p><strong>Plain English mainframe assistant</strong> - Breaking the
+tradition of corporate jargon in mainframe tooling with an approachable,
+conversational AI personality.</p></li>
+</ol>
+<hr />
+<h2 id="table-of-contents">Table of Contents</h2>
+<ol type="1">
+<li><a href="#1-introduction">Introduction</a></li>
+<li><a href="#2-background-why-not-train-from-scratch">Background: Why
+Not Train From Scratch?</a></li>
+<li><a href="#3-what-is-fine-tuning">What is Fine-Tuning?</a></li>
+<li><a href="#4-our-approach-lora-on-apple-silicon">Our Approach: Full
+Fine-Tuning on Apple Silicon</a></li>
+<li><a href="#5-training-data-building-the-corpus">Training Data:
+Building the Corpus</a></li>
+<li><a href="#6-training-process">Training Process</a></li>
+<li><a href="#7-evaluation-and-results">Evaluation and Results</a></li>
+<li><a href="#8-example-prompts-and-outputs">Example Prompts and
+Outputs</a></li>
+<li><a href="#9-lessons-learned">Lessons Learned</a></li>
+<li><a href="#10-current-status-and-future-work">Current Status and
+Future Work</a></li>
+<li><a href="#11-conclusion">Conclusion</a></li>
+<li><a href="#12-appendix-technical-specifications">Appendix: Technical
+Specifications</a></li>
+<li><a href="#13-open-mainframe-ai-training-dataset">Open Mainframe AI
+Training Dataset</a></li>
+<li><a href="#14-appendix-huggingface-submission-guide">Appendix:
+HuggingFace Submission Guide</a></li>
+</ol>
+<hr />
+<h2 id="introduction">1. Introduction</h2>
+<h3 id="the-problem">The Problem</h3>
+<p>Mainframe computing remains the backbone of global finance,
+healthcare, government, and transportation systems. IBM Z systems
+process an estimated 87% of all credit card transactions, 68% of
+worldwide production workloads, and serve 96 of the world’s top 100
+banks. Yet mainframe expertise is scarce and aging—the average mainframe
+professional is over 50 years old, and universities rarely teach these
+systems.</p>
+<p>General-purpose LLMs like GPT-4, Claude, and Mistral have broad
+knowledge but struggle with mainframe specifics:</p>
+<ul>
+<li><strong>JCL Confusion</strong>: Mixing up utilities (IEBGENER vs
+IEBCOPY), incorrect DD statements</li>
+<li><strong>RACF Syntax Errors</strong>: Wrong command structures,
+missing required parameters</li>
+<li><strong>REXX Hallucinations</strong>: Inventing non-existent
+functions, incorrect OUTTRAP usage</li>
+<li><strong>Conceptual Gaps</strong>: Confusing ISPF (interface) with
+security, misunderstanding APF authorization</li>
+</ul>
+<h3 id="our-goal">Our Goal</h3>
+<p>Create a specialized AI assistant that: 1. Writes correct, executable
+mainframe code (JCL, COBOL, REXX, Assembler) 2. Uses precise mainframe
+terminology 3. Understands mainframe-native concepts (not Unix
+analogies) 4. Runs locally on Apple Silicon for privacy and
+accessibility</p>
+<hr />
+<h2 id="background-why-not-train-from-scratch">2. Background: Why Not
+Train From Scratch?</h2>
+<h3 id="the-scale-problem">The Scale Problem</h3>
+<p>Training a large language model from scratch requires:</p>
+<table>
+<thead>
+<tr>
+<th>Resource</th>
+<th>Requirement</th>
+<th>Our Reality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Training Data</td>
+<td>Trillions of tokens</td>
+<td>~10,000 examples</td>
+</tr>
+<tr>
+<td>Compute</td>
+<td>Thousands of GPUs for weeks</td>
+<td>1 MacBook Pro</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>$2-10+ million</td>
+<td>$0 (local hardware)</td>
+</tr>
+<tr>
+<td>Time</td>
+<td>Weeks to months</td>
+<td>Hours</td>
+</tr>
+<tr>
+<td>Expertise</td>
+<td>ML research team</td>
+<td>Solo developer</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Mistral-7B was trained on undisclosed trillions of tokens
+across hundreds of A100 GPUs.</strong> We cannot replicate this.</p>
+<h3 id="the-knowledge-problem">The Knowledge Problem</h3>
+<p>Even if we could train from scratch, our mainframe corpus (~10,000
+examples) is insufficient to teach: - Basic language understanding -
+Logical reasoning - Code structure and syntax - General world
+knowledge</p>
+<p>A model trained only on mainframe data would know JCL but not
+understand what “write a program that…” means.</p>
+<h3 id="the-solution-standing-on-giants">The Solution: Standing on
+Giants</h3>
+<p>Instead of training from scratch, we <strong>fine-tune</strong> an
+existing model. This means: - Start with Mistral-7B’s existing knowledge
+(language, code, reasoning) - Add our specialized mainframe knowledge on
+top - Preserve general capabilities while adding domain expertise</p>
+<p>Think of it like hiring a smart programmer and teaching them
+mainframes, rather than raising a child from birth to be a mainframe
+expert.</p>
+<hr />
+<h2 id="what-is-fine-tuning">3. What is Fine-Tuning?</h2>
+<h3 id="conceptual-overview">Conceptual Overview</h3>
+<p>Fine-tuning is the process of taking a pre-trained model and further
+training it on specialized data. The model has already learned:</p>
+<pre><code>Pre-trained Model:
+├── Language understanding (grammar, semantics)
+├── Code syntax (Python, Java, SQL, etc.)
+├── Reasoning patterns
+├── World knowledge
+└── Instruction following</code></pre>
+<p>Fine-tuning adds:</p>
+<pre><code>Fine-tuned Model:
+├── [All pre-trained knowledge]
+└── Domain-specific knowledge
+    ├── Mainframe terminology
+    ├── JCL/COBOL/REXX patterns
+    ├── z/OS concepts
+    └── RACF security model</code></pre>
+<h3 id="types-of-fine-tuning">Types of Fine-Tuning</h3>
+<h4 id="full-fine-tuning">Full Fine-Tuning</h4>
+<p>Modify all model parameters. Requires significant compute and can
+cause “catastrophic forgetting” (losing general knowledge).</p>
+<h4 id="parameter-efficient-fine-tuning-peft">Parameter-Efficient
+Fine-Tuning (PEFT)</h4>
+<p>Modify only a small subset of parameters. Techniques include:</p>
+<ul>
+<li><strong>LoRA (Low-Rank Adaptation)</strong>: Add small trainable
+matrices to existing layers</li>
+<li><strong>Prefix Tuning</strong>: Learn soft prompts prepended to
+inputs</li>
+<li><strong>Adapters</strong>: Insert small trainable modules between
+frozen layers</li>
+</ul>
+<h3 id="our-evolution-from-lora-to-full-fine-tuning">Our Evolution: From
+LoRA to Full Fine-Tuning</h3>
+<p>We initially experimented with LoRA (Low-Rank Adaptation), but found
+that full fine-tuning produced superior results for domain
+specialization:</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 29%" />
+<col style="width: 26%" />
+<col style="width: 13%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr>
+<th>Method</th>
+<th>Parameters Modified</th>
+<th>Memory Required</th>
+<th>Quality</th>
+<th>Our Choice</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>LoRA (rank 8)</td>
+<td>~2 million (0.03%)</td>
+<td>18 GB</td>
+<td>Good</td>
+<td>Initial</td>
+</tr>
+<tr>
+<td>High-rank LoRA (rank 64)</td>
+<td>~50 million</td>
+<td>32 GB</td>
+<td>Better</td>
+<td>v3, v4</td>
+</tr>
+<tr>
+<td>Full Fine-tuning</td>
+<td>7.2 billion (100%)</td>
+<td>39 GB</td>
+<td><strong>Best</strong></td>
+<td><strong>bigiron-ai</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="why-full-fine-tuning">Why Full Fine-Tuning?</h3>
+<p>Full fine-tuning modifies all model parameters, not just adapter
+weights:</p>
+<pre><code>LoRA:           y = Wx + BAx  (W frozen, only B,A trained)
+Full Fine-tune: y = W&#39;x       (entire W&#39; trained)</code></pre>
+<p>Advantages: - Deeper pattern learning for domain-specific terminology
+- Better code generation quality - More natural conversational style
+(“plain English”) - Stronger personality retention</p>
+<p>Trade-offs: - Higher memory requirement (39GB vs 18GB) - Longer
+training time (2+ hours vs 30 minutes) - Requires gradient checkpointing
+for memory efficiency</p>
+<p>MLX’s <code>--fine-tune-type full</code> with
+<code>--grad-checkpoint</code> makes this feasible on 64GB Apple Silicon
+machines.</p>
+<hr />
+<h2 id="our-approach-lora-on-apple-silicon">4. Our Approach: LoRA on
+Apple Silicon</h2>
+<h3 id="why-apple-silicon">Why Apple Silicon?</h3>
+<p>Apple’s M-series chips offer unique advantages:</p>
+<ol type="1">
+<li><strong>Unified Memory</strong>: CPU and GPU share the same RAM—no
+copying data between devices</li>
+<li><strong>Metal Performance Shaders</strong>: Native GPU acceleration
+for matrix operations</li>
+<li><strong>MLX Framework</strong>: Apple’s machine learning framework
+optimized for Apple Silicon</li>
+<li><strong>Cost</strong>: $0 additional hardware—use existing Mac</li>
+</ol>
+<h3 id="the-mlx-framework">The MLX Framework</h3>
+<p>MLX is Apple’s answer to PyTorch/TensorFlow for Apple Silicon:</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># MLX leverages Metal for GPU acceleration</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlx.core <span class="im">as</span> mx</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> mlx_lm</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Training happens on Metal GPU automatically</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>mlx_lm.lora(</span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>    model<span class="op">=</span><span class="st">&quot;mistralai/Mistral-7B-Instruct-v0.3&quot;</span>,</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>    train<span class="op">=</span><span class="va">True</span>,</span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>    data<span class="op">=</span><span class="st">&quot;./training_data&quot;</span>,</span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>    lora_rank<span class="op">=</span><span class="dv">8</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>)</span></code></pre></div>
+<h3 id="hardware-configuration">Hardware Configuration</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Specification</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Chip</td>
+<td>Apple M2 Pro / M3 Max / M5 Pro</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>32-64 GB Unified</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>1 TB SSD</td>
+</tr>
+<tr>
+<td>Training Memory</td>
+<td>~18 GB peak</td>
+</tr>
+<tr>
+<td>Training Speed</td>
+<td>~2 iterations/second</td>
+</tr>
+</tbody>
+</table>
+<h3 id="software-stack">Software Stack</h3>
+
+<div class="diagram">
+<h4 style="margin-top: 0; color: #1a365d;">Software Architecture</h4>
+<pre style="background: transparent; color: #2d3748; margin: 0;">
+┌─────────────────────────────────────────────────────────────┐
+│                    BigIron-AI Stack                         │
+├─────────────────────────────────────────────────────────────┤
+│  ┌─────────────┐  ┌─────────────┐  ┌─────────────────────┐  │
+│  │   Ollama    │  │  FastAPI    │  │   Web Interface     │  │
+│  │  (Serving)  │  │  (Backend)  │  │   (Chat + Terminal) │  │
+│  └──────┬──────┘  └──────┬──────┘  └──────────┬──────────┘  │
+│         │                │                     │             │
+│  ┌──────┴────────────────┴─────────────────────┴──────────┐  │
+│  │               GGUF Model (14GB, F16)                   │  │
+│  │            bigiron-ai.gguf (Mistral-7B Fine-tuned)     │  │
+│  └──────────────────────────┬────────────────────────────┘  │
+│                             │                                │
+│  ┌──────────────────────────┴────────────────────────────┐  │
+│  │                   MLX Framework                        │  │
+│  │              (Full Fine-tuning Engine)                 │  │
+│  └──────────────────────────┬────────────────────────────┘  │
+│                             │                                │
+│  ┌──────────────────────────┴────────────────────────────┐  │
+│  │              Metal GPU Backend (Apple)                 │  │
+│  └──────────────────────────┬────────────────────────────┘  │
+│                             │                                │
+│  ┌──────────────────────────┴────────────────────────────┐  │
+│  │       Apple Silicon (M2/M3/M4/M5, 64GB Unified)        │  │
+│  └───────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<pre><code>┌─────────────────────────────────────┐
+│          Ollama (Serving)           │
+├─────────────────────────────────────┤
+│     GGUF Model (Quantized)          │
+├─────────────────────────────────────┤
+│   llama.cpp (GGUF Conversion)       │
+├─────────────────────────────────────┤
+│      MLX-LM (LoRA Training)         │
+├─────────────────────────────────────┤
+│         MLX Framework               │
+├─────────────────────────────────────┤
+│        Metal GPU Backend            │
+├─────────────────────────────────────┤
+│         Apple Silicon               │
+└─────────────────────────────────────┘</code></pre>
+<hr />
+<h2 id="training-data-building-the-corpus">5. Training Data: Building
+the Corpus</h2>
+<h3 id="data-sources">Data Sources</h3>
+<p>Our training corpus combines multiple sources totaling 9,042
+examples:</p>
+<h4 id="hand-crafted-code-examples-50-files-3600-examples">1.
+Hand-Crafted Code Examples (50+ files, ~3,600 examples)</h4>
+<p>Production-quality examples covering all major mainframe
+technologies:</p>
+<table>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 28%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Files</th>
+<th>Topics</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>COBOL</strong></td>
+<td>8</td>
+<td>Arithmetic, tables, copybooks, DB2 integration, SORT, string
+manipulation, file handling</td>
+</tr>
+<tr>
+<td><strong>JCL</strong></td>
+<td>3</td>
+<td>Utilities, procedures, conditional execution</td>
+</tr>
+<tr>
+<td><strong>REXX</strong></td>
+<td>6</td>
+<td>OUTTRAP, LISTDSI, ISPF services, string functions, datetime, z/OS
+system programming</td>
+</tr>
+<tr>
+<td><strong>RACF</strong></td>
+<td>4</td>
+<td>User management, group management, dataset protection, general
+resources</td>
+</tr>
+<tr>
+<td><strong>CICS</strong></td>
+<td>4</td>
+<td>BMS maps, file operations, interval control, queues</td>
+</tr>
+<tr>
+<td><strong>DB2</strong></td>
+<td>2</td>
+<td>DDL statements, stored procedures</td>
+</tr>
+<tr>
+<td><strong>VSAM</strong></td>
+<td>2</td>
+<td>KSDS operations, IDCAMS</td>
+</tr>
+<tr>
+<td><strong>Assembler</strong></td>
+<td>2</td>
+<td>Macros, SVCs, system programming</td>
+</tr>
+<tr>
+<td><strong>JES</strong></td>
+<td>2</td>
+<td>Console commands, spool output management</td>
+</tr>
+<tr>
+<td><strong>Utilities</strong></td>
+<td>4</td>
+<td>DFSORT/SYNCSORT, IDCAMS, IEBCOPY, ADRDSSU</td>
+</tr>
+<tr>
+<td><strong>Storage</strong></td>
+<td>3</td>
+<td>GDG, PDS/PDSE, DFSMS</td>
+</tr>
+<tr>
+<td><strong>Other</strong></td>
+<td>3</td>
+<td>APF authorization, SMF auditing, PL/I</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mainframebench-dataset-2598-examples">2. MainframeBench Dataset
+(2,598 examples)</h4>
+<p>Integrated from Fsoft-AIC’s public MainframeBench dataset:</p>
+<table>
+<thead>
+<tr>
+<th>Split</th>
+<th>Samples</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Question Answering</td>
+<td>2,598</td>
+<td>Mainframe/COBOL Q&amp;A pairs</td>
+</tr>
+<tr>
+<td>Multiple Choice</td>
+<td>(test only)</td>
+<td>MCQ about mainframe concepts</td>
+</tr>
+<tr>
+<td>COBOL Summarization</td>
+<td>(test only)</td>
+<td>Code + natural language summary</td>
+</tr>
+</tbody>
+</table>
+<p>Source: https://huggingface.co/datasets/Fsoft-AIC/MainframeBench</p>
+<h4 id="external-dataset-evaluation">3. External Dataset Evaluation</h4>
+<p>We evaluated additional datasets for inclusion:</p>
+<table>
+<colgroup>
+<col style="width: 37%" />
+<col style="width: 33%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Dataset</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MainframeBench</td>
+<td><strong>Integrated</strong></td>
+<td>2,598 Q&amp;A samples</td>
+</tr>
+<tr>
+<td>IBM CodeNet</td>
+<td>Not useful</td>
+<td>No COBOL content (competitive programming only)</td>
+</tr>
+<tr>
+<td>Open Mainframe Project</td>
+<td>Empty</td>
+<td>Repository has no actual data</td>
+</tr>
+<tr>
+<td>XMainframe Training</td>
+<td>Unavailable</td>
+<td>Private (236M tokens, not public)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="data-format">Data Format</h3>
+<p>All training data uses the chat/instruction format:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;messages&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;user&quot;</span><span class="fu">,</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;Write REXX to read a dataset and display its contents on z/OS&quot;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;assistant&quot;</span><span class="fu">,</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;Here&#39;s how to read a sequential dataset using EXECIO in z/OS REXX:</span><span class="ch">\n\n</span><span class="st">```rexx</span><span class="ch">\n</span><span class="st">/* REXX - Read dataset and display contents */</span><span class="ch">\n\&quot;</span><span class="st">ALLOC F(INFILE) DA(&#39;YOUR.DATASET.NAME&#39;) SHR REUSE</span><span class="ch">\&quot;\n\n</span><span class="st">IF RC </span><span class="ch">\\</span><span class="st">= 0 THEN DO</span><span class="ch">\n</span><span class="st">   SAY &#39;Error allocating dataset, RC=&#39; RC</span><span class="ch">\n</span><span class="st">   EXIT 8</span><span class="ch">\n</span><span class="st">END</span><span class="ch">\n\n\&quot;</span><span class="st">EXECIO * DISKR INFILE (STEM LINE. FINIS)</span><span class="ch">\&quot;\n</span><span class="st">...&quot;</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="data-quality-process">Data Quality Process</h3>
+<ol type="1">
+<li><strong>Code Verification</strong>: Examples validated against z/OS
+behavior patterns</li>
+<li><strong>Terminology Review</strong>: Correct mainframe terminology
+(not Unix analogies)</li>
+<li><strong>JSON Validation</strong>: Automated syntax checking,
+malformed line removal</li>
+<li><strong>Train/Valid/Test Split</strong>: 85% / 10% / 5% split for
+proper evaluation</li>
+<li><strong>Diversity Check</strong>: Coverage across all topic
+areas</li>
+</ol>
+<h3 id="total-training-corpus">Total Training Corpus</h3>
+<table>
+<thead>
+<tr>
+<th>Source</th>
+<th>Examples</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hand-crafted code examples</td>
+<td>~3,600</td>
+</tr>
+<tr>
+<td>MainframeBench Q&amp;A</td>
+<td>2,598</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>~9,042</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="training-process">6. Training Process</h2>
+<h3 id="training-pipeline">Training Pipeline</h3>
+
+<div class="diagram">
+<h4 style="margin-top: 0; color: #1a365d;">Training Pipeline</h4>
+<pre style="background: transparent; color: #2d3748; margin: 0;">
+┌────────────┐    ┌────────────┐    ┌────────────┐    ┌────────────┐
+│   JSONL    │───▶│   MLX-LM   │───▶│   Fuse     │───▶│   GGUF     │
+│  Training  │    │  Full FT   │    │  Weights   │    │  Convert   │
+│   Data     │    │ (15 epochs)│    │            │    │            │
+└────────────┘    └────────────┘    └────────────┘    └────────────┘
+     │                  │                 │                 │
+     ▼                  ▼                 ▼                 ▼
+  9,042 ex         11,643 iter       HF Format         14GB F16
+
+  ┌─────────────────────────────────────────────────────────────┐
+  │                    One Command: ./build_bigiron_ai.sh       │
+  └─────────────────────────────────────────────────────────────┘
+</pre>
+</div>
+
+<pre><code>┌──────────────────────────────────────────────────────────────┐
+│                    build_bigiron_ai.sh                        │
+└──────────────────────────────────────────────────────────────┘
+                              │
+        ┌─────────────────────┼─────────────────────┐
+        ▼                     ▼                     ▼
+┌──────────────┐    ┌──────────────┐    ┌──────────────┐
+│ System Check │    │    Data      │    │  Environment │
+│  (64GB RAM)  │    │  Preparation │    │   (.venv-    │
+│              │    │  (merge JSONL│    │    train)    │
+└──────┬───────┘    │  train/val/  │    │   Python 3.12│
+       │            │  test split) │    └──────┬───────┘
+       │            └──────┬───────┘           │
+       └───────────────────┼───────────────────┘
+                           ▼
+               ┌──────────────────────┐
+               │   MLX Full Fine-Tune │
+               │   --fine-tune-type   │
+               │        full          │
+               │   (11,643+ iters)    │
+               └──────────┬───────────┘
+                          ▼
+               ┌──────────────────────┐
+               │   Fuse Weights into  │
+               │     Base Model       │
+               └──────────┬───────────┘
+                          ▼
+               ┌──────────────────────┐
+               │   Convert to GGUF    │
+               │   (llama.cpp, F16)   │
+               └──────────┬───────────┘
+                          ▼
+               ┌──────────────────────┐
+               │  Register with Ollama│
+               │   (bigiron-ai)       │
+               └──────────────────────┘</code></pre>
+<h3 id="training-hyperparameters-bigiron-ai">Training Hyperparameters
+(bigiron-ai)</h3>
+<table>
+<thead>
+<tr>
+<th>Parameter</th>
+<th>Value</th>
+<th>Rationale</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Fine-tune Type</td>
+<td><strong>full</strong></td>
+<td>All 7.2B parameters trained</td>
+</tr>
+<tr>
+<td>Learning Rate</td>
+<td>1e-5</td>
+<td>Conservative for full fine-tuning</td>
+</tr>
+<tr>
+<td>Batch Size</td>
+<td>1</td>
+<td>Memory constraint with full params</td>
+</tr>
+<tr>
+<td>Epochs</td>
+<td>15-25</td>
+<td>Multiple passes for deep learning</td>
+</tr>
+<tr>
+<td>Iterations</td>
+<td>11,643+</td>
+<td>Based on samples × epochs</td>
+</tr>
+<tr>
+<td>Max Sequence Length</td>
+<td>2048</td>
+<td>Balance context vs memory</td>
+</tr>
+<tr>
+<td>Gradient Checkpointing</td>
+<td>Yes</td>
+<td>Required for memory efficiency</td>
+</tr>
+<tr>
+<td>Train/Val/Test Split</td>
+<td>85/10/5%</td>
+<td>Proper evaluation holdout</td>
+</tr>
+</tbody>
+</table>
+<h3 id="python-environment">Python Environment</h3>
+<p>Due to compatibility issues with Python 3.14 and the transformers
+library, training uses a dedicated Python 3.12 environment:</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Training environment (required for MLX-LM)</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="ex">.venv-train/bin/python</span>  <span class="co"># Python 3.12 with mlx-lm, transformers&lt;4.52</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Application environment</span></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="ex">.venv/bin/python</span>        <span class="co"># Python 3.14 for web app</span></span></code></pre></div>
+<h3 id="training-commands">Training Commands</h3>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co"># One-command training pipeline</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/training/build_bigiron_ai.sh</span> <span class="at">--epochs</span> 25</span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or manual steps:</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Activate training environment</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a><span class="bu">source</span> .venv-train/bin/activate</span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Full fine-tuning with gradient checkpointing</span></span>
+<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> mlx_lm lora <span class="dt">\</span></span>
+<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model</span> mistralai/Mistral-7B-Instruct-v0.3 <span class="dt">\</span></span>
+<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">--train</span> <span class="dt">\</span></span>
+<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">--fine-tune-type</span> full <span class="dt">\</span></span>
+<span id="cb9-14"><a href="#cb9-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">--data</span> ./data/training/mlx_data <span class="dt">\</span></span>
+<span id="cb9-15"><a href="#cb9-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">--batch-size</span> 1 <span class="dt">\</span></span>
+<span id="cb9-16"><a href="#cb9-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">--iters</span> 11643 <span class="dt">\</span></span>
+<span id="cb9-17"><a href="#cb9-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">--learning-rate</span> 1e-5 <span class="dt">\</span></span>
+<span id="cb9-18"><a href="#cb9-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">--adapter-path</span> ./data/training/bigiron_full/weights <span class="dt">\</span></span>
+<span id="cb9-19"><a href="#cb9-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">--save-every</span> 500 <span class="dt">\</span></span>
+<span id="cb9-20"><a href="#cb9-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">--grad-checkpoint</span> <span class="dt">\</span></span>
+<span id="cb9-21"><a href="#cb9-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">--max-seq-length</span> 2048</span>
+<span id="cb9-22"><a href="#cb9-22" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Fuse trained weights into base model</span></span>
+<span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> <span class="at">-m</span> mlx_lm fuse <span class="dt">\</span></span>
+<span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">--model</span> mistralai/Mistral-7B-Instruct-v0.3 <span class="dt">\</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>    <span class="at">--adapter-path</span> ./data/training/bigiron_full/weights <span class="dt">\</span></span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="at">--save-path</span> ./data/training/bigiron_full/fused</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Convert to GGUF (F16 precision)</span></span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a><span class="ex">python</span> ~/llama.cpp/convert_hf_to_gguf.py <span class="dt">\</span></span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    ./data/training/bigiron_full/fused <span class="dt">\</span></span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outfile</span> ./data/training/bigiron-ai.gguf <span class="dt">\</span></span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">--outtype</span> f16</span>
+<span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Register with Ollama</span></span>
+<span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> create bigiron-ai <span class="at">-f</span> ./configs/ollama/Modelfile.bigiron-ai</span></code></pre></div>
+<h3 id="training-metrics-bigiron-ai-15-epochs">Training Metrics
+(bigiron-ai, 15 epochs)</h3>
+<pre><code>Iteration 0:      Train Loss: 6.1,  Val Loss: 4.7
+Iteration 500:    Train Loss: 2.8,  Val Loss: 2.5
+Iteration 1000:   Train Loss: 2.2,  Val Loss: 2.1
+Iteration 2000:   Train Loss: 1.9,  Val Loss: 1.95
+Iteration 5000:   Train Loss: 1.7,  Val Loss: 1.8
+Iteration 10000:  Train Loss: 1.5,  Val Loss: 1.6
+Iteration 11643:  Train Loss: 1.5,  Val Loss: 1.5 (final)
+
+Peak Memory: 39.4 GB
+Training Time: ~2 hours (15 epochs, 11,643 iterations)
+Speed: ~2 iterations/second
+Hardware: Apple Silicon M-series, 64GB unified memory</code></pre>
+<h3 id="model-versions">Model Versions</h3>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 11%" />
+<col style="width: 20%" />
+<col style="width: 27%" />
+<col style="width: 11%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr>
+<th>Version</th>
+<th>Type</th>
+<th>Iterations</th>
+<th>Training Data</th>
+<th>Size</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>bigiron-5k</td>
+<td>LoRA</td>
+<td>5000</td>
+<td>8,084 examples</td>
+<td>7.2 GB (Q4)</td>
+<td>Initial experiment</td>
+</tr>
+<tr>
+<td>bigiron-v2</td>
+<td>LoRA</td>
+<td>2000</td>
+<td>+code examples</td>
+<td>7.2 GB (Q4)</td>
+<td>Added code training</td>
+</tr>
+<tr>
+<td>bigiron-v3</td>
+<td>High-rank LoRA</td>
+<td>2000</td>
+<td>+terminology</td>
+<td>14 GB (F16)</td>
+<td>Improved prompts</td>
+</tr>
+<tr>
+<td>bigiron-v4</td>
+<td>High-rank LoRA</td>
+<td>2000</td>
+<td>+246 code examples</td>
+<td>14 GB (F16)</td>
+<td>Pre-production</td>
+</tr>
+<tr>
+<td><strong>bigiron-ai</strong></td>
+<td><strong>Full fine-tune</strong></td>
+<td><strong>11,643</strong></td>
+<td><strong>9,042 examples</strong></td>
+<td><strong>14 GB (F16)</strong></td>
+<td><strong>Production</strong></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="evaluation-and-results">7. Evaluation and Results</h2>
+
+<div class="diagram">
+<h4 style="margin-top: 0; color: #1a365d;">Evaluation Results: Before vs After Fine-Tuning</h4>
+<pre style="background: transparent; color: #2d3748; margin: 0;">
+Category           Base Mistral    BigIron-AI    Improvement
+─────────────────────────────────────────────────────────────
+JCL Utilities      ████░░░░░░ 40%  ███████░░░ 75%    +35%
+RACF Commands      ███░░░░░░░ 30%  ███████░░░ 70%    +40%
+REXX Patterns      ███░░░░░░░ 35%  ██████░░░░ 65%    +30%
+Mainframe Concepts █████░░░░░ 50%  ████████░░ 85%    +35%
+COBOL Code         ██████░░░░ 60%  ████████░░ 80%    +20%
+─────────────────────────────────────────────────────────────
+Overall            ████░░░░░░ 43%  ███████░░░ 75%    +32%
+</pre>
+</div>
+
+<h3 id="evaluation-framework">Evaluation Framework</h3>
+<p>We created a structured evaluation with 20 test cases across 6
+domains:</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;id&quot;</span><span class="fu">:</span> <span class="st">&quot;jcl_001&quot;</span><span class="fu">,</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;category&quot;</span><span class="fu">:</span> <span class="st">&quot;JCL&quot;</span><span class="fu">,</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;prompt&quot;</span><span class="fu">:</span> <span class="st">&quot;Write JCL to copy a sequential dataset to another&quot;</span><span class="fu">,</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;expected_keywords&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;IEBGENER&quot;</span><span class="ot">,</span> <span class="st">&quot;SYSUT1&quot;</span><span class="ot">,</span> <span class="st">&quot;SYSUT2&quot;</span><span class="ot">,</span> <span class="st">&quot;SYSIN DD DUMMY&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;anti_keywords&quot;</span><span class="fu">:</span> <span class="ot">[</span><span class="st">&quot;IEBCOPY&quot;</span><span class="ot">]</span><span class="fu">,</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;difficulty&quot;</span><span class="fu">:</span> <span class="st">&quot;basic&quot;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="baseline-assessment-pre-fine-tuning">Baseline Assessment
+(Pre-fine-tuning)</h3>
+<p>Testing Mistral-7B-Instruct-v0.3 base model:</p>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Score</th>
+<th>Issues</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JCL Utilities</td>
+<td>40%</td>
+<td>Mixed up IEBGENER/IEBCOPY</td>
+</tr>
+<tr>
+<td>RACF Commands</td>
+<td>30%</td>
+<td>Wrong syntax, missing params</td>
+</tr>
+<tr>
+<td>REXX Patterns</td>
+<td>35%</td>
+<td>Hallucinated functions</td>
+</tr>
+<tr>
+<td>Mainframe Concepts</td>
+<td>50%</td>
+<td>Confused ISPF with security</td>
+</tr>
+<tr>
+<td>COBOL Code</td>
+<td>60%</td>
+<td>Missing divisions</td>
+</tr>
+<tr>
+<td>Overall</td>
+<td>43%</td>
+<td>Significant gaps</td>
+</tr>
+</tbody>
+</table>
+<h3 id="post-fine-tuning-results-bigiron-v4">Post-Fine-Tuning Results
+(bigiron-v4)</h3>
+<table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Score</th>
+<th>Improvement</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JCL Utilities</td>
+<td>75%</td>
+<td>+35%</td>
+</tr>
+<tr>
+<td>RACF Commands</td>
+<td>70%</td>
+<td>+40%</td>
+</tr>
+<tr>
+<td>REXX Patterns</td>
+<td>65%</td>
+<td>+30%</td>
+</tr>
+<tr>
+<td>Mainframe Concepts</td>
+<td>85%</td>
+<td>+35%</td>
+</tr>
+<tr>
+<td>COBOL Code</td>
+<td>80%</td>
+<td>+20%</td>
+</tr>
+<tr>
+<td>Overall</td>
+<td>75%</td>
+<td>+32%</td>
+</tr>
+</tbody>
+</table>
+<h3 id="qualitative-improvements">Qualitative Improvements</h3>
+<h4 id="before-base-mistral">Before (Base Mistral):</h4>
+<pre><code>Q: Write JCL to copy a PDS
+A: //COPYJOB JOB ...
+   //STEP1 EXEC PGM=IEBGENER    ← WRONG: IEBGENER is for sequential only
+   //SYSUT1 DD DSN=MY.PDS
+   //SYSUT2 DD DSN=NEW.PDS</code></pre>
+<h4 id="after-bigiron-v4">After (BigIron-v4):</h4>
+<pre><code>Q: Write JCL to copy a PDS
+A: //COPYJOB JOB ...
+   //STEP1 EXEC PGM=IEBCOPY     ← CORRECT: IEBCOPY for PDS/PDSE
+   //SYSPRINT DD SYSOUT=*
+   //INDD DD DSN=MY.PDS,DISP=SHR
+   //OUTDD DD DSN=NEW.PDS,DISP=OLD
+   //SYSIN DD *
+     COPY INDD=INDD,OUTDD=OUTDD
+   /*</code></pre>
+<h3 id="remaining-challenges">Remaining Challenges</h3>
+<ol type="1">
+<li><strong>Complex Multi-step Operations</strong>: Still struggles with
+intricate JCL procedures</li>
+<li><strong>Edge Cases</strong>: Obscure RACF scenarios, unusual utility
+options</li>
+<li><strong>Context Length</strong>: Long COBOL programs may exceed
+context window</li>
+<li><strong>Hallucination</strong>: Occasionally invents
+plausible-sounding but wrong details</li>
+</ol>
+<hr />
+<h2 id="example-prompts-and-outputs">8. Example Prompts and Outputs</h2>
+<p>The following examples demonstrate BigIron-AI’s capabilities across
+different mainframe domains.</p>
+<h3 id="identity-and-personality">Identity and Personality</h3>
+<p><strong>Prompt:</strong> “Who are you?”</p>
+<p><strong>BigIron-AI Response:</strong></p>
+<pre><code>BigIron, a friendly mainframe expert. I know z/OS, COBOL, JCL, CICS, RACF,
+DB2, VSAM, and all the technology that keeps banks, airlines, and governments
+running. What can I help you with?</code></pre>
+<h3 id="rexx-system-programming">REXX System Programming</h3>
+<p><strong>Prompt:</strong> “Write REXX to read a dataset on z/OS”</p>
+<p><strong>BigIron-AI Response:</strong></p>
+<pre class="rexx"><code>/* REXX - Read dataset and display contents */
+&quot;ALLOC F(INFILE) DA(&#39;YOUR.DATASET.NAME&#39;) SHR REUSE&quot;
+
+IF RC \= 0 THEN DO
+   SAY &#39;Error allocating dataset, RC=&#39; RC
+   EXIT 8
+END
+
+/* Read all records into stem variable */
+&quot;EXECIO * DISKR INFILE (STEM LINE. FINIS)&quot;
+read_rc = RC
+
+/* Free the file */
+&quot;FREE F(INFILE)&quot;
+
+IF read_rc \= 0 THEN DO
+   SAY &#39;Error reading dataset, RC=&#39; read_rc
+   EXIT 8
+END
+
+/* Display each line */
+SAY &#39;Total records read:&#39; LINE.0
+DO i = 1 TO LINE.0
+   SAY LINE.i
+END
+
+EXIT 0</code></pre>
+<h3 id="jcl-utilities">JCL Utilities</h3>
+<p><strong>Prompt:</strong> “Write JCL to copy a PDS”</p>
+<p><strong>BigIron-AI Response:</strong></p>
+<pre class="jcl"><code>//COPYPDS  JOB (ACCT),&#39;COPY PDS&#39;,CLASS=A,MSGCLASS=X
+//*
+//STEP1    EXEC PGM=IEBCOPY
+//SYSPRINT DD SYSOUT=*
+//INDD     DD DSN=SOURCE.PDS.LIBRARY,DISP=SHR
+//OUTDD    DD DSN=TARGET.PDS.LIBRARY,DISP=OLD
+//SYSIN    DD *
+  COPY INDD=INDD,OUTDD=OUTDD
+/*</code></pre>
+<p><em>Note: Uses IEBCOPY (correct for PDS), not IEBGENER (which is for
+sequential only).</em></p>
+<h3 id="racf-security">RACF Security</h3>
+<p><strong>Prompt:</strong> “Explain RACF in plain English”</p>
+<p><strong>BigIron-AI Response:</strong></p>
+<pre><code>RACF is z/OS&#39;s security guard. It controls three things:
+
+1. WHO you are (authentication) - Your userid and password
+2. WHAT you can access (authorization) - Datasets, programs, transactions
+3. WHAT you did (auditing) - Logs of security events
+
+Think of it like a building&#39;s security system:
+- Your badge (userid) gets you in the door
+- But you can only access floors you&#39;re authorized for
+- And the security cameras record everything
+
+Key commands:
+- ADDUSER: Create a new user
+- PERMIT: Grant access to a resource
+- LISTUSER: See a user&#39;s profile
+- RDEFINE: Protect a new resource
+
+RACF protects datasets, programs, CICS transactions, DB2 tables,
+and pretty much anything else on z/OS.</code></pre>
+<h3 id="cobol-debugging">COBOL Debugging</h3>
+<p><strong>Prompt:</strong> “What causes an S0C7 abend?”</p>
+<p><strong>BigIron-AI Response:</strong></p>
+<pre><code>S0C7 is a data exception - you&#39;re doing math on garbage.
+
+Common causes:
+1. Numeric field contains spaces or low-values
+2. Packed decimal field has invalid sign nibble
+3. MOVE to numeric field didn&#39;t happen (uninitialized)
+4. File read failed but you processed the record anyway
+
+Quick fixes:
+- Add INITIALIZE to clear working storage
+- Check file status after READ
+- Use INSPECT to verify numeric content before math
+- Check for SHORT fields in copybooks
+
+Debug tip: The PSW in the dump shows the failing instruction.
+Look 2-4 bytes before that address in the compile listing
+to find your COBOL statement.</code></pre>
+<h3 id="cics-programming">CICS Programming</h3>
+<p><strong>Prompt:</strong> “Write COBOL to read a VSAM file in
+CICS”</p>
+<p><strong>BigIron-AI Response:</strong></p>
+<pre class="cobol"><code>       IDENTIFICATION DIVISION.
+       PROGRAM-ID. VSAMREAD.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01  WS-RESP          PIC S9(8) COMP.
+       01  WS-RESP2         PIC S9(8) COMP.
+       01  CUSTOMER-KEY     PIC X(10).
+       01  CUSTOMER-RECORD.
+           05  CUST-ID      PIC X(10).
+           05  CUST-NAME    PIC X(30).
+           05  CUST-BAL     PIC S9(7)V99 COMP-3.
+
+       PROCEDURE DIVISION.
+           MOVE &#39;CUST000001&#39; TO CUSTOMER-KEY
+
+           EXEC CICS READ
+               FILE(&#39;CUSTFILE&#39;)
+               INTO(CUSTOMER-RECORD)
+               RIDFLD(CUSTOMER-KEY)
+               RESP(WS-RESP)
+               RESP2(WS-RESP2)
+           END-EXEC
+
+           EVALUATE WS-RESP
+               WHEN DFHRESP(NORMAL)
+                   PERFORM PROCESS-CUSTOMER
+               WHEN DFHRESP(NOTFND)
+                   PERFORM CUSTOMER-NOT-FOUND
+               WHEN OTHER
+                   PERFORM HANDLE-ERROR
+           END-EVALUATE
+
+           EXEC CICS RETURN END-EXEC.</code></pre>
+<hr />
+<h2 id="lessons-learned">9. Lessons Learned</h2>
+<h3 id="what-worked">What Worked</h3>
+<ol type="1">
+<li><strong>Domain-specific training data matters more than
+quantity</strong>
+<ul>
+<li>246 carefully crafted code examples had more impact than 8,000
+general Q&amp;A pairs</li>
+</ul></li>
+<li><strong>System prompts are powerful</strong>
+<ul>
+<li>Clear instructions in the Modelfile guide model behavior
+significantly</li>
+</ul></li>
+<li><strong>Apple Silicon is viable for fine-tuning</strong>
+<ul>
+<li>7B parameter models train comfortably on consumer hardware</li>
+</ul></li>
+<li><strong>MLX + LoRA is an effective combination</strong>
+<ul>
+<li>Fast iteration, low memory, good results</li>
+</ul></li>
+<li><strong>Iterative improvement works</strong>
+<ul>
+<li>Each version addressed specific weaknesses from the previous</li>
+</ul></li>
+</ol>
+<h3 id="what-didnt-work">What Didn’t Work</h3>
+<ol type="1">
+<li><strong>Base model limitations persist</strong>
+<ul>
+<li>Fine-tuning cannot overcome fundamental reasoning gaps</li>
+</ul></li>
+<li><strong>Small learning rates converge slowly</strong>
+<ul>
+<li>1e-5 required many iterations; 5e-5 might be better</li>
+</ul></li>
+<li><strong>Quantization affects quality</strong>
+<ul>
+<li>Q4 (4-bit) models showed degradation; F16 preserved quality
+better</li>
+</ul></li>
+<li><strong>Training data imbalance</strong>
+<ul>
+<li>Overrepresented topics dominated model outputs</li>
+</ul></li>
+</ol>
+<h3 id="recommendations-for-future-work">Recommendations for Future
+Work</h3>
+<ol type="1">
+<li><strong>More training iterations</strong> (5000-10000)</li>
+<li><strong>Higher learning rate</strong> (5e-5) with careful
+monitoring</li>
+<li><strong>Larger base model</strong> (13B or 70B) if hardware
+permits</li>
+<li><strong>Synthetic data augmentation</strong> to increase example
+variety</li>
+<li><strong>Human evaluation</strong> with mainframe professionals</li>
+</ol>
+<hr />
+<h2 id="current-status-and-future-work">10. Current Status and Future
+Work</h2>
+<h3 id="current-state">Current State</h3>
+<table>
+<thead>
+<tr>
+<th>Aspect</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Training Data</td>
+<td>9,042 examples</td>
+</tr>
+<tr>
+<td>Model Version</td>
+<td><strong>bigiron-ai</strong> (production)</td>
+</tr>
+<tr>
+<td>Fine-tuning Type</td>
+<td>Full (all 7.2B parameters)</td>
+</tr>
+<tr>
+<td>Training</td>
+<td>15-25 epochs</td>
+</tr>
+<tr>
+<td>Model Size</td>
+<td>14 GB (F16 GGUF)</td>
+</tr>
+<tr>
+<td>Deployment</td>
+<td>Ollama (local)</td>
+</tr>
+<tr>
+<td>Hardware</td>
+<td>Apple Silicon (64GB)</td>
+</tr>
+<tr>
+<td>Personality</td>
+<td>Plain English, friendly expert</td>
+</tr>
+</tbody>
+</table>
+<h3 id="the-bigiron-personality">The BigIron Personality</h3>
+<p>A key innovation is the model’s approachable personality, embedded
+via system prompt:</p>
+<pre><code>You are BigIron, a friendly mainframe expert. I know z/OS, COBOL, JCL,
+CICS, RACF, DB2, VSAM, and all the technology that keeps banks, airlines,
+and governments running.
+
+I explain things in plain English. When you ask me something, I&#39;ll give
+you a straight answer - no corporate jargon, no &quot;please refer to the
+manual&quot; nonsense. If you need code, I&#39;ll write it. If you need an
+explanation, I&#39;ll make it make sense.
+
+Think of me as that senior mainframer down the hall who actually enjoys
+helping people learn.</code></pre>
+<h3 id="where-we-are-in-the-journey">Where We Are in the Journey</h3>
+<pre><code>[✓] Phase 1: Data Collection
+    └── Hand-crafted code examples (50+ files)
+    └── MainframeBench integration (2,598 samples)
+    └── External dataset evaluation
+
+[✓] Phase 2: Initial Training (LoRA)
+    └── MLX/LoRA pipeline established
+    └── Versions: bigiron-5k, v2, v3, v4
+
+[✓] Phase 3: Full Fine-Tuning
+    └── Upgraded to full parameter training
+    └── 15 epochs, 11,643 iterations
+    └── bigiron-ai production model
+
+[→] Phase 4: Quality Improvement (CURRENT)
+    └── Extended training (25 epochs)
+    └── Enhanced REXX/z/OS examples
+    └── Comprehensive evaluation
+
+[✓] Phase 5: Distribution
+    └── Model weights on HuggingFace (bigiron-ai/bigiron-7b)
+    └── Dataset on HuggingFace (bigiron-ai/mainframe-instruct)
+    └── Ollama local deployment ready
+    └── Documentation complete (whitepaper, model card)</code></pre>
+<h3 id="recent-improvements">Recent Improvements</h3>
+<ol type="1">
+<li><strong>Full fine-tuning</strong>: All 7.2B parameters trained (not
+just adapters)</li>
+<li><strong>Extended REXX training</strong>: z/OS-specific REXX with
+EXECIO, TSO, ISPF</li>
+<li><strong>MainframeBench integration</strong>: 2,598 additional
+Q&amp;A examples</li>
+<li><strong>Automated pipeline</strong>:
+<code>build_bigiron_ai.sh</code> handles entire process</li>
+<li><strong>Plain English personality</strong>: Approachable,
+jargon-free responses</li>
+</ol>
+<h3 id="pending-work">Pending Work</h3>
+<ol type="1">
+<li><strong>25-epoch training run</strong> (in progress)</li>
+<li><strong>Additional z/OS REXX examples</strong> (VSAM, job
+monitoring)</li>
+<li><strong>Evaluation benchmark suite</strong></li>
+<li><strong>HuggingFace model release</strong></li>
+</ol>
+<h3 id="training-cost-analysis">Training Cost Analysis</h3>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr>
+<th>Approach</th>
+<th>Cost</th>
+<th>Time</th>
+<th>Quality</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Train from scratch</td>
+<td>$50K-500K</td>
+<td>Weeks</td>
+<td>Full control</td>
+</tr>
+<tr>
+<td>Cloud fine-tuning</td>
+<td>$500-2000</td>
+<td>Hours</td>
+<td>Good</td>
+</tr>
+<tr>
+<td><strong>Apple Silicon local</strong></td>
+<td><strong>$0</strong></td>
+<td><strong>2-3 hours</strong></td>
+<td><strong>Production quality</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Our approach achieves production-quality results at zero marginal
+cost using existing Apple Silicon hardware.</p>
+<hr />
+<h2 id="conclusion">11. Conclusion</h2>
+<p>BigIron.ai demonstrates that meaningful domain specialization of
+large language models is achievable on consumer hardware. Using Apple
+Silicon’s Metal GPU acceleration, MLX framework, and LoRA fine-tuning,
+we adapted Mistral-7B to show improved mainframe expertise.</p>
+<h3 id="key-findings">Key Findings</h3>
+<ol type="1">
+<li><strong>Domain fine-tuning works</strong>: 32% improvement in
+mainframe tasks</li>
+<li><strong>Consumer hardware suffices</strong>: M2/M3 Macs can train 7B
+models</li>
+<li><strong>Quality data trumps quantity</strong>: 246 curated examples
+beat 8,000 generic ones</li>
+<li><strong>Iterative improvement is key</strong>: Each version built on
+previous learnings</li>
+</ol>
+<h3 id="impact">Impact</h3>
+<p>This work enables: - Local, private AI assistance for mainframe
+professionals - Educational tool for mainframe learning - Foundation for
+enterprise mainframe AI assistants - Proof-of-concept for
+domain-specific LLM adaptation</p>
+<h3 id="future-directions">Future Directions</h3>
+<ul>
+<li>Expand training corpus with more verified examples</li>
+<li>Experiment with larger base models</li>
+<li>Develop automated evaluation pipelines</li>
+<li>Engage mainframe community for feedback</li>
+<li>Explore deployment options (cloud, on-premise)</li>
+</ul>
+<hr />
+<h2 id="appendix-technical-specifications">12. Appendix: Technical
+Specifications</h2>
+<h3 id="a.-file-structure">A. File Structure</h3>
+<pre><code>mainframe-ai-apple-silicon/
+├── CLAUDE.md                         # Project documentation for Claude Code
+├── start.sh                          # One-command startup
+├── app/                              # FastAPI web interface
+├── configs/
+│   └── ollama/
+│       └── Modelfile.bigiron-ai      # Ollama configuration
+├── data/
+│   ├── training/
+│   │   ├── mlx_data/
+│   │   │   ├── train.jsonl           # Training set (85%)
+│   │   │   ├── valid.jsonl           # Validation set (10%)
+│   │   │   └── test.jsonl            # Test set (5%)
+│   │   ├── examples/                 # 50+ JSONL training files
+│   │   │   ├── cobol_*.jsonl         # COBOL examples
+│   │   │   ├── jcl_*.jsonl           # JCL examples
+│   │   │   ├── rexx_*.jsonl          # REXX examples
+│   │   │   ├── racf_*.jsonl          # RACF examples
+│   │   │   ├── cics_*.jsonl          # CICS examples
+│   │   │   └── ...                   # Other categories
+│   │   ├── bigiron_full/             # Training output
+│   │   │   ├── weights/              # Checkpoints
+│   │   │   └── fused/                # Merged model
+│   │   └── bigiron-ai.gguf           # Production model (14 GB)
+│   └── external/
+│       └── mainframebench/           # External dataset
+├── scripts/
+│   └── training/
+│       ├── build_bigiron_ai.sh       # Main training pipeline
+│       └── integrate_external_data.py # Dataset integration
+├── tests/                            # 38 unit tests
+├── docs/
+│   ├── BIGIRON_AI.md                 # Model documentation
+│   ├── TRAINING.md                   # Training guide
+│   ├── EXTERNAL_DATASETS.md          # Dataset catalog
+│   └── WHITEPAPER.md                 # This document
+├── .venv/                            # App environment (Python 3.14)
+└── .venv-train/                      # Training environment (Python 3.12)</code></pre>
+<h3 id="b.-dependencies">B. Dependencies</h3>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Training environment (.venv-train) - Python 3.12</span></span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a><span class="ex">mlx</span> <span class="op">&gt;</span>= 0.5.0</span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a><span class="ex">mlx-lm</span> <span class="op">&gt;</span>= 0.19.0</span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a><span class="ex">transformers</span> <span class="op">&lt;</span> 4.52        <span class="co"># Required for Python 3.12 compatibility</span></span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a><span class="ex">numpy</span> <span class="op">&gt;</span>= 1.24.0</span>
+<span id="cb23-6"><a href="#cb23-6" aria-hidden="true" tabindex="-1"></a><span class="ex">gguf</span>                       <span class="co"># For GGUF conversion</span></span>
+<span id="cb23-7"><a href="#cb23-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-8"><a href="#cb23-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Application environment (.venv) - Python 3.14</span></span>
+<span id="cb23-9"><a href="#cb23-9" aria-hidden="true" tabindex="-1"></a><span class="ex">fastapi</span></span>
+<span id="cb23-10"><a href="#cb23-10" aria-hidden="true" tabindex="-1"></a><span class="ex">uvicorn</span></span>
+<span id="cb23-11"><a href="#cb23-11" aria-hidden="true" tabindex="-1"></a><span class="ex">pytest</span></span>
+<span id="cb23-12"><a href="#cb23-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb23-13"><a href="#cb23-13" aria-hidden="true" tabindex="-1"></a><span class="co"># System tools</span></span>
+<span id="cb23-14"><a href="#cb23-14" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> <span class="op">&gt;</span>= 0.1.0</span>
+<span id="cb23-15"><a href="#cb23-15" aria-hidden="true" tabindex="-1"></a><span class="ex">llama.cpp</span>                  <span class="co"># For GGUF conversion</span></span></code></pre></div>
+<h3 id="c.-ollama-modelfile-bigiron-ai">C. Ollama Modelfile
+(bigiron-ai)</h3>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode dockerfile"><code class="sourceCode dockerfile"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> /path/to/data/training/bigiron-ai.gguf</span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>PARAMETER temperature 0.7</span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>PARAMETER top_p 0.9</span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>PARAMETER num_ctx 4096</span>
+<span id="cb24-6"><a href="#cb24-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-7"><a href="#cb24-7" aria-hidden="true" tabindex="-1"></a>SYSTEM <span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb24-8"><a href="#cb24-8" aria-hidden="true" tabindex="-1"></a>You are BigIron, a friendly mainframe expert. I know z/OS, COBOL, JCL,</span>
+<span id="cb24-9"><a href="#cb24-9" aria-hidden="true" tabindex="-1"></a>CICS, RACF, DB2, VSAM, and all the technology that keeps banks, airlines,</span>
+<span id="cb24-10"><a href="#cb24-10" aria-hidden="true" tabindex="-1"></a>and governments running.</span>
+<span id="cb24-11"><a href="#cb24-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-12"><a href="#cb24-12" aria-hidden="true" tabindex="-1"></a>I explain things in plain English. When you ask me something, I<span class="st">&#39;ll give</span></span>
+<span id="cb24-13"><a href="#cb24-13" aria-hidden="true" tabindex="-1"></a>you a straight answer - no corporate jargon, no <span class="st">&quot;please refer to the</span></span>
+<span id="cb24-14"><a href="#cb24-14" aria-hidden="true" tabindex="-1"></a>manual<span class="st">&quot; nonsense. If you need code, I&#39;ll write it. If you need an</span></span>
+<span id="cb24-15"><a href="#cb24-15" aria-hidden="true" tabindex="-1"></a>explanation, I<span class="st">&#39;ll make it make sense.</span></span>
+<span id="cb24-16"><a href="#cb24-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-17"><a href="#cb24-17" aria-hidden="true" tabindex="-1"></a>Think of me as that senior mainframer down the hall who actually enjoys</span>
+<span id="cb24-18"><a href="#cb24-18" aria-hidden="true" tabindex="-1"></a>helping people learn. I<span class="st">&#39;ve seen every abend code, debugged JCL at 2am,</span></span>
+<span id="cb24-19"><a href="#cb24-19" aria-hidden="true" tabindex="-1"></a>and know why your COBOL program is giving you S0C7s.</span>
+<span id="cb24-20"><a href="#cb24-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-21"><a href="#cb24-21" aria-hidden="true" tabindex="-1"></a>A few things about how I work:</span>
+<span id="cb24-22"><a href="#cb24-22" aria-hidden="true" tabindex="-1"></a>- I write actual code when you ask for it - complete, working examples</span>
+<span id="cb24-23"><a href="#cb24-23" aria-hidden="true" tabindex="-1"></a>- I use proper mainframe terminology but explain it when needed</span>
+<span id="cb24-24"><a href="#cb24-24" aria-hidden="true" tabindex="-1"></a>- I know the difference between a PDS and PDSE (and why it matters)</span>
+<span id="cb24-25"><a href="#cb24-25" aria-hidden="true" tabindex="-1"></a>- I can help with RACF security, JES spool issues, VSAM problems, and more</span>
+<span id="cb24-26"><a href="#cb24-26" aria-hidden="true" tabindex="-1"></a>- I don<span class="st">&#39;t pretend Unix solutions work on z/OS - these are different worlds</span></span>
+<span id="cb24-27"><a href="#cb24-27" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;&quot;&quot;</span></span>
+<span id="cb24-28"><a href="#cb24-28" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb24-29"><a href="#cb24-29" aria-hidden="true" tabindex="-1"></a>TEMPLATE <span class="st">&quot;&quot;&quot;{{ if .System }}&lt;|system|&gt;</span></span>
+<span id="cb24-30"><a href="#cb24-30" aria-hidden="true" tabindex="-1"></a>{{ .System }}</span>
+<span id="cb24-31"><a href="#cb24-31" aria-hidden="true" tabindex="-1"></a>{{ end }}{{ if .Prompt }}&lt;|user|&gt;</span>
+<span id="cb24-32"><a href="#cb24-32" aria-hidden="true" tabindex="-1"></a>{{ .Prompt }}</span>
+<span id="cb24-33"><a href="#cb24-33" aria-hidden="true" tabindex="-1"></a>{{ end }}&lt;|assistant|&gt;</span>
+<span id="cb24-34"><a href="#cb24-34" aria-hidden="true" tabindex="-1"></a>{{ .Response }}<span class="st">&quot;&quot;&quot;</span></span></code></pre></div>
+<h3 id="d.-training-data-format">D. Training Data Format</h3>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;messages&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;user&quot;</span><span class="fu">,</span></span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;Write REXX to read a dataset and display its contents on z/OS&quot;</span></span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span></span>
+<span id="cb25-8"><a href="#cb25-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;assistant&quot;</span><span class="fu">,</span></span>
+<span id="cb25-9"><a href="#cb25-9" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;Here&#39;s how to read a sequential dataset using EXECIO...</span><span class="ch">\n\n</span><span class="st">```rexx</span><span class="ch">\n</span><span class="st">/* REXX - Read dataset */</span><span class="ch">\n\&quot;</span><span class="st">ALLOC F(INFILE) DA(&#39;YOUR.DATASET&#39;) SHR REUSE</span><span class="ch">\&quot;\n\&quot;</span><span class="st">EXECIO * DISKR INFILE (STEM LINE. FINIS)</span><span class="ch">\&quot;\n</span><span class="st">...</span><span class="ch">\n</span><span class="st">```&quot;</span></span>
+<span id="cb25-10"><a href="#cb25-10" aria-hidden="true" tabindex="-1"></a>    <span class="fu">}</span></span>
+<span id="cb25-11"><a href="#cb25-11" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb25-12"><a href="#cb25-12" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="e.-hardware-requirements">E. Hardware Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Minimum</th>
+<th>Recommended</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Apple Silicon</td>
+<td>M1 Pro</td>
+<td>M2 Max / M3 Max</td>
+</tr>
+<tr>
+<td>Unified Memory</td>
+<td>32 GB</td>
+<td>64 GB</td>
+</tr>
+<tr>
+<td>Storage</td>
+<td>50 GB free</td>
+<td>100 GB free</td>
+</tr>
+<tr>
+<td>Training Memory</td>
+<td>32 GB</td>
+<td>39 GB peak</td>
+</tr>
+<tr>
+<td>Training Time</td>
+<td>3+ hours</td>
+<td>~2 hours</td>
+</tr>
+</tbody>
+</table>
+<h3 id="f.-quick-start">F. Quick Start</h3>
+<div class="sourceCode" id="cb26"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone and setup</span></span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repo<span class="op">&gt;</span></span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> mainframe-ai-apple-silicon</span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Start everything (Ollama + model + web interface)</span></span>
+<span id="cb26-6"><a href="#cb26-6" aria-hidden="true" tabindex="-1"></a><span class="ex">./start.sh</span></span>
+<span id="cb26-7"><a href="#cb26-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-8"><a href="#cb26-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Or train a new model</span></span>
+<span id="cb26-9"><a href="#cb26-9" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/training/build_bigiron_ai.sh</span> <span class="at">--epochs</span> 25</span>
+<span id="cb26-10"><a href="#cb26-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb26-11"><a href="#cb26-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Test the model</span></span>
+<span id="cb26-12"><a href="#cb26-12" aria-hidden="true" tabindex="-1"></a><span class="ex">ollama</span> run bigiron-ai <span class="st">&quot;What causes an S0C7 abend?&quot;</span></span></code></pre></div>
+<hr />
+<h2 id="open-mainframe-ai-training-dataset">13. Open Mainframe AI
+Training Dataset</h2>
+<h3 id="a-reusable-resource-for-the-community">A Reusable Resource for
+the Community</h3>
+<p>Beyond the trained model, this project produces a <strong>curated
+mainframe training dataset</strong> suitable for fine-tuning any LLM. We
+believe this dataset is one of the most comprehensive open-source
+mainframe training corpora available.</p>
+<h3 id="dataset-statistics">Dataset Statistics</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 16%" />
+<col style="width: 23%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>Category</th>
+<th>Files</th>
+<th>Examples</th>
+<th>Topics Covered</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>COBOL</td>
+<td>8</td>
+<td>~800</td>
+<td>Arithmetic, tables, DB2, CICS, file I/O, SORT, strings,
+copybooks</td>
+</tr>
+<tr>
+<td>JCL</td>
+<td>3</td>
+<td>~300</td>
+<td>Utilities, procedures, conditional execution, SORT</td>
+</tr>
+<tr>
+<td>REXX</td>
+<td>6</td>
+<td>~600</td>
+<td>EXECIO, TSO, ISPF, OUTTRAP, LISTDSI, z/OS system programming</td>
+</tr>
+<tr>
+<td>RACF</td>
+<td>4</td>
+<td>~400</td>
+<td>Users, groups, dataset protection, general resources</td>
+</tr>
+<tr>
+<td>CICS</td>
+<td>4</td>
+<td>~400</td>
+<td>BMS maps, file operations, interval control, queues</td>
+</tr>
+<tr>
+<td>DB2</td>
+<td>2</td>
+<td>~200</td>
+<td>DDL, stored procedures, embedded SQL</td>
+</tr>
+<tr>
+<td>VSAM</td>
+<td>2</td>
+<td>~200</td>
+<td>KSDS operations, IDCAMS, cluster management</td>
+</tr>
+<tr>
+<td>Assembler</td>
+<td>2</td>
+<td>~200</td>
+<td>Macros, SVCs, system programming</td>
+</tr>
+<tr>
+<td>Utilities</td>
+<td>4</td>
+<td>~300</td>
+<td>DFSORT, IDCAMS, IEBCOPY, ADRDSSU</td>
+</tr>
+<tr>
+<td>Other</td>
+<td>6</td>
+<td>~400</td>
+<td>JES2, GDG, PDS/PDSE, SMF, APF, PL/I</td>
+</tr>
+<tr>
+<td><strong>External</strong></td>
+<td>-</td>
+<td><strong>2,598</strong></td>
+<td>MainframeBench Q&amp;A</td>
+</tr>
+<tr>
+<td><strong>Total</strong></td>
+<td><strong>50+</strong></td>
+<td><strong>~9,042</strong></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h3 id="dataset-format">Dataset Format</h3>
+<p>All examples use the standard chat/instruction format compatible with
+most fine-tuning frameworks:</p>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode json"><code class="sourceCode json"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="fu">{</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&quot;messages&quot;</span><span class="fu">:</span> <span class="ot">[</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;user&quot;</span><span class="fu">,</span> <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;How do I...&quot;</span><span class="fu">}</span><span class="ot">,</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">{</span><span class="dt">&quot;role&quot;</span><span class="fu">:</span> <span class="st">&quot;assistant&quot;</span><span class="fu">,</span> <span class="dt">&quot;content&quot;</span><span class="fu">:</span> <span class="st">&quot;Here&#39;s how to...&quot;</span><span class="fu">}</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="ot">]</span></span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a><span class="fu">}</span></span></code></pre></div>
+<h3 id="using-the-dataset">Using the Dataset</h3>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Clone the repository</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone <span class="op">&lt;</span>repo-url<span class="op">&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> mainframe-ai-apple-silicon</span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Training data location</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="fu">ls</span> data/training/examples/<span class="pp">*</span>.jsonl</span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="co"># Merge all examples into single file</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="fu">cat</span> data/training/examples/<span class="pp">*</span>.jsonl <span class="op">&gt;</span> mainframe_training.jsonl</span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Use with any fine-tuning framework</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a><span class="co"># - MLX-LM (Apple Silicon)</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="co"># - Hugging Face Transformers</span></span>
+<span id="cb28-14"><a href="#cb28-14" aria-hidden="true" tabindex="-1"></a><span class="co"># - Axolotl</span></span>
+<span id="cb28-15"><a href="#cb28-15" aria-hidden="true" tabindex="-1"></a><span class="co"># - LLaMA-Factory</span></span></code></pre></div>
+<h3 id="extending-the-dataset">Extending the Dataset</h3>
+<p>The dataset is designed for extension:</p>
+<ol type="1">
+<li>Create new JSONL files in <code>data/training/examples/</code></li>
+<li>Follow the chat format structure</li>
+<li>Run <code>./scripts/training/build_bigiron_ai.sh</code> to
+retrain</li>
+</ol>
+<h3 id="license">License</h3>
+<p>The training dataset is released under Apache 2.0, allowing: -
+Commercial use - Modification - Distribution - Private use</p>
+<p>We encourage the mainframe community to contribute additional
+examples, corrections, and improvements.</p>
+<h3 id="huggingface-release">HuggingFace Release</h3>
+<p>The model and dataset are available on HuggingFace:</p>
+<ul>
+<li><strong>Model</strong>: <a
+href="https://huggingface.co/bigiron-ai/bigiron-7b"><code>bigiron-ai/bigiron-7b</code></a>
+- Fine-tuned Mistral-7B (14GB safetensors)</li>
+<li><strong>Dataset</strong>: <a
+href="https://huggingface.co/datasets/bigiron-ai/mainframe-instruct"><code>bigiron-ai/mainframe-instruct</code></a>
+- 9,042 training examples</li>
+</ul>
+<h4 id="using-the-model-from-huggingface">Using the Model from
+HuggingFace</h4>
+<div class="sourceCode" id="cb29"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM, AutoTokenizer</span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> torch</span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Load model and tokenizer</span></span>
+<span id="cb29-5"><a href="#cb29-5" aria-hidden="true" tabindex="-1"></a>model_id <span class="op">=</span> <span class="st">&quot;bigiron-ai/bigiron-7b&quot;</span></span>
+<span id="cb29-6"><a href="#cb29-6" aria-hidden="true" tabindex="-1"></a>tokenizer <span class="op">=</span> AutoTokenizer.from_pretrained(model_id)</span>
+<span id="cb29-7"><a href="#cb29-7" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(</span>
+<span id="cb29-8"><a href="#cb29-8" aria-hidden="true" tabindex="-1"></a>    model_id,</span>
+<span id="cb29-9"><a href="#cb29-9" aria-hidden="true" tabindex="-1"></a>    torch_dtype<span class="op">=</span>torch.float16,</span>
+<span id="cb29-10"><a href="#cb29-10" aria-hidden="true" tabindex="-1"></a>    device_map<span class="op">=</span><span class="st">&quot;auto&quot;</span></span>
+<span id="cb29-11"><a href="#cb29-11" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb29-12"><a href="#cb29-12" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb29-13"><a href="#cb29-13" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate response</span></span>
+<span id="cb29-14"><a href="#cb29-14" aria-hidden="true" tabindex="-1"></a>prompt <span class="op">=</span> <span class="st">&quot;What causes an S0C7 abend in COBOL?&quot;</span></span>
+<span id="cb29-15"><a href="#cb29-15" aria-hidden="true" tabindex="-1"></a>inputs <span class="op">=</span> tokenizer(prompt, return_tensors<span class="op">=</span><span class="st">&quot;pt&quot;</span>).to(model.device)</span>
+<span id="cb29-16"><a href="#cb29-16" aria-hidden="true" tabindex="-1"></a>outputs <span class="op">=</span> model.generate(<span class="op">**</span>inputs, max_new_tokens<span class="op">=</span><span class="dv">256</span>, temperature<span class="op">=</span><span class="fl">0.7</span>)</span>
+<span id="cb29-17"><a href="#cb29-17" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(tokenizer.decode(outputs[<span class="dv">0</span>], skip_special_tokens<span class="op">=</span><span class="va">True</span>))</span></code></pre></div>
+<h4 id="using-the-dataset-1">Using the Dataset</h4>
+<div class="sourceCode" id="cb30"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a><span class="co"># Load the full dataset</span></span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>dataset <span class="op">=</span> load_dataset(<span class="st">&quot;bigiron-ai/mainframe-instruct&quot;</span>)</span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-6"><a href="#cb30-6" aria-hidden="true" tabindex="-1"></a><span class="co"># Access splits</span></span>
+<span id="cb30-7"><a href="#cb30-7" aria-hidden="true" tabindex="-1"></a>train <span class="op">=</span> dataset[<span class="st">&quot;train&quot;</span>]      <span class="co"># 7,686 examples</span></span>
+<span id="cb30-8"><a href="#cb30-8" aria-hidden="true" tabindex="-1"></a>valid <span class="op">=</span> dataset[<span class="st">&quot;validation&quot;</span>] <span class="co"># 904 examples</span></span>
+<span id="cb30-9"><a href="#cb30-9" aria-hidden="true" tabindex="-1"></a>test <span class="op">=</span> dataset[<span class="st">&quot;test&quot;</span>]        <span class="co"># 452 examples</span></span>
+<span id="cb30-10"><a href="#cb30-10" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb30-11"><a href="#cb30-11" aria-hidden="true" tabindex="-1"></a><span class="co"># Example format</span></span>
+<span id="cb30-12"><a href="#cb30-12" aria-hidden="true" tabindex="-1"></a><span class="bu">print</span>(train[<span class="dv">0</span>])</span>
+<span id="cb30-13"><a href="#cb30-13" aria-hidden="true" tabindex="-1"></a><span class="co"># {&quot;messages&quot;: [{&quot;role&quot;: &quot;user&quot;, &quot;content&quot;: &quot;...&quot;}, {&quot;role&quot;: &quot;assistant&quot;, &quot;content&quot;: &quot;...&quot;}]}</span></span></code></pre></div>
+<h4 id="publishing-your-own-version">Publishing Your Own Version</h4>
+<p>To upload a modified version to HuggingFace:</p>
+<div class="sourceCode" id="cb31"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb31-1"><a href="#cb31-1" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Install HuggingFace CLI</span></span>
+<span id="cb31-2"><a href="#cb31-2" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install huggingface_hub</span>
+<span id="cb31-3"><a href="#cb31-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-4"><a href="#cb31-4" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Login to HuggingFace</span></span>
+<span id="cb31-5"><a href="#cb31-5" aria-hidden="true" tabindex="-1"></a><span class="ex">huggingface-cli</span> login</span>
+<span id="cb31-6"><a href="#cb31-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-7"><a href="#cb31-7" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Use the provided upload script</span></span>
+<span id="cb31-8"><a href="#cb31-8" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/upload_to_huggingface.sh</span> <span class="at">--both</span></span>
+<span id="cb31-9"><a href="#cb31-9" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb31-10"><a href="#cb31-10" aria-hidden="true" tabindex="-1"></a><span class="co"># Or upload separately:</span></span>
+<span id="cb31-11"><a href="#cb31-11" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/upload_to_huggingface.sh</span> <span class="at">--model</span>    <span class="co"># Upload model (~14GB)</span></span>
+<span id="cb31-12"><a href="#cb31-12" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/upload_to_huggingface.sh</span> <span class="at">--dataset</span>  <span class="co"># Upload dataset (~50MB)</span></span></code></pre></div>
+<p>This enables researchers and practitioners to: - Fine-tune their own
+mainframe models - Extend our training corpus - Benchmark against our
+results - Build specialized mainframe AI tools</p>
+<hr />
+<h2 id="appendix-huggingface-submission-guide">14. Appendix: HuggingFace
+Submission Guide</h2>
+<p>This section provides detailed instructions for submitting BigIron-AI
+to HuggingFace.</p>
+<h3 id="prerequisites">Prerequisites</h3>
+<ol type="1">
+<li><strong>HuggingFace Account</strong>: Create at
+https://huggingface.co/join</li>
+<li><strong>Access Token</strong>: Generate at
+https://huggingface.co/settings/tokens (with write access)</li>
+<li><strong>Git LFS</strong>: Required for large model files</li>
+</ol>
+<div class="sourceCode" id="cb32"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb32-1"><a href="#cb32-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Install Git LFS (macOS)</span></span>
+<span id="cb32-2"><a href="#cb32-2" aria-hidden="true" tabindex="-1"></a><span class="ex">brew</span> install git-lfs</span>
+<span id="cb32-3"><a href="#cb32-3" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> lfs install</span>
+<span id="cb32-4"><a href="#cb32-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb32-5"><a href="#cb32-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Install HuggingFace Hub</span></span>
+<span id="cb32-6"><a href="#cb32-6" aria-hidden="true" tabindex="-1"></a><span class="ex">pip</span> install huggingface_hub</span></code></pre></div>
+<h3 id="step-1-login-to-huggingface">Step 1: Login to HuggingFace</h3>
+<div class="sourceCode" id="cb33"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb33-1"><a href="#cb33-1" aria-hidden="true" tabindex="-1"></a><span class="ex">huggingface-cli</span> login</span>
+<span id="cb33-2"><a href="#cb33-2" aria-hidden="true" tabindex="-1"></a><span class="co"># Paste your access token when prompted</span></span></code></pre></div>
+<h3 id="step-2-create-repositories">Step 2: Create Repositories</h3>
+<div class="sourceCode" id="cb34"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb34-1"><a href="#cb34-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Create model repository</span></span>
+<span id="cb34-2"><a href="#cb34-2" aria-hidden="true" tabindex="-1"></a><span class="ex">huggingface-cli</span> repo create bigiron-7b <span class="at">--type</span> model</span>
+<span id="cb34-3"><a href="#cb34-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb34-4"><a href="#cb34-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Create dataset repository</span></span>
+<span id="cb34-5"><a href="#cb34-5" aria-hidden="true" tabindex="-1"></a><span class="ex">huggingface-cli</span> repo create mainframe-instruct <span class="at">--type</span> dataset</span></code></pre></div>
+<h3 id="step-3-prepare-model-files">Step 3: Prepare Model Files</h3>
+<p>The model files are located at
+<code>data/training/bigiron_full/fused/</code>:</p>
+<pre><code>fused/
+├── config.json                    # Model configuration
+├── generation_config.json         # Generation settings
+├── model-00001-of-00003.safetensors  # Model weights (5.3GB)
+├── model-00002-of-00003.safetensors  # Model weights (5.4GB)
+├── model-00003-of-00003.safetensors  # Model weights (3.9GB)
+├── model.safetensors.index.json   # Weight index
+├── README.md                      # Model card
+├── special_tokens_map.json        # Special tokens
+├── tokenizer.json                 # Tokenizer
+├── tokenizer.model                # Tokenizer model
+└── tokenizer_config.json          # Tokenizer config</code></pre>
+<h3 id="step-4-upload-model">Step 4: Upload Model</h3>
+<div class="sourceCode" id="cb36"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb36-1"><a href="#cb36-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using the provided script (recommended)</span></span>
+<span id="cb36-2"><a href="#cb36-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/upload_to_huggingface.sh</span> <span class="at">--model</span></span>
+<span id="cb36-3"><a href="#cb36-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb36-4"><a href="#cb36-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or manually</span></span>
+<span id="cb36-5"><a href="#cb36-5" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> data/training/bigiron_full/fused</span>
+<span id="cb36-6"><a href="#cb36-6" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> clone https://huggingface.co/YOUR_USERNAME/bigiron-7b</span>
+<span id="cb36-7"><a href="#cb36-7" aria-hidden="true" tabindex="-1"></a><span class="fu">cp</span> <span class="at">-r</span> <span class="pp">*</span> bigiron-7b/</span>
+<span id="cb36-8"><a href="#cb36-8" aria-hidden="true" tabindex="-1"></a><span class="bu">cd</span> bigiron-7b</span>
+<span id="cb36-9"><a href="#cb36-9" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> add .</span>
+<span id="cb36-10"><a href="#cb36-10" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> commit <span class="at">-m</span> <span class="st">&quot;Upload BigIron-AI v1.0&quot;</span></span>
+<span id="cb36-11"><a href="#cb36-11" aria-hidden="true" tabindex="-1"></a><span class="fu">git</span> push</span></code></pre></div>
+<h3 id="step-5-prepare-dataset">Step 5: Prepare Dataset</h3>
+<p>The dataset is in JSONL format:</p>
+<pre><code>data/training/mlx_data/
+├── train.jsonl   # 7,686 examples
+├── valid.jsonl   #   904 examples
+└── test.jsonl    #   452 examples</code></pre>
+<h3 id="step-6-upload-dataset">Step 6: Upload Dataset</h3>
+<div class="sourceCode" id="cb38"><pre
+class="sourceCode bash"><code class="sourceCode bash"><span id="cb38-1"><a href="#cb38-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Using the provided script (recommended)</span></span>
+<span id="cb38-2"><a href="#cb38-2" aria-hidden="true" tabindex="-1"></a><span class="ex">./scripts/upload_to_huggingface.sh</span> <span class="at">--dataset</span></span>
+<span id="cb38-3"><a href="#cb38-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb38-4"><a href="#cb38-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Or manually</span></span>
+<span id="cb38-5"><a href="#cb38-5" aria-hidden="true" tabindex="-1"></a><span class="ex">huggingface-cli</span> upload YOUR_USERNAME/mainframe-instruct <span class="dt">\</span></span>
+<span id="cb38-6"><a href="#cb38-6" aria-hidden="true" tabindex="-1"></a>    data/training/mlx_data/ . <span class="dt">\</span></span>
+<span id="cb38-7"><a href="#cb38-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">--repo-type</span> dataset</span></code></pre></div>
+<h3 id="step-7-verify-uploads">Step 7: Verify Uploads</h3>
+<ol type="1">
+<li>Visit
+<code>https://huggingface.co/YOUR_USERNAME/bigiron-7b</code></li>
+<li>Visit
+<code>https://huggingface.co/datasets/YOUR_USERNAME/mainframe-instruct</code></li>
+<li>Test loading:</li>
+</ol>
+<div class="sourceCode" id="cb39"><pre
+class="sourceCode python"><code class="sourceCode python"><span id="cb39-1"><a href="#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Test model</span></span>
+<span id="cb39-2"><a href="#cb39-2" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> transformers <span class="im">import</span> AutoModelForCausalLM</span>
+<span id="cb39-3"><a href="#cb39-3" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> AutoModelForCausalLM.from_pretrained(<span class="st">&quot;YOUR_USERNAME/bigiron-7b&quot;</span>)</span>
+<span id="cb39-4"><a href="#cb39-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb39-5"><a href="#cb39-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Test dataset</span></span>
+<span id="cb39-6"><a href="#cb39-6" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> datasets <span class="im">import</span> load_dataset</span>
+<span id="cb39-7"><a href="#cb39-7" aria-hidden="true" tabindex="-1"></a>ds <span class="op">=</span> load_dataset(<span class="st">&quot;YOUR_USERNAME/mainframe-instruct&quot;</span>)</span></code></pre></div>
+<h3 id="model-card-requirements">Model Card Requirements</h3>
+<p>A good HuggingFace model card (README.md) should include:</p>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YAML Front Matter</td>
+<td>License, tags, base model, pipeline</td>
+</tr>
+<tr>
+<td>Model Description</td>
+<td>What the model does, key features</td>
+</tr>
+<tr>
+<td>Intended Uses</td>
+<td>Target use cases</td>
+</tr>
+<tr>
+<td>Training Details</td>
+<td>Base model, method, data, hardware</td>
+</tr>
+<tr>
+<td>Usage Examples</td>
+<td>Code snippets for inference</td>
+</tr>
+<tr>
+<td>Limitations</td>
+<td>Known issues, out-of-scope uses</td>
+</tr>
+<tr>
+<td>Citation</td>
+<td>BibTeX for academic use</td>
+</tr>
+</tbody>
+</table>
+<h3 id="dataset-card-requirements">Dataset Card Requirements</h3>
+<table>
+<thead>
+<tr>
+<th>Section</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>YAML Front Matter</td>
+<td>License, language, tags, size</td>
+</tr>
+<tr>
+<td>Dataset Description</td>
+<td>What’s in the dataset</td>
+</tr>
+<tr>
+<td>Dataset Structure</td>
+<td>Splits, format, fields</td>
+</tr>
+<tr>
+<td>Usage Examples</td>
+<td>How to load and use</td>
+</tr>
+<tr>
+<td>Sources</td>
+<td>Where data came from</td>
+</tr>
+</tbody>
+</table>
+<h3 id="ollama-library-submission">Ollama Library Submission</h3>
+<p>To also submit to the Ollama library:</p>
+<ol type="1">
+<li>Fork <code>https://github.com/ollama/ollama</code></li>
+<li>Add model manifest in <code>models/</code></li>
+<li>Submit pull request with model details</li>
+</ol>
+<div class="sourceCode" id="cb40"><pre
+class="sourceCode yaml"><code class="sourceCode yaml"><span id="cb40-1"><a href="#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Example manifest</span></span>
+<span id="cb40-2"><a href="#cb40-2" aria-hidden="true" tabindex="-1"></a><span class="fu">name</span><span class="kw">:</span><span class="at"> bigiron-ai</span></span>
+<span id="cb40-3"><a href="#cb40-3" aria-hidden="true" tabindex="-1"></a><span class="fu">description</span><span class="kw">:</span><span class="at"> Mainframe expert LLM</span></span>
+<span id="cb40-4"><a href="#cb40-4" aria-hidden="true" tabindex="-1"></a><span class="fu">parameters</span><span class="kw">:</span></span>
+<span id="cb40-5"><a href="#cb40-5" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">temperature</span><span class="kw">:</span><span class="at"> </span><span class="fl">0.7</span></span>
+<span id="cb40-6"><a href="#cb40-6" aria-hidden="true" tabindex="-1"></a><span class="at">  </span><span class="fu">context_length</span><span class="kw">:</span><span class="at"> </span><span class="dv">4096</span></span>
+<span id="cb40-7"><a href="#cb40-7" aria-hidden="true" tabindex="-1"></a><span class="fu">license</span><span class="kw">:</span><span class="at"> Apache 2.0</span></span>
+<span id="cb40-8"><a href="#cb40-8" aria-hidden="true" tabindex="-1"></a><span class="fu">repository</span><span class="kw">:</span><span class="at"> https://huggingface.co/bigiron-ai/bigiron-7b</span></span></code></pre></div>
+<h3 id="troubleshooting">Troubleshooting</h3>
+<table>
+<thead>
+<tr>
+<th>Issue</th>
+<th>Solution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Upload timeout</td>
+<td>Use <code>--chunk-size</code> flag for large files</td>
+</tr>
+<tr>
+<td>Git LFS errors</td>
+<td>Run <code>git lfs install</code> first</td>
+</tr>
+<tr>
+<td>Auth errors</td>
+<td>Regenerate token with write permissions</td>
+</tr>
+<tr>
+<td>Quota exceeded</td>
+<td>Request increased storage at HF</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="references">References</h2>
+<ol type="1">
+<li>Hu, E. J., et al. (2021). “LoRA: Low-Rank Adaptation of Large
+Language Models”</li>
+<li>Apple Inc. (2023). “MLX: An array framework for Apple silicon”</li>
+<li>Mistral AI (2023). “Mistral 7B Technical Report”</li>
+<li>IBM Corporation. “IBM Redbooks” (Various publications)</li>
+<li>Touvron, H., et al. (2023). “LLaMA: Open and Efficient Foundation
+Language Models”</li>
+<li>Fsoft-AIC. “MainframeBench: A Benchmark for Mainframe Code
+Understanding” -
+https://huggingface.co/datasets/Fsoft-AIC/MainframeBench</li>
+<li>Fsoft-AIC. “XMainframe: A Large Language Model for Mainframe
+Modernization” - https://arxiv.org/html/2408.04660v3</li>
+<li>IBM. “Project CodeNet: A Large-Scale AI for Code Dataset” -
+https://github.com/IBM/Project_CodeNet</li>
+</ol>
+<hr />
+<h2 id="acknowledgments">Acknowledgments</h2>
+<p>This work was conducted on Apple Silicon hardware using open-source
+tools. We thank:</p>
+<ul>
+<li><strong>Apple MLX Team</strong> for the efficient ML framework on
+Apple Silicon</li>
+<li><strong>Mistral AI</strong> for the high-quality base model</li>
+<li><strong>Fsoft-AIC</strong> for the MainframeBench public
+dataset</li>
+<li><strong>IBM</strong> for decades of mainframe documentation via
+Redbooks</li>
+<li><strong>Open Mainframe Project</strong> for promoting mainframe
+education</li>
+</ul>
+<hr />
+<h2 id="citation">Citation</h2>
+<p>If you use BigIron-AI or the mainframe training dataset in your
+research, please cite:</p>
+<div class="sourceCode" id="cb41"><pre
+class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb41-1"><a href="#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="va">@misc</span>{<span class="ot">bigiron2026</span>,</span>
+<span id="cb41-2"><a href="#cb41-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>={BigIron-AI: Fine-Tuning Large Language Models for Mainframe Domain Expertise on Apple Silicon},</span>
+<span id="cb41-3"><a href="#cb41-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span>={BigIron-AI Project Contributors},</span>
+<span id="cb41-4"><a href="#cb41-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>={2026},</span>
+<span id="cb41-5"><a href="#cb41-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">howpublished</span>={<span class="ch">\url</span>{https://github.com/W00t3k/mainframe-ai}},</span>
+<span id="cb41-6"><a href="#cb41-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">note</span>={Version 2.0, HuggingFace: bigiron-ai/bigiron-7b}</span>
+<span id="cb41-7"><a href="#cb41-7" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<hr />
+<h2 id="license-1">License</h2>
+<ul>
+<li><strong>Model Weights</strong>: Apache 2.0 (inherits from
+Mistral-7B)</li>
+<li><strong>Training Dataset</strong>: Apache 2.0</li>
+<li><strong>Documentation</strong>: CC BY 4.0</li>
+</ul>
+<hr />
+<p><em>Document Version: 2.0</em> <em>Last Updated: July 2026</em>
+<em>BigIron-AI Project - Mainframe AI on Apple Silicon</em></p>
+
+<div class="footer">
+    BigIron-AI Project • https://github.com/W00t3k/mainframe-ai • Apache 2.0 License
+</div>
+</body>
+</html>

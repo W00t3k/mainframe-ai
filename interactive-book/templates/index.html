@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{title}}</title>
+    <link rel="stylesheet" href="/static/css/book.css">
+</head>
+<body>
+    <div class="book-container">
+        <header class="book-header">
+            <h1>Interactive z/OS Book</h1>
+            <p class="subtitle">Learn mainframe computing with hands-on practice</p>
+        </header>
+
+        <main class="toc">
+            <h2>Table of Contents</h2>
+            <nav class="chapter-list" id="chapters"></nav>
+        </main>
+
+        <footer class="book-footer">
+            <p>Powered by <strong>BigIron AI</strong> and <strong>TK5 MVS 3.8j</strong></p>
+        </footer>
+    </div>
+
+    <script>
+        const chapters = {{chapters}};
+        const list = document.getElementById('chapters');
+        chapters.forEach((ch, i) => {
+            const a = document.createElement('a');
+            a.href = ch.path;
+            a.className = 'chapter-link';
+            a.innerHTML = `<span class="chapter-num">${String(i + 1).padStart(2, '0')}</span> ${ch.title}`;
+            list.appendChild(a);
+        });
+    </script>
+</body>
+</html>

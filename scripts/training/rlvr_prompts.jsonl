@@ -1,0 +1,96 @@
+{"prompt": "Write JCL to run IEFBR14 (a no-op program)", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to allocate a new sequential dataset named HERC01.TEST.DATA with LRECL=80 and RECFM=FB", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to delete dataset HERC01.TEST.DATA using IEFBR14 with DISP=(MOD,DELETE)", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to copy SYS1.PARMLIB to HERC01.PARMLIB.BACKUP using IEBGENER", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to list the catalog entries for SYS1.** using IDCAMS LISTCAT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to sort a file by columns 1-10 ascending using DFSORT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to compress a PDS using IEBCOPY", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to print the first 100 records of a dataset using IEBGENER", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to define a VSAM KSDS cluster using IDCAMS", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to delete and redefine a VSAM cluster using IDCAMS", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to repro (copy) a VSAM file to a sequential backup", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to run a two-step job: first allocate a dataset, then delete it", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to compare two sequential datasets using IEBCOMPR", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to create a GDG base and first generation", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to merge two sorted files into one using DFSORT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to copy specific members from one PDS to another using IEBCOPY SELECT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to rename a PDS member using IEHPROGM", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to scratch (delete) a dataset using IEHPROGM", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to catalog a dataset that exists on a volume", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to uncatalog a dataset without deleting it", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to print dataset attributes using IEHLIST LISTVTOC", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to create a backup of a PDS with IEBCOPY COPYMOD", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to extract records matching a condition using DFSORT INCLUDE", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to reformat records using DFSORT OUTREC", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to remove duplicate records using DFSORT SUM FIELDS=NONE", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to concatenate multiple input files using DFSORT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to split a file into multiple outputs based on key using DFSORT OUTFIL", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to generate test data using DFSORT ICETOOL", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to alter VSAM cluster attributes using IDCAMS ALTER", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to verify VSAM cluster integrity using IDCAMS VERIFY", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to print VSAM cluster statistics using IDCAMS LISTCAT ALL", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to export a VSAM cluster for backup using IDCAMS EXPORT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to import a VSAM cluster from backup using IDCAMS IMPORT", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to define an alternate index on a VSAM KSDS", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to build the path for a VSAM alternate index using BLDINDEX", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to run a COBOL program with input and output files", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to execute a procedure (PROC) with symbolic parameters", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL with conditional execution: skip step if prior step fails", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL with COND parameter to check return codes", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL with IF/THEN/ELSE/ENDIF for conditional steps", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to pass a temporary dataset between job steps", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to restart a job from a specific step using RESTART parameter", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL with JOBLIB to specify a load library for all steps", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL with JCLLIB to specify procedure libraries", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to override a DD in an instream procedure", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to submit another job using intrdr (internal reader)", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to allocate a PDSE (extended PDS)", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to convert a PDS to PDSE using IEBCOPY", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write JCL to print spool output using IEBGENER", "task_type": "jcl", "expected_cc": 0}
+{"prompt": "Write COBOL program that displays 'HELLO WORLD' to SYSOUT", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that reads a sequential file and counts records", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that reads input, converts to uppercase, writes output", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that calculates the sum of numbers from a file", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that validates numeric fields and reports errors", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using EVALUATE statement to categorize values", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using INSPECT to count characters in a string", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using STRING to concatenate fields", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using UNSTRING to parse delimited input", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using SEARCH to find value in a table", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using SEARCH ALL for binary search", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that handles end-of-file correctly", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that writes a report with headers and totals", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using ACCEPT to get current date", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that handles packed decimal arithmetic", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using SORT verb for internal sorting", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using MERGE verb to combine files", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program with COPY statement for copybook", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that uses REDEFINES for data conversion", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that handles variable-length records", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that updates a sequential file in place", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that reads and writes VSAM KSDS", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that reads VSAM sequentially and randomly", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program with error handling using FILE STATUS", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that creates a control break report", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using nested PERFORM loops", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using PERFORM VARYING for iteration", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using CALL to invoke a subprogram", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that passes parameters BY REFERENCE", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that returns a status code to JCL", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that calculates date differences", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that formats numbers with currency symbols", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that validates input against a range", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using INITIALIZE to clear a structure", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that handles multiple input files", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that writes to multiple output files", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using REFERENCE MODIFICATION for substring", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program with OCCURS DEPENDING ON for variable tables", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that loads a table from a file", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using INDEXED BY for table access", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that writes fixed-width output fields", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that handles sign and decimal correctly", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using COMPUTE for complex arithmetic", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that rounds numbers correctly", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program with paragraph naming conventions", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program that handles end-of-page for printing", "task_type": "cobol", "expected_cc": 0}
+{"prompt": "Write COBOL program using WRITE ADVANCING for print control", "task_type": "cobol", "expected_cc": 0}

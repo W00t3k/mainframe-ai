@@ -48,6 +48,7 @@ GRAD_ACCUM=8
 LEARNING_RATE="5e-6"   # Finer tuning (was 1e-5)
 MAX_SEQ_LEN=2048
 RESUME=""
+RESUME_FROM=""
 
 # Parse arguments
 while [[ $# -gt 0 ]]; do
@@ -61,7 +62,10 @@ while [[ $# -gt 0 ]]; do
             shift 2
             ;;
         --resume)
-            RESUME="--resume $DIR/data/training/bigiron_full/checkpoint"
+            # Use existing fused model as base for incremental training
+            if [ -d "$DIR/data/training/bigiron_full/fused" ]; then
+                RESUME_FROM="$DIR/data/training/bigiron_full/fused"
+            fi
             shift
             ;;
         --help)
@@ -97,8 +101,17 @@ echo -e "${MAG}${BLD}╔══════════════════�
 echo -e "${MAG}${BLD}║           BigIron-AI Full Fine-Tuning Pipeline           ║${RST}"
 echo -e "${MAG}${BLD}╚══════════════════════════════════════════════════════════╝${RST}"
 echo ""
+# Use fused model as base if resuming
+if [ -n "$RESUME_FROM" ]; then
+    TRAIN_BASE="$RESUME_FROM"
+    RESUME_MODE="(incremental from existing)"
+else
+    TRAIN_BASE="$BASE_MODEL"
+    RESUME_MODE="(from scratch)"
+fi
+
 echo -e "  ${BLD}Model:${RST}        $MODEL_NAME"
-echo -e "  ${BLD}Base:${RST}         $BASE_MODEL"
+echo -e "  ${BLD}Base:${RST}         $TRAIN_BASE $RESUME_MODE"
 echo -e "  ${BLD}Epochs:${RST}       $EPOCHS"
 echo -e "  ${BLD}Batch size:${RST}   $BATCH_SIZE (x$GRAD_ACCUM grad accum)"
 echo -e "  ${BLD}Learning rate:${RST} $LEARNING_RATE"
@@ -141,6 +154,20 @@ ok "Training data: $SAMPLES samples"
 # Step 2: Merge all training data
 # ─────────────────────────────────────────────────────────
 step 2 "Preparing training data"
+
+# Backup existing GGUF if resuming
+if [ -n "$RESUME_FROM" ] && [ -f "$GGUF_PATH" ]; then
+    BACKUP_PATH="${GGUF_PATH%.gguf}-$(date +%Y%m%d-%H%M%S).gguf"
+    info "Backing up existing model to $BACKUP_PATH"
+    cp "$GGUF_PATH" "$BACKUP_PATH"
+    ok "Backup created"
+fi
+
+# Force re-merge of examples for incremental training (new fixes need to be included)
+if [ -n "$RESUME_FROM" ]; then
+    rm -f "$DIR/data/training/mlx_data/.examples_merged"
+    info "Incremental training: will re-merge training examples"
+fi
 
 # Merge example files if they exist (skip if already merged)
 EXAMPLES_DIR="$DIR/data/training/examples"
@@ -202,7 +229,7 @@ info "Training for $ITERS iterations ($EPOCHS epochs)"
 
 # Full fine-tuning - trains ALL parameters, not just adapters
 "$PYTHON" -m mlx_lm lora \
-    --model "$BASE_MODEL" \
+    --model "$TRAIN_BASE" \
     --train \
     --fine-tune-type full \
     --data "$DIR/data/training/mlx_data" \
@@ -225,10 +252,26 @@ ok "Fine-tuning complete"
 # ─────────────────────────────────────────────────────────
 step 4 "Fusing trained weights into base model"
 
+# When resuming, fuse to temp dir first to avoid same-file error
+FUSE_TARGET="$FULL_MODEL_DIR/fused"
+if [ -n "$RESUME_FROM" ] && [ "$TRAIN_BASE" = "$FULL_MODEL_DIR/fused" ]; then
+    FUSE_TARGET="$FULL_MODEL_DIR/fused_new"
+    info "Resuming: fusing to temp directory first"
+fi
+
 "$PYTHON" -m mlx_lm fuse \
-    --model "$BASE_MODEL" \
+    --model "$TRAIN_BASE" \
     --adapter-path "$FULL_MODEL_DIR/weights" \
-    --save-path "$FULL_MODEL_DIR/fused"
+    --save-path "$FUSE_TARGET"
+
+# If we fused to temp, move it to final location
+if [ "$FUSE_TARGET" = "$FULL_MODEL_DIR/fused_new" ]; then
+    rm -rf "$FULL_MODEL_DIR/fused_old" 2>/dev/null
+    mv "$FULL_MODEL_DIR/fused" "$FULL_MODEL_DIR/fused_old"
+    mv "$FULL_MODEL_DIR/fused_new" "$FULL_MODEL_DIR/fused"
+    rm -rf "$FULL_MODEL_DIR/fused_old"
+    ok "Swapped fused model in place"
+fi
 
 if [ ! -f "$FULL_MODEL_DIR/fused/config.json" ]; then
     fail "Fuse failed"

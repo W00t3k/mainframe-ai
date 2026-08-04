@@ -1,0 +1,173 @@
+[
+  {
+    "id": "abend-s0c1",
+    "title": "ABEND S0C1",
+    "aliases": ["abend s0c1", "s0c1", "soc1", "operation exception"],
+    "summary": "S0C1 is an operation exception, usually meaning the CPU attempted to execute an invalid instruction. Check the failing PSW or instruction offset, module linkage, branch targets, load module integrity, and whether control passed into data or uninitialized storage."
+  },
+  {
+    "id": "abend-s0c5",
+    "title": "ABEND S0C5",
+    "aliases": ["abend s0c5", "s0c5", "soc5", "addressing exception"],
+    "summary": "S0C5 is an addressing exception, commonly caused by an invalid address, bad base register, bad pointer, or addressability error. Check registers, PSW, failing instruction offset, storage map, and recent pointer or subscript logic."
+  },
+  {
+    "id": "abend-s0c6",
+    "title": "ABEND S0C6",
+    "aliases": ["abend s0c6", "s0c6", "soc6", "specification exception"],
+    "summary": "S0C6 is a specification exception, commonly caused by an instruction operand or address that violates architectural requirements. Check the PSW, instruction text, register contents, alignment, and compiler or assembler listing."
+  },
+  {
+    "id": "abend-s0c7",
+    "title": "ABEND S0C7",
+    "aliases": ["abend s0c7", "s0c7", "soc7", "data exception", "packed decimal"],
+    "summary": "S0C7 is an MVS/z/OS data exception, commonly caused by invalid decimal data used by a decimal arithmetic instruction. Useful evidence includes JES job log, SYSOUT, SYSUDUMP/SYSABEND, PSW or instruction offset, compile listing or map, input record, and field definition."
+  },
+  {
+    "id": "abend-s0c8",
+    "title": "ABEND S0C8",
+    "aliases": ["abend s0c8", "s0c8", "soc8", "sc08", "fixed point overflow"],
+    "summary": "S0C8 is a fixed-point overflow exception. It usually means a binary or fixed-point arithmetic result exceeded the target field or register capacity. Check the failing arithmetic instruction, PSW or offset, register contents, field sizes, input values, and compiler listing."
+  },
+  {
+    "id": "abend-s0c9",
+    "title": "ABEND S0C9",
+    "aliases": ["abend s0c9", "s0c9", "soc9", "fixed point divide", "divide exception"],
+    "summary": "S0C9 is a fixed-point divide exception, commonly caused by division by zero or an invalid fixed-point divide result. Check the divisor value, register pair, failing instruction, PSW or offset, and input data."
+  },
+  {
+    "id": "abend-s0ca",
+    "title": "ABEND S0CA",
+    "aliases": ["abend s0ca", "s0ca", "soca", "decimal overflow"],
+    "summary": "S0CA is a decimal overflow exception. It usually means packed or zoned decimal arithmetic produced a result too large for the target field. Check numeric field definitions, precision, result size, input values, and the failing arithmetic statement."
+  },
+  {
+    "id": "abend-s0cb",
+    "title": "ABEND S0CB",
+    "aliases": ["abend s0cb", "s0cb", "socb", "decimal divide", "division by zero"],
+    "summary": "S0CB is a decimal divide exception, commonly caused by decimal division by zero or an invalid decimal divide operation. Check divisor fields, packed decimal validity, input record, and the failing arithmetic statement."
+  },
+  {
+    "id": "abend-s0c4",
+    "title": "ABEND S0C4",
+    "aliases": ["abend s0c4", "s0c4", "soc4", "protection exception"],
+    "summary": "S0C4 is a protection exception, commonly tied to invalid storage access, bad addressability, a wrong pointer, or a buffer/reference error. Useful evidence includes dump output, failing instruction offset, register state, and recent storage references."
+  },
+  {
+    "id": "abend-s806",
+    "title": "ABEND S806",
+    "aliases": ["abend s806", "s806", "module not found"],
+    "summary": "S806 means the requested load module could not be found. Check STEPLIB, JOBLIB, link-list, program name spelling, library concatenation order, and whether the load module exists in an expected library."
+  },
+  {
+    "id": "abend-s913",
+    "title": "ABEND S913",
+    "aliases": ["abend s913", "s913", "racf authorization failure"],
+    "summary": "S913 is commonly a RACF authorization failure. Check the dataset or resource profile, requested access level, user and group authority, and related RACF or job messages."
+  },
+  {
+    "id": "racf",
+    "title": "RACF",
+    "aliases": ["racf", "resource access control facility", "dataset profile", "resource class"],
+    "summary": "RACF is Resource Access Control Facility. It controls access to users, groups, datasets, and named resources through profiles and permissions. It is not equivalent to Linux root."
+  },
+  {
+    "id": "apf",
+    "title": "APF",
+    "aliases": ["apf", "authorized program facility", "apf library", "authorized library"],
+    "summary": "APF means Authorized Program Facility. APF libraries are a trusted-code boundary: authorized programs can run with privileges ordinary application code should not have. APF is not sudo and does not manage users."
+  },
+  {
+    "id": "jes",
+    "title": "JES",
+    "aliases": ["jes", "jes2", "jes3", "spool", "sysout", "job entry subsystem"],
+    "summary": "JES is the Job Entry Subsystem. It accepts submitted work, queues and schedules execution, manages spool and SYSOUT, and preserves evidence around job identity, output, and execution state."
+  },
+  {
+    "id": "jcl",
+    "title": "JCL",
+    "aliases": ["jcl", "job control language", "job card", "dd statement", "exec statement"],
+    "summary": "JCL is Job Control Language. It describes batch work to JES: job identity, execution steps, programs, datasets, DD statements, and output routing."
+  },
+  {
+    "id": "datasets",
+    "title": "Datasets",
+    "aliases": ["dataset", "datasets", "pds", "member", "catalog", "hlq"],
+    "summary": "Datasets are cataloged mainframe resources, not ordinary Unix files. Security depends on naming, cataloging, volumes, PDS members, and RACF dataset profiles."
+  },
+  {
+    "id": "work",
+    "title": "WORK",
+    "aliases": ["work", "work dataset", "work datasets", "work volume", "work volumes", "temporary dataset", "temporary datasets", "sort work", "sortwk", "sortwk01", "sysut1", "sysut2", "work01", "work02", "work03", "work04"],
+    "summary": "WORK is context-dependent on mainframes. It may mean temporary job datasets, utility work DDs such as SYSUT1/SYSUT2, SORTWKnn sort work files, or lab DASD volumes named WORKxx. Treat it as storage context, not a Unix working directory.",
+    "security_impact": "Work datasets and work volumes can hold intermediate data, copied records, sort spill files, dumps, or install artifacts. Sensitive data can appear there even when it is not a permanent business dataset.",
+    "assessment_angle": "Check the JCL DD name, dataset name, DISP, UNIT, VOLSER, catalog status, RACF profile, and JES/SYSOUT messages to determine what kind of WORK object is being referenced.",
+    "lab_safe_example": "In TK5, WORK01-WORK04 are DASD volume images, while SYSUT1/SYSUT2 in JCL are utility work DD names. They are related to temporary/storage use, but they are not the same thing."
+  },
+  {
+    "id": "tso",
+    "title": "TSO",
+    "aliases": ["tso", "time sharing option", "tso logon"],
+    "summary": "TSO is Time Sharing Option, an interactive user environment for commands, logon sessions, dataset work, and tools such as ISPF."
+  },
+  {
+    "id": "ispf",
+    "title": "ISPF",
+    "aliases": ["ispf", "panel", "panels", "dataset list"],
+    "summary": "ISPF is a panel-driven interactive environment commonly used from TSO for browsing, editing, and managing datasets. ISPF itself is not the security manager."
+  },
+  {
+    "id": "vtam",
+    "title": "VTAM",
+    "aliases": ["vtam", "applid", "tn3270", "session fabric"],
+    "summary": "VTAM is a mainframe session and application access fabric. A single TN3270 listener can expose multiple logical application paths through APPLIDs and sessions."
+  },
+  {
+    "id": "cics",
+    "title": "CICS",
+    "aliases": ["cics", "transaction", "transactions", "region"],
+    "summary": "CICS is a transaction processing environment. Security analysis should consider transaction access, region identity, program control, backend resources, and evidence from logs or SMF."
+  },
+  {
+    "id": "smf",
+    "title": "SMF",
+    "aliases": ["smf", "system management facilities", "audit evidence"],
+    "summary": "SMF is System Management Facilities. It records operational and security-relevant events that can support findings about jobs, access, activity, and system behavior."
+  },
+  {
+    "id": "started-task",
+    "title": "Started Task Identity",
+    "aliases": ["started task", "started task identity", "stc", "proc identity"],
+    "summary": "A started task runs under an assigned identity and often references PROC, PARMLIB, PROCLIB, and load libraries. Its identity and referenced datasets are important trust boundaries."
+  },
+  {
+    "id": "proclib-parmlib",
+    "title": "PROCLIB and PARMLIB",
+    "aliases": ["proclib", "parmlib", "proc", "system dataset"],
+    "summary": "PROCLIB contains procedure definitions and PARMLIB contains system parameters. Write access to sensitive members can affect deferred execution, started tasks, and system behavior."
+  },
+  {
+    "id": "system-370",
+    "title": "System/370",
+    "aliases": ["system/370", "s/370", "system 370", "370 architecture"],
+    "summary": "System/370 is an IBM mainframe architecture family that underpins classic MVS-era concepts such as batch processing, channel I/O, 3270 interaction, datasets, and job control."
+  },
+  {
+    "id": "mvs",
+    "title": "MVS",
+    "aliases": ["mvs", "mvs 3.8", "mvs 3.8j", "multiple virtual storage"],
+    "summary": "MVS is Multiple Virtual Storage, a classic IBM mainframe operating system lineage. It uses datasets, JCL, JES, TSO, and system libraries rather than Unix-style files and processes."
+  },
+  {
+    "id": "zos",
+    "title": "z/OS",
+    "aliases": ["z/os", "zos", "z os"],
+    "summary": "z/OS is IBM's modern mainframe operating system. Security and operations commonly involve RACF, datasets, JES, JCL, TSO, ISPF, CICS, VTAM, SMF, APF, and started tasks."
+  },
+  {
+    "id": "rag",
+    "title": "RAG",
+    "aliases": ["rag", "retrieval augmented generation", "knowledge base", "memory", "local memory"],
+    "summary": "RAG is Retrieval-Augmented Generation. In this app it is a local/private knowledge layer outside the mainframe that retrieves docs, transcripts, lab notes, and screen evidence for chat. It is not RACF and it is not a mainframe subsystem."
+  }
+]

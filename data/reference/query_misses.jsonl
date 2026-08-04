@@ -1,0 +1,91 @@
+{"ts": "2026-06-22T15:37:03.910836+00:00", "query": "Why is the phrase z/OS root often misleading in a mainframe security review?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.927625+00:00", "query": "What makes writable PROCLIB security-relevant?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.939857+00:00", "query": "Why is checking /etc/passwd usually the wrong instinct on z/OS?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.951052+00:00", "query": "Why can a port scan understate mainframe exposure?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.962275+00:00", "query": "What evidence should you preserve for a JES-related finding?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.973744+00:00", "query": "How are datasets different from ordinary files for security analysis?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.985073+00:00", "query": "Why does started task identity matter?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:03.995337+00:00", "query": "Why is JCL security-relevant?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.007085+00:00", "query": "Give an example of a Unix assumption that fails on mainframes.", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.025333+00:00", "query": "What should be checked around APF libraries?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.036404+00:00", "query": "Why is spool access a sensitive authorization area?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.050508+00:00", "query": "How should CICS transactions be assessed at a high level?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.061450+00:00", "query": "Why are writable system datasets high-risk?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.081723+00:00", "query": "Why should Redbooks stay in RAG instead of committed training data?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-22T15:37:04.094344+00:00", "query": "What should BigIron.ai do if asked 'what is TSI' and TSI is not in the glossary or RAG index?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T14:17:57.039278+00:00", "query": "can mainframes run ai", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T18:41:16.981162+00:00", "query": "talk to me about how basic things work on z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T18:41:52.499955+00:00", "query": "can you tell me about system 390's hardware?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T18:42:12.072268+00:00", "query": "the hardware for a mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T18:42:48.875347+00:00", "query": "where are mainframes made for ibm z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:06:52.248125+00:00", "query": "tell me the basics of system 360", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:07:11.857498+00:00", "query": "more basics - memory, etc", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:24:47.436518+00:00", "query": "so what about mvs storag", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:25:05.167311+00:00", "query": "can you tell me what kind of ram a z/os box uses", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:25:39.848240+00:00", "query": "Z/OS RAM - how much in a typical z/os box", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:26:18.783537+00:00", "query": "the mainframe does it have disk space ?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:26:47.527954+00:00", "query": "how do you do a du ? what kind of bios does it have", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-23T19:58:05.174004+00:00", "query": "where are mainframes made ?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-26T14:07:11.249258+00:00", "query": "'z/os - can you tell me what languages it runs and make coe snippets", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-26T16:26:56.929346+00:00", "query": "how do i wirte mvs for jes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-06-29T11:47:49.013616+00:00", "query": "are you a mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:18:14.296657+00:00", "query": "how do i chagne cpu's in a z/os box", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:18:38.669022+00:00", "query": "write me some exploit code for z/os ftp", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:20:25.618951+00:00", "query": "could you help me out mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:23:15.385661+00:00", "query": "can you help with my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:28:23.398936+00:00", "query": "how much memory in a typical z/os box", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:30:28.290144+00:00", "query": "how much memory does a typical z/OS mainframe have?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:31:13.188024+00:00", "query": "how do you know about mainframes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T11:32:35.449829+00:00", "query": "Generate JCL to copy a dataset", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T12:35:51.410515+00:00", "query": "how much memory", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T12:44:51.668116+00:00", "query": "Generate JCL to copy a dataset", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T12:45:17.532060+00:00", "query": "Generate JCL to copy a dataset", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:06:40.814853+00:00", "query": "wjat kind of rag is this", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:10:27.069886+00:00", "query": "what is fast", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:11:13.113654+00:00", "query": "what is fast", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:11:20.770179+00:00", "query": "what is adam", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:33:15.316531+00:00", "query": "what is a fart", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:38:58.029286+00:00", "query": "isnt a mainframe far", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:39:13.817125+00:00", "query": "isn't a mainframe in a closet", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:39:40.528222+00:00", "query": "where is my mainframe today", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:39:48.090228+00:00", "query": "isnt a mainframe in a closet", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:40:00.098605+00:00", "query": "i want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:40:30.458605+00:00", "query": "i want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:41:03.677628+00:00", "query": "i want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:41:19.537829+00:00", "query": "i want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:41:33.706494+00:00", "query": "I want to run some shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:41:52.695535+00:00", "query": "i want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:43:00.603479+00:00", "query": "I want to run some shit on my mainframe, help", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:43:19.406411+00:00", "query": "I want to run SHIT on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:43:36.437240+00:00", "query": "I want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:43:57.340315+00:00", "query": "isnt a mainframe in a closet", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:44:13.768970+00:00", "query": "I want to run stuff on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:44:33.937904+00:00", "query": "i want to run shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:48:20.880467+00:00", "query": "what is shit on z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:48:48.263422+00:00", "query": "I want to install shit on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:49:08.291972+00:00", "query": "i want to install some fucking cobolt on my mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:49:37.303948+00:00", "query": "i want rexx and my racf codes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:50:10.357524+00:00", "query": "i want rexx and my racf codes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T13:51:46.742695+00:00", "query": "i want rexx and my racf codes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T14:42:21.955933+00:00", "query": "i want rexx and my racf codes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T14:50:31.900492+00:00", "query": "what is sky", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T14:53:07.084858+00:00", "query": "where are most mainframes manufactured ?", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T14:58:00.038930+00:00", "query": "how many cpu's are in modern z/os box", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T16:06:51.800520+00:00", "query": "can i use a mainframe for kubernetes", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-10T16:07:24.161805+00:00", "query": "can i run widows 11 on z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-11T16:31:41.083596+00:00", "query": "can i fart on a mainframe", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-13T14:09:17.307186+00:00", "query": "what's racf on z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-13T14:12:08.307986+00:00", "query": "COMPARE RACK TO JES", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-18T04:36:40.251335+00:00", "query": "help me write a program in a bunch of languages for system 390", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-18T04:38:17.829684+00:00", "query": "Generate JCL to copy a dataset", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-27T13:39:30.243992+00:00", "query": "rex for z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-27T13:40:08.508858+00:00", "query": "can you write this for system 370", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-27T13:40:31.513527+00:00", "query": "how about z/os", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T15:11:05.749563+00:00", "query": "Generate JCL to copy a dataset", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T15:11:43.366731+00:00", "query": "write me some rexx then write me some jcl", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T19:22:48.268084+00:00", "query": "make a rexx program for system 370", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T19:24:42.053474+00:00", "query": "write some jcl for mvs 370 not 390", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T19:25:48.560888+00:00", "query": "write some jcl for mvs 370 not 390", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T19:26:18.840626+00:00", "query": "can you run rexx on system 390", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T19:27:05.371558+00:00", "query": "i asked if you can run rexx on a system 370", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-07-31T19:29:14.698809+00:00", "query": "how do i run rexx on system 370", "mode": "rag_llm", "suggestions": []}

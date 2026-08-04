@@ -165,6 +165,23 @@ The fine-tuned model inherits licensing from:
 - Mistral-7B-Instruct (Apache 2.0)
 - Training data derived from IBM Redbooks (fair use for training)
 
+## Advanced: RLVR Training
+
+After SFT, you can run RLVR (Reinforcement Learning with Verifiable Rewards) to improve code generation:
+
+```bash
+# Run RLVR training (requires TK5 for verification)
+./scripts/training/run_rlvr.sh --steps 500
+```
+
+RLVR trains the model through trial-and-error:
+1. Generate JCL/COBOL dynamically
+2. Submit to TK5 MVS for execution
+3. Reward based on success (CC 0000 = perfect)
+4. Update model via GRPO
+
+See `docs/RLVR_TRAINING.md` for details.
+
 ## Version History
 
 | Version | Date | Changes |

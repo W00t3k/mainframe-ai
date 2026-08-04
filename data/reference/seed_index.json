@@ -1,0 +1,786 @@
+{
+  "version": 1,
+  "documents": [
+    {
+      "source": "data/rag_seed/mainframe_basics.md",
+      "sha256": "601ecc05fc28b8cb821208c1e47e97923de99c1d65e7d09ad300820b2ca16854"
+    },
+    {
+      "source": "data/rag_seed/mainframe_common_terms.md",
+      "sha256": "96e6bb51f3c9a53979b2d477bd7e26c7bbb0f7d5b669d481eca63266449dbc8a"
+    },
+    {
+      "source": "data/rag_seed/mainframe_timeline.md",
+      "sha256": "2ac3d0166deba448d2ccad761294e7bd81d2142ce779b577ded8a5e3fb7e3af2"
+    }
+  ],
+  "entries": [
+    {
+      "title": "3270",
+      "aliases": [
+        "3270",
+        "3270s"
+      ],
+      "definition": "A family of IBM terminal protocols and screens used for interactive mainframe sessions such as TSO, ISPF, CICS, and VTAM application access.",
+      "security_impact": "A visible TN3270 port does not describe all reachable applications; the real exposure depends on APPLIDs, sessions, screens, and authentication paths.",
+      "assessment_angle": "Map the session flow after connection: banner, APPLID, logon path, exposed applications, and which identity is bound at each step.",
+      "lab_safe_example": "Connecting to port 3270 may first show a menu where TSO, CICS, or other VTAM applications are selected.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "APF",
+      "aliases": [
+        "APF",
+        "APFs"
+      ],
+      "definition": "Authorized Program Facility, a trusted-code boundary for libraries that contain authorized programs.",
+      "security_impact": "Code loaded from APF-authorized libraries can run with authority ordinary application code should not have. APF is not sudo.",
+      "assessment_angle": "Review APF library lists, write access to APF libraries, library concatenation order, and whether trusted paths are writable.",
+      "lab_safe_example": "A writable APF library is a trusted-code path problem, not a temporary user elevation feature.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "APPLID",
+      "aliases": [
+        "APPLID",
+        "APPLIDs"
+      ],
+      "definition": "An application identifier used by VTAM and 3270 environments to name or route sessions to logical applications.",
+      "security_impact": "APPLIDs define reachable application paths beyond what a port scan shows.",
+      "assessment_angle": "Enumerate visible APPLIDs, logon menus, session transitions, and the controls protecting each application path.",
+      "lab_safe_example": "A menu selection can route a user from an initial 3270 screen into TSO or a CICS region.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "Catalog",
+      "aliases": [
+        "Catalog",
+        "Catalogs"
+      ],
+      "definition": "A mainframe index that maps dataset names to volume and location information.",
+      "security_impact": "Catalog entries affect dataset discovery and access paths, but RACF or another security manager still controls authority.",
+      "assessment_angle": "Check whether datasets are cataloged, which catalog is used, aliases, volumes, and how JCL references the dataset.",
+      "lab_safe_example": "A JCL DD can refer to a cataloged dataset by DSN without specifying its physical volume.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "CICS",
+      "aliases": [
+        "CICS"
+      ],
+      "definition": "Customer Information Control System, a transaction processing environment for online applications.",
+      "security_impact": "CICS security depends on transaction access, region identity, program control, backend datasets, and resource permissions.",
+      "assessment_angle": "Review transaction IDs, region authority, program paths, files, journals, logs, and SMF evidence.",
+      "lab_safe_example": "A four-character transaction ID can invoke application logic without looking like a Unix process.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "CICS Transaction",
+      "aliases": [
+        "CICS Transaction",
+        "CICS Transactions"
+      ],
+      "definition": "A named CICS unit of work, usually invoked by a short transaction ID, that runs application logic in a CICS region.",
+      "security_impact": "Transaction authority can expose business functions, backend files, programs, queues, and database access through a small terminal-facing command.",
+      "assessment_angle": "Review transaction IDs, program mappings, resource permissions, region identity, file access, and SMF or CICS logs.",
+      "lab_safe_example": "A four-character transaction entered on a 3270 screen can invoke application logic without resembling a Unix process.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "COBOL",
+      "aliases": [
+        "COBOL",
+        "COBOLs"
+      ],
+      "definition": "Common Business-Oriented Language, a programming language widely used for mainframe business applications, batch jobs, and transaction systems.",
+      "security_impact": "COBOL programs often process sensitive records through datasets, VSAM, Db2, IMS, CICS, and batch workflows.",
+      "assessment_angle": "Review program execution path, input and output datasets, copybooks, compile listings, job output, and which identity runs the program.",
+      "lab_safe_example": "A COBOL batch job may read a fixed-length input dataset and write SYSOUT or another dataset through JCL DD statements.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "Copybook",
+      "aliases": [
+        "Copybook",
+        "Copybooks"
+      ],
+      "definition": "A reusable COBOL source member that defines record layouts, fields, and shared data structures.",
+      "security_impact": "Wrong or stale copybooks can cause data interpretation errors, ABENDs such as S0C7, and incorrect handling of sensitive fields.",
+      "assessment_angle": "Compare copybook field definitions to actual input records, compiler listings, and the dataset layout used by the job.",
+      "lab_safe_example": "If a packed decimal field is defined incorrectly, the program may fail when arithmetic touches invalid data.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "Dataset",
+      "aliases": [
+        "Dataset",
+        "Datasets"
+      ],
+      "definition": "A cataloged mainframe storage object, not the same thing as a Unix file.",
+      "security_impact": "Dataset names, high-level qualifiers, catalogs, volumes, PDS members, and RACF dataset profiles define access and trust.",
+      "assessment_angle": "Check dataset profiles, write access, member-level sensitivity, catalog location, and whether libraries are used by jobs or started tasks.",
+      "lab_safe_example": "SYS1.PROCLIB(MEMBER) is a member in a partitioned dataset, not a path in a directory tree.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "Db2",
+      "aliases": [
+        "Db2",
+        "Db2s"
+      ],
+      "definition": "IBM's relational database management system on the mainframe, commonly used by business applications and batch or CICS workloads.",
+      "security_impact": "Db2 authority, plans, packages, tables, stored procedures, and connected identities can define important application trust boundaries.",
+      "assessment_angle": "Review connection paths, auth IDs, package/plan authority, table privileges, audit evidence, and how batch or CICS work reaches Db2.",
+      "lab_safe_example": "A batch job may run a program that accesses Db2 through a bound plan rather than directly reading a dataset.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "HLQ",
+      "aliases": [
+        "HLQ",
+        "HLQs"
+      ],
+      "definition": "High-Level Qualifier, the first segment of a dataset name and often an important convention for ownership, grouping, or security profiles.",
+      "security_impact": "HLQs commonly drive RACF dataset profile patterns and operational ownership assumptions.",
+      "assessment_angle": "Review HLQ naming, generic dataset profiles, group ownership, and whether sensitive datasets share broad qualifiers.",
+      "lab_safe_example": "`SYS1.PROCLIB` has `SYS1` as the HLQ.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "IMS",
+      "aliases": [
+        "IMS"
+      ],
+      "definition": "Information Management System, a mainframe transaction and hierarchical database environment used by many long-lived enterprise applications.",
+      "security_impact": "IMS authority involves transaction access, region identity, database access, program paths, and operational controls.",
+      "assessment_angle": "Review transaction codes, dependent regions, PSBs/PCBs at a high level, dataset access, operator commands, and audit evidence.",
+      "lab_safe_example": "An IMS transaction can reach application data through IMS control structures rather than a visible Unix-style process path.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "Initiator",
+      "aliases": [
+        "Initiator",
+        "Initiators"
+      ],
+      "definition": "A JES-controlled address space that selects eligible batch jobs from an input queue and runs their job steps.",
+      "security_impact": "Initiators are part of deferred execution. Job class, initiator availability, identity, and JCL determine when and how submitted work actually runs.",
+      "assessment_angle": "Check job class, initiator class assignment, JES messages, job owner, started task identity, and spool evidence around execution.",
+      "lab_safe_example": "A job can sit in input until an initiator for its class is available, then execute later without the submitter staying logged on.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "IPL",
+      "aliases": [
+        "IPL",
+        "IPLs"
+      ],
+      "definition": "Initial Program Load, the mainframe boot/start process for loading an operating system image or LPAR environment.",
+      "security_impact": "IPL paths, PARMLIB members, system libraries, and console controls influence what system image and parameters come up.",
+      "assessment_angle": "Review who can initiate IPL-related actions, which PARMLIB members are used, what LOADxx points to, and what evidence exists around restart changes.",
+      "lab_safe_example": "In a lab, an IPL reloads the MVS system under Hercules and starts subsystems according to configured procedures.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "ISPF",
+      "aliases": [
+        "ISPF",
+        "ISPFs"
+      ],
+      "definition": "Interactive System Productivity Facility, a panel-driven environment commonly used from TSO for browsing, editing, and managing datasets.",
+      "security_impact": "ISPF is a powerful interface to datasets and jobs, but it is not the security manager.",
+      "assessment_angle": "Treat panels as workflow surfaces; check what datasets and functions the user can reach through them.",
+      "lab_safe_example": "ISPF option 2 edits datasets, while RACF decides whether the user is allowed to update them.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "JCL",
+      "aliases": [
+        "JCL",
+        "JCLs"
+      ],
+      "definition": "Job Control Language, the control language used to describe batch jobs, steps, programs, datasets, and output routing.",
+      "security_impact": "JCL names the execution path: JOB identity, EXEC programs, DD datasets, STEPLIB/JOBLIB, SYSIN, and SYSOUT.",
+      "assessment_angle": "Inspect DD statements, library concatenation order, dataset disposition, job class, and spool evidence.",
+      "lab_safe_example": "A harmless IEFBR14 job can still allocate, catalog, or delete datasets depending on DD parameters.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "JCL DD",
+      "aliases": [
+        "JCL DD",
+        "JCL DDs"
+      ],
+      "definition": "A Data Definition statement in JCL that maps a job step's logical input or output name to datasets, SYSOUT, spool, inline data, or devices.",
+      "security_impact": "DD statements define what a program can read, write, allocate, delete, or expose in job output.",
+      "assessment_angle": "Review DSN, DISP, UNIT, VOL, SPACE, DCB, SYSOUT class, and whether STEPLIB/JOBLIB changes executable search paths.",
+      "lab_safe_example": "`//SYSOUT DD SYSOUT=*` routes output to JES spool, while `//INPUT DD DSN=...` names a dataset.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "JES",
+      "aliases": [
+        "JES"
+      ],
+      "definition": "Job Entry Subsystem; JES accepts submitted work, queues it, schedules execution, manages spool, and routes SYSOUT.",
+      "security_impact": "JES is a deferred execution and evidence plane. Submitted JCL can run later under a specific identity and leave spool output.",
+      "assessment_angle": "Review who can submit jobs, alter jobs, browse spool, purge output, hold output, or route SYSOUT.",
+      "lab_safe_example": "A batch job submitted from TSO may execute after the terminal session moves on, and the evidence may be in JES output.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "JOBLIB",
+      "aliases": [
+        "JOBLIB",
+        "JOBLIBs"
+      ],
+      "definition": "A JCL DD statement that defines load libraries available to all job steps unless overridden by step-specific libraries.",
+      "security_impact": "JOBLIB affects executable search paths across a job and can create trust-boundary issues if writable or unexpected libraries are used.",
+      "assessment_angle": "Review concatenation order, dataset profiles, APF relevance, module provenance, and the job's JES output.",
+      "lab_safe_example": "A batch job may use JOBLIB to find application load modules instead of relying only on system link-list libraries.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "Link List",
+      "aliases": [
+        "Link List",
+        "Link Lists"
+      ],
+      "definition": "A system-managed list of load libraries used when programs are searched for execution.",
+      "security_impact": "Link-list libraries are trusted operational paths. Write access or incorrect library order can affect many jobs and tasks.",
+      "assessment_angle": "Review configured libraries, update authority, APF relationships, module provenance, and change evidence.",
+      "lab_safe_example": "If a program is not in STEPLIB or JOBLIB, the system may search link-list libraries.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "LPAR",
+      "aliases": [
+        "LPAR",
+        "LPARs"
+      ],
+      "definition": "Logical Partition, a hardware-enforced partition of an IBM mainframe processor complex that runs an independent operating environment.",
+      "security_impact": "LPAR boundaries sit below z/OS and RACF; management access through HMC/SE and PR/SM configuration can affect entire operating environments.",
+      "assessment_angle": "Distinguish OS-level findings from hardware partitioning control. Review management-plane access, network segmentation, and operational authority.",
+      "lab_safe_example": "TK5 is a single lab system under emulation, but production systems may run many LPARs on one physical machine.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "Mainframe",
+      "aliases": [
+        "Mainframe",
+        "Mainframes"
+      ],
+      "definition": "A mainframe is a large enterprise computing platform designed for high-volume transaction processing, batch workloads, centralized data access, strong reliability, and long-lived operational control.",
+      "security_impact": "Mainframe security is not root or sudo by another name, and it is not just host hardening. The important trust boundaries often involve RACF or another security manager, datasets, JES, JCL, TSO, ISPF, APF libraries, VTAM sessions, CICS transactions, SMF evidence, started task identity, PROCLIB, PARMLIB, and spool access.",
+      "assessment_angle": "Avoid Unix shortcuts such as root, sudo, /etc/passwd, chmod, process-only thinking, or port-scan-only exposure. Map identity, resource, authority, execution path, session path, evidence, and operational impact.",
+      "lab_safe_example": "In a TK5/MVS lab, a simple question like \"who can change what runs?\" leads to datasets, JCL, JES, PROCLIB, started tasks, and security profiles rather than one superuser account.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "MVS",
+      "aliases": [
+        "MVS"
+      ],
+      "definition": "Multiple Virtual Storage, a classic IBM mainframe operating system lineage.",
+      "security_impact": "MVS uses datasets, JES, JCL, TSO, system libraries, and started tasks rather than a Unix process-and-file model.",
+      "assessment_angle": "Map authority through datasets, job execution, system libraries, and session paths.",
+      "lab_safe_example": "MVS 3.8j labs are useful for learning mainframe-native reasoning.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "MVS",
+      "aliases": [
+        "MVS",
+        "multiple virtual storage",
+        "mvs"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**MVS** - MVS, Multiple Virtual Storage, dates to 1974. - Later lineage includes MVS/XA, MVS/ESA, OS/390, and z/OS. - Mainframe angle: MVS is an operating-system lineage, not the same thing as System/370 hardware.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    },
+    {
+      "title": "MVS/ESA",
+      "aliases": [
+        "MVS ESA",
+        "MVS/ESA",
+        "MVS/ESAs",
+        "mvs esa",
+        "mvs sp version 3",
+        "mvs/esa",
+        "mvs/sp version 3"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**MVS/ESA** - Announced as MVS/SP Version 3 on February 15, 1988. - It brought the MVS line into the Enterprise Systems Architecture era before OS/390.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    },
+    {
+      "title": "OS/390",
+      "aliases": [
+        "OS 390",
+        "OS/390",
+        "OS/390s",
+        "os 390",
+        "os/390"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**OS/390** - Introduced in late 1995 as IBM's packaged successor in the MVS family for System/390. - Mainframe angle: OS/390 sits between MVS/ESA and z/OS in the operating-system lineage.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    },
+    {
+      "title": "PARMLIB",
+      "aliases": [
+        "PARMLIB",
+        "PARMLIBs"
+      ],
+      "definition": "A parameter library containing system and subsystem configuration members.",
+      "security_impact": "PARMLIB members influence system behavior, subsystem startup, and operational controls.",
+      "assessment_angle": "Review update authority, referenced members, IPL or restart impact, and audit evidence around changes.",
+      "lab_safe_example": "Configuration changes may not execute immediately but can affect the next subsystem restart.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "PROCLIB",
+      "aliases": [
+        "PROCLIB",
+        "PROCLIBs"
+      ],
+      "definition": "A procedure library containing JCL procedures used by started tasks and batch jobs.",
+      "security_impact": "Write access to sensitive PROCLIB members can affect future execution.",
+      "assessment_angle": "Review who can update procedures, what libraries procedures reference, and which tasks consume them.",
+      "lab_safe_example": "A changed PROC member may affect a task the next time it is started.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "RACF",
+      "aliases": [
+        "RACF",
+        "RACFs"
+      ],
+      "definition": "Resource Access Control Facility, the security manager commonly used to control users, groups, datasets, and named resources through profiles and permissions.",
+      "security_impact": "RACF defines authority across many resource types; it is not a single Unix root account and it is not controlled by sudo.",
+      "assessment_angle": "Check user IDs, group membership, dataset profiles, resource classes, access levels, and evidence of denied or excessive access.",
+      "lab_safe_example": "A user can log on to TSO but still be denied UPDATE access to a protected dataset by RACF.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "REXX",
+      "aliases": [
+        "REXX",
+        "REXXs"
+      ],
+      "definition": "Restructured Extended Executor, a scripting language commonly used on mainframes for TSO automation, ISPF dialogs, command procedures, and operational tooling.",
+      "security_impact": "REXX can automate privileged workflows, issue TSO commands, read or write datasets, call system utilities, and become part of a control path when run under a powerful user or started-task context.",
+      "assessment_angle": "Review where REXX execs live, who can update those datasets or members, what identity runs them, what commands they issue, and whether they touch RACF, JES, datasets, or system libraries.",
+      "lab_safe_example": "A REXX exec in a training library can list datasets or submit a harmless job; the security question is who can change the exec and under which identity it runs.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "SAF",
+      "aliases": [
+        "SAF",
+        "SAFs"
+      ],
+      "definition": "System Authorization Facility, the z/OS interface that lets system components ask an external security manager such as RACF for authorization decisions.",
+      "security_impact": "SAF is the call path between components and the security manager. The security decision is not simply a local file permission check.",
+      "assessment_angle": "Identify which resource class and profile are checked, which identity is used, and whether RACF or another security product answers the SAF request.",
+      "lab_safe_example": "A dataset access request can flow through SAF to RACF before the open is allowed.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "SDSF",
+      "aliases": [
+        "SDSF",
+        "SDSFs"
+      ],
+      "definition": "System Display and Search Facility, an interactive interface commonly used to view and control jobs, output, queues, and system activity.",
+      "security_impact": "SDSF access can expose spool output, job control actions, operator-style views, and evidence that should be permissioned carefully.",
+      "assessment_angle": "Review who can browse held output, issue job commands, purge output, change classes, or view sensitive SYSOUT.",
+      "lab_safe_example": "A user may use SDSF to inspect a failed job's JES log and SYSOUT without directly opening a dataset.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "SMF",
+      "aliases": [
+        "SMF",
+        "SMFs"
+      ],
+      "definition": "System Management Facilities, the event recording framework used for operational and security-relevant records.",
+      "security_impact": "SMF can preserve evidence about jobs, access, commands, system activity, and security events.",
+      "assessment_angle": "Identify which SMF record types are enabled, where records are written, and who can read or alter evidence.",
+      "lab_safe_example": "A batch job may leave useful evidence in JES spool and SMF records even after terminal activity ends.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "Spool",
+      "aliases": [
+        "Spool",
+        "Spools"
+      ],
+      "definition": "JES-managed storage for jobs, input queues, output queues, SYSOUT, and job-related evidence.",
+      "security_impact": "Spool access can expose job output, commands, diagnostics, and sensitive data.",
+      "assessment_angle": "Check who can browse, alter, purge, or route spool output and whether output classes protect sensitive data.",
+      "lab_safe_example": "A failed job can leave the exact error and dataset names in SYSOUT.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "Started Task",
+      "aliases": [
+        "Started Task",
+        "Started Tasks"
+      ],
+      "definition": "A system or subsystem task started from procedures and assigned an identity.",
+      "security_impact": "Started task identity and referenced libraries can define powerful long-running trust boundaries.",
+      "assessment_angle": "Check started task user mapping, PROC contents, PROCLIB, PARMLIB, STEPLIB, APF paths, and dataset access.",
+      "lab_safe_example": "A subsystem can run under a started task identity rather than a human TSO user.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "STEPLIB",
+      "aliases": [
+        "STEPLIB",
+        "STEPLIBs"
+      ],
+      "definition": "A JCL DD statement that adds load libraries to the search path for a specific job step.",
+      "security_impact": "STEPLIB can redirect which program module is loaded. Writable libraries in a STEPLIB path can become an execution trust issue.",
+      "assessment_angle": "Check library order, dataset permissions, APF status where relevant, and whether the named program exists in an unexpected library.",
+      "lab_safe_example": "An S806 module-not-found failure often leads reviewers to inspect STEPLIB, JOBLIB, and link-list paths.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "SYSOUT",
+      "aliases": [
+        "SYSOUT",
+        "SYSOUTs"
+      ],
+      "definition": "Job output routed through JES spool, commonly containing messages, listings, and program output.",
+      "security_impact": "SYSOUT can contain operational evidence and sensitive application data.",
+      "assessment_angle": "Review output classes, spool permissions, retention, and who can browse or purge output.",
+      "lab_safe_example": "An ABEND investigation often starts by checking JES job log and SYSOUT.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "System/360",
+      "aliases": [
+        "System 360",
+        "System/360",
+        "System/360s"
+      ],
+      "definition": "IBM System/360 is the compatible mainframe architecture family announced in 1964 that established a common instruction-set and peripheral model across a range of machines.",
+      "security_impact": "System/360 itself is historical hardware architecture, but it matters because later System/370, MVS, and z/OS concepts inherited the mainframe control-plane mindset: channels, datasets, batch work, terminals, and centralized access control.",
+      "assessment_angle": "Use System/360 as historical context, not a modern z/OS security target. Distinguish architecture history from current controls such as RACF, JES, APF, VTAM, CICS, and SMF.",
+      "lab_safe_example": "If a user asks about System/360, answer as architecture history first, then connect it to why System/370 and MVS-era labs behave differently from Unix systems.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "System/360",
+      "aliases": [
+        "System 360",
+        "System/360",
+        "System/360s",
+        "ibm 360",
+        "s 360",
+        "s/360",
+        "system 360",
+        "system/360"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**IBM System/360** - Announced on April 7, 1964. - Mainframe angle: System/360 established the compatible architecture family that System/370 later extended. - If the user asks when it came out, answer with the date first, not a generic mainframe overview.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    },
+    {
+      "title": "System/370",
+      "aliases": [
+        "System 370",
+        "System/370",
+        "System/370s"
+      ],
+      "definition": "IBM mainframe architecture family behind classic MVS-era concepts such as 3270 interaction, batch work, datasets, and channel I/O.",
+      "security_impact": "System/370 and MVS assumptions differ from Unix assumptions about users, files, processes, and network exposure.",
+      "assessment_angle": "Use a mainframe control-plane model: RACF, JES, JCL, TSO, ISPF, datasets, VTAM, CICS, SMF, and APF.",
+      "lab_safe_example": "A System/370-style lab teaches why port scans and Unix privilege terms do not explain the whole system.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "System/370",
+      "aliases": [
+        "370 architecture",
+        "System 370",
+        "System/370",
+        "System/370s",
+        "ibm 370",
+        "s 370",
+        "s/370",
+        "system 370",
+        "system/370"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**IBM System/370** - Announced on June 30, 1970 as the successor to System/360. - First customer shipments for early models followed in 1971. - Mainframe angle: System/370 is the hardware architecture family; MVS arrived later in the operating-system lineage, and z/OS is much later. - If the user asks when it came out, the direct answer is **June 30, 1970**.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    },
+    {
+      "title": "System/390",
+      "aliases": [
+        "System 390",
+        "System/390",
+        "System/390s"
+      ],
+      "definition": "IBM System/390 is the mainframe architecture generation announced in 1990 between the System/370 lineage and the later z/Architecture era.",
+      "security_impact": "System/390 systems commonly sit in the MVS/ESA and OS/390 lineage, where security analysis still centers on RACF, datasets, JES, JCL, APF, VTAM, CICS, SMF, and started task identity.",
+      "assessment_angle": "Clarify whether the user means System/390 hardware, MVS/ESA, or OS/390. Do not collapse all of them into generic \"mainframe\" wording.",
+      "lab_safe_example": "A System/390 question may need a timeline answer, while an OS/390 question may need an operating-system lineage answer.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "System/390",
+      "aliases": [
+        "System 390",
+        "System/390",
+        "System/390s",
+        "esa/390",
+        "mvs 390",
+        "mvs/390",
+        "s 390",
+        "s/390",
+        "system 390",
+        "system/390"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**IBM System/390** - IBM System/390 and ESA/390 were announced on September 5, 1990. - MVS/ESA was announced earlier, on February 15, 1988. - OS/390 followed in late 1995 as the packaged successor in the MVS line. - If the user says `MVS 390`, clarify whether they mean MVS/ESA or the System/390 generation.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    },
+    {
+      "title": "TN3270",
+      "aliases": [
+        "TN3270",
+        "TN3270s"
+      ],
+      "definition": "Telnet-based 3270 terminal access used to connect modern clients to mainframe 3270 applications.",
+      "security_impact": "TN3270 is a transport path into logical mainframe applications, not proof that only one service or trust boundary exists.",
+      "assessment_angle": "Check listener exposure, TLS or AT-TLS use, APPLID routing, logon flows, banner leakage, and whether brute force protections exist.",
+      "lab_safe_example": "A lab TN3270 listener can expose TSO and application menus behind the same network port.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_common_terms.md"
+    },
+    {
+      "title": "TSO",
+      "aliases": [
+        "TSO",
+        "TSOs"
+      ],
+      "definition": "Time Sharing Option, an interactive user environment for logon sessions, commands, dataset work, and tools such as ISPF.",
+      "security_impact": "TSO is an interactive control plane where user identity, commands, datasets, and submitted jobs meet.",
+      "assessment_angle": "Review TSO logon authority, command access, dataset access, submitted jobs, and session evidence.",
+      "lab_safe_example": "A user may edit JCL in ISPF under TSO and submit it to JES.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "VSAM",
+      "aliases": [
+        "VSAM",
+        "VSAMs"
+      ],
+      "definition": "Virtual Storage Access Method, a mainframe access method and dataset organization commonly used for keyed and sequential application data.",
+      "security_impact": "VSAM clusters can hold sensitive business records, and access is governed through dataset profiles, application paths, and job or transaction identity.",
+      "assessment_angle": "Check cluster names, alternate indexes, catalog entries, RACF dataset access, CICS file definitions, batch DD usage, and backup or unload paths.",
+      "lab_safe_example": "A CICS transaction may read a VSAM KSDS through a file definition rather than opening a Unix-style file path.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "VTAM",
+      "aliases": [
+        "VTAM",
+        "VTAMs"
+      ],
+      "definition": "Virtual Telecommunications Access Method, the session and application access fabric behind many 3270 application paths.",
+      "security_impact": "A single TN3270 listener can lead to multiple logical APPLIDs, sessions, and application trust boundaries.",
+      "assessment_angle": "Map APPLIDs, logon paths, exposed applications, session transitions, and whether access is visible beyond a port scan.",
+      "lab_safe_example": "Finding port 3270 does not tell you which VTAM applications are reachable after connection.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "z/OS",
+      "aliases": [
+        "z OS",
+        "z/OS"
+      ],
+      "definition": "IBM's flagship mainframe operating system. Unlike Unix/Linux, z/OS has no traditional filesystem - it uses datasets (sequential, PDS, PDSE, VSAM) organized by 44-character names with dot-separated qualifiers (e.g., SYS1.PARMLIB). Storage is managed by SMS (Storage Management Subsystem) across DASD volumes. z/OS UNIX System Services (USS) provides a POSIX layer with zFS filesystems for Unix-style file access, but native z/OS applications use datasets, not files.",
+      "security_impact": "z/OS security is enforced by RACF (or Top Secret/ACF2), controlling access to datasets, programs, transactions, and system resources. Key components: JES (job scheduling), TSO/ISPF (interactive), CICS (transactions), VTAM (networking), SMF (auditing), APF (trusted programs).",
+      "assessment_angle": "Don't import Unix assumptions. There's no /etc, no root user, no filesystem hierarchy. Identity is bound at logon, authority is distributed across profiles, and work can be deferred (batch jobs run later under submitter's identity).",
+      "lab_safe_example": "Dataset SYS1.PARMLIB contains system configuration members. PDS members are like files in a directory. VSAM is a high-performance keyed/sequential access method. zFS provides Unix-style paths under /u/userid for USS applications.",
+      "question_intent": "",
+      "answer": "",
+      "kind": "definition",
+      "source": "data/rag_seed/mainframe_basics.md"
+    },
+    {
+      "title": "z/OS",
+      "aliases": [
+        "z OS",
+        "z os",
+        "z/OS",
+        "z/os",
+        "zos"
+      ],
+      "definition": "",
+      "security_impact": "",
+      "assessment_angle": "",
+      "lab_safe_example": "",
+      "question_intent": "date, announced, released, introduced, came out, come out, coming out",
+      "answer": "**z/OS** - z/OS Version 1 Release 1 became generally available in 2001 as the 64-bit successor in the OS/390 line. - Mainframe angle: z/OS is not System/370 hardware; it belongs to the later z/Architecture era.",
+      "kind": "answer",
+      "source": "data/rag_seed/mainframe_timeline.md"
+    }
+  ]
+}

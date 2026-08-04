@@ -214,6 +214,29 @@ If the model isn't answering well:
 ./scripts/training/build_bigiron_ai.sh
 ```
 
+## RLVR Training (Advanced)
+
+After SFT (Supervised Fine-Tuning), you can optionally run RLVR (Reinforcement Learning with Verifiable Rewards) to improve the model's ability to generate working code.
+
+```bash
+# Requires TK5 MVS running for verification
+./start.sh &
+
+# Run RLVR training
+./scripts/training/run_rlvr.sh --steps 500
+
+# Or without TK5 (heuristic mode)
+./scripts/training/run_rlvr.sh --no-tk5 --steps 500
+```
+
+RLVR works by:
+1. Generating prompts dynamically (non-deterministic)
+2. Getting LLM completions (JCL, COBOL)
+3. Verifying on TK5 MVS (or using heuristics)
+4. Training with GRPO based on rewards
+
+See `docs/RLVR_TRAINING.md` for full documentation.
+
 ## Hardware Notes
 
 **Memory Usage** (approximate):

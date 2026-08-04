@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>BigIron-AI: RLVR Training Architecture</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap');
+
+:root {
+  --bg-deep: #0a0f1a;
+  --bg-card: #111827;
+  --bg-elevated: #1a2332;
+  --text-primary: #e8edf4;
+  --text-secondary: #8b9cb3;
+  --text-muted: #5a6a7a;
+  --accent-blue: #00d4ff;
+  --accent-green: #00ff88;
+  --accent-amber: #ffb000;
+  --accent-red: #ff4d6a;
+  --accent-purple: #a78bfa;
+  --border: #2a3a4a;
+  --gradient-hero: linear-gradient(135deg, #0a0f1a 0%, #1a1a2e 50%, #16213e 100%);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+}
+
+/* Hero Section */
+.hero {
+  background: var(--gradient-hero);
+  padding: 4rem 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(0, 212, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 50%, rgba(0, 255, 136, 0.08) 0%, transparent 50%);
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 1;
+}
+
+.hero h1 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 3rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero .subtitle {
+  font-size: 1.5rem;
+  color: var(--text-secondary);
+  margin-bottom: 2rem;
+}
+
+.hero .tagline {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  color: var(--accent-amber);
+  padding: 0.5rem 1rem;
+  background: rgba(255, 176, 0, 0.1);
+  border: 1px solid rgba(255, 176, 0, 0.3);
+  border-radius: 4px;
+  display: inline-block;
+}
+
+/* Section Styling */
+section {
+  padding: 4rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+section h2 {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.75rem;
+  color: var(--accent-blue);
+  margin-bottom: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+section h2::before {
+  content: '//';
+  color: var(--text-muted);
+}
+
+/* Architecture Diagram */
+.architecture {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+}
+
+.arch-flow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 2rem 0;
+}
+
+.arch-node {
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+  min-width: 150px;
+  transition: all 0.3s ease;
+}
+
+.arch-node:hover {
+  border-color: var(--accent-blue);
+  transform: translateY(-2px);
+}
+
+.arch-node.primary {
+  border-color: var(--accent-blue);
+  box-shadow: 0 0 20px rgba(0, 212, 255, 0.2);
+}
+
+.arch-node.success {
+  border-color: var(--accent-green);
+  box-shadow: 0 0 20px rgba(0, 255, 136, 0.2);
+}
+
+.arch-node .icon {
+  font-size: 2rem;
+  margin-bottom: 0.5rem;
+}
+
+.arch-node .label {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.arch-node .sublabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 0.25rem;
+}
+
+.arch-arrow {
+  color: var(--accent-blue);
+  font-size: 1.5rem;
+  font-family: 'IBM Plex Mono', monospace;
+}
+
+/* Score Gauge */
+.score-section {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 2rem;
+}
+
+.score-gauge {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+}
+
+.score-gauge h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text-secondary);
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.gauge-bar {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 1rem;
+}
+
+.gauge-segment {
+  flex: 1;
+  height: 40px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  font-size: 0.875rem;
+  transition: all 0.3s ease;
+}
+
+.gauge-segment.score-0 { background: linear-gradient(180deg, #1a1a2e, #0d0d1a); color: var(--text-muted); }
+.gauge-segment.score-1 { background: linear-gradient(180deg, #4a1a1a, #2d0f0f); color: var(--accent-red); }
+.gauge-segment.score-2 { background: linear-gradient(180deg, #4a2a1a, #2d1a0f); color: var(--accent-amber); }
+.gauge-segment.score-3 { background: linear-gradient(180deg, #3a3a1a, #2d2d0f); color: #dddd00; }
+.gauge-segment.score-4 { background: linear-gradient(180deg, #1a3a2a, #0f2d1a); color: #88ff88; }
+.gauge-segment.score-5 { background: linear-gradient(180deg, #1a4a3a, #0f2d22); color: var(--accent-green); }
+
+.gauge-segment.active {
+  transform: scaleY(1.1);
+  box-shadow: 0 0 15px currentColor;
+}
+
+.score-labels {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* CC Code Table */
+.cc-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.875rem;
+}
+
+.cc-table th {
+  text-align: left;
+  padding: 1rem;
+  background: var(--bg-elevated);
+  color: var(--accent-blue);
+  border-bottom: 2px solid var(--border);
+}
+
+.cc-table td {
+  padding: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.cc-table tr:hover {
+  background: rgba(0, 212, 255, 0.05);
+}
+
+.cc-code {
+  font-weight: 600;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.cc-0000 { background: rgba(0, 255, 136, 0.2); color: var(--accent-green); }
+.cc-0004 { background: rgba(136, 255, 136, 0.2); color: #88ff88; }
+.cc-0008 { background: rgba(255, 176, 0, 0.2); color: var(--accent-amber); }
+.cc-0012 { background: rgba(255, 77, 106, 0.2); color: var(--accent-red); }
+.cc-abend { background: rgba(255, 0, 0, 0.2); color: #ff4444; }
+
+/* Pipeline Visualization */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.pipeline-phase {
+  display: flex;
+  align-items: stretch;
+  position: relative;
+}
+
+.pipeline-phase::before {
+  content: '';
+  position: absolute;
+  left: 24px;
+  top: 60px;
+  bottom: -20px;
+  width: 2px;
+  background: var(--border);
+}
+
+.pipeline-phase:last-child::before {
+  display: none;
+}
+
+.pipeline-marker {
+  width: 50px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 1rem;
+}
+
+.pipeline-dot {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  border: 3px solid var(--accent-blue);
+  z-index: 1;
+}
+
+.pipeline-dot.complete {
+  background: var(--accent-green);
+  border-color: var(--accent-green);
+}
+
+.pipeline-dot.active {
+  background: var(--accent-amber);
+  border-color: var(--accent-amber);
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 176, 0, 0.4); }
+  50% { box-shadow: 0 0 0 10px rgba(255, 176, 0, 0); }
+}
+
+.pipeline-content {
+  flex: 1;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 0.5rem 0 1.5rem 0;
+}
+
+.pipeline-content h3 {
+  font-family: 'IBM Plex Mono', monospace;
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.pipeline-content .meta {
+  font-size: 0.875rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.pipeline-content .description {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+}
+
+/* Stats Grid */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.stat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1.5rem;
+  text-align: center;
+}
+
+.stat-card .value {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 2.5rem;
+  font-weight: 700;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.stat-card .label {
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+  margin-top: 0.5rem;
+}
+
+/* Agent Loop Animation */
+.agent-loop {
+  background: var(--bg-card);
+  border-radius: 12px;
+  padding: 2rem;
+  border: 1px solid var(--border);
+  position: relative;
+}
+
+.loop-diagram {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  position: relative;
+}
+
+.loop-center {
+  width: 120px;
+  height: 120px;
+  background: var(--bg-elevated);
+  border: 3px solid var(--accent-blue);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+  text-align: center;
+  font-size: 0.8rem;
+  z-index: 2;
+}
+
+.loop-ring {
+  position: absolute;
+  border: 2px dashed var(--border);
+  border-radius: 50%;
+  animation: rotate 20s linear infinite;
+}
+
+.loop-ring-1 { width: 200px; height: 200px; }
+.loop-ring-2 { width: 280px; height: 280px; animation-direction: reverse; animation-duration: 30s; }
+
+@keyframes rotate {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.loop-node {
+  position: absolute;
+  background: var(--bg-elevated);
+  border: 2px solid var(--border);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.loop-node.top { top: 0; left: 50%; transform: translateX(-50%); border-color: var(--accent-purple); }
+.loop-node.right { right: 0; top: 50%; transform: translateY(-50%); border-color: var(--accent-blue); }
+.loop-node.bottom { bottom: 0; left: 50%; transform: translateX(-50%); border-color: var(--accent-green); }
+.loop-node.left { left: 0; top: 50%; transform: translateY(-50%); border-color: var(--accent-amber); }
+
+/* Comparison Table */
+.comparison {
+  background: var(--bg-card);
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.comparison-header {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  background: var(--bg-elevated);
+  font-family: 'IBM Plex Mono', monospace;
+  font-weight: 600;
+}
+
+.comparison-header > div {
+  padding: 1rem;
+  border-right: 1px solid var(--border);
+}
+
+.comparison-header > div:last-child {
+  border-right: none;
+}
+
+.comparison-row {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  border-top: 1px solid var(--border);
+}
+
+.comparison-row > div {
+  padding: 1rem;
+  border-right: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.comparison-row > div:last-child {
+  border-right: none;
+}
+
+.comparison-row .label {
+  color: var(--text-secondary);
+}
+
+.check { color: var(--accent-green); }
+.cross { color: var(--accent-red); }
+.partial { color: var(--accent-amber); }
+
+/* Timeline */
+.timeline-bar {
+  background: var(--bg-elevated);
+  border-radius: 8px;
+  padding: 1.5rem;
+  margin: 2rem 0;
+}
+
+.timeline-track {
+  height: 8px;
+  background: var(--bg-deep);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+}
+
+.timeline-progress {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent-blue), var(--accent-green));
+  border-radius: 4px;
+  transition: width 0.5s ease;
+}
+
+.timeline-markers {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 1rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* Footer */
+footer {
+  padding: 3rem 0;
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+footer .logo {
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--accent-blue);
+  margin-bottom: 1rem;
+}
+
+/* Print Styles */
+@media print {
+  body {
+    background: white;
+    color: #1a1a1a;
+  }
+
+  .hero {
+    background: #f5f5f5;
+  }
+
+  section {
+    page-break-inside: avoid;
+  }
+}
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="container hero-content">
+    <h1>BigIron-AI</h1>
+    <p class="subtitle">Reinforcement Learning with Verifiable Rewards for Mainframe Code Generation</p>
+    <span class="tagline">First RLVR implementation on real MVS 3.8j verification</span>
+  </div>
+</header>
+
+<section>
+  <div class="container">
+    <h2>Key Metrics</h2>
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="value">120K+</div>
+        <div class="label">Training Examples</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">7.2B</div>
+        <div class="label">Parameters (Full Fine-tune)</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">5</div>
+        <div class="label">Target Score (CC 0000)</div>
+      </div>
+      <div class="stat-card">
+        <div class="value">$0</div>
+        <div class="label">Cloud Compute Cost</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>The RLVR Agent Loop</h2>
+
+    <div class="agent-loop">
+      <div class="loop-diagram">
+        <div class="loop-ring loop-ring-1"></div>
+        <div class="loop-ring loop-ring-2"></div>
+        <div class="loop-center">AGENT<br/>LOOP</div>
+        <div class="loop-node top">1. Generate JCL/COBOL</div>
+        <div class="loop-node right">2. Submit to TK5 MVS</div>
+        <div class="loop-node bottom">3. Get CC Code (0-5)</div>
+        <div class="loop-node left">4. Update Weights</div>
+      </div>
+    </div>
+
+    <div class="architecture" style="margin-top: 2rem;">
+      <div class="arch-flow">
+        <div class="arch-node primary">
+          <div class="icon">🤖</div>
+          <div class="label">BigIron-AI</div>
+          <div class="sublabel">Ollama / MLX</div>
+        </div>
+        <div class="arch-arrow">→ JCL →</div>
+        <div class="arch-node">
+          <div class="icon">📝</div>
+          <div class="label">Agent Script</div>
+          <div class="sublabel">Python</div>
+        </div>
+        <div class="arch-arrow">→ HTTP →</div>
+        <div class="arch-node">
+          <div class="icon">🖥️</div>
+          <div class="label">Hercules</div>
+          <div class="sublabel">Port 8038</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-node success">
+          <div class="icon">🏛️</div>
+          <div class="label">TK5 MVS 3.8j</div>
+          <div class="sublabel">JES2 / Real Execution</div>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <div class="arch-arrow" style="font-size: 2rem;">↓ CC Code ↓</div>
+      </div>
+      <div class="arch-flow" style="justify-content: center;">
+        <div class="arch-node success">
+          <div class="icon">✨</div>
+          <div class="label">Reward Signal</div>
+          <div class="sublabel">0-5 Score → Weight Update</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Reward Scoring System</h2>
+
+    <div class="score-section">
+      <div class="score-gauge">
+        <h3>Score Visualization</h3>
+        <div class="gauge-bar">
+          <div class="gauge-segment score-0">0</div>
+          <div class="gauge-segment score-1">1</div>
+          <div class="gauge-segment score-2">2</div>
+          <div class="gauge-segment score-3">3</div>
+          <div class="gauge-segment score-4">4</div>
+          <div class="gauge-segment score-5 active">5</div>
+        </div>
+        <div class="score-labels">
+          <span>Parse<br/>Fail</span>
+          <span>JCL<br/>Error</span>
+          <span>ABEND</span>
+          <span>Wrong<br/>Output</span>
+          <span>Warnings</span>
+          <span>CC 0000<br/>Perfect</span>
+        </div>
+      </div>
+
+      <div class="score-gauge">
+        <h3>Condition Code Mapping</h3>
+        <table class="cc-table">
+          <tr>
+            <td><span class="cc-code cc-0000">CC 0000</span></td>
+            <td>Perfect execution</td>
+            <td>Score 5</td>
+          </tr>
+          <tr>
+            <td><span class="cc-code cc-0004">CC 0004</span></td>
+            <td>Minor warnings</td>
+            <td>Score 4</td>
+          </tr>
+          <tr>
+            <td><span class="cc-code cc-0008">CC 0008</span></td>
+            <td>Errors (completed)</td>
+            <td>Score 3</td>
+          </tr>
+          <tr>
+            <td><span class="cc-code cc-0012">CC 0012</span></td>
+            <td>JCL syntax error</td>
+            <td>Score 1</td>
+          </tr>
+          <tr>
+            <td><span class="cc-code cc-abend">S0C7</span></td>
+            <td>ABEND (crash)</td>
+            <td>Score 2</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Training Pipeline</h2>
+
+    <div class="pipeline">
+      <div class="pipeline-phase">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot complete"></div>
+        </div>
+        <div class="pipeline-content">
+          <h3>Phase 1: Data Collection</h3>
+          <div class="meta">✓ Complete • 120,414 examples</div>
+          <div class="description">Hand-crafted code examples, IBM Redbooks extraction (30,799 Q&A pairs), MainframeBench integration, agentic training data.</div>
+        </div>
+      </div>
+
+      <div class="pipeline-phase">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot active"></div>
+        </div>
+        <div class="pipeline-content">
+          <h3>Phase 2: Supervised Fine-Tuning (SFT)</h3>
+          <div class="meta">⏳ In Progress • ~40 hours remaining</div>
+          <div class="description">Full fine-tuning of all 7.2B parameters on Apple Silicon using MLX framework. Teaches patterns and syntax from examples.</div>
+        </div>
+      </div>
+
+      <div class="pipeline-phase">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot"></div>
+        </div>
+        <div class="pipeline-content">
+          <h3>Phase 3: RLVR Training</h3>
+          <div class="meta">⏳ Queued • ~10-20 hours estimated</div>
+          <div class="description">Reinforcement learning with real MVS verification. Model generates code, submits to TK5, learns from actual condition codes. Trains until 10 consecutive CC 0000.</div>
+        </div>
+      </div>
+
+      <div class="pipeline-phase">
+        <div class="pipeline-marker">
+          <div class="pipeline-dot"></div>
+        </div>
+        <div class="pipeline-content">
+          <h3>Phase 4: Deployment</h3>
+          <div class="meta">⏳ Pending</div>
+          <div class="description">Convert to GGUF, register with Ollama, publish to HuggingFace. Model writes JCL/COBOL that actually runs on MVS 3.8j.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="timeline-bar">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem; font-family: 'IBM Plex Mono', monospace; font-size: 0.875rem;">
+        <span>Progress to Score 5</span>
+        <span style="color: var(--accent-blue);">~50-60 hours total</span>
+      </div>
+      <div class="timeline-track">
+        <div class="timeline-progress" style="width: 15%;"></div>
+      </div>
+      <div class="timeline-markers">
+        <span>Start</span>
+        <span>SFT Complete</span>
+        <span>RLVR Complete</span>
+        <span>Score 5 🎯</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>SFT vs RLVR Comparison</h2>
+
+    <div class="comparison">
+      <div class="comparison-header">
+        <div>Aspect</div>
+        <div>SFT</div>
+        <div>RLVR</div>
+      </div>
+      <div class="comparison-row">
+        <div class="label">Learning Method</div>
+        <div>"Copy these examples"</div>
+        <div>"Try it, did it work?"</div>
+      </div>
+      <div class="comparison-row">
+        <div class="label">Analogy</div>
+        <div>Reading a driving manual</div>
+        <div>Actually driving</div>
+      </div>
+      <div class="comparison-row">
+        <div class="label">Output Quality</div>
+        <div>Looks correct</div>
+        <div>Actually runs</div>
+      </div>
+      <div class="comparison-row">
+        <div class="label">Verification</div>
+        <div><span class="cross">✗</span> None (pattern matching)</div>
+        <div><span class="check">✓</span> Real MVS execution</div>
+      </div>
+      <div class="comparison-row">
+        <div class="label">Expected Score</div>
+        <div>2-3 (errors likely)</div>
+        <div>5 (CC 0000)</div>
+      </div>
+      <div class="comparison-row">
+        <div class="label">Required For</div>
+        <div>Foundation</div>
+        <div>Perfection</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Novel Contributions</h2>
+
+    <div class="stats-grid">
+      <div class="stat-card" style="border-color: var(--accent-green);">
+        <div class="value" style="font-size: 1.5rem;">First</div>
+        <div class="label">RLVR on real MVS verification</div>
+      </div>
+      <div class="stat-card" style="border-color: var(--accent-blue);">
+        <div class="value" style="font-size: 1.5rem;">Largest</div>
+        <div class="label">Open mainframe training corpus</div>
+      </div>
+      <div class="stat-card" style="border-color: var(--accent-purple);">
+        <div class="value" style="font-size: 1.5rem;">Full</div>
+        <div class="label">7B fine-tune on Apple Silicon</div>
+      </div>
+      <div class="stat-card" style="border-color: var(--accent-amber);">
+        <div class="value" style="font-size: 1.5rem;">Zero</div>
+        <div class="label">Cloud compute cost</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="container">
+    <h2>Agent Training Example</h2>
+
+    <div class="architecture">
+      <pre style="font-family: 'IBM Plex Mono', monospace; font-size: 0.8rem; line-height: 1.8; overflow-x: auto;">
+<span style="color: var(--text-muted);">[08:15:01]</span> Iter 1: Write JCL to run IEFBR14...
+           Model output: //STEP1 JOB ... EXEC PGM=IFASM96  <span style="color: var(--accent-red);">← Wrong program</span>
+           Submit to TK5 → <span style="color: var(--accent-red);">JCL ERROR</span>
+           Score: <span style="color: var(--accent-red);">[█░░░░] 1/5</span>
+
+<span style="color: var(--text-muted);">[08:15:35]</span> Iter 2: Write JCL to run IEFBR14...
+           Model output: //TESTJOB JOB ... EXEC PGM=IEFBR14  <span style="color: var(--accent-green);">← Correct!</span>
+           Submit to TK5 → <span style="color: var(--accent-green);">CC 0000</span>
+           Score: <span style="color: var(--accent-green);">[█████] 5/5 - Perfect!</span>
+
+<span style="color: var(--text-muted);">[08:16:02]</span> Iter 3: Write JCL to copy dataset using IEBGENER...
+           Model output: //COPYJOB JOB ... EXEC PGM=IEBGENER ...
+           Submit to TK5 → <span style="color: var(--accent-green);">CC 0000</span>
+           Score: <span style="color: var(--accent-green);">[█████] 5/5 - Perfect!</span>
+           Running avg: 3.67, Consecutive 5s: 2
+
+           <span style="color: var(--accent-amber);">... 800+ iterations ...</span>
+
+<span style="color: var(--text-muted);">[14:32:15]</span> Iter 847: Write JCL for DB2 BIND...
+           Score: <span style="color: var(--accent-green);">[█████] 5/5</span>
+           <span style="color: var(--accent-green); font-weight: bold;">Consecutive 5s: 10 → SUCCESS!</span>
+
+<span style="color: var(--accent-green); font-size: 1.2rem;">🎉 MODEL ACHIEVED SCORE 5!</span>
+      </pre>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="container">
+    <div class="logo">BigIron-AI</div>
+    <p>Mainframe AI on Apple Silicon • RLVR Training with Real MVS Verification</p>
+    <p style="margin-top: 1rem;">July 2026 • Apache 2.0 License</p>
+  </div>
+</footer>
+
+</body>
+</html>

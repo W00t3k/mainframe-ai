@@ -1,0 +1,34 @@
+{"id":"eval_001","question":"Why is the phrase z/OS root often misleading in a mainframe security review?","ideal_keywords":["RACF","profiles","distributed authority","not root"]}
+{"id":"eval_002","question":"Explain why APF authorization should not be treated as sudo.","ideal_keywords":["APF","authorized library","trusted code","not sudo"]}
+{"id":"eval_003","question":"What makes writable PROCLIB security-relevant?","ideal_keywords":["PROCLIB","started task","JCL","deferred execution"]}
+{"id":"eval_004","question":"Why is checking /etc/passwd usually the wrong instinct on z/OS?","ideal_keywords":["RACF","dataset profiles","not Unix","resource classes"]}
+{"id":"eval_005","question":"Why can a port scan understate mainframe exposure?","ideal_keywords":["VTAM","TN3270","CICS","logical sessions"]}
+{"id":"eval_006","question":"What evidence should you preserve for a JES-related finding?","ideal_keywords":["JES","spool","SYSOUT","SMF"]}
+{"id":"eval_007","question":"How are datasets different from ordinary files for security analysis?","ideal_keywords":["datasets","catalog","PDS","RACF dataset profile"]}
+{"id":"eval_008","question":"Why does started task identity matter?","ideal_keywords":["started task","identity","RACF","permissions"]}
+{"id":"eval_009","question":"Why is JCL security-relevant?","ideal_keywords":["JCL","execution","datasets","JES"]}
+{"id":"eval_010","question":"Give an example of a Unix assumption that fails on mainframes.","ideal_keywords":["root","sudo","/etc/passwd","mainframe-native"]}
+{"id":"eval_011","question":"What is TSO in the context of mainframe access?","ideal_keywords":["TSO","interactive","logon","user session"]}
+{"id":"eval_012","question":"What is ISPF and why does it matter during assessment?","ideal_keywords":["ISPF","panels","datasets","interactive"]}
+{"id":"eval_013","question":"What should be checked around APF libraries?","ideal_keywords":["APF libraries","write access","authorized code","trust boundary"]}
+{"id":"eval_014","question":"Why is spool access a sensitive authorization area?","ideal_keywords":["spool","SYSOUT","JES","evidence"]}
+{"id":"eval_015","question":"What does VTAM exposure mean beyond an open port?","ideal_keywords":["VTAM","applid","session fabric","TN3270"]}
+{"id":"eval_016","question":"How should CICS transactions be assessed at a high level?","ideal_keywords":["CICS","transactions","region identity","authorization"]}
+{"id":"eval_017","question":"Why are writable system datasets high-risk?","ideal_keywords":["system datasets","UPDATE","ALTER","control plane"]}
+{"id":"eval_018","question":"What is the mainframe control-plane mindset?","ideal_keywords":["RACF","JES","VTAM","trust boundaries"]}
+{"id":"eval_019","question":"How should BigIron.ai explain a finding?","ideal_keywords":["concept","security impact","assessment angle","lab-safe example"]}
+{"id":"eval_020","question":"Why should Redbooks stay in RAG instead of committed training data?","ideal_keywords":["private corpus","copyright","RAG","not committed"]}
+{"id":"eval_021","question":"What should BigIron.ai do if asked 'what is TSI' and TSI is not in the glossary or RAG index?","ideal_keywords":["do not invent","unknown","did you mean TSO","RAG"]}
+{"id":"eval_022","question":"What is TSO and RACF?","ideal_keywords":["TSO","Time Sharing Option","RACF","Resource Access Control Facility"]}
+{"id":"eval_023","question":"What is WORK in a mainframe or TK5 context?","ideal_keywords":["context-dependent","temporary dataset","SYSUT","SORTWK","WORK01"]}
+{"id":"eval_024","question":"When did IBM System/370 come out?","ideal_keywords":["System/370","June 30, 1970","successor","System/360"]}
+{"id":"eval_025","question":"What is the date of System 370 coming out?","ideal_keywords":["System/370","June 30, 1970","date","not generic overview"]}
+{"id":"eval_026","question":"When did IBM System/390 come out?","ideal_keywords":["System/390","September 5, 1990","ESA/390"]}
+{"id":"eval_027","question":"What is JES?","ideal_keywords":["Job Entry Subsystem","deferred execution","spool","SYSOUT","assessment angle"]}
+{"id":"eval_028","question":"What are initiators?","ideal_keywords":["JES-controlled","batch jobs","job class","spool evidence"]}
+{"id":"eval_029","question":"What is VSAM?","ideal_keywords":["Virtual Storage Access Method","cluster","RACF dataset access","CICS"]}
+{"id":"eval_030","question":"What is SDSF?","ideal_keywords":["System Display and Search Facility","jobs","spool output","SYSOUT"]}
+{"id":"eval_031","question":"What is REXX?","ideal_keywords":["Restructured Extended Executor","scripting language","TSO","datasets"]}
+{"id":"eval_032","question":"What is System/360?","ideal_keywords":["System/360","architecture","1964","System/370"]}
+{"id":"eval_033","question":"What is System/390?","ideal_keywords":["System/390","1990","MVS/ESA","OS/390"]}
+{"id":"eval_034","question":"Tell me about mainframes.","ideal_keywords":["enterprise computing","transaction processing","RACF","JES","datasets","not root"]}
