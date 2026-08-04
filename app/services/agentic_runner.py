@@ -175,8 +175,12 @@ class AgenticLabRunner:
             action = self._decide_action(screen, goal, context, actions_taken)
 
             if not action:
-                self._add_log("Agent couldn't decide action", "warning")
-                return False
+                # No action needed - check if we're done
+                if self._check_success(screen, success_criteria):
+                    return True
+                self._add_log("Agent pausing - checking screen state", "info")
+                time.sleep(2)
+                continue
 
             # Execute the action
             self._add_log(f"Action: {action}", "action")
@@ -355,10 +359,18 @@ YOUR ACTION:"""
             if "LOGOFF" in goal_upper:
                 return "LOGOFF"
 
+        # Already at ISPF/RFE - don't type random stuff
+        if "ISPF" in upper and "OPTION" in upper and "BROWSE" in upper:
+            if "BROWSE" in goal_upper or "VIEW" in goal_upper:
+                return "TYPE 1"
+            # Default: we're logged in, goal might be complete
+            return None
+
         # RFE primary menu
         if "RFE" in upper and "BROWSE" in upper and "EDIT" in upper:
             if "BROWSE" in goal_upper:
                 return "TYPE 1"
+            return None
 
         # Generic: try PF3 to go back
         if "ERROR" in upper or "INVALID" in upper:

@@ -14,7 +14,7 @@ AGENTIC_LABS = {
                 "id": 1,
                 "goal": "Connect to the mainframe and login to TSO as HERC01",
                 "context": "RAKF is the security system on TK5 MVS 3.8j. We need to authenticate first.",
-                "success_criteria": ["READY", "TSOAPPLS", "RFE"],
+                "success_criteria": ["ISPF", "USERID", "HERC01"],
                 "narration": "**Establishing Identity**\n\nConnecting and logging in as HERC01. RAKF (not RACF) handles authentication on MVS 3.8j TK5.",
                 "control_plane": "tso",
                 "max_actions": 20,
