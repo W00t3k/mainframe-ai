@@ -148,8 +148,8 @@
       "description": "Analyze the reverse_shell_jcl payload. Trace deferred execution, identity binding, and the submission-to-execution gap.",
       "category": "security",
       "difficulty": "advanced",
-      "status": "disabled",
-      "status_reason": "Requires USS - not on MVS 3.8j",
+      "status": "working",
+      "status_reason": "Concept demo on TK5 (browses/analyzes the JCL attack path). A live shell needs USS, which MVS 3.8j lacks.",
       "walkthrough": true,
       "steps": 10
     },

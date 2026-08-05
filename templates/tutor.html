@@ -21,9 +21,8 @@
         <!-- Page Nav -->
         <div class="sidebar-section" style="padding:8px 12px; border-bottom:1px solid rgba(68,119,204,0.2);">
             <div style="display:flex; flex-wrap:wrap; gap:4px;">
-                <a href="/walkthrough" style="padding:3px 8px; font-size:10px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid #333; color:#6699ff; border-radius:2px; text-decoration:none;">Walkthrough</a>
-                <a href="/tutorials" style="padding:3px 8px; font-size:10px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid #333; color:#6699ff; border-radius:2px; text-decoration:none;">Tutorials</a>
                 <a href="/tutor" style="padding:3px 8px; font-size:10px; font-family:'IBM Plex Mono',monospace; background:rgba(100,150,255,0.2); border:1px solid #6699ff; color:#fff; border-radius:2px; text-decoration:none;">AI Tutor</a>
+                <a href="/tutorials" style="padding:3px 8px; font-size:10px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid #333; color:#6699ff; border-radius:2px; text-decoration:none;">Tutorials</a>
                 <a href="/labs" style="padding:3px 8px; font-size:10px; font-family:'IBM Plex Mono',monospace; background:transparent; border:1px solid #333; color:#6699ff; border-radius:2px; text-decoration:none;">Labs</a>
             </div>
         </div>
@@ -267,25 +266,41 @@ const AGENTIC_LABS = new Set([
     // Note: cics-kicks disabled - requires KICKS to be installed
 ]);
 
+// Scripted (deterministic) offensive-security labs. No agentic definition —
+// these run through the walkthrough backend but live in the Red Team Tutor
+// alongside the agentic labs (isAgentic stays false so they route correctly).
+const SCRIPTED_LABS = new Set([
+    'reverse-shell', 'apf-privesc', 'jcl-injection', 'system-enum',
+    'prsm-lpars', 'dc30-hello-world', 'dc30-buffer-overflow',
+    'dc30-arbauth-privesc', 'dc30-ftp-overflow'
+]);
+
 function renderLabsList() {
     const listEl = $('#moduleList');
     if (!labsIndex.length) {
         listEl.innerHTML = '<div class="module-loading">No labs available.</div>';
         return;
     }
-    // Filter to only labs with agentic definitions
-    const execLabs = labsIndex.filter(l => AGENTIC_LABS.has(l.id));
-    listEl.innerHTML = execLabs.map(lab => {
-        const cat = catMeta[lab.category] || catMeta.fundamentals;
+    // Only agentic labs are runnable in the tutor. A lab is "ready" when it has
+    // an agentic definition and isn't flagged disabled/wip.
+    const isReady = (l) => AGENTIC_LABS.has(l.id)
+        && l.status !== 'disabled' && l.status !== 'wip';
+
+    const shown = labsIndex.filter(l => AGENTIC_LABS.has(l.id) || SCRIPTED_LABS.has(l.id));
+    const ready = shown.filter(isReady);
+    const notReady = shown.filter(l => !isReady(l));
+
+    const card = (lab, ready) => {
         const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
-        const isDisabled = lab.status === 'disabled' || lab.status === 'wip';
-        const statusText = lab.status === 'disabled' ? '[NOT ON TK5]' :
-                          lab.status === 'wip' ? '[WIP]' : 'Not started';
-        const statusClass = lab.status === 'disabled' ? 'status-disabled' :
-                           lab.status === 'wip' ? 'status-wip' : '';
-        const reason = lab.status_reason || '';
+        // Not-ready reason: scripted labs still need an agentic port; others are wip/disabled.
+        const scripted = !AGENTIC_LABS.has(lab.id);
+        const statusText = ready ? 'Not started'
+            : lab.status === 'disabled' ? '[NOT ON TK5]'
+            : scripted ? '[AGENTIC PORT PENDING]' : '[WIP]';
+        const statusClass = ready ? '' : (lab.status === 'disabled' ? 'status-disabled' : 'status-wip');
+        const reason = scripted && !ready ? 'Scripted lab — agentic version not built yet' : (lab.status_reason || '');
         return `
-        <div class="module-item ${isDisabled ? 'module-disabled' : ''}" data-lab="${lab.id}" ${isDisabled ? '' : ''} title="${reason}">
+        <div class="module-item ${ready ? '' : 'module-disabled'}" data-lab="${lab.id}" title="${reason}">
             <div class="module-header">
                 <span class="module-name">${lab.title}</span>
                 <span class="module-time">${lab.steps || '?'} steps</span>
@@ -296,9 +311,19 @@ function renderLabsList() {
                 <span class="module-status ${statusClass}">${statusText}</span>
             </div>
         </div>`;
-    }).join('');
+    };
 
-    // Bind click handlers only on enabled labs
+    const divider = notReady.length ? `
+        <div class="module-group-divider" style="margin:14px 4px 8px; padding-top:10px; border-top:1px solid rgba(68,119,204,0.25); font-size:10px; letter-spacing:0.08em; text-transform:uppercase; color:#5a6b82;">
+            Not yet available
+        </div>` : '';
+
+    listEl.innerHTML =
+        ready.map(l => card(l, true)).join('') +
+        divider +
+        notReady.map(l => card(l, false)).join('');
+
+    // Bind click handlers only on ready (runnable) labs
     $$('.module-item:not(.module-disabled)').forEach(el => {
         el.addEventListener('click', () => selectLab(el.dataset.lab));
     });
@@ -484,10 +509,15 @@ async function startWalkthrough(name) {
 
     try {
         const explainMode = $('#explainModeToggle')?.getAttribute('aria-pressed') === 'true';
+        // Scripted offensive labs (e.g. reverse-shell) take an lhost/lport for
+        // the demo payload; the agentic backend ignores these fields.
         const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, target, speed: 4.0, explain_mode: explainMode })
+            body: JSON.stringify({
+                name, target, speed: 4.0, explain_mode: explainMode,
+                lhost: '127.0.0.1', lport: '4444'
+            })
         });
         const data = await res.json();
         if (!data.success) {
