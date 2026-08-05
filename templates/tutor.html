@@ -69,6 +69,7 @@
                     <span class="panel-title">TN3270 Terminal</span>
                     <div class="terminal-controls">
                         <input type="text" id="hostInput" value="localhost:3270" placeholder="host:port">
+                        <button type="button" id="explainModeToggle" aria-pressed="false" title="Pause between each step so you can explore or ask the AI, then Resume for the next step">⏸ Pause</button>
                         <button id="connectBtn">Connect</button>
                         <button id="disconnectBtn" style="display:none;">Disconnect</button>
                     </div>
@@ -106,6 +107,9 @@
                             <button class="action-btn" id="wtPauseBtn" style="font-size:11px; padding:2px 10px;">Pause</button>
                             <button class="action-btn" id="wtStopBtn" style="font-size:11px; padding:2px 10px; color:#f44;">Stop</button>
                         </div>
+                    </div>
+                    <div id="pausedBanner" style="display:none; margin-bottom:8px; padding:6px 10px; background:#3a2d00; border:1px solid #a80; border-radius:4px; color:#fc4; font-size:12px;">
+                        ⏸ Paused — explore the terminal or ask the AI below, then click <b>Resume</b> for the next step.
                     </div>
                     <h3 class="step-title" id="stepTitle">Getting Started</h3>
                     <div class="step-field" id="controlPlaneField" style="display:none;">
@@ -254,9 +258,13 @@ const WORKING_WALKTHROUGHS = new Set([
     'dc30-hello-world', 'dc30-buffer-overflow', 'dc30-arbauth-privesc', 'dc30-ftp-overflow'
 ]);
 
-// Labs that use the new agentic runner (LLM decides actions)
+// ALL labs now use the agentic runner (LLM decides actions based on goals)
+// No more scripted walkthroughs - the agent observes and decides
 const AGENTIC_LABS = new Set([
-    'rakf-security', 'session-stack', 'deferred-exec'
+    'rakf-security', 'session-stack', 'deferred-exec',
+    'quick-demo', 'dataset-model', 'address-spaces',
+    'system-inspection', 'cobol-basics', 'jcl-basics', 'auth-model'
+    // Note: cics-kicks disabled - requires KICKS to be installed
 ]);
 
 function renderLabsList() {
@@ -265,8 +273,8 @@ function renderLabsList() {
         listEl.innerHTML = '<div class="module-loading">No labs available.</div>';
         return;
     }
-    // Filter to only labs with walkthrough scripts defined
-    const execLabs = labsIndex.filter(l => WORKING_WALKTHROUGHS.has(l.id));
+    // Filter to only labs with agentic definitions
+    const execLabs = labsIndex.filter(l => AGENTIC_LABS.has(l.id));
     listEl.innerHTML = execLabs.map(lab => {
         const cat = catMeta[lab.category] || catMeta.fundamentals;
         const diff = diffMeta[lab.difficulty] || diffMeta.beginner;
@@ -475,10 +483,11 @@ async function startWalkthrough(name) {
     const endpoint = isAgentic ? '/api/agentic/start' : '/api/walkthrough/start';
 
     try {
+        const explainMode = $('#explainModeToggle')?.getAttribute('aria-pressed') === 'true';
         const res = await fetch(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ name, target, speed: 4.0 })
+            body: JSON.stringify({ name, target, speed: 4.0, explain_mode: explainMode })
         });
         const data = await res.json();
         if (!data.success) {
@@ -513,6 +522,12 @@ function startWalkthroughPoll() {
             } else if (s.screen) {
                 $('#terminalScreen').innerHTML = '<pre>' + s.screen + '</pre>';
             }
+
+            // Paused banner + Pause/Resume button reflect live state
+            const pausedBanner = $('#pausedBanner');
+            if (pausedBanner) pausedBanner.style.display = s.paused ? '' : 'none';
+            const pauseBtn = $('#wtPauseBtn');
+            if (pauseBtn && state.isAgentic) pauseBtn.textContent = s.paused ? 'Resume' : 'Pause';
 
             // Update step card
             if (s.running || s.finished) {
@@ -769,6 +784,28 @@ $('#analyzeBtn').addEventListener('click', analyzeScreen);
 $('#nextBtn').addEventListener('click', nextStep);
 $('#wtPauseBtn').addEventListener('click', pauseWalkthrough);
 $('#wtStopBtn').addEventListener('click', stopWalkthrough);
+
+// Auto-pause toggle: stop on each output screen so you can read/ask the AI.
+// Toggling mid-run applies live.
+$('#explainModeToggle')?.addEventListener('click', async (e) => {
+    const btn = e.currentTarget;
+    const on = btn.getAttribute('aria-pressed') !== 'true';
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.style.background = on ? '#a80' : '';
+    btn.style.color = on ? '#000' : '';
+    btn.title = on
+        ? 'Auto-pause ON — the lab stops on each output screen. Click to turn off.'
+        : 'Auto-pause on each output screen so you can read it and ask the AI to explain';
+    if (state.isAgentic) {
+        try {
+            await fetch('/api/agentic/explain_mode', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ enabled: on })
+            });
+        } catch (_) {}
+    }
+});
 
 $('#sendBtn').addEventListener('click', askTutor);
 $('#askInput').addEventListener('keydown', (e) => {

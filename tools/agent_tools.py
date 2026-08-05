@@ -324,6 +324,14 @@ def disconnect_mainframe() -> str:
     connection.connected = False
     connection.emulator = None
     connection.current_screen = ""
+
+    # Force kill any orphan s3270 processes to release the userid
+    import subprocess
+    try:
+        subprocess.run(["pkill", "-9", "s3270"], capture_output=True, timeout=2)
+    except:
+        pass
+
     return "Disconnected"
 
 
@@ -530,6 +538,15 @@ def send_terminal_key(key_type: str, value: str = "") -> dict:
         # Send the key
         if key_type == "string":
             if value:
+                # Wait for the keyboard to unlock BEFORE typing. If we type while
+                # the 3270 keyboard is still locked (e.g. TSO is busy right after
+                # a LOGON Enter), the String() command raises "Keyboard locked"
+                # and the leading characters are dropped — the resulting garbled
+                # command shows up as "input not recognized" on the terminal.
+                try:
+                    exec_emulator_command(b'Wait(3,Unlock)')
+                except Exception:
+                    pass
                 exec_emulator_command(f'String("{value}")'.encode())
             # String input: return immediately, no post-wait needed
             return {"success": True, "screen_data": get_cached_screen_data()}

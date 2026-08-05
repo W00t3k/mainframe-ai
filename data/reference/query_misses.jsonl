@@ -89,3 +89,8 @@
 {"ts": "2026-07-31T19:26:18.840626+00:00", "query": "can you run rexx on system 390", "mode": "rag_llm", "suggestions": []}
 {"ts": "2026-07-31T19:27:05.371558+00:00", "query": "i asked if you can run rexx on a system 370", "mode": "rag_llm", "suggestions": []}
 {"ts": "2026-07-31T19:29:14.698809+00:00", "query": "how do i run rexx on system 370", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-08-05T13:53:25.680951+00:00", "query": "can you write some jcl for me that shows important info", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-08-05T13:54:02.870618+00:00", "query": "how do i run that can you run it on the mainframe emulator", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-08-05T13:54:23.797105+00:00", "query": "ok after that how do i submit that jcl", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-08-05T13:55:13.153696+00:00", "query": "ok so my jobname is defcon, now write jcl that says hack the planet defcon 34", "mode": "rag_llm", "suggestions": []}
+{"ts": "2026-08-05T13:55:57.061262+00:00", "query": "ok so my jobname is defcon, now write jcl that says hAx the planet defcon 34", "mode": "rag_llm", "suggestions": []}

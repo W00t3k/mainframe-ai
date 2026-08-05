@@ -198,6 +198,9 @@ kill_all() {
   # Cleanup stale tail processes from old TK5 starts
   pkill -f "tail -f /dev/null" 2>/dev/null
 
+  # Clear auto-connect flag
+  rm -f "$LOGDIR/.auto_connect_done" 2>/dev/null
+
   sleep 1
   echo -e "${GRN}${BLD}All stopped.${RST}\n"
 }
@@ -644,22 +647,21 @@ except Exception as e:
       fi
     }
 
-    # Wait for JES2 + submit extra terminals in parallel
+    # Prevent duplicate runs
+    [ -f "$LOGDIR/.auto_connect_done" ] && return 0
+    touch "$LOGDIR/.auto_connect_done"
+
+    # Wait for JES2 + submit extra terminals
     sleep 3
     if tk5_has_extra_terminal_devices; then
-      _submit_jcl "jcl/terminals.jcl" "Extra terminals (32x VTAM)"
-    else
-      info "Skipping terminals.jcl: Hercules config lacks 0400-041F 3270 devices"
+      _submit_jcl "jcl/terminals.jcl" "Terminals" >/dev/null 2>&1
     fi
-    
-    # Start FTPD (dasd_backup already has UPDVTAM + custom USS fixes)
-    curl -s --max-time 5 -X POST "http://localhost:8038/cgi-bin/tasks/syslog" \
-      --data "command=%2FS+FTPD" -o /dev/null 2>&1 \
-      && ok "FTPD started" || info "FTPD start skipped"
-    
-    ok "AI/OS USS screen active (from DASD backup)"
 
-    ok "VTAM ready — AI/OS TN3270 logon screen available"
+    # Start FTPD silently
+    curl -s --max-time 5 -X POST "http://localhost:8038/cgi-bin/tasks/syslog" \
+      --data "command=%2FS+FTPD" -o /dev/null 2>&1
+
+    ok "TK5 ready — VTAM logon available"
   }
 
   detect_python

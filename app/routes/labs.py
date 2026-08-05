@@ -29,10 +29,35 @@ def read_json_file(path: str, default: dict) -> dict:
 
 @router.get("")
 async def api_labs_index():
-    """Get labs index."""
+    """Get labs index - merges static labs with agentic labs."""
+    from app.constants.agentic_labs import AGENTIC_LABS
+
+    # Start with agentic labs (these are the primary ones)
+    labs = []
+    for lab_id, lab in AGENTIC_LABS.items():
+        if lab.get("disabled"):
+            continue
+        labs.append({
+            "id": lab_id,
+            "title": lab.get("title", lab_id),
+            "description": lab.get("description", ""),
+            "category": "fundamentals",
+            "difficulty": "beginner",
+            "status": "working",
+            "walkthrough": True,
+            "agentic": True,
+            "steps": len(lab["steps"]),
+        })
+
+    # Add any static labs not in agentic labs
     index_path = os.path.join(config.LAB_DATA_DIR, "index.json")
-    data = read_json_file(index_path, {"labs": []})
-    return JSONResponse(data)
+    static_data = read_json_file(index_path, {"labs": []})
+    agentic_ids = set(AGENTIC_LABS.keys())
+    for lab in static_data.get("labs", []):
+        if lab.get("id") not in agentic_ids:
+            labs.append(lab)
+
+    return JSONResponse({"labs": labs})
 
 
 @router.get("/{lab_id}")

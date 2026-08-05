@@ -101,7 +101,8 @@ def main():
         "app.main:app",
         host=args.host,
         port=args.port,
-        reload=args.reload
+        reload=args.reload,
+        log_level="warning"  # Reduce verbosity - only warn/error
     )
 
 
