@@ -13,6 +13,12 @@ This branch is optimized for local macOS development, inference, and **MLX-based
 
 ## BigIron-5k: Fine-Tuned Mainframe Model
 
+> **Model lineage:** `bigiron-5k` (below) was an early large-corpus experiment.
+> The **shipped production model is `bigironv2`** — LoRA on **86 curated
+> examples** (Q8). A large ~22,000-example corpus was explored, but full 7B
+> fine-tuning locally on Apple Silicon at that scale was unstable, which drove
+> the pivot to curated data. See `docs/WHITEPAPER.md`.
+
 This branch includes **bigiron-5k**, a Mistral-7B model fine-tuned on 8,175 Q&A pairs from IBM Redbooks:
 
 | Metric | Value |

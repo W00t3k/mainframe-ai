@@ -72,8 +72,8 @@ This branch (`feature/apple-silicon-bigiron`) adds **local-first AI** optimized 
 | Feature | Main Branch | Apple Silicon Branch |
 |---------|------------|----------------------|
 | LLM Backend | Ollama (generic) | **BigIron-AI** (fully fine-tuned Mistral-7B) |
-| Knowledge Source | Generic LLM knowledge | **120,000+ examples** (33,733 source + Redbooks) |
-| Training Method | None | **Full fine-tuning** (all 7.2B parameters) |
+| Knowledge Source | Generic LLM knowledge | **86 curated examples** (bigironv2); a larger ~22K corpus was also explored |
+| Training Method | None | **LoRA fine-tuning** (Q8); full 7B fine-tuning was tried but ran into trouble locally |
 | Response Speed | LLM for everything | **<50ms** for known terms (RAG + fuzzy lookup) |
 | Embeddings | External API | **Local** (nomic-embed-text) |
 | Personality | Corporate/generic | **Plain English** ("senior mainframer") |

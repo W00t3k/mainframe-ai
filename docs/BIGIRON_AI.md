@@ -1,10 +1,18 @@
 # BigIron-AI: Mainframe Expert Model
 
-A fully fine-tuned 7B parameter LLM specialized in IBM mainframe technology, built on Apple Silicon.
+A 7B-parameter LLM specialized in IBM mainframe technology, built on Apple Silicon.
+
+> **Which model ships:** the current production model is **bigironv2** — a LoRA
+> fine-tune on **86 curated examples** (Q8, ~7.2 GB). This page documents the
+> earlier, larger **bigiron-ai** experiment (the spec table below). A large
+> ~22,000-example corpus was assembled, but **full fine-tuning the 7B model
+> locally on Apple Silicon at that scale ran into trouble** (slow, memory-bound,
+> noisy output), which is why the curated bigironv2 became the shipped model.
+> See `docs/WHITEPAPER.md` for both approaches.
 
 ## Overview
 
-BigIron-AI is a fine-tuned version of Mistral-7B-Instruct, trained on 6,200+ mainframe Q&A pairs and code examples. It speaks plain English while maintaining deep expertise in z/OS, COBOL, JCL, CICS, RACF, DB2, VSAM, and related technologies.
+BigIron-AI is a fine-tuned version of Mistral-7B-Instruct. It speaks plain English while maintaining deep expertise in z/OS, COBOL, JCL, CICS, RACF, DB2, VSAM, and related technologies.
 
 ## Model Details
 

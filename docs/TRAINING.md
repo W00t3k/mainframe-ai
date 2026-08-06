@@ -137,10 +137,10 @@ python scripts/training/validate_jsonl.py data/training/mlx_data/train.jsonl
 
 BigIron-AI uses Mistral-7B-Instruct as the base model with:
 
-- **Fine-tuning approach**: High-rank LoRA (rank 64) across all 32 transformer layers
-- **Training data**: 8,000+ Q&A pairs from IBM Redbooks + 300+ code examples
+- **Fine-tuning approach**: LoRA (the shipped **bigironv2** uses 86 curated examples)
+- **Training data**: 86 curated, hand-crafted examples for bigironv2. A larger ~22,000-example corpus (MainframeBench + Redbooks-derived + hand-crafted) was also explored, but full 7B fine-tuning on it locally was unstable — see `docs/WHITEPAPER.md`.
 - **Context length**: 4096 tokens
-- **Precision**: FP16
+- **Precision**: FP16 (training); Q8 GGUF (serving)
 
 This approximates full fine-tuning while remaining memory-efficient on Apple Silicon.
 

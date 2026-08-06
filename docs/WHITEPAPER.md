@@ -21,7 +21,7 @@
 
 ## Abstract
 
-This paper documents the development of BigIron-AI, a domain-specialized large language model fully fine-tuned for IBM mainframe expertise. Using Apple Silicon's Metal GPU acceleration and the MLX framework, we performed full parameter fine-tuning on Mistral-7B-Instruct-v0.3 with **120,209 training examples** covering z/OS, RACF, JCL, COBOL, CICS, VSAM, REXX, and related mainframe technologies. Our corpus includes **30,799 Q&A pairs extracted from IBM Redbooks** plus hand-crafted examples. Unlike traditional LoRA approaches that modify only adapter weights, our full fine-tuning trains all 7.2 billion parameters, achieving deeper domain specialization. The resulting model speaks plain English while maintaining technical accuracy, designed to be "the senior mainframer down the hall who actually enjoys helping." This work demonstrates that production-quality domain specialization is achievable on consumer Apple Silicon hardware.
+This paper documents the development of BigIron-AI, a domain-specialized large language model for IBM mainframe expertise, and reports **two** training approaches. First, we assembled a **large corpus (~22,000 examples)** — aggregating hand-crafted code, the MainframeBench dataset, and IBM Redbooks-derived Q&A — and attempted full-parameter fine-tuning of Mistral-7B-Instruct-v0.3 on Apple Silicon via the MLX framework. Full fine-tuning a **7-billion-parameter model locally** at that scale proved slow, memory-bound, and prone to output artifacts from noisier data. This motivated the second approach: a **curated set of 86 clean, hand-crafted examples** trained with LoRA, which became the shipped production model (**bigironv2**). Both approaches are documented; sections that cite larger figures (e.g. the 120K weighted / 30,799-Redbooks corpus) describe the large-corpus experiment. The resulting model speaks plain English while maintaining technical accuracy, designed to be "the senior mainframer down the hall who actually enjoys helping." This work demonstrates that on consumer Apple Silicon, careful data curation can outperform brute-force scale for domain specialization.
 
 **Keywords:** Large Language Models, Full Fine-tuning, Mainframe Computing, Apple Silicon, MLX, Domain Adaptation, COBOL, z/OS
 
@@ -870,7 +870,9 @@ helping people learn.
 
 ### BigironV2: Curated Quality Over Quantity (July 2026)
 
-After observing output artifacts (stray `[/REXX]` tags, `[SETUP]` blocks, OS/400 confusion) from models trained on large noisy datasets, we developed a **curated approach** focusing on 86 hand-crafted, clean examples:
+> **Note on corpus size.** This project explored **two** training approaches, and both are documented here. The first assembled a **large corpus (~22,000 examples)** by aggregating MainframeBench, hand-crafted code, and Redbooks-derived Q&A. Full fine-tuning a **7-billion-parameter model locally on Apple Silicon** at that scale proved problematic — the runs were slow and memory-bound, and the resulting models emitted noticeable output artifacts (stray `[/REXX]` tags, `[SETUP]` blocks, IBM i / OS/400 confusion) from the noisier data. That experience motivated the pivot to the curated approach below. Earlier sections that cite the larger figures describe the large-corpus experiment; the shipped production model is **bigironv2**, trained on the **86 curated examples**.
+
+After observing those artifacts from models trained on the large, noisy corpus, we developed a **curated approach** focusing on 86 hand-crafted, clean examples:
 
 | Category | Examples | Topics |
 |----------|----------|--------|
@@ -888,7 +890,7 @@ After observing output artifacts (stray `[/REXX]` tags, `[SETUP]` blocks, OS/400
 - **Training time**: ~15 minutes on Apple Silicon
 - **Model size**: 7.2 GB (Q8_0 quantization)
 
-**Key Insight**: Quality over quantity. 86 clean, noise-free examples produced cleaner output than 120k noisy examples. The model no longer hallucinates bracket tags or confuses IBM i (OS/400) with z/OS
+**Key Insight**: Quality over quantity. 86 clean, noise-free examples produced cleaner output than the large ~22,000-example corpus that had caused trouble when full fine-tuning the 7B model locally. The model no longer hallucinates bracket tags or confuses IBM i (OS/400) with z/OS.
 
 ### RLVR: Reinforcement Learning with Verifiable Rewards
 
