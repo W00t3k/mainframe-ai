@@ -12,7 +12,7 @@ import hashlib
 import time
 import numpy as np
 from typing import List, Dict, Optional
-from dataclasses import dataclass, asdict
+from dataclasses import dataclass, asdict, fields as dataclass_fields
 from datetime import datetime
 import httpx
 
@@ -199,8 +199,12 @@ class RAGEngine:
             try:
                 with open(INDEX_FILE, "r") as f:
                     data = json.load(f)
+                    # Keep only fields the dataclass knows about — indexes written
+                    # by other tooling may carry extra metadata (title, page
+                    # count, IBM form number, etc.) that we can safely ignore.
+                    fields = {f.name for f in dataclass_fields(Document)}
                     for doc_data in data.get("documents", []):
-                        doc = Document(**doc_data)
+                        doc = Document(**{k: v for k, v in doc_data.items() if k in fields})
                         self.documents[doc.id] = doc
             except Exception as e:
                 print(f"Error loading index: {e}")
@@ -213,20 +217,28 @@ class RAGEngine:
                 print(f"Error loading embeddings: {e}")
 
     def _save_index(self):
-        """Save index to disk"""
+        """Save index to disk (atomic: temp file + rename)."""
         try:
-            with open(INDEX_FILE, "w") as f:
+            tmp = INDEX_FILE + ".tmp"
+            with open(tmp, "w") as f:
                 json.dump({
                     "documents": [asdict(d) for d in self.documents.values()]
                 }, f, indent=2)
+            os.replace(tmp, INDEX_FILE)
         except Exception as e:
             print(f"Error saving index: {e}")
 
     def _save_embeddings(self):
-        """Save embeddings to disk"""
+        """Save embeddings to disk (atomic: temp file + rename).
+
+        The store is a single large JSON file; writing to a temp file and
+        renaming means an interrupted write can never corrupt the live store.
+        """
         try:
-            with open(EMBEDDINGS_FILE, "w") as f:
+            tmp = EMBEDDINGS_FILE + ".tmp"
+            with open(tmp, "w") as f:
                 json.dump(self.chunks, f)
+            os.replace(tmp, EMBEDDINGS_FILE)
         except Exception as e:
             print(f"Error saving embeddings: {e}")
 
