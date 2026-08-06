@@ -19,7 +19,7 @@
         <div class="idx-toolbar-items">
             <div class="idx-toolbar-center">
                 <a href="/tutorials" class="idx-pill idx-pill-outline" data-hint="Tutorial library — step-by-step exercises for TSO, ISPF, JCL, COBOL, KICKS/CICS, and more.">[T] TUTORIALS</a>
-                <a href="/walkthrough" class="idx-pill idx-pill-accent" data-hint="Interactive walkthrough — learn mainframe concepts, control planes, and security fundamentals step by step.">[F1] LEARN</a>
+                <a href="/tutor" class="idx-pill idx-pill-accent" data-hint="Interactive walkthrough — learn mainframe concepts, control planes, and security fundamentals step by step.">[F1] LEARN</a>
                 <button class="idx-pill idx-pill-success" id="connBtn2" onclick="quickConnect()" data-hint="Connect to the TN3270 terminal — opens a live session to the MVS 3.8j mainframe via Hercules emulator.">[C] CONNECT</button>
                 <button class="idx-pill idx-pill-primary" id="wtStartBtn2" onclick="startWalkthrough()" data-hint="Run a guided demo — automatically walks through mainframe screens with AI narration explaining each step.">[D] DEMO</button>
                 <button class="idx-pill idx-pill-outline" id="restartBtn" onclick="restartMainframe()" data-hint="Restart the Hercules mainframe emulator — performs an IPL to reset the MVS system to a clean state.">[R] RESTART</button>
@@ -85,23 +85,23 @@
         <!-- ── Control Planes (collapsible) ── -->
         <div class="cp-heading cp-toggle" onclick="toggleSection('cpGrid', this)"><span class="cp-arrow">&#9654;</span> CONTROL PLANES</div>
         <div class="cp-grid collapsed" id="cpGrid">
-            <a href="/walkthrough?plane=vtam" class="cp-card cp-vtam" style="background:#1a2a4a !important;" data-hint="VTAM — the session fabric. Controls all terminal sessions and network routing on the mainframe. Every logon flows through VTAM first.">
+            <a href="/tutor" class="cp-card cp-vtam" style="background:#1a2a4a !important;" data-hint="VTAM — the session fabric. Controls all terminal sessions and network routing on the mainframe. Every logon flows through VTAM first.">
                 <span class="cp-name">VTAM</span>
                 <span class="cp-desc">Session Fabric</span>
             </a>
-            <a href="/walkthrough?plane=tso" class="cp-card cp-tso" style="background:#1a2a4a !important;" data-hint="TSO — interactive command shell. The mainframe equivalent of SSH. Users submit commands, edit datasets, and manage jobs from here.">
+            <a href="/tutor" class="cp-card cp-tso" style="background:#1a2a4a !important;" data-hint="TSO — interactive command shell. The mainframe equivalent of SSH. Users submit commands, edit datasets, and manage jobs from here.">
                 <span class="cp-name">TSO</span>
                 <span class="cp-desc">Interactive</span>
             </a>
-            <a href="/walkthrough?plane=racf" class="cp-card cp-racf" style="background:#1a2a4a !important;" data-hint="RACF — the authorization engine. Controls who can access what. Manages users, groups, profiles, and resource access rules.">
+            <a href="/tutor" class="cp-card cp-racf" style="background:#1a2a4a !important;" data-hint="RACF — the authorization engine. Controls who can access what. Manages users, groups, profiles, and resource access rules.">
                 <span class="cp-name">RACF</span>
                 <span class="cp-desc">Authorization</span>
             </a>
-            <a href="/walkthrough?plane=jes" class="cp-card cp-jes" style="background:#1a2a4a !important;" data-hint="JES — batch execution subsystem. Manages job queues, scheduling, and output. All batch work on the mainframe flows through JES.">
+            <a href="/tutor" class="cp-card cp-jes" style="background:#1a2a4a !important;" data-hint="JES — batch execution subsystem. Manages job queues, scheduling, and output. All batch work on the mainframe flows through JES.">
                 <span class="cp-name">JES</span>
                 <span class="cp-desc">Batch Execution</span>
             </a>
-            <a href="/walkthrough?plane=cics" class="cp-card cp-cics" style="background:#1a2a4a !important;" data-hint="CICS/KICKS — transaction processing. Handles real-time interactive applications. Think of it as the mainframe's application server.">
+            <a href="/tutor" class="cp-card cp-cics" style="background:#1a2a4a !important;" data-hint="CICS/KICKS — transaction processing. Handles real-time interactive applications. Think of it as the mainframe's application server.">
                 <span class="cp-name">CICS/KICKS</span>
                 <span class="cp-desc">Transactions</span>
             </a>
@@ -141,9 +141,9 @@
                         <span class="os2w-icon-lbl">AI Chat</span>
                     </a>
                     <!-- Walkthrough — green play on white doc -->
-                    <a href="/walkthrough" class="os2w-icon" data-hint="Guided walkthrough.">
+                    <a href="/tutor" class="os2w-icon" data-hint="Guided walkthrough.">
                         <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="4" y="2" width="20" height="28" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="24,2 24,8 30,8" fill="#C0C0C0" stroke="#808080" stroke-width="1"/><line x1="24" y1="2" x2="30" y2="8" stroke="#808080" stroke-width="1"/><rect x="4" y="8" width="26" height="22" fill="#FFF" stroke="#808080" stroke-width="1"/><polygon points="11,12 11,24 23,18" fill="#008000" stroke="#004000" stroke-width="1"/></svg></span>
-                        <span class="os2w-icon-lbl">Walkthrough</span>
+                        <span class="os2w-icon-lbl">Tutor</span>
                     </a>
                     <!-- Tutor — F1 help book -->
                     <a href="/tutor" class="os2w-icon" data-hint="Red Team AI Tutor — interactive mainframe security mentor with multiple personas.">
@@ -216,7 +216,7 @@
                         <span class="os2w-icon-lbl">Abstract</span>
                     </a>
                     <!-- Demo — IBM red play button -->
-                    <a href="/walkthrough?plane=demo" class="os2w-icon" data-hint="Live demo.">
+                    <a href="/tutor" class="os2w-icon" data-hint="Live demo.">
                         <span class="os2w-icon-gfx"><svg viewBox="0 0 32 32" width="40" height="40"><rect x="2" y="2" width="28" height="28" rx="3" fill="#000080" stroke="#000040" stroke-width="1"/><text x="5" y="10" fill="#FFF" font-size="5" font-weight="bold" font-family="sans-serif">IBM</text><rect x="4" y="12" width="24" height="1" fill="#FFF"/><polygon points="10,16 10,27 24,21.5" fill="#FF0000" stroke="#800000" stroke-width="1"/><circle cx="17" cy="21.5" r="1.5" fill="#FFF"/></svg></span>
                         <span class="os2w-icon-lbl">Demo</span>
                     </a>
@@ -260,9 +260,9 @@
 <!-- ── Right Control Panel ── -->
 <aside class="idx-control-panel collapsed" id="controlPanel">
     <div class="idx-cp-title">▓ MENU ▓</div>
-    <a href="/walkthrough" class="idx-cp-item cp-walkthrough">
+    <a href="/tutor" class="idx-cp-item cp-walkthrough">
         <span class="idx-cp-icon">▶</span>
-        <span>Walkthrough</span>
+        <span>Tutor</span>
     </a>
     <a href="/abstract-models" class="idx-cp-item cp-models">
         <span class="idx-cp-icon">◈</span>
@@ -699,92 +699,19 @@ document.getElementById('terminalScreen').addEventListener('mouseup', function(e
     });
 });
 
-// ── Walkthrough ──
-async function startWalkthrough() {
-    const target = document.getElementById('connTarget').value.trim() || 'localhost:3270';
-    const demoBtn = document.getElementById('wtStartBtn2');
-    demoBtn.disabled = true;
-    demoBtn.innerHTML = '&#9203; Starting...';
-    try {
-        const res = await fetch('/api/walkthrough/start', {
-            method:'POST', headers:{'Content-Type':'application/json'},
-            body: JSON.stringify({name: 'quick-demo', target, speed: 4.0})
-        });
-        const data = await res.json();
-        if (!data.success) { demoBtn.disabled = false; demoBtn.innerHTML = '&#9654; Demo'; return; }
-    } catch(e) { demoBtn.disabled = false; demoBtn.innerHTML = '&#9654; Demo'; return; }
-
-    wtRunning = true;
-    wtLastLogLen = 0;
-    showTerminal();
-    demoBtn.innerHTML = '&#9654; Running...';
-    document.getElementById('demoBadge').style.display = 'inline-block';
-    document.getElementById('wtPauseBtn').style.display = 'inline-flex';
-    document.getElementById('wtStopBtn').style.display = 'inline-flex';
-    try { document.getElementById('wtStartBtn').disabled = true; } catch(_) {}
-    try { document.getElementById('wtRunLabel').textContent = 'Running Demo...'; } catch(_) {}
-
-    if (wtPollingInterval) clearInterval(wtPollingInterval);
-    wtPollCount = 0;
-    wtSeenRunning = false;
-    // Delay first poll to let backend thread start
-    setTimeout(() => {
-        wtPollingInterval = setInterval(pollWalkthrough, 500);
-        pollWalkthrough();
-    }, 1000);
+// ── Demo → Red Team Tutor ──
+// The guided demo now lives in the Red Team Tutor; send the user there.
+function startWalkthrough() {
+    window.location.href = '/tutor';
 }
 
+// Legacy landing-page demo runner removed — the demo lives in the Red Team Tutor.
 let lastExplainScreen = '';
 let wtPollCount = 0;
 let wtSeenRunning = false;
-async function pollWalkthrough() {
-    try {
-        wtPollCount++;
-        const res = await fetch('/api/walkthrough/status');
-        const data = await res.json();
-        if (data.screen_html) {
-            updateTerminal({screen_html: data.screen_html});
-        } else if (data.screen) {
-            updateTerminal({screen: data.screen});
-        }
-        if (data.running) {
-            wtSeenRunning = true;
-            const demoBtn = document.getElementById('wtStartBtn2');
-            const p = data.paused ? ' (Paused)' : '';
-            const stepText = data.title ? data.title + p : 'Running...';
-            try { document.getElementById('wtRunLabel').textContent = stepText; } catch(_) {}
-            if (demoBtn) { demoBtn.innerHTML = '&#9654; ' + stepText; demoBtn.className = 'idx-pill idx-pill-primary'; demoBtn.disabled = true; }
-            // Update AI explanation on step changes
-            if (data.title && data.title !== lastExplainScreen) {
-                lastExplainScreen = data.title;
-                aiExplainScreen(data.screen || '', data.title);
-            }
-        }
-        // Only stop polling if we've seen it running first, or after 20 polls (10s grace)
-        if (!data.running && (wtSeenRunning || wtPollCount > 20)) {
-            clearInterval(wtPollingInterval);
-            wtPollingInterval = null;
-            wtRunning = false;
-            resetWtControls();
-            if (wtSeenRunning) aiExplainScreen(data.screen || '', 'Demo complete');
-        }
-    } catch(e) {}
-}
-
-async function pauseWalkthrough() {
-    try {
-        const res = await fetch('/api/walkthrough/pause', {method:'POST'});
-        const data = await res.json();
-        document.getElementById('wtPauseBtn').innerHTML = data.paused ? '&#9654;' : '&#9646;&#9646;';
-    } catch(e) {}
-}
-
-async function stopWalkthrough() {
-    try { await fetch('/api/walkthrough/stop', {method:'POST'}); } catch(e) {}
-    if (wtPollingInterval) { clearInterval(wtPollingInterval); wtPollingInterval = null; }
-    wtRunning = false;
-    resetWtControls();
-}
+function pollWalkthrough() {}
+function pauseWalkthrough() { window.location.href = '/tutor'; }
+function stopWalkthrough() { if (wtPollingInterval) { clearInterval(wtPollingInterval); wtPollingInterval = null; } wtRunning = false; try { resetWtControls(); } catch(_) {} }
 
 async function restartMainframe() {
     if (!confirm('Restart the TK5 mainframe? This will disconnect any active sessions.')) return;

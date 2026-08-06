@@ -16,7 +16,6 @@ from .rag import router as rag_router
 from .graph import router as graph_router
 from .recon import router as recon_router
 from .tutor import router as tutor_router
-from .walkthrough import router as walkthrough_router
 from .system import router as system_router
 from .methodology import router as methodology_router
 from .kicks import router as kicks_router
@@ -37,7 +36,6 @@ def register_routes(app):
     app.include_router(graph_router, prefix="/api/graph")
     app.include_router(recon_router, prefix="/api/recon")
     app.include_router(tutor_router, prefix="/api/tutor")
-    app.include_router(walkthrough_router, prefix="/api/walkthrough")
     app.include_router(system_router, prefix="/api/system")
     app.include_router(methodology_router)
     app.include_router(kicks_router, prefix="/api")

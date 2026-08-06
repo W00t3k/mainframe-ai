@@ -129,8 +129,9 @@ async def recon_page(request: Request):
 
 @router.get("/walkthrough", response_class=HTMLResponse)
 async def walkthrough_page(request: Request):
-    """Autonomous walkthrough page."""
-    return templates.TemplateResponse(request, "walkthrough.html")
+    """Legacy walkthrough page — consolidated into the Red Team Tutor."""
+    from fastapi.responses import RedirectResponse
+    return RedirectResponse(url="/tutor", status_code=307)
 
 
 @router.get("/slides", response_class=HTMLResponse)
