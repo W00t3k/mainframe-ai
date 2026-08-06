@@ -83,3 +83,7 @@ tk5-dasd.tar.gz
 
 # External datasets (nested git repos)
 data/external/xmainframe/
+
+# build-script backups (large, transient)
+data/training/mlx_data/*.old
+*.jsonl.old
