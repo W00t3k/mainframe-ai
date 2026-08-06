@@ -314,9 +314,18 @@ function renderTestResults(d) {
     results.innerHTML = html;
 }
 
-// Auto-run on page load
+// Auto-connect on page load so the client is live (status shows Online and
+// the dataset browser works). The test suite stays on its manual button —
+// running it also opens a connection, and MVS FTP allows only one at a time.
 window.addEventListener('DOMContentLoaded', () => {
-    setTimeout(runAutoTest, 500);
+    setTimeout(async () => {
+        try {
+            const r = await fetch(`${API}/ftp/status`);
+            const d = await r.json();
+            if (!d.connected) ftpConnect();
+            else { pollStatus(); ftpList(); }
+        } catch (_) { ftpConnect(); }
+    }, 400);
 });
 
 // ── Connection ───────────────────────────────────────────────────

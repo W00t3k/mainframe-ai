@@ -11,6 +11,7 @@ TK5 FTP server (port 2121) specifics:
 """
 
 import io
+import time
 import ftplib
 import logging
 import threading
@@ -39,32 +40,65 @@ class FTPService:
     def connect(self, host: str = "localhost", port: int = 2121,
                 user: str = "HERC01", password: str = "CUL8TR",
                 timeout: float = 15.0) -> Dict:
-        """Connect and authenticate to the MVS FTP server."""
+        """Connect and authenticate to the MVS FTP server.
+
+        MVS FTP (TK5) allows only one control connection at a time, so if we're
+        already connected to the same target and the link is healthy, reuse it
+        rather than tearing it down — reconnecting before the server frees the
+        old slot just times out.
+        """
         with self._lock:
+            if (self.connected and self._ftp
+                    and self.host == host and self.port == port
+                    and self.user == user):
+                try:
+                    self._ftp.voidcmd("NOOP")
+                    self.last_error = ""
+                    return {
+                        "success": True,
+                        "message": f"Already connected to {host}:{port} as {user}",
+                        "welcome": "",
+                    }
+                except Exception:
+                    pass  # stale — fall through and reconnect
             self._disconnect_locked()
-            try:
-                ftp = ftplib.FTP()
-                ftp.connect(host, port, timeout=timeout)
-                welcome = ftp.getwelcome() or ""
-                ftp.login(user, password)
-                self._ftp = ftp
-                self.host = host
-                self.port = port
-                self.user = user
-                self.connected = True
-                self.last_error = ""
-                self._cached_listing = []
-                logger.info(f"FTP connected to {host}:{port} as {user}")
-                return {
-                    "success": True,
-                    "message": f"Connected to {host}:{port} as {user}",
-                    "welcome": welcome,
-                }
-            except Exception as e:
-                self.connected = False
-                self.last_error = str(e)
-                logger.error(f"FTP connect failed: {e}")
-                return {"success": False, "error": str(e)}
+            # MVS FTP can be slow to free a previous session's slot, so the
+            # first attempt may time out. Retry a couple of times with a short
+            # per-attempt timeout before giving up.
+            attempts = 3
+            last_exc = None
+            for attempt in range(1, attempts + 1):
+                try:
+                    ftp = ftplib.FTP()
+                    ftp.connect(host, port, timeout=min(timeout, 8.0))
+                    welcome = ftp.getwelcome() or ""
+                    ftp.login(user, password)
+                    self._ftp = ftp
+                    self.host = host
+                    self.port = port
+                    self.user = user
+                    self.connected = True
+                    self.last_error = ""
+                    self._cached_listing = []
+                    logger.info(f"FTP connected to {host}:{port} as {user} (attempt {attempt})")
+                    return {
+                        "success": True,
+                        "message": f"Connected to {host}:{port} as {user}",
+                        "welcome": welcome,
+                    }
+                except Exception as e:
+                    last_exc = e
+                    logger.warning(f"FTP connect attempt {attempt}/{attempts} failed: {e}")
+                    try:
+                        ftp.close()
+                    except Exception:
+                        pass
+                    if attempt < attempts:
+                        time.sleep(2.0)
+            self.connected = False
+            self.last_error = str(last_exc)
+            logger.error(f"FTP connect failed after {attempts} attempts: {last_exc}")
+            return {"success": False, "error": str(last_exc)}
 
     def disconnect(self) -> Dict:
         """Disconnect from the FTP server."""
