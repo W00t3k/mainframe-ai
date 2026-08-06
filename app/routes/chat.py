@@ -306,22 +306,6 @@ async def api_screen():
         return JSONResponse({"connected": False, "screen": "", "screen_html": "", "rows": 24, "cols": 80})
 
 
-@router.get("/ftp/status")
-async def api_ftp_status():
-    """FTP service status — checks if MVS FTP server is reachable."""
-    try:
-        from agent_tools import connection
-        connected = connection.connected if connection else False
-    except ImportError:
-        connected = False
-    return JSONResponse({
-        "running": connected,
-        "port": 21,
-        "host": "localhost" if connected else None,
-        "users": ["HERC01"] if connected else [],
-    })
-
-
 @router.post("/demo/load")
 async def api_demo_load(request: Request):
     """Load demo data (sample JCL/sysout/screen) into the trust graph."""
