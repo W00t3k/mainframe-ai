@@ -83,11 +83,9 @@ This branch (`feature/apple-silicon-bigiron`) adds **local-first AI** optimized 
 The app includes a **Retrieval-Augmented Generation** system with:
 
 ```
-213 IBM Redbooks indexed
-16,137 text chunks
-~4.8 million words
-~12,000 pages of mainframe documentation
-159 MB embeddings (local, no API)
+178 documents indexed (IBM Redbooks + classic MVS manuals)
+18,785 text chunks
+~1.25 GB embeddings (local, no API)
 ```
 
 **How it works:**
@@ -97,6 +95,18 @@ The app includes a **Retrieval-Augmented Generation** system with:
 4. Fast fuzzy lookup catches typos ("mainfraem" → "mainframe")
 
 **Topics covered:** RACF, JCL, ABEND codes, CICS, COBOL, DB2, VSAM, JES2/JES3, TSO/ISPF, z/OS security, Cyber Vault, data encryption, and more.
+
+> **The RAG store is local.** `data/rag_data/embeddings.json` (~1.25 GB) is
+> gitignored — it is **not** in the repo. The source PDFs under `data/` *are*
+> committed, so after a fresh clone rebuild the local index with:
+>
+> ```bash
+> # requires Ollama running with the nomic-embed-text model
+> .venv/bin/python scripts/rag/ingest_missing.py
+> ```
+>
+> This ingests every PDF under `data/` that isn't already indexed (atomic,
+> resumable). It's a no-op once the index is up to date.
 
 ### BigironV2: Clean Fine-Tuned Mainframe Model
 
